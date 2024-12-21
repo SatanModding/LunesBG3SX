@@ -7,7 +7,7 @@ Ext.Require("Client/NPCSync.lua") -- NPC changes have to be synced on the client
 
 Ext.Require("Shared/_constructor.lua")
 
-Ext.Require("Shared/_initData.lua")
+-- Ext.Require("Shared/_initData.lua")
 Ext.Require("Shared/_initUtils.lua")
 
 Ext.Require("Client/UIHelper.lua")

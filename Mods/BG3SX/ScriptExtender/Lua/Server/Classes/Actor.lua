@@ -41,9 +41,10 @@ function Actor:new(parent)
     local scene = Scene:FindSceneByEntity(parent) -- Warning: Don't create scene reference in actor metatable or dumps of a scene will infinite loop
     instance.position = scene.rootPosition
     instance.uuid = Osi.CreateAt(Osi.GetTemplate(parent), instance.position.x, instance.position.y, instance.position.z, 1, 0, "")
-    SatanPrint(GLOBALDEBUG, "actor uuid ".. instance.uuid)
-    initialize(instance)
 
+    SatanPrint(GLOBALDEBUG, "actor uuid ".. instance.uuid)
+
+    initialize(instance)
     return instance
 end
 

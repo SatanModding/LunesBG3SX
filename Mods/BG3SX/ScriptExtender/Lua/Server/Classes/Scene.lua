@@ -298,16 +298,18 @@ initialize = function(self)
         Osi.SetDetached(entity, 1)              -- Make entity untargetable
         Osi.DetachFromPartyGroup(entity)        -- Detach from party to stop party members from following
         --self:DetachSummons(entity) -- TODO: Add something to handle summon/follower movement here
-        Osi.SetVisible(entity, 0)               -- 0 = Invisible
+        -- Osi.SetVisible(entity, 0)               -- 0 = Invisible
         Entity:ToggleWalkThrough(entity)        -- To prevent interactions with other entities even while invisible and untargetable
         self:ToggleCampFlags(entity)            -- Toggles camp flags so companions don't return to tents
         Sex:RemoveMainSexSpells(entity)         -- Removes the regular sex spells
+        Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Body"])
+        Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Face"])
     end
 
-    for _, entity in pairs(self.entities) do
-        table.insert(self.actors, Actor:new(entity))
-        self:ScaleEntity(entity) -- After creating the actor to not create one with a smaller scale
-    end
+    -- for _, entity in pairs(self.entities) do
+    --     table.insert(self.actors, Actor:new(entity))
+    --     self:ScaleEntity(entity) -- After creating the actor to not create one with a smaller scale
+    -- end
 
     for _, actor in ipairs(self.actors) do
         local startLocation = self.startLocations[1]

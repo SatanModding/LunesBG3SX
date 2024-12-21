@@ -369,6 +369,6 @@ end)
 --                                       Load MCM Tab
 ---------------------------------------------------------------------------------------------------
 
-Mods.BG3MCM.IMGUIAPI:InsertModMenuTab(ModuleUUID, "BG3SX", function(tab)
-    createModTab(tab)
-end)
+--Mods.BG3MCM.IMGUIAPI:InsertModMenuTab(ModuleUUID, "BG3SX", function(tab)
+--    createModTab(tab)
+--end)
