@@ -336,25 +336,25 @@ local function getUUIDFromUserdata(mouseover)
     end
 end
 
-Ext.Events.KeyInput:Subscribe(function (e)
-    if e.Event == "KeyDown" and e.Repeat == false then
-        if e.Key == "F" then
-            if UI.SelectingTarget == true then
-                local caster = UI.GetSelectedCharacter()
-                local target = getUUIDFromUserdata(getMouseover())
-                Ext.Net.PostMessageToServer("BG3SX_Client_AskForSex", Ext.Json.Stringify({caster = caster, target = target}))
-                -- genitals
-                Ext.Net.PostMessageToServer("BG3SX_AskForSex",Ext.Json.Stringify({caster, target}))
-                UI.SelectingTarget = false
-            end
-        end
-        if e.Key == "Escape" then
-            sceneTables.noSceneTable.Visible = true
-            sceneTables.sceneTable.Visible = false
-            UI.SelectingTarget = false
-        end
-    end
-end)
+--Ext.Events.KeyInput:Subscribe(function (e)
+--    if e.Event == "KeyDown" and e.Repeat == false then
+--        if e.Key == "F" then
+--            if UI.SelectingTarget == true then
+--                local caster = UI.GetSelectedCharacter()
+--                local target = getUUIDFromUserdata(getMouseover())
+--                Ext.Net.PostMessageToServer("BG3SX_Client_AskForSex", Ext.Json.Stringify({caster = caster, target = target}))
+--                -- genitals
+--                Ext.Net.PostMessageToServer("BG3SX_AskForSex",Ext.Json.Stringify({caster, target}))
+--                UI.SelectingTarget = false
+--            end
+--        end
+--        if e.Key == "Escape" then
+--            sceneTables.noSceneTable.Visible = true
+--            sceneTables.sceneTable.Visible = false
+--            UI.SelectingTarget = false
+--        end
+--    end
+--end)
 
 ---------------------------------------------------------------------------------------------------
 --                                       NetListener
@@ -364,11 +364,187 @@ Ext.RegisterNetListener("BG3SX_Server_DistributeGenitals", function(e, payload)
     local payload = Ext.Json.Parse(payload)
     genitals = payload
 end)
-
+            
 ---------------------------------------------------------------------------------------------------
 --                                       Load MCM Tab
 ---------------------------------------------------------------------------------------------------
 
---Mods.BG3MCM.IMGUIAPI:InsertModMenuTab(ModuleUUID, "BG3SX", function(tab)
---    createModTab(tab)
---end)
+Mods.BG3MCM.IMGUIAPI:InsertModMenuTab(ModuleUUID, "BG3SX", function(mcm)
+    UI.New(mcm)
+end)
+
+
+-------------------------------------------------
+-- New stuff - Replace old stuff with new stuff
+-------------------------------------------------
+
+UIInstances = {}
+
+function UI.New(mcm)
+    local workingArea
+    local mcm = mcm or nil
+
+    if mcm then
+        --workingArea = mcm.ParentElement.ParentElement -- Get the Parent of the Tabs Tabbar
+        --UI.DestroyChildren(workingArea)
+        workingArea = mcm:AddChildWindow("")
+    else
+        workingArea = Ext.IMGUI.NewWindow("")
+    end
+
+    local id = #UIInstances + 1
+    local instance = setmetatable({
+        ID = id,
+        Window = workingArea,
+        HotKeys = {},
+    }, UI)
+
+    instance:Initialize()
+    table.insert(UIInstances, instance)
+    return instance
+end 
+
+SceneInterface = {}
+SceneInterface.__index = SceneInterface
+function SceneInterface.New(UI)
+    local instance = setmetatable({
+        UI = UI.ID,
+        Tab = UI.TabBar:AddTabItem("Scenes"),
+    }, SceneInterface)
+    return instance
+end
+GenitalInterface = {}
+GenitalInterface.__index = GenitalInterface
+function GenitalInterface.New(UI)
+    local instance = setmetatable({
+        UI = UI.ID,
+        Tab = UI.TabBar:AddTabItem("Genitals"),
+    }, GenitalInterface)
+    return instance
+end
+SettingsInterface = {}
+SettingsInterface.__index = SettingsInterface
+function SettingsInterface.New(UI)
+    local instance = setmetatable({
+        UI = UI.ID,
+        Tab = UI.TabBar:AddTabItem("Settings"),
+    }, SettingsInterface)
+    return instance
+end
+
+function UI:Initialize()
+    self.TabBar = self.Window:AddTabBar("")
+    self.SceneInterface = SceneInterface.New(self)
+    self.GenitalInterface = GenitalInterface.New(self)
+    self.SettingsInterface = SettingsInterface.New(self)
+    self.SceneInterface:Initialize()
+    self.GenitalInterface:Initialize()
+    self.SettingsInterface:Initialize()
+end
+
+function SceneInterface:Initialize()
+    local UI = UI.GetUIByID(self.UI)
+    self.CurrentScenes = UI:GetScenes()
+    self.SceneCount = nil
+    self.NoSceneArea = self:CreateNewSceneArea()
+end
+
+function SceneInterface:CreateNewSceneArea()
+    local table = self.Tab:AddTable("", 1)
+    self.NoSceneText = table:AddRow():AddCell():AddText("No Scenes found, create one!")
+    self.CreateSceneButton = table:AddRow():AddCell():AddButton("Create Scene")
+    self.CreateSceneButton.OnClick = function()
+        self:CreateScene()
+    end
+    return table
+end
+
+function SceneInterface:CreateScene()
+    local UI = UI.GetUIByID(self.UI)
+    UI:AwaitInput("NewScene")
+end
+
+function GenitalInterface:Initialize()
+    self.Tab:AddText("Genitals TEST TEST")
+end
+
+function SettingsInterface:Initialize()
+    local UI = UI.GetUIByID(self.UI)
+    self.Tab:AddText("Hotkeys")
+    UI.HotKeys.Select = self.Tab:AddCombo("Select - While awaiting Input")
+    _D(UI.HotKeys)
+    local combo = UI.HotKeys.Select
+    for i,key in ipairs(Ext.Enums.SDLScanCode) do
+        if not key == "UNKNOWN" then -- So this doesn't become selectable
+            combo.Options[i] = key
+        end
+    end
+    combo.OnChange = function()
+        Debug.Print("Hotkey Changed to " .. combo.Value)
+    end
+end
+
+function UI:AwaitInput(whatFor)
+    if not self.EventListener then
+        self.EventListener = UI:CreateListener()
+    end
+    self.Await = whatFor
+end
+
+function UI:CreateListener()
+    local listener = Ext.Events.KeyInput:Subscribe(function (e)
+        if e.Event == "KeyDown" and e.Repeat == false then
+            if e.Key == self.HotKeys.Select.Value then
+                if self.Await == "NewScene" then
+                    self:InputRecieved(self.Await)
+                end
+            end
+        end
+    end)
+    return listener
+end
+
+function UI:InputRecieved(whatFor)
+    if whatFor == "NewScene" then
+        self.Await = nil
+        local caster = UI.GetSelectedCharacter()
+        local target = getUUIDFromUserdata(getMouseover())
+        Ext.Net.PostMessageToServer("BG3SX_Client_AskForSex", Ext.Json.Stringify({caster = caster, target = target}))
+        -- genital function
+        Ext.Net.PostMessageToServer("BG3SX_AskForSex",Ext.Json.Stringify({caster, target}))
+        self.SceneInterface.NoSceneText.Visible = false
+    end
+end
+
+function UI.DestroyChildren(obj)
+    if obj.Children and #obj.Children > 0 then
+        for _,child in pairs(obj.Children) do
+            child:Destroy()
+        end
+    end
+end
+
+function UI.GetUIByID(id)
+    for _,UI in pairs(UIInstances) do
+        if UI.ID == id then
+            return UI
+        end
+    end
+end
+
+function UI:GetScenes()
+    self.AwaitingScenes = true
+    UIEvents.FetchScenes:SendToServer("")
+end
+UIEvents.SendScenes:SetHandler(function (payload)
+    if not payload == "Empty" then
+        local scenes = payload
+        for _,UI in pairs(UIInstances) do
+            if UI.AwaitingScenes == true then
+                UI.SceneInterface.CurrentScenes = scenes
+                UI.SceneInterface.SceneCount = #scenes
+                UI.AwaitingScenes = false
+            end
+        end
+    end
+end)

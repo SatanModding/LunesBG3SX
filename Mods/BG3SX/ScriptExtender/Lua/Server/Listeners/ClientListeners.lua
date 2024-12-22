@@ -33,4 +33,14 @@ if Ext.IsServer() then
         local payload = Data.CreateUIGenitalPayload(uuid)
         Ext.Net.BroadcastMessage("BG3SX_Server_DistributeGenitals", Ext.Json.Stringify(payload))
     end)
+
+    UIEvents.FetchScenes:SetHandler(function (payload)
+        if Data.SavedScenes and #Data.SavedScenes > 0 then
+            _P("SavedScenes exists")
+            UIEvents.SendScenes:Broadcast(Ext.Json.Stringify(Data.SavedScenes))
+        else
+            _P("SavedScenes doesn't exist")
+            UIEvents.SendScenes:Broadcast("Empty")
+        end
+    end)
 end

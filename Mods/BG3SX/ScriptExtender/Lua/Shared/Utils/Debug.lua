@@ -29,11 +29,19 @@ function Debug.Print(message)
 end
 function Debug.Dump(table)
     if Debug.Active then
-        _D(modname .. "Dump:\n" .. table)
+        _D(modname .. "Dump:")
+        _D(table)
     end
 end
 function Debug.DumpS(table)
     if Debug.Active then
-        _DS(modname .. "Shallow Dump:\n" .. table)
+        _P(modname .. "Shallow Dump:")
+        _DS(table)
     end
 end
+
+
+
+
+
+TEST_CHANNEL = Ext.Net.CreateChannel(ModuleUUID, "name of le channel")

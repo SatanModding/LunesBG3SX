@@ -8,6 +8,7 @@ Ext.Require("Shared/Utils/Table.lua")
 Ext.Require("Shared/Utils/Visual.lua")
 Ext.Require("Shared/Utils/Entity.lua")
 Ext.Require("Shared/Utils/Helper.lua")
+Ext.Require("Shared/Utils/UIEvents.lua")
 
 -- Initialize Usersettings
 Ext.Require("Shared/Utils/UserSettings.lua")

@@ -70,9 +70,15 @@ end
 -- @param animationData table   - The chosen animations data table
 -- @param position      string  - Specifies the actor's position (either "Top" or "Bottom") to determine the correct animation and sound
 local function playAnimationAndSound(scene, animSpell)
+    print("called playAnimationAndSound")
     local newAnimation
     local newSound
-    for _,actor in pairs(scene.actors) do
+
+    print("entities in scene")
+    _D(scene.entities)
+
+    for _,actor in pairs(scene.entities) do
+        print("creating new animation class for ", actor)
         newAnimation = Animation:new(actor, animSpell)
         newSound = Sound:new(actor, animSpell)
     end
@@ -97,10 +103,10 @@ function Sex:PlayAnimation(entity, animSpell)
     if sceneType == "MasturbateMale" or sceneType == "MasturbateFemale" then
     elseif sceneType == "Straight" then -- Handle this in a different way to enable actor swapping even for straight animations
         -- In case of actor1 not being male, swap them around to still assign correct animations
-        if not Entity:HasPenis(scene.actors[1].parent) then
-            local savedActor = scene.actors[1]
-            scene.actors[1] = scene.actors[2]
-            scene.actors[2] = savedActor
+        if not Entity:HasPenis(scene.entities[1]) then
+            local savedActor = scene.entities[1]
+            scene.entities[1] = scene.entities[2]
+            scene.entities[2] = savedActor
         end
     -- Might need to switch to free-form animation choosing because Heightmatching already is pretty complicated with 2 entities
     -- elseif sceneType == "FFF" then
@@ -150,17 +156,25 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
             scene = Scene:new(sexHavers)
             
             -- TODO - works for masturbation but not for sex
-            for _, actor in pairs(scene.actors) do
+            --for _, actor in pairs(scene.entities) do
                 -- _P("giving erection to ", actor.parent , "`s clone ", actor.uuid)
                 -- If Shpeshifted ,  the genitals have to eb transferred 
-                Genital:GiveGenitalsToActor(actor)
-                Genital:GiveErectionToActor(actor)
+                --Genital:GiveGenitalsToActor(actor)
+            for _, actor in pairs(sexHavers) do
+                if Entity:HasPenis(actor) then
+                    Genital:GiveErection(actor)
+                end
+            end
+            
                 --print("visuals ")
                 --_D(Ext.Entity.Get(actor.uuid).AppearanceOverride.Visual.Visuals)
-            end 
+            --end 
             Sex:InitSexSpells(scene)
+            print("starting Sex:PlayAnimation")
             Sex:PlayAnimation(caster, animationData)
         end
+
+
         Ext.Timer.WaitFor(333, function() haveSex() end)
     end
 end

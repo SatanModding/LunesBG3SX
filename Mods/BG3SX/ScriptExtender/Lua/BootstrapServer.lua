@@ -99,3 +99,19 @@ Ext.RegisterModEvent("BG3SX", "GenitalChange")              --{uuid, newGenital}
 -- end
 
 -- Ext.Events.ResetCompleted:Subscribe(OnReset)
+
+
+
+Ext.Timer.WaitFor(500, function ()
+        print("test channel dumpy")
+        _D(TEST_CHANNEL)
+
+        TEST_CHANNEL:SetHandler(function (msg) 
+                print("message received ", msg) 
+        
+        end)
+
+        
+end)
+
+

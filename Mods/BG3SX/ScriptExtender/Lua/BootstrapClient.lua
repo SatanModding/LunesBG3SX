@@ -13,3 +13,16 @@ Ext.Require("Shared/_initUtils.lua")
 Ext.Require("Client/UIHelper.lua")
 Ext.Require("Client/UI.lua")
 Ext.Require("Client/GenitalMessages.lua")
+
+
+
+
+
+
+Ext.Timer.WaitFor(500, function ()
+        local msg = "hello"
+
+        TEST_CHANNEL:SendToServer(msg)
+
+end)
+

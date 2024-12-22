@@ -453,11 +453,14 @@ local genitalChoice = {}
 ---@param uuid	string 		- uuid of entity that will receive the genital
 ---@return selectedGenital	- ID of CharacterCreationAppearaceVisual
 function Genital:GetNextGenital(spell, uuid)
+	print("GetNextGenital")
     local permittedGenitals = Genital:getPermittedGenitals(uuid)
+
+
     local filteredGenitals = Genital:getFilteredGenitals(spell, permittedGenitals)
 
 	if (not filteredGenitals) or (#filteredGenitals == 0) then
-        -- _P("[BG3SX] No " , spell , " genitals available after filtering for this entity.")
+         SatanPrint(GLOBALDEBUG, "[BG3SX] No " .. spell .. " genitals available after filtering for this entity.")
         return nil
     else
 			if genitalChoice.uuid == uuid and genitalChoice.spell == spell then
@@ -468,6 +471,7 @@ function Genital:GetNextGenital(spell, uuid)
 			end
 
         local selectedGenital = filteredGenitals[genitalChoice.index]
+		print("chose a new genital: ", selectedGenital)
         return selectedGenital
     end
 end
@@ -714,6 +718,8 @@ end
 -- gives erections to all characters in the list, if applicable
 ---@param characters table
 function Genital:GiveErections(characters)
+
+	print("Genital:GiveErections for ", #characters, " characters")
 
     for _, uuid in pairs(characters) do
         local personalGenital = Genital:GetCurrentGenital(uuid)

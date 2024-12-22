@@ -10,10 +10,10 @@ Data.AnimationSets = { -- Check BG3AF about what Slot and Type means
 
 if Ext.IsServer() then -- because this file is loaded through _initData.lua which is also loaded on the client
     local as = Mods.BG3AF.AnimationSet
-    -- local body = as.Get() -- Gets an AnimationSet - Check BG3AF for options
-    -- local face = as.Get("Face")
-    local body = as.Get(Data.AnimationSets["BG3SX_Body"].Uuid) -- Gets an AnimationSet - Check BG3AF for options
-    local face = as.Get(Data.AnimationSets["BG3SX_Face"].Uuid)
+    local body = as.Get() -- Gets an AnimationSet - Check BG3AF for options
+    local face = as.Get("Face")
+    --local body = as.Get(Data.AnimationSets["BG3SX_Body"].Uuid) -- Gets an AnimationSet - Check BG3AF for options
+    --local face = as.Get(Data.AnimationSets["BG3SX_Face"].Uuid)
 
     Data.AnimLinks = {}
     -- Create a new link between an animation ID and Mapkey on an AnimationSet
@@ -76,13 +76,13 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     end
 end
 
-function Data.AnimationSets.AddSetToEntity(uuid, animationSet)
-    local character = uuid
-    local animWaterfall = Mods.BG3AF.AnimationWaterfall.Get(character)
-    local addedWaterfall = animWaterfall:AddWaterfall(animationSet.Uuid, animationSet.Slot, animationSet.Type)
-    -- _D(animWaterfall)
-    _D(addedWaterfall)
-end
+-- function Data.AnimationSets.AddSetToEntity(uuid, animationSet)
+--     local character = uuid
+--     local animWaterfall = Mods.BG3AF.AnimationWaterfall.Get(character)
+--     local addedWaterfall = animWaterfall:AddWaterfall(animationSet.Uuid, animationSet.Slot, animationSet.Type)
+--     -- _D(animWaterfall)
+--     _D(addedWaterfall)
+-- end
 
 --[[
 local char = Osi.GetHostCharacter()

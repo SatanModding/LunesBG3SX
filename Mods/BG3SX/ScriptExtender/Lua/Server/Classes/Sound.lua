@@ -30,14 +30,14 @@ end
 --------------------------------------------------------------
 
 playSound = function(self)
-    local scene = Scene:FindSceneByEntity(self.actor.parent)
+    local scene = Scene:FindSceneByEntity(self.actor)
     if scene then
         local minRepeatTime = self.duration - 200
         local maxRepeatTime = self.duration + 200
-        Osi.PlaySound(self.actor.uuid, "") -- First, stop current sound
+        Osi.PlaySound(self.actor, "") -- First, stop current sound
 
         local sound = self.soundTable[math.random(1, #self.soundTable)]
-        Osi.PlaySound(self.actor.uuid, sound) -- Plays a random entry of sounds on an actor
+        Osi.PlaySound(self.actor, sound) -- Plays a random entry of sounds on an actor
         
         -- Will be an infinite loop until registered timer gets canceled on Scene:Destroy()
         local newSoundTimer = Ext.Timer.WaitFor(math.random(minRepeatTime, maxRepeatTime), function()

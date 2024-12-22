@@ -17,7 +17,6 @@ local initialize
 ---@param rotation          table   - Table with x,y,z,w 
 ---@param startLocations    table   - Saves the start locations (Position/Rotation) of each entity to teleport back to when scene is destroyed
 ---@param entityScales      table   - Saves the start entity scales
----@param actors            table   - Table of all actors in a scene
 ---@param currentAnimation  table   - Table of the current animation being played
 ---@param currentSounds     table   - Table of currently playing sounds
 ---@param timerHandles      table   - Timer handles in case they have to be cancelled (failsave)
@@ -33,7 +32,6 @@ function Scene:new(entities)
         rotation        = {},
         startLocations  = {}, -- NEVER change this after initialize - Used to teleport everyone back on Scene:Destroy()
         entityScales    = {},
-        actors          = {},
         currentAnimation= {},
         currentSounds   = {},
         timerHandles    = {},
@@ -94,6 +92,7 @@ end
 -- Goes through every currently running scene until it finds the entityToSearch
 ---@param entityToSearch uuid
 function Scene:FindSceneByEntity(entityToSearch)
+
     for i, scene in ipairs(Data.SavedScenes) do
         for _, entity in pairs(scene.entities) do
             if Helper:StringContains(entityToSearch, entity) then
@@ -293,7 +292,7 @@ initialize = function(self)
     self:ToggleSummonVisibility() -- Toggles summon visibility and collision - on Scene:Destroy() it also teleports them back to start location
 
     -- We do this before in a seperate loop to already apply this to all entities before actors are spawned one by one
-    for _, entity in pairs(self.entities) do
+    for i, entity in pairs(self.entities) do
         Osi.AddBoosts(entity, "ActionResourceBlock(Movement)", "", "") -- Blocks movement
         Osi.SetDetached(entity, 1)              -- Make entity untargetable
         Osi.DetachFromPartyGroup(entity)        -- Detach from party to stop party members from following
@@ -302,8 +301,26 @@ initialize = function(self)
         Entity:ToggleWalkThrough(entity)        -- To prevent interactions with other entities even while invisible and untargetable
         self:ToggleCampFlags(entity)            -- Toggles camp flags so companions don't return to tents
         Sex:RemoveMainSexSpells(entity)         -- Removes the regular sex spells
-        Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Body"])
-        Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Face"])
+        --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Body"])
+        --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Face"])
+        
+
+        Ext.Timer.WaitFor(100, function ()
+            Osi.TeleportTo(entity, self.entities[1])
+        end)
+        
+        
+        --Osi.TeleportToPosition(entity, self.rootPosition.x, self.rootPosition.y, self.rootPosition.z) -- now handled correctly in actor initialization
+        
+        
+        --local startLocation = self.startLocations[1]
+        --Entity:RotateEntity(entity, startLocation.rotationHelper)
+       
+
+        print("Stripping ", entity )
+        if Sex:IsStripper(entity) then
+            Entity:UnequipAll(entity)
+        end
     end
 
     -- for _, entity in pairs(self.entities) do
@@ -311,11 +328,7 @@ initialize = function(self)
     --     self:ScaleEntity(entity) -- After creating the actor to not create one with a smaller scale
     -- end
 
-    for _, actor in ipairs(self.actors) do
-        local startLocation = self.startLocations[1]
-        -- Osi.TeleportToPosition(actor.uuid, startLocation.position.x, startLocation.position.y, startLocation.position.z) -- now handled correctly in actor initialization
-        Entity:RotateEntity(actor.uuid, startLocation.rotationHelper)
-    end
+
 
     Ext.ModEvents.BG3SX.SceneCreated:Throw({self})
 end
