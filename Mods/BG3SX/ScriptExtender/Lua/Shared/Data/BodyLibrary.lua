@@ -1874,8 +1874,9 @@ function Data.CreateUIGenitalPayload(uuid)
             table.insert(genitalContent, {name = name, uuid = genital})
         end
 
-        payload[mod][mod] = genitalContent
+        payload[mod] = genitalContent
     end
 
+    --Debug.Dump(payload)
     return payload
 end

@@ -1,3 +1,36 @@
+-- TODO: remove this when UI is implemented
+
+
+
+Ext.Osiris.RegisterListener("UsingSpellOnTarget", 6, "after", function(_, target, spell, _, _, _)
+
+
+    if spell == "BG3SX_ManualErections" then
+        Mods.BG3SX.SexUserVars:SetAutoErection(0,target)
+    end
+    
+    if spell == "BG3SX_AutoErection" then
+        Mods.BG3SX.SexUserVars:SetAutoErection(1,target)
+    end
+end)
+
+
+-- TODO: remove this when UI is implemented
+
+
+Ext.Osiris.RegisterListener("UsingSpell", 5, "after", function(caster, spell,_,_,_)
+  
+    local containerID = Ext.Stats.Get(spell).SpellContainerID
+    if containerID == "BG3SX_ChangeGenitals" then
+
+    local newGenital = Genital:GetNextGenital(spell, caster)
+
+    Genital:OverrideGenital(newGenital, caster)
+
+    end
+end)
+
+
 ----------------------------------------------------------------------------------------
 --
 --                               For handling Sex functionalities
@@ -155,20 +188,11 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
         local function haveSex()
             scene = Scene:new(sexHavers)
             
-            -- TODO - works for masturbation but not for sex
-            --for _, actor in pairs(scene.entities) do
-                -- _P("giving erection to ", actor.parent , "`s clone ", actor.uuid)
-                -- If Shpeshifted ,  the genitals have to eb transferred 
-                --Genital:GiveGenitalsToActor(actor)
+            -- erections
             for _, actor in pairs(sexHavers) do
-                if Entity:HasPenis(actor) then
-                    Genital:GiveErection(actor)
-                end
+                Genital:GiveErection(actor)
             end
-            
-                --print("visuals ")
-                --_D(Ext.Entity.Get(actor.uuid).AppearanceOverride.Visual.Visuals)
-            --end 
+                          
             Sex:InitSexSpells(scene)
             print("starting Sex:PlayAnimation")
             Sex:PlayAnimation(caster, animationData)

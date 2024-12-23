@@ -1,5 +1,3 @@
-
-
 -- TODO Skiz. I need an autoerection setting  and a Stop Sex button
 
 UI = {}
@@ -87,6 +85,8 @@ end
 local genitals = {}
 function UI.GetUIGenitals()
     return genitals
+    -- TODO - send request for genitals to server. 
+    -- include currently controlled entity
 end
 local function OnSessionLoaded()
 
@@ -117,9 +117,9 @@ local function OnSessionLoaded()
 
         local function addGenitalEntry(parent, genital, mod)
             idContextCount = idContextCount + 1
-            local inactiveGButton = parent:AddButton("Inactive")
+            local inactiveGButton = parent:AddButton("Out of sex")
             inactiveGButton.IDContext = "Inactive_GButton_" .. idContextCount
-            local activeGButton = parent:AddButton("Active")
+            local activeGButton = parent:AddButton("During Sex")
             activeGButton.IDContext = "Active_GButton_" .. idContextCount
             local GText = parent:AddText(genital.name)
             activeGButton.SameLine = true
@@ -378,7 +378,7 @@ end)
 -- New stuff - Replace old stuff with new stuff
 -------------------------------------------------
 
-UIInstances = {}
+UIInstance = nil
 
 function UI.New(mcm)
     local workingArea
@@ -392,88 +392,245 @@ function UI.New(mcm)
         workingArea = Ext.IMGUI.NewWindow("")
     end
 
-    local id = #UIInstances + 1
+    local u = _C().UserReservedFor.UserID
+    local id = Helper.UserToPeerID(u)
     local instance = setmetatable({
         ID = id,
         Window = workingArea,
         HotKeys = {},
     }, UI)
-
+    UIInstance = instance
     instance:Initialize()
-    table.insert(UIInstances, instance)
     return instance
 end 
 
-SceneInterface = {}
-SceneInterface.__index = SceneInterface
-function SceneInterface.New(UI)
+PartyInterface = {}
+PartyInterface.__index = PartyInterface
+function UI:NewPartyInterface()
     local instance = setmetatable({
-        UI = UI.ID,
-        Tab = UI.TabBar:AddTabItem("Scenes"),
-    }, SceneInterface)
+        --UI = self.ID,
+        Wrapper = self.Window:AddCollapsingHeader("Party"),
+        Party = {}
+    }, PartyInterface)
     return instance
 end
-GenitalInterface = {}
-GenitalInterface.__index = GenitalInterface
-function GenitalInterface.New(UI)
+
+SceneTab = {}
+SceneTab.__index = SceneTab
+function UI:NewSceneTab()
     local instance = setmetatable({
-        UI = UI.ID,
-        Tab = UI.TabBar:AddTabItem("Genitals"),
-    }, GenitalInterface)
+        --UI = self.ID,
+        Tab = self.TabBar:AddTabItem("Scenes"),
+        Scenes = {},
+    }, SceneTab)
     return instance
 end
-SettingsInterface = {}
-SettingsInterface.__index = SettingsInterface
-function SettingsInterface.New(UI)
+GenitalsTab = {}
+GenitalsTab.__index = GenitalsTab
+function UI:NewGenitalsTab()
     local instance = setmetatable({
-        UI = UI.ID,
-        Tab = UI.TabBar:AddTabItem("Settings"),
-    }, SettingsInterface)
+        --UI = self.ID,
+        Tab = self.TabBar:AddTabItem("Genitals"),
+        Genitals = {},
+    }, GenitalsTab)
+    return instance
+end
+SettingsTab = {}
+SettingsTab.__index = SettingsTab
+function UI:NewSettingsTab()
+    local instance = setmetatable({
+        --UI = self.ID,
+        Tab = self.TabBar:AddTabItem("Settings"),
+    }, SettingsTab)
     return instance
 end
 
 function UI:Initialize()
+    self.PartyInterface = self:NewPartyInterface()
+    self.PartyInterface:Initialize()
+    -- PartyTable on top of Tabs so we can make everything Character specific depending on which one is selected
     self.TabBar = self.Window:AddTabBar("")
-    self.SceneInterface = SceneInterface.New(self)
-    self.GenitalInterface = GenitalInterface.New(self)
-    self.SettingsInterface = SettingsInterface.New(self)
-    self.SceneInterface:Initialize()
-    self.GenitalInterface:Initialize()
-    self.SettingsInterface:Initialize()
+    self.SceneTab = self:NewSceneTab()
+    self.GenitalsTab = self:NewGenitalsTab()
+    self.SettingsTab = self:NewSettingsTab()
+    self.SceneTab:Initialize()
+    self.GenitalsTab:Initialize()
+    self.SettingsTab:Initialize()
 end
 
-function SceneInterface:Initialize()
-    local UI = UI.GetUIByID(self.UI)
-    self.CurrentScenes = UI:GetScenes()
-    self.SceneCount = nil
-    self.NoSceneArea = self:CreateNewSceneArea()
+function PartyInterface:Initialize()
+    UIEvents.FetchParty:SendToServer({ID = UIInstance.ID})
 end
 
-function SceneInterface:CreateNewSceneArea()
+function PartyInterface:UpdateParty()
+    UI.DestroyChildren(self.Wrapper)
+    local tWidth = 4
+    local t = self.Wrapper:AddTable("",tWidth)
+    local row = t:AddRow()
+    local characterCount = 0
+    for i, uuid in ipairs(self.Party) do
+        if i % tWidth == 0 then
+            row = t:AddRow()
+        end
+        PartyInterface:AddCharacter()
+    end
+end
+
+function PartyInterface:AddCharacter()
+
+end
+
+function SceneTab:Initialize()
+    self:GetScenes()
+    self.NewSceneArea = self:CreateNewSceneArea()
+    self.ActiveSceneControls = {}
+    if self.Scenes and #self.Scenes > 0 then
+        for i,Scene in ipairs(self.Scenes) do
+            self:NewSceneControl(Scene)
+        end
+    end
+end
+
+function SceneTab:GetScenes()
+    self.AwaitingScenes = true
+    UIEvents.FetchScenes:SendToServer("")
+end
+
+function SceneTab:CreateNewSceneArea()
     local table = self.Tab:AddTable("", 1)
     self.NoSceneText = table:AddRow():AddCell():AddText("No Scenes found, create one!")
     self.CreateSceneButton = table:AddRow():AddCell():AddButton("Create Scene")
     self.CreateSceneButton.OnClick = function()
-        self:CreateScene()
+        self:AwaitNewScene()
     end
     return table
 end
 
-function SceneInterface:CreateScene()
-    local UI = UI.GetUIByID(self.UI)
-    UI:AwaitInput("NewScene")
+function SceneTab:AwaitNewScene()
+    --local UI = UI.GetUIByID(self.UI)
+    UIInstance:AwaitInput("NewScene")
 end
 
-function GenitalInterface:Initialize()
-    self.Tab:AddText("Genitals TEST TEST")
+SceneControl = {}
+SceneControl.__index = SceneControl
+function SceneTab:NewSceneControl(Scene)
+    local id = #self.ActiveSceneControls + 1
+    local instance = setmetatable({
+        ID = id,
+        Scene = Scene,
+        Window = Ext.IMGUI.NewWindow(""),
+        Buttons = {}
+    }, SceneControl)
+    local involved = instance.Scene.entities
+    if involved[1] == involved[2] then
+        instance.Window.Label = "Scene: " .. involved[1]
+    else
+        instance.Window.Label = "Scene: " .. involved[1] .. " + " .. involved[2]
+    end
+    
+    instance:CreateAnimationControlArea()
+    table.insert(self.ActiveSceneControls, instance)
+    return instance
 end
 
-function SettingsInterface:Initialize()
-    local UI = UI.GetUIByID(self.UI)
+function SceneControl:AddControlButtons()
+    local t = self.Window:AddTable("",5)
+    local r = t:AddRow():AddCell()
+    local buttons = {
+        "ChangePosition",
+        "RotateScene",
+        "ChangeCameraHeight",
+        "MoveScene",
+        "StopSex",
+    }
+    for _,button in pairs(buttons) do
+        local controlButton = r:AddButton(button)
+        controlButton.OnClick = function()
+           self:UseSceneControlButton(controlButton.Label) 
+        end
+    end
+end
+
+function SceneControl:UseSceneControlButton(buttonLabel)
+    --local UI = UI.GetUIByID(self.UI)
+    if buttonLabel == "ChangePosition" then
+        UIInstance:AwaitInput("ChangePosition", self.Scene)
+    elseif buttonLabel == "RotateScene" then
+        UIEvents.RotateScene:SendToServer({ID = UIInstance.ID, Scene = self.Scene})
+
+    elseif buttonLabel == "ChangeCameraHeight" then
+        UIEvents.ChangeCameraHeight:SendToServer({ID = UIInstance.ID, Scene = self.Scene})
+
+    elseif buttonLabel == "MoveScene" then
+        UIEvents.MoveScene:SendToServer({ID = UIInstance.ID, Scene = self.Scene})
+
+    elseif buttonLabel == "StopSex" then
+        UIEvents.StopSex:SendToServer({ID = UIInstance.ID, Scene = self.Scene})
+    end
+end
+
+function SceneControl:CreateAnimationControlArea()
+    self.UpdatingAnimationPicker = false
+    --local UI = UI.GetUIByID(self.UI)
+    UIEvents.FetchFilteredAnimations:SendToServer(self.Scene.Type)
+    self.AnimationPicker = self.Tab:AddCombo("Choose Animation")
+    for i,Animation in ipairs(self.Animations) do
+        self.AnimationPicker.Options[i] = Animation
+    end
+    self.AnimationPicker.OnChange = function()
+        if self.UpdatingAnimationPicker == false then
+            UIEvents.ChangeAnimation:SendToServer(self.AnimationPicker.Value)
+        end
+    end
+end
+
+function GenitalsTab:Initialize()
+    self:FetchGenitals()
+end
+
+function GenitalsTab:FetchGenitals()
+    self.AwaitingGenitals = true
+    UIEvents.FetchGenitals:SendToServer({ID = UIInstance.ID, Character = _C().Uuid.EntityUuid})
+end
+
+--self.GenitalTable = self.Tab:AddTable("", 1)
+function GenitalsTab:UpdateGenitalTable()
+    UI.DestroyChildren(self.Tab)
+    local buttonID = 0
+    for Category,Genitals in pairs(self.Genitals) do
+        local categoryHeader = self.Tab:AddCollapsingHeader(Category)
+        for i,Genital in ipairs(Genitals) do
+            local genitalChoice = categoryHeader:AddText(Genital.name)
+            local activeGenitalButton = categoryHeader:AddButton("During Sex")
+            local inactiveGenitalButton = categoryHeader:AddButton("Out of Sex")
+            activeGenitalButton.SameLine = true
+            inactiveGenitalButton.SameLine = true
+            buttonID = buttonID + 1
+            activeGenitalButton.IDContext = buttonID
+            buttonID = buttonID + 1
+            inactiveGenitalButton.IDContext = buttonID
+            activeGenitalButton.OnClick = function()
+                UIEvents.SetActiveGenital:SendToServer({ID = UIInstance.ID, Genital = Genital.uuid})
+            end
+            inactiveGenitalButton.OnClick = function()
+                UIEvents.SetInactiveGenital:SendToServer({ID = UIInstance.ID, Genital = Genital.uuid})
+            end
+            
+        end
+    end
+end
+
+function SettingsTab:Initialize()
+    self:AddHotKeySettings()
+    self:AddSceneSettings()
+end
+
+function SettingsTab:AddHotKeySettings()
+    --local UI = UI.GetUIByID(self.UI)
     self.Tab:AddText("Hotkeys")
-    UI.HotKeys.Select = self.Tab:AddCombo("Select - While awaiting Input")
-    _D(UI.HotKeys)
-    local combo = UI.HotKeys.Select
+    UIInstance.HotKeys.Select = self.Tab:AddCombo("Select - While awaiting Input")
+    --Debug.DumpS(UI.HotKeys)
+    local combo = UIInstance.HotKeys.Select
     for i,key in ipairs(Ext.Enums.SDLScanCode) do
         if not key == "UNKNOWN" then -- So this doesn't become selectable
             combo.Options[i] = key
@@ -484,17 +641,54 @@ function SettingsInterface:Initialize()
     end
 end
 
-function UI:AwaitInput(whatFor)
+function SettingsTab:AddSceneSettings()
+    local t = self.Tab:AddTable("", 1):AddRow():AddCell()
+    local checkBoxes = {
+        "Show All Animations",
+        --"Automatic Erections"
+    }
+    for _,box in pairs(checkBoxes) do
+        local settingsCheckbox = t:AddCheckbox(box)
+        if settingsCheckbox.Label == "Show All Animations" then
+            local animInfo = t:AddText(" - May Show some that don't line up correctly")
+            animInfo.SameLine = true
+        end
+        settingsCheckbox.OnChange = function()
+            self:SetSceneSettings(settingsCheckbox)
+        end
+    end
+end
+
+function SettingsTab:SetSceneSettings(Checkbox)
+    if Checkbox.Label == "Show All Animations" then
+        if Checkbox.Checked == true then
+            UIEvents.FetchAnimations:SendToServer({ID = UIInstance.ID, Filter = false})
+        else
+            UIEvents.FetchAnimations:SendToServer({ID = UIInstance.ID, Filter = true})
+        end
+    elseif Checkbox.Label == "Automatic Erections" then
+        if Checkbox.Checked == true then
+            UIEvents.AutoErectionOn:SendToServer({ID = UIInstance.ID})
+        else
+            UIEvents.AutoErectionOff:SendToServer({ID = UIInstance.ID})
+        end
+    end
+end
+
+function UI:AwaitInput(whatFor, payload)
+    local payload = payload or nil
     if not self.EventListener then
         self.EventListener = UI:CreateListener()
     end
-    self.Await = whatFor
+    self.Await = {whatFor = whatFor, payload = payload}
 end
 
+
 function UI:CreateListener()
-    local listener = Ext.Events.KeyInput:Subscribe(function (e)
-        if e.Event == "KeyDown" and e.Repeat == false then
-            if e.Key == self.HotKeys.Select.Value then
+    local listener = Ext.Events.MouseButtonInput:Subscribe(function (e)
+        e.PreventAction()
+        if e.Button == 1 and e.Pressed == true then
+            if getMouseover() and getMouseover().Inner and getMouseover().Inner.Inner[1] and getMouseover().Inner.Inner[1] and getMouseover().Inner.Inner[1].Character then
                 if self.Await == "NewScene" then
                     self:InputRecieved(self.Await)
                 end
@@ -504,15 +698,15 @@ function UI:CreateListener()
     return listener
 end
 
-function UI:InputRecieved(whatFor)
+
+
+function UI:InputRecieved(whatFor, payload)
+    local payload = payload or nil
     if whatFor == "NewScene" then
         self.Await = nil
-        local caster = UI.GetSelectedCharacter()
-        local target = getUUIDFromUserdata(getMouseover())
-        Ext.Net.PostMessageToServer("BG3SX_Client_AskForSex", Ext.Json.Stringify({caster = caster, target = target}))
-        -- genital function
-        Ext.Net.PostMessageToServer("BG3SX_AskForSex",Ext.Json.Stringify({caster, target}))
-        self.SceneInterface.NoSceneText.Visible = false
+        UIEvents.AskForSex:SendToServer({ID = self.ID, Target = getUUIDFromUserdata(getMouseover())})
+    elseif whatFor == "ChangePosition" then
+        UIEvents.ChangePosition:SendToServer({ID = self.ID, Scene = payload, Position = getMouseover().Inner.WorldPosition})
     end
 end
 
@@ -524,27 +718,10 @@ function UI.DestroyChildren(obj)
     end
 end
 
-function UI.GetUIByID(id)
-    for _,UI in pairs(UIInstances) do
-        if UI.ID == id then
-            return UI
-        end
-    end
-end
-
-function UI:GetScenes()
-    self.AwaitingScenes = true
-    UIEvents.FetchScenes:SendToServer("")
-end
-UIEvents.SendScenes:SetHandler(function (payload)
-    if not payload == "Empty" then
-        local scenes = payload
-        for _,UI in pairs(UIInstances) do
-            if UI.AwaitingScenes == true then
-                UI.SceneInterface.CurrentScenes = scenes
-                UI.SceneInterface.SceneCount = #scenes
-                UI.AwaitingScenes = false
-            end
-        end
-    end
-end)
+--function UI.GetUIByID(id)
+--    for _,UI in pairs(UIInstances) do
+--        if UI.ID == id then
+--            return UI
+--        end
+--    end
+--end

@@ -6,6 +6,59 @@
 SatanPrint(GLOBALDEBUG, "Registered GenitalListeners")
 
 
+
+UIEvents.SetInactiveGenital:SetHandler(function (payload)
+
+    print("Event set INactive gential")
+
+    local uuid = payload.ID
+    local genital = payload.Genital
+
+
+    SexUserVars:AssignGenital("BG3SX_Flaccid", genital, uuid)
+
+     -- If inactive is changed, update USerVars of entity and change genital
+     -- only if no scene is currently active
+
+    for _, scene in pairs(Data.SavedScenes) do
+        
+        for _, entity in pairs(scene.entities) do
+            if Helper:StringContains(entity, uuid) then
+                return
+            end
+        end
+    end
+
+    Genital:OverrideGenital(genital, uuid)
+
+end)
+
+
+
+UIEvents.SetActiveGenital:SetHandler(function (payload)
+
+    print("Event set active gential")
+
+    local uuid = payload.ID
+    local genital = payload.Genital
+
+    SexUserVars:AssignGenital("BG3SX_Erect", genital, uuid)
+
+    -- If active is changed, update UserVars, search for active actors, and change their genitals as well
+
+    for _, scene in pairs(Data.SavedScenes) do
+        
+        for _, entity in pairs(scene.entities) do
+            if Helper:StringContains(entity, uuid) then
+                Genital:OverrideGenital(genital, uuid)
+                return
+            end
+        end
+    end
+end)
+
+
+
 -- TODO - test for shapeshifts, rsculpts etc.
 Ext.Events.NetMessage:Subscribe(function(e)
 
@@ -53,53 +106,6 @@ Ext.Events.NetMessage:Subscribe(function(e)
         elseif setting == "OFF" then
             SexUserVars:SetAutoErection(false, character)
         end
-    end
-
-
-
-    if (e.Channel == "BG3SX_Client_ChangedInactiveGenital") then
-        local payload = Ext.Json.Parse(e.Payload)
-        local uuid = payload.uuid
-        local genital = payload.genital
-
-        -- TODO - currently uuid is sent as nil. Have SKiz send the uuid
-        -- so its multiplayer compatible
-
-        local uuid = Osi.GetHostCharacter()
-        SexUserVars:AssignGenital("BG3SX_Flaccid", genital, uuid)
-
-         -- If inactive is changed, update USerVars of entity and change genital
-
-         Genital:OverrideGenital(genital, uuid)
-
-    end
-
-
-    if (e.Channel == "BG3SX_Client_ChangedActiveGenital") then
-
-        local payload = Ext.Json.Parse(e.Payload)
-        local uuid = payload.uuid
-        local genital = payload.genital
-
-        -- TODO - currently uuid is sent as nil. Have SKiz send the uuid
-        -- so its multiplayer compatible
-
-        local uuid = Osi.GetHostCharacter()
-        SexUserVars:AssignGenital("BG3SX_Erect", genital, uuid)
-
-        -- If active is changed, update UserVars, search for active actors, and change their genitals as well
-
-        local scene = Scene:FindSceneByEntity(uuid)
-        if scene then
-            local actors = scene.actors
-            for _,actor in  pairs(actors) do
-                -- If an actor ith the parent uuid exists, then that one is currently involved in a scene
-                if actor.parent == uuid then
-                    Genital:OverrideGenital(genital, actor.uuid)
-                end
-            end
-        end
-
     end
 
 end)

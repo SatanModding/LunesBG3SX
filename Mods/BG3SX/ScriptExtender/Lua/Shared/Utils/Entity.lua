@@ -72,6 +72,29 @@ end
 ---@param uuid      string  - The entity UUID to check
 ---@return          boolean - Returns either 1 or 0
 function Entity:HasPenis(uuid)
+
+
+    local vulva = "a0738fdf-ca0c-446f-a11d-6211ecac3291"
+    local penis = "d27831df-2891-42e4-b615-ae555404918b"
+
+    -- Users can theoretically give the characters differen "flaccid" and "erect" genital
+    -- this is why we need to ask specifically for the "erect" version, not just the
+    -- current gential to get the correct animation
+    local sexGenital = SexUserVars:GetGenital("BG3SX_Erect", uuid)
+    if sexGenital then
+
+        local genitalTags =  Ext.StaticData.Get(sexGenital, "CharacterCreationAppearanceVisual").Tags
+        if Table:Contains(genitalTags, vulva) then
+            return false
+        -- this gives up the option to set custom genital types. Liek tentacles
+        elseif  Table:Contains(genitalTags, penis) then
+            return true
+        end
+        
+    end
+
+
+
     -- If entity is polymorphed (e.g., Disguise Self spell)
     if Osi.HasAppliedStatusOfType(uuid, "POLYMORPHED") == 1 then
         -- As of hotfix #17, "Femme Githyanki" disguise has a dick.
@@ -95,6 +118,13 @@ function Entity:HasPenis(uuid)
 
     -- Fallback for NPCs, "future" companions, etc.
     return Osi.IsTagged(uuid, "FEMALE_3806477c-65a7-4100-9f92-be4c12c4fa4f") ~= 1
+
+
+
+
+
+
+
 end
 
 

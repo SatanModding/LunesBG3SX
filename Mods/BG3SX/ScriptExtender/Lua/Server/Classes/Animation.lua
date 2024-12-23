@@ -66,7 +66,6 @@ end
 ---@param animation     string  - The actual animation to play because there could be multiple ("Top"/"Bottom")
 playAnimation = function(self)
 
-    print("playing animation ", self.animation)
 
   --  Osi.PlayAnimation(self.actor.uuid, "") -- First, stop current animation on actor
     if self.animationData.Loop == true then
@@ -77,3 +76,19 @@ playAnimation = function(self)
     end
     -- _P("[BG3SX][Animation.lua] - Animation:new() - playAnimation - Begin to play ", self.animation, " on ", self.actor.uuid)
 end
+
+
+
+
+-- When  a characters portrait is clicked, they reset. 
+-- Try this workaround
+
+Ext.Osiris.RegisterListener("GainedControl", 1, "after", function(target)  
+
+    -- while sex is active.... 
+    local currentScene = Scene:FindSceneByEntity(target)
+    if currentScene then
+        playAnimation(Animation:new(target, currentScene.currentAnimation))
+    end
+
+end)

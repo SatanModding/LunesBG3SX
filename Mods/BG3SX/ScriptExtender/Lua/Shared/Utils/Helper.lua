@@ -169,3 +169,36 @@ end
 function Helper:GetPlayerSummons()
     return Osi.DB_PlayerSummons:Get(nil)
 end
+
+
+
+
+
+
+---@return EntityHandle|nil
+function Helper.GetLocalControlledEntity()
+    for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
+        if entity.UserReservedFor.UserID == 1 then
+            return entity
+        end
+    end
+end
+
+
+
+-- By Aahz  https://next.nexusmods.com/profile/Aahz07?gameId=3474
+
+---NetMessage user is actually peerid, convert using this
+---@param p integer peerid
+---@return integer userid
+function Helper.PeerToUserID(p)
+    -- all this for userid+1 usually smh
+    return (p & 0xffff0000) | 0x0001
+end
+
+---Probably unreliable/unnecessary
+---@param u integer userid
+---@return integer peerid
+function Helper.UserToPeerID(u)
+    return (u & 0xffff0000)
+end
