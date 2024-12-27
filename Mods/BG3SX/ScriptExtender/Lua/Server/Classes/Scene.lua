@@ -464,3 +464,20 @@ function Scene:Destroy()
         end
     end
 end
+
+-- Terminates all running scenes
+function Scene.TerminateAllScenes()
+    if Data.SavedScenes and #Data.SavedScenes > 0 then
+        for i = #Data.SavedScenes, 1, -1 do
+            local scene = Data.SavedScenes[i]
+            for _,parent in pairs(scene.entities) do
+                if Entity:IsNPC(parent) then
+                    NPC:RemoveGenitals(parent)
+                    NPC:Redress(parent)
+                end
+            end
+            scene:Destroy()
+        end
+    end
+end
+Ext.RegisterConsoleCommand("BG3SX.TerminateScenes", Scene.TerminateAllScenes) -- Killswitch

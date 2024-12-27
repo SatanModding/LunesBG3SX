@@ -12,7 +12,7 @@
 
 
 
-print("Whitelist initialized")
+Debug.Print("Whitelist initialized")
 Data.AllowedTagsAndRaces = {
     ------------------------------------TAGS------------------------------------
     --- We keep sub-races allowed even when their parent race is disallowed to make it not too difficult for modders but keep them in here to not be unknown
@@ -1043,23 +1043,37 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
     end
 end
 
+function Entity:HasTags(uuid)
+    local tags = Entity:TryGetEntityValue(uuid, nil, {"Tag", "Tags"})
+    if tags and #tags >0 then
+        return true
+    else
+        local msg = "[BG3SX][Whitelist.lua]\n Not a single Tag was found on this entity. Please contact race mod author."
+        _P(msg)
+        Ext.Loca.UpdateTranslatedString(popuphandle, msg)
+        Osi.OpenMessageBox(uuid, popupkey)
+        return false
+    end
+end
 
 --- Checks if an entity is allowed based on its UUID and current settings of Data.WhitelistedEntities, Data.BlacklistedEntities and Data.AllowedTagsAndRaces.
 --- @param uuid any - The UUID of the entity to check.
 --- @return boolean - Returns true if the entity is allowed, false otherwise.
 function Entity:IsWhitelisted(uuid, debug)
-    local debug = debug or false
-    if Entity:IsWhitelistedEntity(uuid) then -- If true it is allowed - return true
-        return true -- We do this seperately from the other checks to just immediately return true if they are indeed whitelisted here
-    end
-    if Entity:IsBlacklistedEntity(uuid) then -- If true it is NOT allowed - return false
-        return false -- Entity not allowed
-    else -- Entity not found in the entity-specific white/blacklist, check Race/Tags whitelist now
+    if Entity:HasTags(uuid) then
+        local debug = debug or false
+        if Entity:IsBlacklistedEntity(uuid) then -- If true it is NOT allowed - return false
+            return false -- Entity not allowed
+        elseif Entity:IsWhitelistedEntity(uuid) then -- If true it is allowed - return true
+            return true -- We do this seperately from the other checks to just immediately return true if they are indeed whitelisted here
+        else -- Entity not found in the entity-specific white/blacklist, check Race/Tags whitelist now
         if Entity:IsWhitelistedTagOrRace(uuid, debug) then
             return true -- Entity allowed by race/tags
         else
             return false -- Entity not allowed by race/tags
         end
+    else
+        return false
     end
 end
 
@@ -1073,7 +1087,7 @@ function Data:SetAllowedTagsByName(tableOfTags, allow)
             if tag == tagToEdit then -- It checks each iteration if it finds an allowedTag you list in our table of tags -- IF it finds it, then...
             wList[tag].Allowed = allow -- You set it to whatever your allow parameter is
                 if wList[tag].racesUsingTag and #wList[tag].racesUsingTag > 0 then -- Then it checks if it has a racesUsingTag entry and if it has at least one entry itself
-                    for _,subTag in pairs(wList[tag].racesUsingTag) do -- Not it checks any of those subTags
+                    for _,subTag in pairs(wList[tag].racesUsingTag) do -- Then it checks any of those subTags
                         for _,subTagToEdit in pairs(tableOfTags) do -- Against any of the ones we want to allow
                             if subTag.Name == subTagToEdit then -- And if we find a match
                             wList[tag].racesUsingTag[subTag].Allowed = allow -- We set it to whatever your allow parameter is
@@ -1220,16 +1234,27 @@ end
 local function tagsandraces()
     getAllTagsAndRaces()
 end
-Ext.RegisterConsoleCommand("tagsandraces", tagsandraces);
+Ext.RegisterConsoleCommand("tagsandraces", tagsandraces)
 local function racewhitelist()
     Entity:IsWhitelistedTagOrRace(Osi.GetHostCharacter())
 end
-Ext.RegisterConsoleCommand("racewhitelist", racewhitelist);
+Ext.RegisterConsoleCommand("racewhitelist", racewhitelist)
 local function blacklist()
     Entity:IsBlacklistedEntity(Osi.GetHostCharacter())
 end
-Ext.RegisterConsoleCommand("blacklist", blacklist);
+Ext.RegisterConsoleCommand("blacklist", blacklist)
 local function whitelist()
     Entity:IsWhitelisted(Osi.GetHostCharacter())
 end
-Ext.RegisterConsoleCommand("whitelist", whitelist);
+Ext.RegisterConsoleCommand("whitelist", whitelist)
+
+local function showtags()
+    local tags = Entity:TryGetEntityValue(Osi.GetHostCharacter(), nil, {"Tag", "Tags"})
+    local output = {}
+    for _,tag in pairs(tags) do
+        local actualTag = Ext.StaticData.Get(tag, "Tag") or Ext.StaticData.Get(tag, "Race")
+        output[actualTag.Name] = actualTag.UUID
+    end
+    Debug.Dump(output)
+end
+Ext.RegisterConsoleCommand("showtags", showtags)

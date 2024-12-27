@@ -202,3 +202,9 @@ end
 function Helper.UserToPeerID(u)
     return (u & 0xffff0000)
 end
+
+
+-- local function blacklist()
+--     Entity:IsBlacklistedEntity(Osi.GetHostCharacter())
+-- end
+-- Ext.RegisterConsoleCommand("racewhitelist", racewhitelist);

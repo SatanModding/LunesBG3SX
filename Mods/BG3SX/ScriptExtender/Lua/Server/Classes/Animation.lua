@@ -26,9 +26,9 @@ function Animation:new(actor, animSpell)
         print("hmInstance exists")
 
         if #scene.entities == 1 then
-            instance.animation = hmInstance:getAnimation(actor)
+            instance.animation = hmInstance:GetAnimation(actor)
         else
-            hmAnim, hmAnim2 = hmInstance:getAnimation(scene.entities[1], scene.entities[2])
+            hmAnim, hmAnim2 = hmInstance:GetAnimation(scene.entities[1], scene.entities[2])
             if scene.entities[1] == instance.actor then
                 instance.animation = hmAnim
             elseif scene.entities[2] == instance.actor then

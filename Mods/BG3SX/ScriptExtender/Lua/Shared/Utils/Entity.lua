@@ -7,8 +7,6 @@
 -- CONSTRUCTOR
 --------------------------------------------------------------
 
-
-
 -- Variables
 --------------------------------------------------------------
 
@@ -93,11 +91,9 @@ function Entity:HasPenis(uuid)
         
     end
 
-
-
     -- If entity is polymorphed (e.g., Disguise Self spell)
     if Osi.HasAppliedStatusOfType(uuid, "POLYMORPHED") == 1 then
-        -- As of hotfix #17, "Femme Githyanki" disguise has a dick.
+        -- As of hotfix #17, the "Femme Githyanki" disguise has a penis for whatever reason.
         if Entity:TryGetEntityValue(uuid, nil, {"GameObjectVisual", "RootTemplateId"}) == "7bb034aa-d355-4973-9b61-4d83cf29d510" then
             return true
         end
@@ -118,13 +114,6 @@ function Entity:HasPenis(uuid)
 
     -- Fallback for NPCs, "future" companions, etc.
     return Osi.IsTagged(uuid, "FEMALE_3806477c-65a7-4100-9f92-be4c12c4fa4f") ~= 1
-
-
-
-
-
-
-
 end
 
 
