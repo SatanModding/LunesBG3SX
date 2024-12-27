@@ -49,44 +49,45 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     -- etc.
 
     Data.Animations = {}
-    function Data.Animations.New(name, category, animTop, animBtm, props)
+    local anims = Data.Animations
+    function anims.New(name, category, animTop, animBtm, props)
         category = category or nil
         animBtm = animBtm or nil
         props = props or nil
-        Data.Animations[name] = { -- Generic animation setup
+        anims[name] = { -- Generic animation setup
             AnimLength = 3600, Loop = true, Fade = true, Sound = true, Category = category,
             SoundTop = Data.Sounds.Moaning, SoundBottom = Data.Sounds.Moaning}
         if animBtm then
-            Data.Animations[name].Heightmatching = hm:New(name, animTop, animBtm)
+            anims[name].Heightmatching = hm:New(name, animTop, animBtm)
         else
-            Data.Animations[name].Heightmatching = hm:New(name, animTop)
+            anims[name].Heightmatching = hm:New(name, animTop)
         end
         if props then
-            Data.Animations[name].Props = props
+            anims[name].Props = props
         end
-        return Data.Animations[name]
+        return anims[name]
     end
 
     -- Animation Entries:
     ----------------------------------------------------
-    local grinding = Data.Animations.new("BG3SX_Grinding", anim["ScissorTop"].MapKey, anim["ScissorBtm"].MapKey)
-    local eatpussy = Data.Animations.new("BG3SX_EatPussy", anim["EatOutTop"].MapKey, anim["EatOutBtm"].MapKey)
+    local grinding = anims.New("BG3SX_Grinding", anim["ScissorTop"].MapKey, anim["ScissorBtm"].MapKey)
+    local eatpussy = anims.New("BG3SX_EatPussy", anim["EatOutTop"].MapKey, anim["EatOutBtm"].MapKey)
     eatpussy.SoundTop = Data.Sounds.Kissing
-    local fingerfuck = Data.Animations.new("BG3SX_FingerFuck", anim["FingeringTop"].MapKey, anim["FingeringBtm"].MapKey)
+    local fingerfuck = anims.New("BG3SX_FingerFuck", anim["FingeringTop"].MapKey, anim["FingeringBtm"].MapKey)
     fingerfuck.SoundTop = Data.Sounds.Kissing
-    local blowjob = Data.Animations.new("BG3SX_Blowjob", anim["BlowjobTop"].MapKey, anim["BlowjobBtm"].MapKey)
+    local blowjob = anims.New("BG3SX_Blowjob", anim["BlowjobTop"].MapKey, anim["BlowjobBtm"].MapKey)
     blowjob.SoundTop = Data.Sounds.Kissing
-    local laying = Data.Animations.new("BG3SX_Laying", anim["LayingTop"].MapKey, anim["LayingBtm"].MapKey)
-    local doggy = Data.Animations.new("BG3SX_Doggy", anim["DoggyTop"].MapKey, anim["DoggyBtm"].MapKey)
-    local cowgirl = Data.Animations.new("BG3SX_Cowgirl", anim["CowgirlTop"].MapKey, anim["CowgirlBtm"].MapKey)
+    local laying = anims.New("BG3SX_Laying", anim["LayingTop"].MapKey, anim["LayingBtm"].MapKey)
+    local doggy = anims.New("BG3SX_Doggy", anim["DoggyTop"].MapKey, anim["DoggyBtm"].MapKey)
+    local cowgirl = anims.New("BG3SX_Cowgirl", anim["CowgirlTop"].MapKey, anim["CowgirlBtm"].MapKey)
     cowgirl.SoundBottom = Data.Sounds.Kissing
-    local milking = Data.Animations.new("BG3SX_Milking", anim["MilkingTop"].MapKey, anim["MilkingBtm"].MapKey)
+    local milking = anims.New("BG3SX_Milking", anim["MilkingTop"].MapKey, anim["MilkingBtm"].MapKey)
     milking.SoundBottom = Data.Sounds.Kissing
-    local masturbate = Data.Animations.new("BG3SX_MasturbateStanding", anim["MasturbateStanding_F"].MapKey)
-    local wanking = Data.Animations.new("BG3SX_Wanking", anim["MasturbateWank"].MapKey)
+    local masturbate = anims.New("BG3SX_MasturbateStanding", anim["MasturbateStanding_F"].MapKey)
+    local wanking = anims.New("BG3SX_Wanking", anim["MasturbateWank"].MapKey)
     wanking.SoundBottom = Data.Sounds.Kissing
-    local bottlesit = Data.Animations.new("BG3SX_BottleSit", anim["BottleSit"].MapKey, nil, {"0f2ccca6-3ce8-4271-aec0-820f6581c551"}) -- Prop: Bottle
-    local vampireThrust = Data.Animations.new("YOUR_LAST_THRUST", anim["VampireLord"].MapKey)
+    local bottlesit = anims.New("BG3SX_BottleSit", anim["BottleSit"].MapKey, nil, {"0f2ccca6-3ce8-4271-aec0-820f6581c551"}) -- Prop: Bottle
+    local vampireThrust = anims.New("YOUR_LAST_THRUST", anim["VampireLord"].MapKey)
     -- Heightmatching:
     ----------------------------------------------------
     local hmi = hm:GetInstanceByAnimName("BG3SX_MasturbateStanding")

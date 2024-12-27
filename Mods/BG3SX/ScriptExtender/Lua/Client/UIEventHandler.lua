@@ -49,9 +49,6 @@ end)
 UIEvents.SendGenitals:SetHandler(function (payload)
     local genitals = payload.Data
 
-    print("CLIENT RECEIVED SEND GENITALS")
-    print("payload.Data")
-    _D(payload)
     local tab = UIInstance.GenitalsTab
     if tab.AwaitingGenitals == true then
         tab.Genitals = genitals

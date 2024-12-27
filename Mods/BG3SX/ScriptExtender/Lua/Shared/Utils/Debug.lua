@@ -19,7 +19,8 @@ function SatanDump(debug, message)
     end
 end
 
-Debug = {}
+
+Debug  = {}
 Debug.Active = true
 local modname = "[BG3AF] "
 function Debug.Print(message)

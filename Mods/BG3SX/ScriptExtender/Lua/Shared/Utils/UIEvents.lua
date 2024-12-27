@@ -41,6 +41,8 @@ function UIEvents:Initialize()
         -- Server -> Client
     self.SendAllAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendAllAnimations")
     self.SendFilteredAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendFilteredAnimations")
+
+    self.SendAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendAnimations")
 end
 UIEvents:Initialize()
 

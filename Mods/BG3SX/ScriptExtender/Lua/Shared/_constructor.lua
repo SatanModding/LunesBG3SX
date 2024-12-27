@@ -1,6 +1,7 @@
 -- Pre-Construct our classes so we can create functions in scripts that might not be loaded yet.
 -- E.g. Shared/Data/RaceWhitelist.lua
 
+Ext.Require("Shared/Utils/Debug.lua")
 -- Main Classes
 Entity = {}
 Entity.__index = Entity

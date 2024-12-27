@@ -40,9 +40,12 @@ UIEvents.FetchScenes:SetHandler(function (payload)
     end
 end)
 UIEvents.AskForSex:SetHandler(function (payload)
+    Debug.Print("ask for sex received")
+    Debug.Dump(payload)
     local caster = payload.Caster
     local target = payload.Target
     if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
+        -- Todo - why always start masturbating?
         Ext.Timer.WaitFor(200, function() -- Wait for erections
             Sex:StartSexSpellUsed(caster, {target}, Data.StartSexSpells["BG3SX_StartMasturbating"])
         end)

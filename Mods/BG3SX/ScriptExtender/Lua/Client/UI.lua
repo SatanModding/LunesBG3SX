@@ -507,7 +507,6 @@ function SceneTab:CreateNewSceneArea()
 end
 
 function SceneTab:AwaitNewScene()
-    --local UI = UI.GetUIByID(self.UI)
     UIInstance:AwaitInput("NewScene")
 end
 
@@ -677,20 +676,37 @@ end
 
 function UI:AwaitInput(whatFor, payload)
     local payload = payload or nil
-    if not self.EventListener then
-        self.EventListener = UI:CreateListener()
-    end
+    Debug.Print("Setting self.Await to ".. whatFor)
     self.Await = {whatFor = whatFor, payload = payload}
+    if not self.EventListener then
+        self.EventListener = self:CreateListener()
+    end
 end
 
 
+local function jjdoorframe()
+    Ext.Events.MouseButtonInput:Subscribe(function(event)
+        print("got Mouse Button Input")
+        event:PreventAction()
+    end)
+end
+    
+-- TODO - Skiz fix the rest here. Actions get successfully prevented currently 
+
 function UI:CreateListener()
+    --jjdoorframe()
     local listener = Ext.Events.MouseButtonInput:Subscribe(function (e)
-        e.PreventAction()
+        Debug.Print("0")
+        e:PreventAction()
+        Debug.Print("1")
         if e.Button == 1 and e.Pressed == true then
-            if getMouseover() and getMouseover().Inner and getMouseover().Inner.Inner[1] and getMouseover().Inner.Inner[1] and getMouseover().Inner.Inner[1].Character then
-                if self.Await == "NewScene" then
+            Debug.Print("2")
+            if getMouseover() and getMouseover().Inner and getMouseover().Inner.Inner[1] and getMouseover().Inner.Inner[1].Character then
+                Debug.Print("3")
+                if self.Await.whatFor == "NewScene" then
+                    Debug.Print("4")
                     self:InputRecieved(self.Await)
+
                 end
             end
         end
@@ -698,16 +714,15 @@ function UI:CreateListener()
     return listener
 end
 
-
-
-function UI:InputRecieved(whatFor, payload)
-    local payload = payload or nil
-    if whatFor == "NewScene" then
-        self.Await = nil
-        UIEvents.AskForSex:SendToServer({ID = self.ID, Target = getUUIDFromUserdata(getMouseover())})
-    elseif whatFor == "ChangePosition" then
-        UIEvents.ChangePosition:SendToServer({ID = self.ID, Scene = payload, Position = getMouseover().Inner.WorldPosition})
+function UI:InputRecieved(Await)
+    Debug.Print("Input Recieved")
+    if Await.whatFor == "NewScene" then
+        Await = nil
+        UIEvents.AskForSex:SendToServer({ID = self.ID, Caster = _C().Uuid.EntityUuid, Target = getUUIDFromUserdata(getMouseover())})
+    elseif Await.whatFor == "ChangePosition" then
+        UIEvents.ChangePosition:SendToServer({ID = self.ID, Scene = Await.payload, Position = getMouseover().Inner.WorldPosition})
     end
+    self.EventListener = nil -- Destroy event listener after recieving input
 end
 
 function UI.DestroyChildren(obj)

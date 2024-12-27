@@ -10,8 +10,6 @@
 
 
 
-
-
 Debug.Print("Whitelist initialized")
 Data.AllowedTagsAndRaces = {
     ------------------------------------TAGS------------------------------------
@@ -1066,7 +1064,8 @@ function Entity:IsWhitelisted(uuid, debug)
             return false -- Entity not allowed
         elseif Entity:IsWhitelistedEntity(uuid) then -- If true it is allowed - return true
             return true -- We do this seperately from the other checks to just immediately return true if they are indeed whitelisted here
-        else -- Entity not found in the entity-specific white/blacklist, check Race/Tags whitelist now
+        end
+        
         if Entity:IsWhitelistedTagOrRace(uuid, debug) then
             return true -- Entity allowed by race/tags
         else
@@ -1076,6 +1075,7 @@ function Entity:IsWhitelisted(uuid, debug)
         return false
     end
 end
+
 
 -- Input a table of tag names to iterate over every tag in Data.AllowedTagsAndRaces and set them to either true or false
 ---@param tableOfTags table -- A table of tag names for the function to iterate over

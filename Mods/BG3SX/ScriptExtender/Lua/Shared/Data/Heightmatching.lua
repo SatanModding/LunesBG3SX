@@ -2,10 +2,6 @@ Heightmatching = {}
 Heightmatching.__index = Heightmatching
 HeightmatchingInstances = {} -- Don't create it as Heightmatching.Instance so we don't replicate all instances for every instance:new()
 
-Heightmatching = {}
-Heightmatching.__index = Heightmatching
-HeightmatchingInstances = {} -- Don't create it as Heightmatching.Instance so we don't replicate all instances for every instance:new()
-
 -- TODO: Move some table functions over to Table:
 
 ---Retrieves a Heightmatching instance by its animation name.
@@ -128,6 +124,18 @@ end
 ---@param topAnimation string The animation identifier for the top part. If `nil`, uses the default value.
 ---@param bottomAnimation string|nil The animation identifier for the bottom part. If `nil`, uses the default value.
 function Heightmatching:SetAnimation(bodyType1, bodyType2, topAnimation, bottomAnimation)
+    bodyType2 = bodyType2 or nil
+    bottomAnimation = bottomAnimation or nil
+    if not bodyType2 then
+        if bottomAnimation then
+            Debug.Print("Error while setting up a heightmatching entry - A bottomAnimation was added without an identifier for a second entities bodytype")
+        end
+    end
+    if bodyType2 then
+        if not bottomAnimation then
+            Debug.Print("Error while setting up a heightmatching entry - A second entity bodytype identifier was added but no corresponding bottomAnimation")
+        end
+    end
     self.matchingTable[bodyType1] = self.matchingTable[bodyType1] or {} -- Creates the first level of the table if it doesn't exist, otherwise uses the existing one
     if bodyType2 then
         self.matchingTable[bodyType1][bodyType2] = self.matchingTable[bodyType1][bodyType2] or {} -- Do the same for the second level
@@ -146,11 +154,13 @@ end
 -- bsOverrides["Your Custom Race Tag"] = 0
 -- 0 is Med - 1 is Tall - 2 is Small - 3 is Tiny
 Heightmatching.BodyShapeOverrides = {
+    -- Vanilla Overrides by BG3SX
     ["02e5e9ed-b6b2-4524-99cd-cb2bc84c754a"] = 1,   -- Dragonborn Tall -- May need to remove this tag if someone ever does medium Dragonborn or Orcs
     ["3311a9a9-cdbc-4b05-9bf6-e02ba1fc72a3"] = 1,   -- Half-Orc Tall
     ["486a2562-31ae-437b-bf63-30393e18cbdd"] = 2,   -- Dwarf Small
     ["1f0551f3-d769-47a9-b02b-5d3a8c51978c"] = 3,   -- Gnome Tiny
     ["b99b6a5d-8445-44e4-ac58-81b2ee88aab1"] = 3,   -- Halfling Tiny
+    -- Modded
     ["7fa93b80-8ba5-4c1d-9b00-5dd20ced7f67"] = 0,   -- Githzerai Medium
     -- BodyShape Tags - Always list as last
     -- ["d3116e58-c55a-4853-a700-bee996207397"] = 1,   -- BodyShape Strong Tag -- TODO: Check if we need this at all, apparently only this tag exist
@@ -175,33 +185,58 @@ end
 -- This function is designed to handle custom race tags like Githzerai, Dwarf, Gnome, and Halfling.
 -- It returns a human-readable string that represents the body shape and body type combination.
 ---@param uuid string - The unique identifier of the entity.
----@return string - A concatenated string representing the body shape and body type (e.g., "TallM", "MedF").
+---@return string, string, string - A concatenated string representing the body shape and body type (e.g., "TallM", "MedF").
 function Heightmatching:GetEntityBody(uuid)
     local entity = Ext.Entity.Get(uuid)
     local raceTags = Entity:TryGetEntityValue(uuid, nil, {"ServerRaceTag", "Tags"})
-    local bt = entity.BodyType.BodyType
     local bs = 0 -- Default Medium bodyShape
-    local p = 0
+    local bt = entity.BodyType.BodyType
+    local g
+    
     if Entity:IsNPC(uuid) == false then
         if Entity:HasPenis(uuid) then
-            p = 0
+            g = "_P" -- Penis
         else
-            p = 1
+            g = "_V" -- Vulva
         end
         bs = entity.CharacterCreationStats.BodyShape
     end
+
     -- Apply body shape overrides based on race tags
     local bsOverride = bodyShapeOverrides(raceTags)
     if bsOverride ~= nil then
         bs = bsOverride
     end
-    -- Translate to Human-readable
-    bt = Data.BodyLibrary.BodyType[bt]
-    bs = Data.BodyLibrary.BodyShape[bs]
-    -- _P(uuid, " is of bt/bs ", bs .. bt)
-    return bs, bt, g -- TallM, MedF, etc.
-end
 
+    -- Translate to Human-readable
+    bs = Data.BodyLibrary.BodyShape[bs]
+    bt = Data.BodyLibrary.BodyType[bt]
+
+    -- Performs a check on the entity if its an NPC and either gets its current UserVars or sets the genital to a default 
+    if Entity:IsNPC(uuid) then
+        local vulva = "a0738fdf-ca0c-446f-a11d-6211ecac3291"
+        local genital = SexUserVars:GetGenital("BG3SX_Flaccid", uuid)
+        
+        if genital then
+        -- genital has been set once before (for example by user)
+            local genitalTags =  Ext.StaticData.Get(genital, "CharacterCreationAppearanceVisual").Tags
+            if Table:Contains(genitalTags, vulva) then
+                g = "_V"
+            else
+                g = "_P"
+            end
+        else
+            -- genital has not been assigned, assume penises for all masc bodytypes
+            if bt == "M" then
+                g = "_P"
+            else
+                g = "_V"
+            end
+        end
+    end
+
+    return bs, bt, g  -- TallM_P, MedF_V, etc.
+end
 
 
 -- --- Splits a concatenated body type and shape string to extract either the body type or the body shape.
@@ -256,13 +291,43 @@ end
 
 --- Retrieves the appropriate animations for a given body type pairing or solo entry.
 -- If both entity and entity2 are provided, it returns the top and bottom animations for that specific pair.
--- The function checks for multiple levels of specificity: the exact body type pairing, then general gender pairing, and finally general body shape pairing.
+-- The function checks for multiple levels of specificity: the exact bodyshape pairing, then general gender pairing, and finally general body shape pairing.
 -- If only entity is provided, it returns the solo animation for that body type.
 -- If the specific pair or solo entry does not exist, it defaults to the provided fallback animations.
 ---@param entity string - UUID of the first entity.
 ---@param entity2 string|nil - (Optional) The UUID of the second entity. If nil, this retrieves the solo animation for entity.
 ---@return string, string - Returns the top and bottom animations if both entities are provided, or the solo animation if only the first entity is provided.
 function Heightmatching:GetAnimation(entity, entity2)
+
+    -- We require different kinds of matches.
+    -- In some cases we have all required values, like TallM_P + MedF_V
+    -- however in some cases, certain values are not importatn
+    -- for Blowjobs for example, the gentials are irrelevant for the "bottom" animation
+
+    -- example
+
+    -- TallM_P + MedF_V
+    -- TallM_P + MedF
+    -- TallM_P + Med
+    -- TallM_P + Med_V
+    -- M + Tall_V
+
+    -- If there is an "ideal" match of all 3 parameters (Tall/Med(Bodyshape), M/F(bodytype) and _P/_V(penis/vulva) )
+    -- choose that animation
+    -- always choose the ones with the most identical parameters
+    -- if multiple identical parameters exist, prioritize bs, bt and g according to the following logic
+    -- 1. g
+    -- 2. bs
+    -- 3. bt
+    
+    
+   
+    -- Perfect Match wins over
+    -- Genital wins over
+    -- BodyShape (height) wins over
+    -- BodyType (thicc - M/F)
+
+    local entity = entity2 or nil
     local bs1, bt1, g1 = Heightmatching:GetEntityBody(entity)
     local eB1 = bs1 .. bt1 .. g1
 
@@ -338,6 +403,7 @@ function Heightmatching:GetAnimation(entity, entity2)
         -- 17. Entity1: Match by BS, Entity2: Match by BS
         elseif self.matchingTable[bs1] and self.matchingTable[bs1][bs2] then
             return self.matchingTable[bs1][bs2].Top, self.matchingTable[bs1][bs2].Bottom
+        end
     end
 
     -- Fallback logic for no entity2 (Solo Entry for Entity 1)

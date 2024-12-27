@@ -92,5 +92,4 @@ animSet.AddSetToEntity(char, animSet["BG3SX_Face"])
 local animWaterfall = Mods.BG3AF.AnimationWaterfall.Get(char)
 local waterfall = animWaterfall:GetWaterfall()
 Osi.PlayAnimation(char, "ff7a5a30-b661-4192-bd8f-118373e3f4b8")
-
 ]]--
