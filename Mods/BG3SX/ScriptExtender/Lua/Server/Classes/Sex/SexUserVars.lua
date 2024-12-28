@@ -63,3 +63,7 @@ function SexUserVars:GetAutoErection(character)
     local e = Ext.Entity.Get(character)
     return e.Vars.BG3SX_AutoErection
 end
+
+
+
+

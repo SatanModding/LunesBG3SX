@@ -36,13 +36,18 @@ function UIEvents:Initialize()
     -- Settings
         -- Client -> Server
     self.FetchAnimations = Ext.Net.CreateChannel(ModuleUUID, "FetchAnimations")
+    self.FetchAllAnimations = Ext.Net.CreateChannel(ModuleUUID, "FetchAllAnimations")
+    self.FetchFilteredAnimations = Ext.Net.CreateChannel(ModuleUUID, "FetchFilteredAnimations")
     --self.AutoErectionsOn = Ext.Net.CreateChannel(ModuleUUID, "AutoErectionsOn")
     --self.AutoErectionsOff = Ext.Net.CreateChannel(ModuleUUID, "AutoErectionsOff")
         -- Server -> Client
     self.SendAllAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendAllAnimations")
     self.SendFilteredAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendFilteredAnimations")
 
-    self.SendAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendAnimations")
+    --self.SendAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendAnimations")
+
+
+    self.CustomEvent = Ext.Net.CreateChannel(ModuleUUID, "CustomEvent")
 end
 UIEvents:Initialize()
 

@@ -7,7 +7,7 @@ HeightmatchingInstances = {} -- Don't create it as Heightmatching.Instance so we
 ---Retrieves a Heightmatching instance by its animation name.
 ---@param animName string - The animation name used as the unique identifier for the instance.
 ---@return table|nil - The Heightmatching instance if found, or nil if not found.
-function Heightmatching:GetInstanceByAnimName(animName)
+function Heightmatching.GetInstanceByAnimName(animName)
     return HeightmatchingInstances[animName]
 end
 
@@ -128,12 +128,12 @@ function Heightmatching:SetAnimation(bodyType1, bodyType2, topAnimation, bottomA
     bottomAnimation = bottomAnimation or nil
     if not bodyType2 then
         if bottomAnimation then
-            Debug.Print("Error while setting up a heightmatching entry - A bottomAnimation was added without an identifier for a second entities bodytype")
+            --Debug.Print("Error while setting up a heightmatching entry - A bottomAnimation was added without an identifier for a second entities bodytype")
         end
     end
     if bodyType2 then
         if not bottomAnimation then
-            Debug.Print("Error while setting up a heightmatching entry - A second entity bodytype identifier was added but no corresponding bottomAnimation")
+            --Debug.Print("Error while setting up a heightmatching entry - A second entity bodytype identifier was added but no corresponding bottomAnimation")
         end
     end
     self.matchingTable[bodyType1] = self.matchingTable[bodyType1] or {} -- Creates the first level of the table if it doesn't exist, otherwise uses the existing one
@@ -186,7 +186,10 @@ end
 -- It returns a human-readable string that represents the body shape and body type combination.
 ---@param uuid string - The unique identifier of the entity.
 ---@return string, string, string - A concatenated string representing the body shape and body type (e.g., "TallM", "MedF").
-function Heightmatching:GetEntityBody(uuid)
+function Heightmatching.GetEntityBody(uuid)
+
+    --print("Heightmatching.GetEntityBody for " , uuid )
+
     local entity = Ext.Entity.Get(uuid)
     local raceTags = Entity:TryGetEntityValue(uuid, nil, {"ServerRaceTag", "Tags"})
     local bs = 0 -- Default Medium bodyShape
@@ -211,6 +214,8 @@ function Heightmatching:GetEntityBody(uuid)
     -- Translate to Human-readable
     bs = Data.BodyLibrary.BodyShape[bs]
     bt = Data.BodyLibrary.BodyType[bt]
+
+    --Debug.Print("bt = ".. bt.. " bs = ".. bs .. " g = " .. g )
 
     -- Performs a check on the entity if its an NPC and either gets its current UserVars or sets the genital to a default 
     if Entity:IsNPC(uuid) then
@@ -239,54 +244,6 @@ function Heightmatching:GetEntityBody(uuid)
 end
 
 
--- --- Splits a concatenated body type and shape string to extract either the body type or the body shape.
--- -- Depending on the type parameter, this function will return the body type or body shape component.
--- -- The function expects that the body shape is always prefixed, followed by the body type.
--- ---@param btsg string - The concatenated body type/shape/genital string (e.g., "TallM").
--- ---@param type string - Specifies whether to extract the body type ("BT") or the body shape ("BS").
--- ---@return string - The extracted body type or body shape, depending on the 'type' parameter.
--- local function splitBodyString(btsg, type)
---     -- Patterns for Regex - Generated through GetBodyType
---     local bt_pattern = "(Tall|Med|Small|Tiny)"  -- Matches 'Tall', 'Med', 'Small', 'Tiny' (case-sensitive)
---     local bs_pattern = "(F|M)"  -- Matches 'F' or 'M' (case-sensitive)
---     local g_pattern = "(_[PV])"  -- Matches '_P' or '_V' (case-sensitive)
-
---     local bt, bs, g
-
---     if btsg:match(bt_pattern) then
---         bt = btsg:match(bt_pattern)  -- Match body height type (Tall, Med, Small, Tiny)
---     end
-
---     if btsg:match(bs_pattern) then
---         bs = btsg:match(bs_pattern)  -- Match gendered bodyshape (F, M)
---     end
-
---     if btsg:match(g_pattern) then
---         g = btsg:match(g_pattern)  -- Match genital (_P, _V)
---     end
-
---     if type == "BT" then
---         if bt then
---             return bt
---         else
---             return Debug.Print("Heightmatching - No bodytype found on entity")
---         end
---     elseif type == "BS" then
---         if bs then
---             return bs
---         else
---             return Debug.Print("Heightmatching - No bodyshape found on entity")
---         end
---     elseif type == "G" then
---         if g then
---             return g
---         else
---             return Debug.Print("Heightmatching - No genital found on entity")
---         end
---     else
---         return Debug.Print("Heightmatching - Asking for unknown type")
---     end
--- end
 
 
 --- Retrieves the appropriate animations for a given body type pairing or solo entry.
@@ -297,135 +254,132 @@ end
 ---@param entity string - UUID of the first entity.
 ---@param entity2 string|nil - (Optional) The UUID of the second entity. If nil, this retrieves the solo animation for entity.
 ---@return string, string - Returns the top and bottom animations if both entities are provided, or the solo animation if only the first entity is provided.
-function Heightmatching:GetAnimation(entity, entity2)
+-- function Heightmatching:GetAnimation(entity, entity2)
 
-    -- We require different kinds of matches.
-    -- In some cases we have all required values, like TallM_P + MedF_V
-    -- however in some cases, certain values are not importatn
-    -- for Blowjobs for example, the gentials are irrelevant for the "bottom" animation
+--     local entity2 = entity2 or nil
+--     local bs1, bt1, g1 = Heightmatching.GetEntityBody(entity)
+--     local eB1 = bs1 .. bt1 .. g1
+--     Debug.Print("Entity 1 Body: " .. eB1)
 
-    -- example
+--     if entity2 then
+--         Debug.Print("Entity 2 found for Heightmatching")
+--         -- Get body type, shape, and genital for entity2
+--         local bs2, bt2, g2 = Heightmatching.GetEntityBody(entity2)
+--         local eB2 = bs2 .. bt2 .. g2
+--         Debug.Print("Entity 2 Body: " .. eB2)
 
-    -- TallM_P + MedF_V
-    -- TallM_P + MedF
-    -- TallM_P + Med
-    -- TallM_P + Med_V
-    -- M + Tall_V
+--         -- 1. Exact match for both entities (BS + BT + G)
+--         if self.matchingTable[eB1] and self.matchingTable[eB1][eB2] then
+--             local match = self.matchingTable[eB1][eB2]
+--             Debug.Dump(match)
+--             return match.Top, match.Bottom
+        
+--         -- 1.1 Former Common Match Type: TallM + MedF - Relied on Genital so we prioritize Tall_P + Med_V now
+--         elseif self.matchingTable[bs1..g1] and self.matchingTable[bs1..bt1][bs2..g2] then
+--             local match = self.matchingTable[bs1..bt1][bs2..g2]
+--             Debug.Dump(match)
+--             return match.Top, match.Bottom
 
-    -- If there is an "ideal" match of all 3 parameters (Tall/Med(Bodyshape), M/F(bodytype) and _P/_V(penis/vulva) )
-    -- choose that animation
-    -- always choose the ones with the most identical parameters
-    -- if multiple identical parameters exist, prioritize bs, bt and g according to the following logic
-    -- 1. g
-    -- 2. bs
-    -- 3. bt
+--         -- 1.2 Former Common Match Type: Tall + Med
+--         elseif self.matchingTable[bs1] and self.matchingTable[bs1][bs2] then
+--             local match = self.matchingTable[bs1][bs2]
+--             Debug.Dump(match)
+--             return match.Top, match.Bottom
+
+--         -- 1.3 Former Common Match Type: M + F - Relied on Genital so we prioritize _P + _V
+--         elseif self.matchingTable[g1] and self.matchingTable[g1][g2] then
+--             local match = self.matchingTable[g1][g2]
+--             Debug.Dump(match)
+--             return match.Top, match.Bottom
+
+--         -- 2. Entity1: Full match (BS + BT + G), Entity2: Match by BS
+--         elseif self.matchingTable[eB1] and self.matchingTable[eB1][bs2] then
+--             return self.matchingTable[eB1][bs2].Top, self.matchingTable[eB1][bs2].Bottom
+        
+--         -- 3. Entity1: Full match (BS + BT + G), Entity2: Match by BT + G
+--         elseif self.matchingTable[eB1] and self.matchingTable[eB1][bt2 .. g2] then
+--             return self.matchingTable[eB1][bt2 .. g2].Top, self.matchingTable[eB1][bt2 .. g2].Bottom
+        
+--         -- 4. Entity1: Full match (BS + BT + G), Entity2: Match by BS + BT
+--         elseif self.matchingTable[eB1] and self.matchingTable[eB1][bs2 .. bt2] then
+--             return self.matchingTable[eB1][bs2 .. bt2].Top, self.matchingTable[eB1][bs2 .. bt2].Bottom
+        
+--         -- 5. Entity1: Full match (BS + BT + G), Entity2: Match by BT
+--         elseif self.matchingTable[eB1] and self.matchingTable[eB1][bt2] then
+--             return self.matchingTable[eB1][bt2].Top, self.matchingTable[eB1][bt2].Bottom
+        
+--         -- 6. Entity1: Full match (BS + BT + G), Entity2: Match by G
+--         elseif self.matchingTable[eB1] and self.matchingTable[eB1][g2] then
+--             return self.matchingTable[eB1][g2].Top, self.matchingTable[eB1][g2].Bottom
+        
+--         -- 7. Entity1: Match by BS + BT, Entity2: Full match (BS + BT + G)
+--         elseif self.matchingTable[bs1 .. bt1] and self.matchingTable[bs1 .. bt1][eB2] then
+--             return self.matchingTable[bs1 .. bt1][eB2].Top, self.matchingTable[bs1 .. bt1][eB2].Bottom
+        
+--         -- 8. Entity1: Match by BS + BT, Entity2: Match by BS + BT
+--         elseif self.matchingTable[bs1 .. bt1] and self.matchingTable[bs1 .. bt1][bs2 .. bt2] then
+--             return self.matchingTable[bs1 .. bt1][bs2 .. bt2].Top, self.matchingTable[bs1 .. bt1][bs2 .. bt2].Bottom
+        
+--         -- 9. Entity1: Match by BS + G, Entity2: Full match (BS + BT + G)
+--         elseif self.matchingTable[bs1 .. g1] and self.matchingTable[bs1 .. g1][eB2] then
+--             return self.matchingTable[bs1 .. g1][eB2].Top, self.matchingTable[bs1 .. g1][eB2].Bottom
+        
+--         -- 10. Entity1: Match by BS + G, Entity2: Match by BS + BT
+--         elseif self.matchingTable[bs1 .. g1] and self.matchingTable[bs1 .. g1][bs2 .. bt2] then
+--             return self.matchingTable[bs1 .. g1][bs2 .. bt2].Top, self.matchingTable[bs1 .. g1][bs2 .. bt2].Bottom
+        
+--         -- 11. Entity1: Match by BT + G, Entity2: Full match (BS + BT + G)
+--         elseif self.matchingTable[bt1 .. g1] and self.matchingTable[bt1 .. g1][eB2] then
+--             return self.matchingTable[bt1 .. g1][eB2].Top, self.matchingTable[bt1 .. g1][eB2].Bottom
+        
+--         -- 12. Entity1: Match by BT + G, Entity2: Match by BS + BT
+--         elseif self.matchingTable[bt1 .. g1] and self.matchingTable[bt1 .. g1][bs2 .. bt2] then
+--             return self.matchingTable[bt1 .. g1][bs2 .. bt2].Top, self.matchingTable[bt1 .. g1][bs2 .. bt2].Bottom
+        
+--         -- 13. Entity1: Match by BT, Entity2: Full match (BS + BT + G)
+--         elseif self.matchingTable[bt1] and self.matchingTable[bt1][eB2] then
+--             return self.matchingTable[bt1][eB2].Top, self.matchingTable[bt1][eB2].Bottom
+        
+--         -- 14. Entity1: Match by BT, Entity2: Match by BS + BT
+--         elseif self.matchingTable[bt1] and self.matchingTable[bt1][bs2 .. bt2] then
+--             return self.matchingTable[bt1][bs2 .. bt2].Top, self.matchingTable[bt1][bs2 .. bt2].Bottom
+        
+--         -- 15. Entity1: Match by BS, Entity2: Full match (BS + BT + G)
+--         elseif self.matchingTable[bs1] and self.matchingTable[bs1][eB2] then
+--             return self.matchingTable[bs1][eB2].Top, self.matchingTable[bs1][eB2].Bottom
+        
+--         -- 16. Entity1: Match by BS, Entity2: Match by BS + BT
+--         elseif self.matchingTable[bs1] and self.matchingTable[bs1][bs2 .. bt2] then
+--             return self.matchingTable[bs1][bs2 .. bt2].Top, self.matchingTable[bs1][bs2 .. bt2].Bottom
+        
+--         -- 17. Entity1: Match by BS, Entity2: Match by BS
+--         elseif self.matchingTable[bs1] and self.matchingTable[bs1][bs2] then
+--             return self.matchingTable[bs1][bs2].Top, self.matchingTable[bs1][bs2].Bottom
+--         end
+--     else
     
-    
-   
-    -- Perfect Match wins over
-    -- Genital wins over
-    -- BodyShape (height) wins over
-    -- BodyType (thicc - M/F)
-
-    local entity = entity2 or nil
-    local bs1, bt1, g1 = Heightmatching:GetEntityBody(entity)
-    local eB1 = bs1 .. bt1 .. g1
-
-    if entity2 then
-        -- Get body type, shape, and genital for entity2
-        local bs2, bt2, g2 = Heightmatching:GetEntityBody(entity2)
-        local eB2 = bs2 .. bt2 .. g2
-
-        -- 1. Exact match for both entities (BS + BT + G)
-        if self.matchingTable[eB1] and self.matchingTable[eB1][eB2] then
-            return self.matchingTable[eB1][eB2].Top, self.matchingTable[eB1][eB2].Bottom
-        
-        -- 2. Entity1: Full match (BS + BT + G), Entity2: Match by BS
-        elseif self.matchingTable[eB1] and self.matchingTable[eB1][bs2] then
-            return self.matchingTable[eB1][bs2].Top, self.matchingTable[eB1][bs2].Bottom
-        
-        -- 3. Entity1: Full match (BS + BT + G), Entity2: Match by BT + G
-        elseif self.matchingTable[eB1] and self.matchingTable[eB1][bt2 .. g2] then
-            return self.matchingTable[eB1][bt2 .. g2].Top, self.matchingTable[eB1][bt2 .. g2].Bottom
-        
-        -- 4. Entity1: Full match (BS + BT + G), Entity2: Match by BS + BT
-        elseif self.matchingTable[eB1] and self.matchingTable[eB1][bs2 .. bt2] then
-            return self.matchingTable[eB1][bs2 .. bt2].Top, self.matchingTable[eB1][bs2 .. bt2].Bottom
-        
-        -- 5. Entity1: Full match (BS + BT + G), Entity2: Match by BT
-        elseif self.matchingTable[eB1] and self.matchingTable[eB1][bt2] then
-            return self.matchingTable[eB1][bt2].Top, self.matchingTable[eB1][bt2].Bottom
-        
-        -- 6. Entity1: Full match (BS + BT + G), Entity2: Match by G
-        elseif self.matchingTable[eB1] and self.matchingTable[eB1][g2] then
-            return self.matchingTable[eB1][g2].Top, self.matchingTable[eB1][g2].Bottom
-        
-        -- 7. Entity1: Match by BS + BT, Entity2: Full match (BS + BT + G)
-        elseif self.matchingTable[bs1 .. bt1] and self.matchingTable[bs1 .. bt1][eB2] then
-            return self.matchingTable[bs1 .. bt1][eB2].Top, self.matchingTable[bs1 .. bt1][eB2].Bottom
-        
-        -- 8. Entity1: Match by BS + BT, Entity2: Match by BS + BT
-        elseif self.matchingTable[bs1 .. bt1] and self.matchingTable[bs1 .. bt1][bs2 .. bt2] then
-            return self.matchingTable[bs1 .. bt1][bs2 .. bt2].Top, self.matchingTable[bs1 .. bt1][bs2 .. bt2].Bottom
-        
-        -- 9. Entity1: Match by BS + G, Entity2: Full match (BS + BT + G)
-        elseif self.matchingTable[bs1 .. g1] and self.matchingTable[bs1 .. g1][eB2] then
-            return self.matchingTable[bs1 .. g1][eB2].Top, self.matchingTable[bs1 .. g1][eB2].Bottom
-        
-        -- 10. Entity1: Match by BS + G, Entity2: Match by BS + BT
-        elseif self.matchingTable[bs1 .. g1] and self.matchingTable[bs1 .. g1][bs2 .. bt2] then
-            return self.matchingTable[bs1 .. g1][bs2 .. bt2].Top, self.matchingTable[bs1 .. g1][bs2 .. bt2].Bottom
-        
-        -- 11. Entity1: Match by BT + G, Entity2: Full match (BS + BT + G)
-        elseif self.matchingTable[bt1 .. g1] and self.matchingTable[bt1 .. g1][eB2] then
-            return self.matchingTable[bt1 .. g1][eB2].Top, self.matchingTable[bt1 .. g1][eB2].Bottom
-        
-        -- 12. Entity1: Match by BT + G, Entity2: Match by BS + BT
-        elseif self.matchingTable[bt1 .. g1] and self.matchingTable[bt1 .. g1][bs2 .. bt2] then
-            return self.matchingTable[bt1 .. g1][bs2 .. bt2].Top, self.matchingTable[bt1 .. g1][bs2 .. bt2].Bottom
-        
-        -- 13. Entity1: Match by BT, Entity2: Full match (BS + BT + G)
-        elseif self.matchingTable[bt1] and self.matchingTable[bt1][eB2] then
-            return self.matchingTable[bt1][eB2].Top, self.matchingTable[bt1][eB2].Bottom
-        
-        -- 14. Entity1: Match by BT, Entity2: Match by BS + BT
-        elseif self.matchingTable[bt1] and self.matchingTable[bt1][bs2 .. bt2] then
-            return self.matchingTable[bt1][bs2 .. bt2].Top, self.matchingTable[bt1][bs2 .. bt2].Bottom
-        
-        -- 15. Entity1: Match by BS, Entity2: Full match (BS + BT + G)
-        elseif self.matchingTable[bs1] and self.matchingTable[bs1][eB2] then
-            return self.matchingTable[bs1][eB2].Top, self.matchingTable[bs1][eB2].Bottom
-        
-        -- 16. Entity1: Match by BS, Entity2: Match by BS + BT
-        elseif self.matchingTable[bs1] and self.matchingTable[bs1][bs2 .. bt2] then
-            return self.matchingTable[bs1][bs2 .. bt2].Top, self.matchingTable[bs1][bs2 .. bt2].Bottom
-        
-        -- 17. Entity1: Match by BS, Entity2: Match by BS
-        elseif self.matchingTable[bs1] and self.matchingTable[bs1][bs2] then
-            return self.matchingTable[bs1][bs2].Top, self.matchingTable[bs1][bs2].Bottom
-        end
-    end
-
-    -- Fallback logic for no entity2 (Solo Entry for Entity 1)
-    -- 1. Check for Entity1's full combinations: BS + BT + G, BS + BT, BS, BT, G
-    if self.matchingTable[eB1] then
-        return self.matchingTable[eB1].Top, self.matchingTable[eB1].Bottom
-    end
-    -- 2. Check for Entity1's partial matches: BS + BT, BS + G, BT + G, etc.
-    -- (Similar structure like the above cases for entity1's fallback checks)
-end
+--         --Debug.Print("Only one entity in scene")
+--         local mt = self.matchingTable
+--         --Debug.Dump(mt)
+--         return mt[eB1] and mt[eB1].Solo or -- Return Solo Animation for fullbody match TallM_P
+--         mt[bs1..g1] and mt[bs1..g1].Solo or -- Return Solo Animation for BodyShape+Genital match Tall_P or Med_V
+--         mt[g1] and mt[g1].Solo or -- Return Solo Animation for Genital match _P or _V
+--         mt[bs1] and mt[bs1].Solo or -- Return Solo Animation for BodyShape(Height) match Tall or Med
+--         self.fallbackTop
+--     end
+-- end
 
 
 -- Heightmatching:new, basically creates a table somewhat like this
 -- Technically the table structure is completely empty and always defaults to the fallbackTop/Bottom if we didn't manually create a match with :SetAnimation
 ----------------------------------------------------------------
 -- instance.matchingTable = {
---     TallM = {
+--     TallM_P = {
 --         TallM = { Top = "fallbackTop", Bottom = "fallbackBottom" },
---         TallF = { Top = "fallbackTop", Bottom = "fallbackBottom" },
+--         TallF_P = { Top = "fallbackTop", Bottom = "fallbackBottom" },
 --         MedM  = { Top = "fallbackTop", Bottom = "fallbackBottom" },
 --         MedF  = { Top = "fallbackTop", Bottom = "fallbackBottom" },
---         SmallM = { Top = "fallbackTop", Bottom = "fallbackBottom" },
+--         SmallM_V = { Top = "fallbackTop", Bottom = "fallbackBottom" },
 --         SmallF = { Top = "fallbackTop", Bottom = "fallbackBottom" },
 --         TinyM = { Top = "fallbackTop", Bottom = "fallbackBottom" },
 --         TinyF = { Top = "fallbackTop", Bottom = "fallbackBottom" },
@@ -447,3 +401,174 @@ end
 --     -- Repeats for every bodytype, agnostictype and gender
 --     -- Can create dynamic new combinations by using :SetAnimation and using parameter 1 or 2 with previously non-existent entry names
 -- }
+
+
+-- TODO - test with other functions and see if values need to be tweaked
+
+-- Had an issue where the wanking anim prioritized "Tall_V" over "_P" for "Tall_P"
+-- trying to give genital matches high scores
+-- Custom scoring function
+local function custom_score(char1, char2)
+
+    if char1 == "_" and char2 == "_" or char1 == "P" and char2 == "P" or  char1 == "V" and char2 == "V" then
+        return 10 -- Prioritize matching "_" with "P" or "V"
+    elseif char1 == char2 then
+        return 1 -- High score for match
+    else
+        return -2 -- Penalty for mismatches
+    end
+end
+
+
+--- Performs global sequence alignment using the Needleman-Wunsch algorithm.
+-- Aligns two sequences, `str1` and `str2`, using dynamic programming to calculate the optimal
+-- alignment by considering matches, mismatches, and gaps. It returns the aligned sequences
+-- and the final alignment score.
+---@param str1 string The first sequence to align.
+---@param str2 string The second sequence to align.
+---@return string The first aligned sequence.
+---@return string The second aligned sequence.
+---@return number The final alignment score, calculated based on match, mismatch, and gap penalties.
+function Helper.NeedlemanWunsch(str1, str2)
+
+    local gp = -1 -- Small gap penalty since we want to prioritize matching certain characters (for example the last2).
+    local m, n = #str1, #str2
+    -- Initialize score matrix
+    local score = {}
+    for i = 0, m do
+        score[i] = {}
+        score[i][0] = i * gp -- Gap penalty for first column
+    end
+    for j = 0, n do
+        score[0][j] = j * gp -- Gap penalty for first row
+    end
+
+  -- Fill in the score matrix
+    for i = 1, m do
+        for j = 1, n do
+            local char1, char2 = str1:sub(i, i), str2:sub(j, j)
+            local match = score[i-1][j-1] + custom_score(char1, char2)
+            local delete = score[i-1][j] + gp
+            local insert = score[i][j-1] + gp
+
+            -- Determine the winning operation
+            if match >= delete and match >= insert then
+                score[i][j] = match
+            elseif delete >= insert then
+                score[i][j] = delete
+            else
+                score[i][j] = insert
+            end
+        end
+    end
+
+
+
+    -- Traceback to determine the alignment
+    local aligned1, aligned2 = "", ""
+    local i, j = m, n
+    while i > 0 or j > 0 do
+        local current = score[i][j]
+        if i > 0 and j > 0 and current == score[i-1][j-1] + custom_score(str1:sub(i, i), str2:sub(j, j)) then
+            aligned1 = str1:sub(i, i) .. aligned1
+            aligned2 = str2:sub(j, j) .. aligned2
+            i, j = i - 1, j - 1
+        elseif i > 0 and current == score[i-1][j] + gp then
+            aligned1 = str1:sub(i, i) .. aligned1
+            aligned2 = "-" .. aligned2
+            i = i - 1
+        else
+            aligned1 = "-" .. aligned1
+            aligned2 = str2:sub(j, j) .. aligned2
+            j = j - 1
+        end
+    end
+
+    return aligned1, aligned2, score[m][n]
+end
+
+
+
+
+-- compares all scores and returns the string of the highest
+---@param scores table
+---@return string
+--[[
+scores is a table that contains the scores and the corresponding string
+example:  
+myScores = {
+    {score = 1, str = "TallM_P"},
+    {score = 2, str = "TallF_P"}
+}
+]]--
+local function getBestValueOfAllScores(scores)
+
+    local bestScore = -math.huge
+    local bestString = "NO MATCH FOUND"
+
+    for _, entry in pairs(scores) do
+
+        -- Debug thingy
+        if entry.score == bestScore then
+            Debug.Print("The same score was found for ".. entry.str .. " and " .. bestString)
+            Debug.Print("Please check your files")
+
+        elseif entry.score > bestScore then
+            bestScore = entry.score
+            bestString = entry.str
+        end
+
+    end
+
+
+    return bestString
+end
+
+
+function Heightmatching:NewGetAnimation(character1, character2)
+
+    local matchingTable = self.matchingTable
+    local bs, bt, g = Heightmatching.GetEntityBody(character1)
+    local body = bs..bt..g
+
+    local scoresEntityOne = {}
+    
+    for bodyIdentifier1,_ in pairs(matchingTable) do
+        local aligned1, aligned2, score = Helper.NeedlemanWunsch(body, bodyIdentifier1)
+        table.insert(scoresEntityOne, {score = score, str = bodyIdentifier1})
+    end
+    local bestHMEntityOne = getBestValueOfAllScores(scoresEntityOne)
+
+
+    -- if Masturbation
+    if not character2 then
+        --print("BEST MATCH IS " .. bestHMEntityOne .. " with animation " , matchingTable[bestHMEntityOne].Solo)
+        return matchingTable[bestHMEntityOne].Solo
+    else
+        --print("BEST MATCH IS " .. bestHMEntityOne .. " with the animations ")
+        --_D(matchingTable[bestHMEntityOne])
+    end
+
+    -- if Sex
+    local bs2, bt2, g2 = Heightmatching.GetEntityBody(character2)
+    local body2 = bs2..bt2..g2
+
+    local secondEntityTable = matchingTable[bestHMEntityOne]
+    local scoresEntityTwo = {}
+    for bodyIdentifier2,_ in pairs(secondEntityTable) do
+        local _, _, score = Helper.NeedlemanWunsch(body2, bodyIdentifier2)
+        table.insert(scoresEntityTwo, {score = score, str = bodyIdentifier2})
+    end
+
+    local bestHMEntityTwo = getBestValueOfAllScores(scoresEntityTwo)
+    --print("BEST MATCH IS " .. bestHMEntityTwo .. " with animation " , matchingTable[bestHMEntityOne][bestHMEntityTwo].Bottom)
+
+    local animationSet = matchingTable[bestHMEntityOne][bestHMEntityTwo]
+
+    return animationSet.Top, animationSet.Bottom
+    
+end
+
+
+
+

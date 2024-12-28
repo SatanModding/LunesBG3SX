@@ -304,7 +304,7 @@ end
 ---@param uuid          string  - The entity UUID to unequip
 ---@return oldEquipment table   - Collection of every previously equipped item
 function Entity:UnequipAll(uuid)
-    Osi.SetArmourSet(uuid, 0)
+    --Osi.SetArmourSet(uuid, 0)
     
     local oldEquipment = {}
     for _, slotName in ipairs(Data.Equipment.Slots) do
@@ -611,28 +611,28 @@ function Entity:DeleteCurrentVisualOfType(character, visual, type)
     if entity.AppearanceOverride then
     -- if appearanceOverride then
         for _, currentVisual in pairs(entity.AppearanceOverride.Visual.Visuals) do
-            SatanPrint( GLOBALDEBUG, " currentVisual = " .. tostring(currentVisual))
+            Debug.Print( " currentVisual = " .. tostring(currentVisual))
             local contents = Ext.StaticData.Get(currentVisual, visualType)
             -- print("Debug: contents = " .. tostring(contents))
 
             if contents then
                 local slotName = contents.SlotName
-                SatanPrint(GLOBALDEBUG, "slotname " .. slotName)
+                Debug.Print("slotname " .. slotName)
                 -- print("Debug: slotName = " .. tostring(slotName))
                 if slotName and slotName ~= type then -- Only add
-                SatanPrint(GLOBALDEBUG, "type is not ".. type .. " adding to list to keep")
+                Debug.Print("type is not ".. type .. " adding to list to keep")
                     table.insert(allowedVisuals, currentVisual)
                     -- print("Debug: added visual to allowedVisuals = " .. tostring(visual))
                 end
             else
-                SatanPrint(GLOBALDEBUG, "does not have contents " .. currentVisual)
+                Debug.Print("does not have contents " .. currentVisual)
                 table.insert(allowedVisuals, currentVisual)
 
             end
         end
         -- print("Debug: allowedVisuals = " .. tostring(allowedVisuals))
-        SatanPrint(GLOBALDEBUG, "setting visuals to")
-        SatanDump(GLOBALDEBUG, allowedVisuals)
+        Debug.Print("setting visuals to")
+        Debug.Dump(allowedVisuals)
         entity.AppearanceOverride.Visual.Visuals = allowedVisuals
         -- print("Debug: updated entity.AppearanceOverride.Visual.Visuals = " .. tostring(entity.AppearanceOverride.Visual.Visuals))
     end
@@ -645,10 +645,10 @@ function Entity:DeleteCurrentVisualOfType(character, visual, type)
     -- revert to originial type to prevent weird things from happening
     -- Timer necessary because else the visual change doesn't show if we revert to 4 too fast.
     
-    --SatanDump(GLOBALDEBUG, entity.AppearanceOverride)
+
     Ext.Timer.WaitFor(100, function()
         entity.GameObjectVisual.Type = 4
-        --SatanDump(GLOBALDEBUG, entity.AppearanceOverride)
+
     end)
 end
 
@@ -662,7 +662,7 @@ end
 function Entity:SwitchShapeshiftedVisual(character, visual, type)
 
     Ext.Timer.WaitFor(200, function ()
-        SatanPrint(GLOBALDEBUG, "Removing " .. type .. " from " .. character .. " and adding " .. visual)
+        Debug.Print("Removing " .. type .. " from " .. character .. " and adding " .. visual)
         Entity:DeleteCurrentVisualOfType(character, visual, type)
         Entity:GiveShapeshiftedVisual(character, visual)
         -- print("Debug: called Entity:GiveShapeshiftedVisual with character = " .. tostring(character) .. " and visual = " .. tostring(visual))

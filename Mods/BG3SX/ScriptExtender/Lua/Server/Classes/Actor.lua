@@ -42,7 +42,7 @@ function Actor:new(parent)
     instance.position = scene.rootPosition
     instance.uuid = Osi.CreateAt(Osi.GetTemplate(parent), instance.position.x, instance.position.y, instance.position.z, 1, 0, "")
 
-    SatanPrint(GLOBALDEBUG, "actor uuid ".. instance.uuid)
+    Debug.Print("actor uuid ".. instance.uuid)
 
     initialize(instance)
     return instance
@@ -114,7 +114,7 @@ function Actor:CopyEntityAppearanceOverrides()
     -- Type is special Appearance Edit Enhanced thing?
     Entity:TryCopyEntityComponent(self.parent, self.uuid, "GameObjectVisual")
     if entity.GameObjectVisual and entity.GameObjectVisual.Type ~= 0 then
-        SatanPrint(GLOBALDEBUG, "GameObjectVisual is not 0. It's ".. entity.GameObjectVisual.Type )
+        Debug.Print("GameObjectVisual is not 0. It's ".. entity.GameObjectVisual.Type )
         entity.GameObjectVisual.Type = 0
         entity:Replicate("GameObjectVisual")
     elseif not entity.GameObjectVisual then
@@ -130,7 +130,7 @@ function Actor:CopyEntityAppearanceOverrides()
     Ext.Timer.WaitFor(100, function()
         if self.isResculpted then
 
-            SatanPrint(GLOBALDEBUG, "is rescuplted")
+            Debug.Print("is rescuplted")
 
             Entity:TryCopyEntityComponent(self.parent, self.uuid, "AppearanceOverride")
             entity.GameObjectVisual.Type = 2
@@ -138,10 +138,10 @@ function Actor:CopyEntityAppearanceOverrides()
             entity:Replicate("AppearanceOverride")
             entity:Replicate("GameObjectVisual")
         else
-            SatanPrint(GLOBALDEBUG, "is not resculpted")
+            Debug.Print("is not resculpted")
         end
 
-        SatanPrint(GLOBALDEBUG, " changed type to ".. entity.GameObjectVisual.Type)
+        Debug.Print(" changed type to ".. entity.GameObjectVisual.Type)
 
     end)
 

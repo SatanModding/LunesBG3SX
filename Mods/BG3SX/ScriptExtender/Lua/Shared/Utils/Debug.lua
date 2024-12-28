@@ -1,48 +1,53 @@
-GLOBALDEBUG = true
-
-function SatanPrint(debug, message)
-    local modname = "[BG3SX] "
-    if debug then
-        if message and (type(message) == string) then
-            _P(modname .. message)
-        else
-            _P(modname)
-            _P(message)
-        end
-    end
-end
-
-function SatanDump(debug, message)
-
-    if debug then
-        _D(message)
-    end
-end
-
-
 Debug  = {}
+Debug.GLOBALDEBUG = true
+Debug.USEPREFIX = true
+
+
+local function getDebugPrefix()
+
+    local prefix
+    if USEPREFIX then
+        prefix = "[BG3SX]"
+    end
+
+    if Ext.Debug.IsDeveloperMode() and Debug.USEPREFIX then
+        local info = debug.getinfo(3, "nfSlu")
+        local fileLocation = string.format("\"%s\" IN FILE \"%s\" AT LINE", info.name or "unknown", info.source or "unknown")
+        local line = string.format("%d] :", info.currentline or 0)
+        return string.format("\n %s %s %s", prefix , fileLocation , line)
+    else
+        return ""
+    end
+    
+end
+
+
+
 Debug.Active = true
-local modname = "[BG3AF] "
 function Debug.Print(message)
     if Debug.Active then
-        _P(modname .. "\n" .. message)
+
+        local pre = getDebugPrefix()
+
+        _P(pre .. "\n" .. message)
     end
 end
 function Debug.Dump(table)
     if Debug.Active then
-        _D(modname .. "Dump:")
+
+        local pre = getDebugPrefix()
+
+        _D(pre .. "Dump:")
         _D(table)
     end
 end
 function Debug.DumpS(table)
     if Debug.Active then
-        _P(modname .. "Shallow Dump:")
+
+        local pre = getDebugPrefix()
+        _P(pre .. "Shallow Dump:")
         _DS(table)
     end
 end
 
 
-
-
-
-TEST_CHANNEL = Ext.Net.CreateChannel(ModuleUUID, "name of le channel")

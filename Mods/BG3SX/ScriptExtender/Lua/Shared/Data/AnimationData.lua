@@ -8,25 +8,26 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     -- Seperated from Data.Animations because these 2 are the start spells which are handled differently and will create a scene
     Data.StartSexSpells = {
         ["BG3SX_StartMasturbating"] = {
-            AnimLength = 3600, Loop = true, Fade = true, Sound = true, -- Fade and Sound currently don't do anything and could technically be left out when creating new entries
+            AnimLength = 3600, Loop = true, Fade = true, Sound = true, Category = {}, -- Fade and Sound currently don't do anything and could technically be left out when creating new entries
             SoundTop = Data.Sounds.Moaning,
-            Heightmatching = hm:New("BG3SX_StartMasturbating", anim["MasturbateWank"].MapKey, anim["MasturbateStanding_F"].MapKey),
+            Heightmatching = hm:New("BG3SX_StartMasturbating", anim["MasturbateWank"].MapKey, anim["MasturbateStanding_V"].MapKey),
         },
         ["BG3SX_AskForSex"] = {
-            AnimLength = 3600, Loop = true, Fade = true, Sound = false,
+            AnimLength = 3600, Loop = true, Fade = true, Sound = false, Category = {}, 
             SoundTop = Data.Sounds.Silence, SoundBottom = Data.Sounds.Silence,
             Heightmatching = hm:New("BG3SX_AskForSex", anim["EmbraceTop"].MapKey, anim["EmbraceBtm"].MapKey),
         },
     }
 
     -- Additional entries need to be done seperately, we only create the instance per animation - We can't do this in the table belonging to the animation itself
-    local hmi = hm:GetInstanceByAnimName("BG3SX_StartMasturbating")
+    local hmi = hm.GetInstanceByAnimName("BG3SX_StartMasturbating")
     if hmi then -- Solo animation only needs to specify one bodytype/gender and one animation UUID
-        hmi:SetAnimation("M",  nil, anim["MasturbateWank"].MapKey)
-        hmi:SetAnimation("F",  nil, anim["MasturbateStanding_F"].MapKey)
-        hmi:SetAnimation("TallF",  nil, anim["MasturbateStanding_TallF"].MapKey) -- TallF specific animation - Tall is what we call the "Strong" bodytype identifier
+        hmi:SetAnimation("_P",  nil, anim["MasturbateWank"].MapKey)
+        --hmi:SetAnimation("Tall_P",  nil, anim["MasturbateWank"].MapKey)
+        hmi:SetAnimation("_V",  nil, anim["MasturbateStanding_V"].MapKey)
+        hmi:SetAnimation("Tall_V",  nil, anim["MasturbateStanding_Tall_V"].MapKey) -- TallF specific animation - Tall is what we call the "Strong" bodytype identifier
     end
-    local hmi = hm:GetInstanceByAnimName("BG3SX_AskForSex")
+    local hmi = hm.GetInstanceByAnimName("BG3SX_AskForSex")
     if hmi then -- Instead of a specific bodytype/gender combo, just the bodytype matchup also works
         hmi:SetAnimation("Tall", "Med", anim["CarryingTop_Tall"].MapKey, anim["CarryingBtm_Med"].MapKey)
         -- hmi:SetAnimation("Med", "Tall", "392073ca-c6e0-4f7d-848b-ffb0b510500b", "04922882-0a2d-4945-8790-cef50276373d")
@@ -50,48 +51,146 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
 
     Data.Animations = {}
     local anims = Data.Animations
+
+
     function anims.New(name, category, animTop, animBtm, props)
         category = category or nil
         animBtm = animBtm or nil
         props = props or nil
+
         anims[name] = { -- Generic animation setup
             AnimLength = 3600, Loop = true, Fade = true, Sound = true, Category = category,
-            SoundTop = Data.Sounds.Moaning, SoundBottom = Data.Sounds.Moaning}
+            SoundTop = Data.Sounds.Moaning, SoundBottom = Data.Sounds.Moaning, Enabled = true}
+
+
         if animBtm then
             anims[name].Heightmatching = hm:New(name, animTop, animBtm)
         else
             anims[name].Heightmatching = hm:New(name, animTop)
         end
+
+
         if props then
             anims[name].Props = props
         end
+
+
         return anims[name]
     end
 
     -- Animation Entries:
     ----------------------------------------------------
-    local grinding = anims.New("BG3SX_Grinding", anim["ScissorTop"].MapKey, anim["ScissorBtm"].MapKey)
-    local eatpussy = anims.New("BG3SX_EatPussy", anim["EatOutTop"].MapKey, anim["EatOutBtm"].MapKey)
+    local grinding = anims.New("BG3SX_Grinding", {"Lesbian"}, anim["ScissorTop"].MapKey, anim["ScissorBtm"].MapKey)
+    grinding.Enabled = true
+    local eatpussy = anims.New("BG3SX_EatPussy", {"Straight", "Lesbian", "Oral"},  anim["EatOutTop"].MapKey, anim["EatOutBtm"].MapKey)
     eatpussy.SoundTop = Data.Sounds.Kissing
-    local fingerfuck = anims.New("BG3SX_FingerFuck", anim["FingeringTop"].MapKey, anim["FingeringBtm"].MapKey)
+    local fingerfuck = anims.New("BG3SX_FingerFuck", {"Straight", "Lesbian", "Gay", "Vaginal", "Anal"},  anim["FingeringTop"].MapKey, anim["FingeringBtm"].MapKey)
     fingerfuck.SoundTop = Data.Sounds.Kissing
-    local blowjob = anims.New("BG3SX_Blowjob", anim["BlowjobTop"].MapKey, anim["BlowjobBtm"].MapKey)
+    local blowjob = anims.New("BG3SX_Blowjob", {"Straight", "Oral"},  anim["BlowjobTop"].MapKey, anim["BlowjobBtm"].MapKey)
     blowjob.SoundTop = Data.Sounds.Kissing
-    local laying = anims.New("BG3SX_Laying", anim["LayingTop"].MapKey, anim["LayingBtm"].MapKey)
-    local doggy = anims.New("BG3SX_Doggy", anim["DoggyTop"].MapKey, anim["DoggyBtm"].MapKey)
-    local cowgirl = anims.New("BG3SX_Cowgirl", anim["CowgirlTop"].MapKey, anim["CowgirlBtm"].MapKey)
+    local laying = anims.New("BG3SX_Laying", {"Straight", "Gay", "Vaginal", "Anal"},  anim["LayingTop"].MapKey, anim["LayingBtm"].MapKey)
+    local doggy = anims.New("BG3SX_Doggy", {"Straight", "Gay", "Vaginal", "Anal"},  anim["DoggyTop"].MapKey, anim["DoggyBtm"].MapKey)
+    local cowgirl = anims.New("BG3SX_Cowgirl", {"Straight", "Gay", "Vaginal", "Anal"},  anim["CowgirlTop"].MapKey, anim["CowgirlBtm"].MapKey)
     cowgirl.SoundBottom = Data.Sounds.Kissing
-    local milking = anims.New("BG3SX_Milking", anim["MilkingTop"].MapKey, anim["MilkingBtm"].MapKey)
+    local milking = anims.New("BG3SX_Milking", {"Straight", "Gay"},  anim["MilkingTop"].MapKey, anim["MilkingBtm"].MapKey)
     milking.SoundBottom = Data.Sounds.Kissing
-    local masturbate = anims.New("BG3SX_MasturbateStanding", anim["MasturbateStanding_F"].MapKey)
-    local wanking = anims.New("BG3SX_Wanking", anim["MasturbateWank"].MapKey)
+    local masturbate = anims.New("BG3SX_MasturbateStanding", anim["MasturbateStanding_V"].MapKey)
+    local wanking = anims.New("BG3SX_Wanking", {"Masturbation"},  anim["MasturbateWank"].MapKey)
     wanking.SoundBottom = Data.Sounds.Kissing
-    local bottlesit = anims.New("BG3SX_BottleSit", anim["BottleSit"].MapKey, nil, {"0f2ccca6-3ce8-4271-aec0-820f6581c551"}) -- Prop: Bottle
-    local vampireThrust = anims.New("YOUR_LAST_THRUST", anim["VampireLord"].MapKey)
+    local bottlesit = anims.New("BG3SX_BottleSit", {"Masturbation"},  anim["BottleSit"].MapKey, nil, {"0f2ccca6-3ce8-4271-aec0-820f6581c551"}) -- Prop: Bottle
+    local vampireThrust = anims.New("YOUR_LAST_THRUST", {"Test"},  anim["VampireLord"].MapKey)
     -- Heightmatching:
     ----------------------------------------------------
-    local hmi = hm:GetInstanceByAnimName("BG3SX_MasturbateStanding")
+    local hmi = hm.GetInstanceByAnimName("BG3SX_MasturbateStanding")
     if hmi then
-        hmi:SetAnimation("TallF",  nil, anim["MasturbateStanding_TallF"].MapKey)
+        hmi:SetAnimation("Tall_V",  nil, anim["MasturbateStanding_Tall_V"].MapKey)
     end
+
+    -- Data.FilteredAnimations = {}
+    -- local filter = Data.FilteredAnimations
+    -- filter.Straight = {}
+    -- filter.Gay = {}
+    -- filter.Lesbian = {}
+    -- filter.Whatever = {}
+    -- function CreateAnimationFilter()
+    --     for AnimationName,Animation in pairs(Data.Animations) do
+    --         for Category in pairs(Animation.Category) do
+    --             Debug.Print("Animation " .. AnimationName .. " is part of Category " .. Category)
+    --         end
+    --     end
+    -- end
+   -- UIEvents.SendFilteredAnimations()
+
+
+
+
+
+-- Takes a comma separated string and returns a table of the single entries
+-- Example:  "Straight, Lesbian, Vaginal, Anal" returns
+-- {"Straight","Lesbian","Vaginal","Anal"}
+---@param str string
+---@return table
+function Helper:StringToTable(str)
+    -- Create an empty table to store the results
+    local result = {}
+
+    -- Use a pattern to match each value between commas
+    for entry in string.gmatch(str, "([^,]+)") do
+        -- Trim leading and trailing spaces and insert into the result table
+        table.insert(result, entry:match("^%s*(.-)%s*$"))
+    end
+
+    return result
 end
+
+
+
+
+    local function getFilteredAnimations(filter)
+        filter = filter or nil
+
+        local animations = {}
+
+        for AnimationName,Animation in pairs(Data.Animations) do
+            print(AnimationName)
+            if not (AnimationName == "New") then
+
+                local Category = Animation.Category
+                local categories
+
+                if type (Category) == "string" then
+                    categories = Helper:StringToTable(Category)
+                elseif type(Category) == "table" then
+                    categories = Category
+                else
+                    print("category is weird. its a ", type(Category))
+                    _D(Category)
+                end
+
+                for _,category in pairs(categories) do
+                    print("Category ", category)
+                    if Animation.Enabled and category == filter then
+                        animations[AnimationName] = Animation
+                    end
+                end
+            end
+        end
+
+        return animations
+    end
+
+
+    UIEvents.FetchFilteredAnimations:SetHandler(function (payload)
+        local filter = payload.filter
+        local animations = getFilteredAnimations(filter)
+        UIEvents:SendFilteredAnimations(animations, payload.ID)
+
+    end)
+
+
+    local anal = getFilteredAnimations("Anal")
+    _D(anal)
+
+end
+    
+

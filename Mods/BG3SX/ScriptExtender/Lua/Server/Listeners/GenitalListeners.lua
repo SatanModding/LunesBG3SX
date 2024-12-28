@@ -3,7 +3,7 @@
 -----------------------------------------------------------------------------------------------------------------------------------------
 
 
-SatanPrint(GLOBALDEBUG, "Registered GenitalListeners")
+Debug.Print("Registered GenitalListeners")
 
 
 
@@ -11,9 +11,8 @@ UIEvents.SetInactiveGenital:SetHandler(function (payload)
 
     print("Event set INactive gential")
 
-    local uuid = payload.ID
+    local uuid = payload.uuid
     local genital = payload.Genital
-
 
     SexUserVars:AssignGenital("BG3SX_Flaccid", genital, uuid)
 
@@ -39,7 +38,7 @@ UIEvents.SetActiveGenital:SetHandler(function (payload)
 
     print("Event set active gential")
 
-    local uuid = payload.ID
+    local uuid = payload.uuid
     local genital = payload.Genital
 
     SexUserVars:AssignGenital("BG3SX_Erect", genital, uuid)
@@ -51,6 +50,7 @@ UIEvents.SetActiveGenital:SetHandler(function (payload)
         for _, entity in pairs(scene.entities) do
             if Helper:StringContains(entity, uuid) then
                 Genital:OverrideGenital(genital, uuid)
+                Animation.ResetAnimation(uuid)
                 return
             end
         end
@@ -59,17 +59,14 @@ end)
 
 
 
+Ext.Osiris.RegisterListener("GainedControl", 1, "after", function(target)  
+
+    -- send event to refresh genital tab 
+
+end)
+
 -- TODO - test for shapeshifts, rsculpts etc.
 Ext.Events.NetMessage:Subscribe(function(e)
-
-    if (e.Channel == "BG3SX_AskForSex") then
-
-        SatanPrint(GLOBALDEBUG, "Server GenitalListener received BG3SX_AskForSex")
-        local characters = Ext.Json.Parse(e.Payload)
-
-        -- TOD - modify Give Erections to use the UserVArs
-        Genital:GiveErections(characters)
-    end
 
 
     if (e.Channel == "BG3SX_StopSex") then
@@ -80,16 +77,6 @@ Ext.Events.NetMessage:Subscribe(function(e)
         Scene:EntitiesByScene(scene)
 
 
-    end
-
-
-    if (e.Channel == "BG3SX_ChangeGenitals") then
-
-        local payload = Ext.Json.Parse(e.Payload)
-        local character = payload.character
-        local genital = payload.genital
-
-        Genital:OverrideGenital(genital, character)
     end
 
 

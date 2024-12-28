@@ -1,56 +1,51 @@
-
-Ext.RegisterNetListener("BG3SX_Client_Masturbate", function(e, payload)
-    local payload = Ext.Json.Parse(payload)
-    -- _P("ClientMasturbateEvent Dump")
-    -- _D(payload)
-    local caster = payload[1]
-    local target = payload[1]
-    if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
-        Ext.Timer.WaitFor(200, function() -- Wait for erections
-            Sex:StartSexSpellUsed(caster, {target}, Data.StartSexSpells["BG3SX_StartMasturbating"])
-        end)
-        Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.StartSexSpells["BG3SX_StartMasturbating"]})
-    end
-end)
-
-Ext.RegisterNetListener("BG3SX_Client_AskForSex", function(e, payload)
-    local payload = Ext.Json.Parse(payload)
-    -- _P("ClientAskForSexEvent Dump")
-    -- _D(payload)
-    local caster = payload["caster"]
-    local target = payload["target"]
-    if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
-        Ext.Timer.WaitFor(200, function() -- Wait for erections
-            Sex:StartSexSpellUsed(caster, {target}, Data.StartSexSpells["BG3SX_AskForSex"])
-        end)
-        Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.StartSexSpells["BG3SX_AskForSex"]})
-    end
-end)
-
-
--------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------
 --------------- New v22 Events
 UIEvents.FetchScenes:SetHandler(function (payload)
     if Data.SavedScenes and #Data.SavedScenes > 0 then
         _P("SavedScenes exists")
-        UIEvents.SendScenes:SendToClient(Ext.Json.Stringify(Data.SavedScenes), payload.ID)
+        UIEvents.SendScenes:SendToClient(Data.SavedScenes, payload.ID)
     else
         _P("SavedScenes doesn't exist")
         UIEvents.SendScenes:Broadcast("Empty")
     end
 end)
 UIEvents.AskForSex:SetHandler(function (payload)
-    Debug.Print("ask for sex received")
-    Debug.Dump(payload)
+    -- Debug.Print("ASK FOR SEX RECEIVED")
+    -- Debug.Dump(payload)
     local caster = payload.Caster
     local target = payload.Target
-    if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
-        -- Todo - why always start masturbating?
-        Ext.Timer.WaitFor(200, function() -- Wait for erections
-            Sex:StartSexSpellUsed(caster, {target}, Data.StartSexSpells["BG3SX_StartMasturbating"])
-        end)
-        Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.StartSexSpells["BG3SX_StartMasturbating"]})
+    -- Debug.Print("CASTER ".. caster)
+    -- Debug.Print("TARGET ".. target)
+
+    -- masturbation 
+    if target == caster then
+        if Entity:IsWhitelisted(caster, true) then
+            Ext.Timer.WaitFor(200, function() -- Wait for erections
+                Sex:StartSexSpellUsed(caster, {target}, Data.StartSexSpells["BG3SX_StartMasturbating"])
+            end)
+            Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.StartSexSpells["BG3SX_StartMasturbating"]})
+        end
+        
+
+    -- sex
+    else
+        if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
+            Ext.Timer.WaitFor(200, function() -- Wait for erections
+                Sex:StartSexSpellUsed(caster, {target}, Data.StartSexSpells["BG3SX_AskForSex"])
+            end)
+
+            Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.StartSexSpells["BG3SX_AskForSex"]})
+        end
     end
+end)
+
+
+
+UIEvents.ChangeAnimation:SetHandler(function (payload)
+    Debug.Dump(payload)
+    local caster = payload.Caster
+    local animation = payload.Animation
+    Osi.PlayAnimation(caster, animation)
 end)
 UIEvents.ChangePosition:SetHandler(function (payload)
     local scene = Scene:FindSceneByEntity(payload.Caster)
@@ -63,14 +58,15 @@ UIEvents.MoveScene:SetHandler(function (payload)
     local scene = Scene:FindSceneByEntity(payload)
 end)
 UIEvents.StopSex:SetHandler(function (payload)
-    local scene = Scene:FindSceneByEntity(payload)
+    local scene = Scene:FindSceneByEntity(payload.Caster)
+    scene:Destroy()
 end)
 UIEvents.FetchGenitals:SetHandler(function (payload)
 
     local conts = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
     if conts ~= nil then
         for k, v in pairs(conts) do
-            print("sending payload to ", v.UserReservedFor.UserID)
+            --print("sending payload to ", v.UserReservedFor.UserID)
             UIEvents.SendGenitals:SendToClient({ID = payload.ID, Data = Data.CreateUIGenitalPayload(payload.Character)}, v.UserReservedFor.UserID)
         end
     end
@@ -79,7 +75,7 @@ end)
     
    
 UIEvents.FetchAnimations:SetHandler(function (payload)
-    local sceneType = Scene:FindSceneByEntity(payload.ID)
+    local sceneType = Scene:FindSceneByEntity(payload.Caster)
     local container = nil
     for _,type in pairs(Data.SceneTypes) do
         if type.sceneType == sceneType then
@@ -96,16 +92,29 @@ UIEvents.FetchAnimations:SetHandler(function (payload)
     end
     --UIEvents.SendAnimations:SendToClient({ID = payload.ID, Data = availableAnimations}, payload.ID)
 end)
+UIEvents.FetchAllAnimations:SetHandler(function (payload)
+    local anims = {}
+    for anim,animData in pairs(Data.Animations) do
+        if anim ~= "New" then
+            anims[anim] = animData
+            anims[anim].Heightmatching = anims[anim].Heightmatching.matchingTable
+        end
+    end
+    --Debug.DumpS(anims)
+    UIEvents.SendAllAnimations:Broadcast(anims)
+end)
 
 
 UIEvents.FetchParty:SetHandler(function (payload)
     local party = Osi.DB_PartyMembers:Get(nil)
-    UIEvents.SendParty:SendToClient({Data = party}, payload.ID)
+    Debug.Print("sending message to client ".. payload)
+    UIEvents.SendParty:SendToClient(party, payload)
 end)
 
-
+UIEvents.CustomEvent:SetHandler(function (payload)
+    CreateAnimationFilter()
+end)
 
 Ext.Osiris.RegisterListener("GainedControl", 1, "after", function(target)  
-    print("Sending message about gained control ", target)
     UIEvents.ChangeCharacter:Broadcast(target)
 end)

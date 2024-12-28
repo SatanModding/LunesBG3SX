@@ -313,12 +313,10 @@ local function tableContainsNameAlready(tableOfGenitals, genital)
 	local genitalName = Genital:GetName(genital)
 		for _, uuid in pairs(tableOfGenitals) do
 			local name = Genital:GetName(uuid)
-			SatanPrint(false, " comparing " .. name .. " to " .. " genitalName" )
 			if name == genitalName then
 				return true
 			end
 		end
-	SatanPrint(false, " returning true")		
 	return false	
 end
 
@@ -348,7 +346,7 @@ function Genital:getPermittedGenitals(uuid)
 		end
 	end
 
-	SatanPrint(GLOBALDEBUG, " race for " .. uuid .. " is " .. race)
+	--Debug.Print(" race for " .. uuid .. " is " .. race)
 
 	-- Failsafe for modded races - assign human race
 	-- TODO - add support for modded genitals for modded races
@@ -395,10 +393,8 @@ function Genital:getPermittedGenitals(uuid)
 
 
 			if not tableContainsNameAlready(permittedGenitals, genital) then
-				SatanPrint(false,Genital:GetName(genital) .. " is not yet in the table" )
 				table.insert(permittedGenitals, genital)
 			else
-				SatanPrint(false,Genital:GetName(genital) .. " is already in the table" )
 			end
 		end
 	end
@@ -453,14 +449,13 @@ local genitalChoice = {}
 ---@param uuid	string 		- uuid of entity that will receive the genital
 ---@return string	- ID of CharacterCreationAppearaceVisual
 function Genital:GetNextGenital(spell, uuid)
-	print("GetNextGenital")
     local permittedGenitals = Genital:getPermittedGenitals(uuid)
 
 
     local filteredGenitals = Genital:getFilteredGenitals(spell, permittedGenitals)
 
 	if (not filteredGenitals) or (#filteredGenitals == 0) then
-         SatanPrint(GLOBALDEBUG, "[BG3SX] No " .. spell .. " genitals available after filtering for this entity.")
+         Debug.Print("[BG3SX] No " .. spell .. " genitals available after filtering for this entity.")
         return nil
     else
 			if genitalChoice.uuid == uuid and genitalChoice.spell == spell then
@@ -471,7 +466,7 @@ function Genital:GetNextGenital(spell, uuid)
 			end
 
         local selectedGenital = filteredGenitals[genitalChoice.index]
-		print("chose a new genital: ", selectedGenital)
+		--print("chose a new genital: ", selectedGenital)
         return selectedGenital
     end
 end
@@ -605,13 +600,26 @@ function Genital:AddGenitalIfHasNone(uuid)
 			-- _P("[BG3SX][Genital.lua] - AddGenitalIfHasNone triggered with uuid: ", uuid)
 			if Entity:HasPenis(uuid) and not Genital:GetCurrentGenital(uuid) then
 				-- _P("[BG3SX][Genital.lua] - ActorHasPenis and not getCurrentGenital - AddCustomVisualOverride triggered")
-				Osi.AddCustomVisualOverride(uuid, Genital:GetNextGenital("BG3SX_VanillaFlaccid", uuid))
+
+				local genital = Genital:GetNextGenital("BG3SX_VanillaFlaccid", uuid)
+				Osi.AddCustomVisualOverride(uuid, genital)
+				SexUserVars:AssignGenital("BG3SX_Flaccid", genital, uuid)
 				-- _P("[BG3SX][Genital.lua] - getNextGenital = ", getNextGenital("BG3SX_VanillaFlaccid", uuid))
 			end
 		end
 	end
 end
 
+
+function Genital:AssignDefaultIfHasNotYet(character)
+
+	local currentSetting = SexUserVars:GetGenital("BG3SX_Flaccid", character)
+
+	if not currentSetting then
+		local currentGenital = Genital:GetCurrentGenital(character)
+		SexUserVars:AssignGenital("BG3SX_Flaccid", currentGenital, character)
+	end
+end
 
 -- TODO - NPC Genitals broken -- call correct NPC function 
 
@@ -631,18 +639,18 @@ function Genital:GiveErection(uuid)
 	local autoerection = Entity:TryGetEntityValue(uuid, nil, {"Vars", "BG3SX_AutoErection"})
 
 	if not sexGenital then
-		print("NO SEX GENITAL HAS BEEN SET")
+		--print("NO SEX GENITAL HAS BEEN SET")
 		if not hasPenis then
-			print("ENTITY HAS NO PENIS. DOING NOTHING")
+			--print("ENTITY HAS NO PENIS. DOING NOTHING")
 			return
 		else
-			print("ENTITY HAS A PENIS, CHECKING AUTOERECTION")
-			print(autoerection)
+			--print("ENTITY HAS A PENIS, CHECKING AUTOERECTION")
+			--print(autoerection)
 			if ((autoerection == nil) or (entity.Vars.BG3SX_AutoErection == 1)) then
-				print("AUTOERECTION ALLOWED FOR ", uuid, " CHOOSING SIMPLE ERECTION")
+				--print("AUTOERECTION ALLOWED FOR ", uuid, " CHOOSING SIMPLE ERECTION")
 				sexGenital = Genital:GetNextGenital("BG3SX_SimpleErections", uuid)
 			else
-				print("AUTOERECTION OFF. DOING NOTHING")
+				--print("AUTOERECTION OFF. DOING NOTHING")
 				return
 			end
 		end
@@ -681,7 +689,7 @@ end
 ---@param characters table
 function Genital:GiveErections(characters)
 
-	print("Genital:GiveErections for ", #characters, " characters")
+	--print("Genital:GiveErections for ", #characters, " characters")
 
     for _, uuid in pairs(characters) do
         local personalGenital = Genital:GetCurrentGenital(uuid)

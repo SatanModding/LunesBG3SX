@@ -35,7 +35,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         ["DoggyTop"] = {MapKey = "b8f04918-c5b6-4c4a-aee5-390bfaff33bc", AnimationID = "96c374fa-0559-4f2c-bc15-d76fda8704c9"},
         ["DoggyBtm"] = {MapKey = "ffdd67e7-7363-46a4-92e2-38260ef0a2e0", AnimationID = "3c6bb4b8-3a74-416f-95d1-2685aba044a9"},
         ["FingeringTop"] = {MapKey = "adf1b790-da1d-4aaf-9ac4-83157c52d5c2", AnimationID = "ba6b9eda-199c-4f04-bfd7-2b7dc05be633"},
-        ["FingeringTop_M"] = {MapKey = "dcbc520b-f15f-498e-a829-c497a41f838f", AnimationID = "be7b9cfa-8a63-4eb8-be20-cc6757b180d3"},
+        ["FingeringTop_P"] = {MapKey = "dcbc520b-f15f-498e-a829-c497a41f838f", AnimationID = "be7b9cfa-8a63-4eb8-be20-cc6757b180d3"},
         ["FingeringBtm"] = {MapKey = "a79232a2-a498-4689-a5bd-8923e80284d2", AnimationID = "8f8014b5-7a2e-44ad-a301-848b310b8a96"},
         ["LayingTop"] = {MapKey = "905be226-3edc-4783-9d4e-45d2b57a3d0a", AnimationID = "1de1d865-e3f9-4df2-8078-55af4bde7a77"},
         ["LayingBtm"] = {MapKey = "48a255e9-02ec-4541-b1b7-32275da29206", AnimationID = "5b99ad69-dd48-4e2d-b77f-0ce61deb93aa"},
@@ -46,8 +46,8 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         --#endregion
         --#region Masturbation
         ["BottleSit"] = {MapKey = "d0f6cf4a-a418-4640-bf36-87531d55154b", AnimationID = "580daac5-3e82-4474-924c-6b7731cab169"},
-        ["MasturbateStanding_F"] = {MapKey = "9d8c5992-55ab-4c2f-8d97-28b68eb50a8b", AnimationID = "1df05dff-b187-42ec-aacd-6ff99bcec62a"},
-        ["MasturbateStanding_TallF"] = {MapKey = "2c60a233-b669-4b94-81dc-280e98238fd0", AnimationID = "2de90307-0134-44f7-9306-a019d2de30df"},
+        ["MasturbateStanding_V"] = {MapKey = "9d8c5992-55ab-4c2f-8d97-28b68eb50a8b", AnimationID = "1df05dff-b187-42ec-aacd-6ff99bcec62a"},
+        ["MasturbateStanding_Tall_V"] = {MapKey = "2c60a233-b669-4b94-81dc-280e98238fd0", AnimationID = "2de90307-0134-44f7-9306-a019d2de30df"},
         ["MasturbateWank"] = {MapKey = "49497bdc-d901-4f60-9e4e-3d31a06f9002", AnimationID = "f3613d2c-b652-4dd7-b0f2-600e64afbdf4"},
         --#endregion
         --#region Experimental
@@ -58,8 +58,8 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         --#endregion
     }
     local faceAnim = "cd8b98d1-5ae2-f4f7-ce9d-8b47a3252b4d" -- "Crying" AnimID for BG3SX
-    local faceIdle = "60b456ce-107e-909c-9d01-f6e309d31c8a" -- AnimID for regular Idle animations
-    local idles = { -- Idle animation MapKeys
+    local faceIdle = "60b456ce-107e-909c-9d01-f6e309d31c8a" -- AnimID for face Idle animations
+    local idles = { -- Regular idle animation MapKeys (Standing around)
         "392073ca-c6e0-4f7d-848b-ffb0b510500b",
         "04922882-0a2d-4945-8790-cef50276373d",
         "10fee5b7-d674-436c-994c-616e01efcb90",

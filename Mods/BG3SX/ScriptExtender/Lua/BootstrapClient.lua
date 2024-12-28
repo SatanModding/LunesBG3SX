@@ -15,9 +15,10 @@ Ext.Require("Client/UIHelper.lua")
 Ext.Require("Client/UI.lua")
 Ext.Require("Client/PartyInterface.lua")
 Ext.Require("Client/SceneTab.lua")
+Ext.Require("Client/SceneControl.lua")
 Ext.Require("Client/GenitalTab.lua")
 Ext.Require("Client/SettingsTab.lua")
-Ext.Require("Client/SceneControl.lua")
+Ext.Require("Client/DebugTab.lua")
 
 Ext.Require("Client/UIEventHandler.lua")
 
@@ -29,11 +30,6 @@ Ext.Require("Client/GenitalMessages.lua")
 
 
 
-
-Ext.Timer.WaitFor(500, function ()
-        local msg = "hello"
-
-        TEST_CHANNEL:SendToServer(msg)
-
-end)
-
+Ext.Vars.RegisterModVariable(ModuleUUID, "BG3SX_ShowAllAnimations", {
+        Server = true, Client = true, SyncToClient = true
+    })

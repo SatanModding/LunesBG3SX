@@ -86,15 +86,12 @@ end
 -- @param animationData table   - The chosen animations data table
 -- @param position      string  - Specifies the actor's position (either "Top" or "Bottom") to determine the correct animation and sound
 local function playAnimationAndSound(scene, animSpell)
-    print("called playAnimationAndSound")
     local newAnimation
     local newSound
 
-    print("entities in scene")
-    _D(scene.entities)
 
     for _,actor in pairs(scene.entities) do
-        print("creating new animation class for ", actor)
+        --print("creating new animation class for ", actor, " with animation ", animSpell)
         newAnimation = Animation:new(actor, animSpell)
         newSound = Sound:new(actor, animSpell)
     end
@@ -114,7 +111,9 @@ function Sex:PlayAnimation(entity, animSpell)
 
 
     local scene = Scene:FindSceneByEntity(entity)
+    --print("entity is in scene ", scene)
     local sceneType = Sex:DetermineSceneType(scene)
+    --print("scene type is ", sceneType)
 
     if sceneType == "MasturbateMale" or sceneType == "MasturbateFemale" then
     elseif sceneType == "Straight" then -- Handle this in a different way to enable actor swapping even for straight animations
@@ -155,6 +154,7 @@ end
 ---@param animationData     table   - The animation data to use
 function Sex:StartSexSpellUsed(caster, targets, animationData)
     local scene
+
     if animationData then
         -- _P("----------------------------- [BG3SX][Sex.lua] - Creating new scene -----------------------------")
         local sexHavers = {caster}
@@ -177,7 +177,6 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
             end
                           
             Sex:InitSexSpells(scene)
-            print("starting Sex:PlayAnimation")
             Sex:PlayAnimation(caster, animationData)
         end
 

@@ -19,6 +19,7 @@ function OnSessionLoaded()
             if Entity:IsWhitelisted(party[i][1]) then
                 Sex:AddMainSexSpells(party[i][1])
                 Genital:AddGenitalIfHasNone(party[i][1])
+                Genital:AssignDefaultIfHasNotYet(party[i][1])
             end
         end
     end)

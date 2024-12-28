@@ -46,73 +46,50 @@ Ext.RegisterModEvent("BG3SX", "CameraHeightChange")         --{uuid}            
 Ext.RegisterModEvent("BG3SX", "ActorDressed")               --{uuid, equipment}                         - Actor.lua
 Ext.RegisterModEvent("BG3SX", "GenitalChange")              --{uuid, newGenital}                        - Genital.lua
 
--- Clientside NPC Template functions need to be handled via NetMessages, not ModEvents - Please look at Client/NPCSync.lua
--- Ext.RegisterModEvent("BG3SX", "NPCStrip")                   --({naked = naked, resource = resource})    - NPCStripping.lua
--- Ext.RegisterModEvent("BG3SX", "NPCDress")                   --({dressed = dressed, resource = resource})- NPCStripping.lua
-
--- To subscribe to events:
-------------------------------------------------------------------------------------------------------------------------------------------------
-
--- Ext.ModEvents.BG3SX.Channel:Subscribe(function (payload) ... end)
-
--- Example:
--------------------------------------------------------------------
--- Ext.ModEvents.BG3SX.ActorDressed:Subscribe(function (e)
---     _P("ActorDressed received with PayLoad: ")
---     _D(e) -- Dumps the entire payload
--- end)
-
--- Or check ModEventsTester.lua
 
 
 
+-- If I don't define this, the console yells at me
+ModuleUUID = "df8b9877-5662-4411-9d08-9ee2ec4d8d9e" 
 
 
--- Muffin stats loader
+-- USers can set whether they want to "unlock" all animations
+-- or only use "genital based" ones
+-- This means that 2 characters with penises will have accesss
+-- to the "lesbian" animations like "grinding", or "eating pussy" 
 
 
--- local modPath = 'Public/RunesOfFaerun/Stats/Generated/Data/'
--- local filesToReload = {
---     'Character.txt',
---     'Object.txt',
---     'Passive.txt',
---     'Projectile.txt',
---     'Shout.txt',
---     'Status.txt',
---     'Target.txt',
--- }
-
--- local function OnReset()
---     if filesToReload and #filesToReload then
---         for _, filename in pairs(filesToReload) do
---             if filename then
---                 local filePath = string.format('%s%s', modPath, filename)
---                 if string.len(filename) > 0 then
---                     Debug(string.format('RELOADING %s', filePath))
---                     ---@diagnostic disable-next-line: undefined-field
---                     Ext.Stats.LoadStatsFile(filePath, false)
---                 else
---                     Critical(string.format('Invalid file: %s', filePath))
---                 end
---             end
---         end
---     end
--- end
-
--- Ext.Events.ResetCompleted:Subscribe(OnReset)
+Ext.Vars.RegisterModVariable(ModuleUUID, "BG3SX_ShowAllAnimations", {
+    Server = true, Client = true, SyncToClient = true
+})
 
 
 
-Ext.Timer.WaitFor(500, function ()
-        print("test channel dumpy")
-        _D(TEST_CHANNEL)
+local function OnSessionLoaded()
 
-        TEST_CHANNEL:SetHandler(function (msg) 
-                print("message received ", msg) 
-        
-        end)
+
+        local vars = Ext.Vars.GetModVariables(ModuleUUID)
+
+
+        print(vars)
+
+
+
+        if not vars.BG3SX_ShowAllAnimations then
+        print("BG3SX_ShowAllAnimations mod variable not initialized yet")
+        print("setting it to default value = false")
+        vars.BG3SX_ShowAllAnimations = "false"
+        end
+
+        Ext.Log.Print("BG3SX_ShowAllAnimations")
+        Ext.Log.Print(vars.BG3SX_ShowAllAnimations)
+        Ext.Log.Print("End BG3SX_ShowAllAnimations")
+
+
+        Ext.Vars.SyncModVariables(ModuleUUID)
 
         
-end)
+end
 
 
+Ext.Events.SessionLoaded:Subscribe(OnSessionLoaded)

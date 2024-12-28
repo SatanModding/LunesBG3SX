@@ -25,6 +25,8 @@ local initialize
 ---@param switchPlaces      boolean - Boolean for PlayAnimation to check if actors have been switched - TODO: need a cleaner way to handle this
 ---@param campFlags         table   - Table of entities with campflags applied before scene to reapply on Destroy() - Ignore those who didn't - PleaseStay Mod compatibility
 ---@paran summons           table   - Table of summons saved per involved entity
+---@param equipment         table   - Table of [uuid] of entity and a table of their equipment
+---@param armorset          table   - Table of [uuid] of entity and a table of their armorset
 function Scene:new(entities)
     local instance      = setmetatable({
         entities        = entities,
@@ -39,6 +41,8 @@ function Scene:new(entities)
         props           = {},
         campFlags       = {},
         summons         = {},
+        equipment       = {},
+        armorset        = {},
     }, Scene)
 
     -- Somehow can't set rootPosition/rotation within the metatable construction, it poops itself trying to do this - rootPosition.x, rootPosition.y, rootPosition.z = Osi.GetPosition(entities[1])
@@ -319,7 +323,10 @@ initialize = function(self)
 
         print("Stripping ", entity )
         if Sex:IsStripper(entity) then
-            Entity:UnequipAll(entity)
+            local equipment = Entity:UnequipAll(entity)
+            local armorset = Osi.GetArmourSet(entity)
+            self.equipment[entity] = equipment
+            self.armorset[entity] = armorset
         end
     end
 
@@ -329,7 +336,7 @@ initialize = function(self)
     -- end
 
 
-
+    UIEvents.NewScene:Broadcast(self)
     Ext.ModEvents.BG3SX.SceneCreated:Throw({self})
 end
 
@@ -402,58 +409,75 @@ end
 
 -- Handles the generic stuff to reset on an entity on Scene:Destroy()
 local function sceneEntityReset(entity)
-    local scene = Scene:FindSceneByEntity(entity)
-    local startLocation
-    local startScale
 
-    -- Getting old position and scale
-    for i, entry in ipairs(scene.startLocations) do
+    -- dress them
+    -- give out of scene genitals back
+
+    local outOfSexGenital = SexUserVars:GetGenital("BG3SX_Flaccid", entity)
+    local scene = Scene:FindSceneByEntity(entity)
+    local equipment = scene.equipment[entity]
+    local armorset = scene.armorset[entity]
+    local startLocation
+
+
+    Entity:Redress(entity, armorset, equipment)
+    Genital:OverrideGenital(outOfSexGenital, entity)
+
+
+    -- Getting old position
+    for _, entry in ipairs(scene.startLocations) do
         if entry.entity == entity then
             startLocation = entry
-        end
-    end
-    for _, entry in pairs(scene.entityScales) do
-        if entity == entry.entity then
-            startScale = entry.scale
         end
     end
 
     Osi.TeleportToPosition(entity, startLocation.position.x, startLocation.position.y, startLocation.position.z, "", 0, 0, 0, 0, 1)
     Entity:RotateEntity(entity, startLocation.rotationHelper) -- Rotate the entity back to what it was looking at prior to the scene
-    Entity:Scale(entity, startScale) -- Sets the entity scale back to its original
     Osi.RemoveBoosts(entity, "ActionResourceBlock(Movement)", 0, "", "") -- Unlocks movement
 
     scene:ToggleCampFlags(entity) -- Toggles camp flags so companions return to tents IF they had them before
     
     -- Re-attach entity to make it selectable again
     Osi.SetDetached(entity, 0)
-    Osi.SetVisible(entity, 1)
 end
 
 
 -- Destroys a scene instance
 function Scene:Destroy()
-    for _, entity in pairs(self.entities) do -- Go over this seperately so it already is applied to every entity before the other stuff happens
-        -- Effect:Fade(entity, 2000) -- 2sec Fadeout on scene termination
-    end
+
+
 
     self:CancelAllSoundTimers()
     self:DestroyProps()
     self:ToggleSummonVisibility()
 
-    for _, actor in pairs(self.actors) do
-        actor:Destroy()
-    end
+
 
     for _, entity in pairs(self.entities) do
+
+
         sceneEntityReset(entity)
         
+
+         -- TODO - has issues cancelling animations 
+        Osi.PlayAnimation(entity, "")
         Osi.PlaySound(entity, Data.Sounds.Orgasm[math.random(1, #Data.Sounds.Orgasm)]) -- TODO - change this to a generic sound for when we use this for non-sex instead
+
+
+
 
         Sex:RemoveSexSceneSpells(entity) -- Removes any spells given for the scene
         if Osi.IsPartyMember(entity, 0) == 1 then
             Sex:AddMainSexSpells(entity) -- Readds the regular sex spells (StartSex, Options, ChangeGenitals)
         end
+
+
+        if Entity:IsNPC(entity) then
+            NPC:RemoveGenitals(entity)
+            NPC:Redress(entity)
+        end
+
+
     end
     
     Ext.ModEvents.BG3SX.SceneDestroyed:Throw({self})
@@ -481,3 +505,4 @@ function Scene.TerminateAllScenes()
     end
 end
 Ext.RegisterConsoleCommand("BG3SX.TerminateScenes", Scene.TerminateAllScenes) -- Killswitch
+
