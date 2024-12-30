@@ -55,7 +55,7 @@
 --     local tab = tBar:AddTabItem("Sex Settings")
 --     local table = tab:AddTable("",1)
 --     for option,content in pairs(options) do
---         local cell = table:AddRow():AddCell()
+--         local cell = Table.AddRow():AddCell()
 --         local optionCheckBox = cell:AddCheckbox(option)
 --         if content.val == true then
 --             optionCheckBox.Checked = true
@@ -88,7 +88,7 @@
 
 --     -- TODO SKIZ 
 --     -- The inactive and active gential labels can be populated by
---     -- calling SexUserVars:GetGenital("BG3SX_Flaccid", uuid) and SexUserVars:GetGenital("BG3SX_Erect", uuid)
+--     -- calling SexUserVars.GetGenital("BG3SX_OutOfSexGenital", uuid) and SexUserVars.GetGenital("BG3SX_SexGenital", uuid)
 
 
 
@@ -103,11 +103,11 @@
 --         local inactiveGArea = favRow:AddCell() -- Left
 --         local inactiveGInfo = inactiveGArea:AddText("Inactive Genital")
 --         local inactiveGSource = inactiveGArea:AddText("Source: ")
---         local inactiveGenital = inactiveGArea:AddText("Genital: ")
+--         local inactiveGenital = inactiveGArea:AddText("Genital. ")
 --         local activeGArea = favRow:AddCell() -- Right
 --         local activeGInfo = activeGArea:AddText("Active Genital")
 --         local activeGSource = activeGArea:AddText("Source: ")
---         local activeGenital = activeGArea:AddText("Genital: ")
+--         local activeGenital = activeGArea:AddText("Genital. ")
 
 --         tab:AddSeparator("")
 
@@ -122,14 +122,14 @@
 --             GText.SameLine = true
 --             inactiveGButton.OnClick = function()
 --                 inactiveGSource.Label = "Source: " .. mod
---                 inactiveGenital.Label = "Genital: " .. genital.uuid
+--                 inactiveGenital.Label = "Genital. " .. genital.uuid
 --                 -- TODO Skiz - also send uuid of host
 --                 local uuid = nil
 --                 Ext.Net.PostMessageToServer("BG3SX_Client_ChangedInactiveGenital", Ext.Json.Stringify({uuid = uuid, genital = genital.uuid}))
 --             end
 --             activeGButton.OnClick = function()
 --                 activeGSource.Label = mod
---                 activeGenital.Label = "Genital: " .. genital.uuid
+--                 activeGenital.Label = "Genital. " .. genital.uuid
 --                 -- TODO Skiz - also send uuid of host
 --                 local uuid = nil
 --                 Ext.Net.PostMessageToServer("BG3SX_Client_ChangedActiveGenital", Ext.Json.Stringify({uuid = uuid, genital = genital.uuid}))
@@ -137,7 +137,7 @@
 --         end
 
 --         local genitalTable = tab:AddTable("",1)
---         local genitalArea = genitalTable:AddRow():AddCell()
+--         local genitalArea = genitalTable.AddRow():AddCell()
 --         genitalTable.SizingStretchProp = true
     
 --         for mod,content in pairs(genitals) do
@@ -193,7 +193,7 @@
 --     table.insert(sceneTables, sceneTable)
 
 --     -- No Scene exists for selected character
---     local noSceneArea = noSceneTable:AddRow():AddCell()
+--     local noSceneArea = noSceneTable.AddRow():AddCell()
 --     for _,entry in pairs(preSexControls) do
 --         local sexButton = noSceneArea:AddButton(entry)
 --         sexButton.SameLine = true
@@ -240,7 +240,7 @@
 --     local charTable = parent:AddCell():AddTable("", 1)
 --     charTable.SizingStretchProp = true
 --     --charTable.Borders = true
---     local row = charTable:AddRow()
+--     local row = charTable.AddRow()
 --     local size = {100,100}
 --     local tName = Ext.Loca.GetTranslatedString(character.DisplayName.NameKey.Handle.Handle)
 --     local characterButton
@@ -259,7 +259,7 @@
 --         UI.CharacterButton(charTable)
 --     end
 --     --local infoArea = row:AddCell():AddTable("", 1)
---     local characterName = charTable:AddRow():AddCell():AddText("")
+--     local characterName = charTable.AddRow():AddCell():AddText("")
 --     characterName.Label = tName
 --     --local additionalInfo = infoArea:AddRow():AddCell():AddText("AdditionalInfoArea")
 --     table.insert(characterTables, {uuid = uuid, table = charTable, button = characterButton})
@@ -274,13 +274,13 @@
 --     --charTable.Borders = true
 --     charTable.ScrollY = false
 --     --charTable.ScrollX = true
---     local row = charTable:AddRow()
+--     local row = charTable.AddRow()
 --     --row:AddCell():AddText("Test")
 --     local characterCount = 0
 --     local party = UIHelper:GetCurrentParty()
 --     for _, uuid in pairs(party) do
 --         if characterCount > 0 and characterCount % 4 == 0 then
---             row = charTable:AddRow()
+--             row = charTable.AddRow()
 --         end
 --         --if Entity:IsWhitelisted(uuid, false) then
 --             local companion = UI.AddCharacter(row, uuid)

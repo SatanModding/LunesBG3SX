@@ -71,6 +71,8 @@ end
 ---@return          boolean - Returns either 1 or 0
 function Entity:HasPenis(uuid)
 
+    local entity = Ext.Entity.Get(uuid)
+
 
     local vulva = "a0738fdf-ca0c-446f-a11d-6211ecac3291"
     local penis = "d27831df-2891-42e4-b615-ae555404918b"
@@ -78,14 +80,14 @@ function Entity:HasPenis(uuid)
     -- Users can theoretically give the characters differen "flaccid" and "erect" genital
     -- this is why we need to ask specifically for the "erect" version, not just the
     -- current gential to get the correct animation
-    local sexGenital = SexUserVars:GetGenital("BG3SX_Erect", uuid)
+    local sexGenital = SexUserVars.GetGenital("BG3SX_SexGenital", entity)
     if sexGenital then
 
         local genitalTags =  Ext.StaticData.Get(sexGenital, "CharacterCreationAppearanceVisual").Tags
-        if Table:Contains(genitalTags, vulva) then
+        if Table.Contains(genitalTags, vulva) then
             return false
         -- this gives up the option to set custom genital types. Liek tentacles
-        elseif  Table:Contains(genitalTags, penis) then
+        elseif  Table.Contains(genitalTags, penis) then
             return true
         end
         
@@ -109,6 +111,14 @@ function Entity:HasPenis(uuid)
         end
         if Osi.IsTagged(uuid, "GENITAL_VULVA_a0738fdf-ca0c-446f-a11d-6211ecac3291") == 1 then
             return false
+        end
+    else
+        -- 0 = penis, 1 = vagina [This assumes that everyone is cis]
+        local bodyType =  Ext.Entity.Get(uuid).BodyType.BodyType
+        if bodyType == 1 then
+            return false
+        else
+            return true
         end
     end
 
@@ -264,9 +274,9 @@ end
 
 -- Tries to get the value of an entities component
 ---@param uuid              string      - The entity UUID to check
----@param previousComponent value       - component of previous iteration
+---@param previousComponent any|nil       - component of previous iteration
 ---@param components        table       - Sorted list of component path
----@return Value                        - Returns the value of a field within a component
+---@return any                        - Returns the value of a field within a component
 ---@example
 -- Entity:TryGetEntityValue("UUID", nil, {"ServerCharacter, "PlayerData", "HelmetOption"})
 -- nil as previousComponent on first call because it iterates over this parameter during recursion
@@ -302,7 +312,7 @@ end
 
 -- Unequips all equipment from an entity
 ---@param uuid          string  - The entity UUID to unequip
----@return oldEquipment table   - Collection of every previously equipped item
+---@return table   - Collection of every previously equipped item
 function Entity:UnequipAll(uuid)
     --Osi.SetArmourSet(uuid, 0)
     
@@ -337,13 +347,26 @@ end
 -- Re-equips all equipment of an entity
 ---@param entity      string      - The entity UUID to equip
 ---@param armorset  ArmorSet    - The entities prior armorset
-function Entity:Redress(entity, oldArmourSet, oldEquipment)
+---@paran slots table -  Format: {uuid = entry.VisualResource, index = i}
+function Entity:Redress(entity, oldArmourSet, oldEquipment, slots)
+
     Osi.SetArmourSet(entity, oldArmourSet)
     for _, item in ipairs(oldEquipment) do
         Osi.Equip(entity, item)
     end
     oldArmourSet = nil
     oldEquipment = nil
+
+    if slots then 
+        local actualEntity = Ext.Entity.Get(entity)
+        if not actualEntity then
+            print("is not an entity ", entity)
+        end
+
+        NPC.Redress(actualEntity, slots) 
+    end
+
+
 end
 
 
@@ -422,7 +445,7 @@ local function getRace(character)
     local race
     for _, tag in pairs(raceTags) do
         if Data.BodyLibrary.RaceTags[tag] then
-            race = Table:GetKey(Data.BodyLibrary.Races, Data.BodyLibrary.RaceTags[tag])
+            race = Table.GetKey(Data.BodyLibrary.Races, Data.BodyLibrary.RaceTags[tag])
             break
         end
     end

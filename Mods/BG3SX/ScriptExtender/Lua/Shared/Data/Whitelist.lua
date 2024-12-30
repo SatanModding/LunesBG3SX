@@ -746,7 +746,7 @@ Data.AllowedTagsAndRaces = {
 
 Data.ModdedTags = {}
 
-Data.UnimportantTags = { -- These tags will get skipped by Whitelist
+local unimportantTags = { -- These tags will get skipped by Whitelist
     --#region System
     "00000000-0000-0000-0000-000000000000", -- EMPTY
     "0fcfa622-a3c9-4a03-aab4-2a74904b62eb", -- EMPTY
@@ -827,10 +827,7 @@ Data.WhitelistedEntities = {
 -- Anyone can add specific entities to it via:
 -- table.insert(Mods.BG3SX.Data.BlacklistedEntities, "An Entity UUID")
 Data.BlacklistedEntities = {
-    "58a69333-40bf-8358-1d17-fff240d7fb11", -- "Placeholder" - Doesn't exist
-    "3ed74f06-3c60-42dc-83f6-f034cb47c671", -- "Placeholder" - Doesn't exist
 }
-
 
 -- WHITE-/BLACKLIST CHECK
 -- Use !whitelist or !blacklist to check against HostCharacter
@@ -942,7 +939,7 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
     end
     for i,tag in ipairs(tags) do
         local skip = false
-        for _,unimportantTag in pairs(Data.UnimportantTags) do
+        for _,unimportantTag in pairs(unimportantTags) do
             if tag == unimportantTag then
                 skip = true
             end

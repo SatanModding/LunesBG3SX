@@ -247,10 +247,10 @@ if Ext.IsClient() then
 
                 if type(targetPosition) == "table" then
                         -- targetPosition is coordinates
-                        NOsi:TeleportToPosition(character, targetPosition)
+                        --NOsi:TeleportToPosition(character, targetPosition)
                 else
                         -- targetposition is another character
-                        NOsi:TeleportTo(character, targetPosition)
+                        --NOsi:TeleportTo(character, targetPosition)
                 end
         end)
 
@@ -265,10 +265,10 @@ if Ext.IsClient() then
 
                 if type(targetRotation) == "number" then
                         -- targetPosition is coordinates
-                        NOsi:RotateToPosition(character, targetRotation)
+                        --NOsi:RotateToPosition(character, targetRotation)
                 else
                         -- targetposition is another character
-                        NOsi.RotateTo(character, targetRotation)
+                        --NOsi.RotateTo(character, targetRotation)
                 end
         end)
 end

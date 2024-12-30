@@ -153,14 +153,23 @@ end
 
 
 UIEvents.FetchAnimations:SetHandler(function (payload)
+    Debug.Print("Received message FetchAnimations with payload")
+    _D(payload)
     
 end)
 
 
-UIEvents.FetchAnimations = Ext.Net.CreateChannel(ModuleUUID, "FetchAnimations")
-UIEvents.FetchAllAnimations = Ext.Net.CreateChannel(ModuleUUID, "FetchAllAnimations")
-UIEvents.FetchFilteredAnimations = Ext.Net.CreateChannel(ModuleUUID, "FetchFilteredAnimations")
+UIEvents.FetchAllAnimations:SetHandler(function (payload)
+    Debug.Print("Received message FetchAllAnimations with payload")
+    _D(payload)
+    
+end)
 
 
-UIEvents.SendAllAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendAllAnimations")
-UIEvents.SendFilteredAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendFilteredAnimations")
+UIEvents.FetchFilteredAnimations:SetHandler(function (payload)
+    Debug.Print("Received message FetchFilteredAnimations with payload")
+    _D(payload)
+    
+end)
+
+

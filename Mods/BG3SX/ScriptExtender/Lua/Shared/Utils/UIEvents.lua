@@ -12,12 +12,13 @@ function UIEvents:Initialize()
     self.FetchScenes = Ext.Net.CreateChannel(ModuleUUID, "FetchScenes")
         -- Server -> Client
     self.SendScenes = Ext.Net.CreateChannel(ModuleUUID, "SendScenes")
+    self.UpdateScenes = Ext.Net.CreateChannel(ModuleUUID, "UpdateScenes")
 
     -- Scene specific
         -- Client -> Server
     self.AskForSex = Ext.Net.CreateChannel(ModuleUUID, "AskForSex")
     self.ChangeAnimation = Ext.Net.CreateChannel(ModuleUUID, "ChangeAnimation")
-    self.ChangePosition = Ext.Net.CreateChannel(ModuleUUID, "ChangePosition")
+    self.SwapPosition = Ext.Net.CreateChannel(ModuleUUID, "SwapPosition")
     self.RotateScene = Ext.Net.CreateChannel(ModuleUUID, "RotateScene")
     self.ChangeCameraHeight = Ext.Net.CreateChannel(ModuleUUID, "ChangeCameraHeight")
     self.MoveScene = Ext.Net.CreateChannel(ModuleUUID, "MoveScene")
@@ -51,6 +52,12 @@ function UIEvents:Initialize()
 
     self.RequestTeleport = Ext.Net.CreateChannel(ModuleUUID, "RequestTeleport")
     self.RequestRotation = Ext.Net.CreateChannel(ModuleUUID, "RequestRotation")
+
+    -- Whitelist Tab
+        -- Client -> Server
+    self.FetchWhitelist = Ext.Net.CreateChannel(ModuleUUID, "RequestWhitelist")
+        -- Server -> Client
+    self.SendWhitelist = Ext.Net.CreateChannel(ModuleUUID, "SendWhitelist")
 end
 UIEvents:Initialize()
 
@@ -59,9 +66,9 @@ UIEvents:Initialize()
 
 -- Client -> Server
 -- UIEvents.FetchAllAnimations:SendToServer({ID = UI.ID})
--- UIEvents.ChangePosition:SendToServer({ID = UI.ID, Scene = scene, Position = pos})
+-- UIEvents.SwapPosition:SendToServer({ID = UI.ID, Scene = scene, Position = pos})
 --     -- Do something on Server
---     changePosition(payload.Scene, payload.Position)
+--     SwapPosition(payload.Scene, payload.Position)
 
 
 -- -- Server -> Client

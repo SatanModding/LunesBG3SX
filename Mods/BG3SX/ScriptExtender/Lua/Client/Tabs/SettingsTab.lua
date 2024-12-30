@@ -1,4 +1,3 @@
-
 SettingsTab = {}
 SettingsTab.__index = SettingsTab
 function UI:NewSettingsTab()

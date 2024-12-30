@@ -6,29 +6,15 @@ Ext.Osiris.RegisterListener("UsingSpellOnTarget", 6, "after", function(_, target
 
 
     if spell == "BG3SX_ManualErections" then
-        Mods.BG3SX.SexUserVars:SetAutoErection(0,target)
+        Mods.BG3SX.SexUserVars.SetAutoSexGenital(false,target)
     end
     
-    if spell == "BG3SX_AutoErection" then
-        Mods.BG3SX.SexUserVars:SetAutoErection(1,target)
+    if spell == "BG3SX_AutoSexGenital" then
+        Mods.BG3SX.SexUserVars.SetAutoSexGenital(true,target)
     end
 end)
 
 
--- TODO: remove this when UI is implemented
-
-
-Ext.Osiris.RegisterListener("UsingSpell", 5, "after", function(caster, spell,_,_,_)
-  
-    local containerID = Ext.Stats.Get(spell).SpellContainerID
-    if containerID == "BG3SX_ChangeGenitals" then
-
-    local newGenital = Genital:GetNextGenital(spell, caster)
-
-    Genital:OverrideGenital(newGenital, caster)
-
-    end
-end)
 
 
 ----------------------------------------------------------------------------------------
@@ -103,14 +89,14 @@ end
 
 -- TODO: This might need to become its own class
 -- Determines which type of scene the entity is part of and assigns the appropriate animations and sounds to the actors involved
----@param entity    Entity  - The entity which used a new animation spell
+---@param character    string  - The entity which used a new animation spell
 ---@param spell     string   - The chosen animations data table
-function Sex:PlayAnimation(entity, animSpell)
+function Sex:PlayAnimation(character, animSpell)
 
     -- TODO - make this dependant on actor instead of entity and refresh when genital has changed
 
 
-    local scene = Scene:FindSceneByEntity(entity)
+    local scene = Scene:FindSceneByEntity(character)
     --print("entity is in scene ", scene)
     local sceneType = Sex:DetermineSceneType(scene)
     --print("scene type is ", sceneType)
@@ -157,6 +143,8 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
 
     if animationData then
         -- _P("----------------------------- [BG3SX][Sex.lua] - Creating new scene -----------------------------")
+        -- TODO - sexHavers should be able to be deleted, as the scenes are saved on the client
+        -- TODO - check NPC
         local sexHavers = {caster}
         for _,target in pairs(targets) do
             if target ~= caster then -- To not add caster twice if it might also be the target
@@ -169,10 +157,28 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
         
         -- Delay the rest as well, since scene initilization is delayed for 1 second to avoid user seeing behind the scenes stuff
         local function haveSex()
-            Scene:new(sexHavers)
+
+            local armorsets = {}
+            local equipments = {}
+            local slots = {}
+        
             -- erections
-            for _, actor in pairs(sexHavers) do
-                Genital:GiveErection(actor)
+            for _, character in pairs(sexHavers) do
+
+                local entity = Ext.Entity.Get(character)
+
+                Genital.GiveSexGenital(entity)
+
+                 -- stripping
+                if Sex:IsStripper(character) then
+                    armorset, equipment, slot = Sex:Strip(character)
+                    armorsets[character] = armorset
+                    equipments[character] = equipment
+                    slots[character] = slot
+                end
+
+                Scene:new(sexHavers, equipments, armorsets, slots)
+
             end
                           
             --Sex:InitSexSpells(scene)
@@ -256,6 +262,26 @@ function Sex:IsStripper(uuid)
     end 
 end
 
+-- TODO - implement NPC logic
+function Sex:Strip(character)
+
+    local armorset = {} 
+    local equipment = {}
+    local slot = {}
+
+
+    if Entity:IsNPC(character) then
+    -- NPCs only have slots in their CharacterVisualResourceID
+        slot = NPC.StripNPC(character)
+        
+    else
+        equipment = Entity:UnequipAll(character)
+        armorset = Osi.GetArmourSet(character)
+    end
+
+    return armorset, equipment, slot
+
+end
 
 ----------------------------------------------------------------------------------------------------
 -- 

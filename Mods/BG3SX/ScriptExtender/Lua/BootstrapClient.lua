@@ -1,3 +1,9 @@
+NULL = "NULL_00000000-0000-0000-0000-000000000000"
+
+
+
+
+
 ------------------------------------
         -- Init Classes --
 ------------------------------------
@@ -16,11 +22,12 @@ Ext.Require("Shared/_initUtils.lua")
 Ext.Require("Client/UIHelper.lua")
 Ext.Require("Client/UI.lua")
 Ext.Require("Client/PartyInterface.lua")
-Ext.Require("Client/SceneTab.lua")
+Ext.Require("Client/Tabs/SceneTab.lua")
 Ext.Require("Client/SceneControl.lua")
-Ext.Require("Client/GenitalTab.lua")
-Ext.Require("Client/SettingsTab.lua")
-Ext.Require("Client/DebugTab.lua")
+Ext.Require("Client/Tabs/GenitalTab.lua")
+Ext.Require("Client/Tabs/SettingsTab.lua")
+Ext.Require("Client/Tabs/WhitelistTab.lua")
+Ext.Require("Client/Tabs/DebugTab.lua")
 
 Ext.Require("Client/UIEventHandler.lua")
 

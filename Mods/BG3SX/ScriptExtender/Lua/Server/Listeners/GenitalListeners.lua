@@ -13,8 +13,14 @@ UIEvents.SetInactiveGenital:SetHandler(function (payload)
 
     local uuid = payload.uuid
     local genital = payload.Genital
+    local entity = Ext.Entity.Get(uuid)
 
-    SexUserVars:AssignGenital("BG3SX_Flaccid", genital, uuid)
+    if not entity then
+        print(uuid, " is not a valid entity")
+    end
+
+
+    SexUserVars.AssignGenital("BG3SX_OutOfSexGenital", genital, entity)
 
      -- If inactive is changed, update USerVars of entity and change genital
      -- only if no scene is currently active
@@ -28,7 +34,7 @@ UIEvents.SetInactiveGenital:SetHandler(function (payload)
         end
     end
 
-    Genital:OverrideGenital(genital, uuid)
+    Genital.OverrideGenital(genital, entity)
 
 end)
 
@@ -40,8 +46,9 @@ UIEvents.SetActiveGenital:SetHandler(function (payload)
 
     local uuid = payload.uuid
     local genital = payload.Genital
+    local entity = Ext.Entity.Get(uuid)
 
-    SexUserVars:AssignGenital("BG3SX_Erect", genital, uuid)
+    SexUserVars.AssignGenital("BG3SX_SexGenital", genital, entity)
 
     -- If active is changed, update UserVars, search for active actors, and change their genitals as well
 
@@ -49,7 +56,7 @@ UIEvents.SetActiveGenital:SetHandler(function (payload)
         
         for _, entity in pairs(scene.entities) do
             if Helper:StringContains(entity, uuid) then
-                Genital:OverrideGenital(genital, uuid)
+                Genital.OverrideGenital(genital, entity)
                 Animation.ResetAnimation(uuid)
                 return
             end
@@ -87,11 +94,12 @@ Ext.Events.NetMessage:Subscribe(function(e)
         local payload = Ext.Json.Parse(e.Payload)
         local character = payload.character
         local setting = payload.setting
+        
 
         if setting == "ON" then
-            SexUserVars:SetAutoErection(true, character)
+            SexUserVars.SetAutoSexGenital(true, character)
         elseif setting == "OFF" then
-            SexUserVars:SetAutoErection(false, character)
+            SexUserVars.SetAutoSexGenital(false, character)
         end
     end
 

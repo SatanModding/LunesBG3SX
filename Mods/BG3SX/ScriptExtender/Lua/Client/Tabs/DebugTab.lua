@@ -60,7 +60,7 @@ function DebugTab:AddAnimationPicker()
     self.AnimationsTable = self.Tab:AddTable("", 2)
     --Debug.DumpS(self.Animations)
     for AnimationName,Animation in pairsByKeys(self.Animations) do
-        local animRow = self.AnimationsTable:AddRow()
+        local animRow = self.AnimationsTable.AddRow()
         local animName = animRow:AddCell():AddText(AnimationName)
         local buttonCell = animRow:AddCell()
         local allAnimAnims = getAllHeightmatchingAnims(Animation.Heightmatching)

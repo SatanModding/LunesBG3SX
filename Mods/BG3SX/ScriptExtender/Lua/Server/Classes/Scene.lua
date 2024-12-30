@@ -27,7 +27,8 @@ local initialize
 ---@paran summons           table   - Table of summons saved per involved entity
 ---@param equipment         table   - Table of [uuid] of entity and a table of their equipment
 ---@param armorset          table   - Table of [uuid] of entity and a table of their armorset
-function Scene:new(entities)
+---@param slots             table   - Format: {uuid = entry.VisualResource, index = i} 
+function Scene:new(entities, equipment, armorset, slots)
     local instance      = setmetatable({
         entities        = entities,
         rootPosition    = {},
@@ -41,8 +42,9 @@ function Scene:new(entities)
         props           = {},
         campFlags       = {},
         summons         = {},
-        equipment       = {},
-        armorset        = {},
+        equipment       = equipment,
+        armorset        = armorset,
+        slots           = slots,
     }, Scene)
 
     -- Somehow can't set rootPosition/rotation within the metatable construction, it poops itself trying to do this - rootPosition.x, rootPosition.y, rootPosition.z = Osi.GetPosition(entities[1])
@@ -57,6 +59,8 @@ function Scene:new(entities)
     return instance
 end
 
+
+-- Something crashes when starting a scene
 
 ----------------------------------------------------------------------------------------------------
 -- 
@@ -134,6 +138,7 @@ local function saveCampFlags(self)
         end
     end
 end
+
 function Scene:ToggleCampFlags(entity)
     for _,flagEntity in pairs(self.campFlags) do
         if entity == flagEntity then
@@ -149,6 +154,7 @@ end
 function Scene:RegisterNewSoundTimer(newSoundTimer)
     table.insert(self.timerHandles, newSoundTimer)
 end
+
 function Scene:CancelAllSoundTimers()
     for i = #self.timerHandles, 1, -1 do
         local handle = self.timerHandles[i]
@@ -285,6 +291,7 @@ function Scene:CreateProps()
         end
     end
 end
+
 function Scene:DestroyProps()
     if #self.props > 0 then
         -- _D(self.props)
@@ -341,13 +348,7 @@ initialize = function(self)
         --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Face"])
 
 
-        if Sex:IsStripper(character) then
-            local equipment = Entity:UnequipAll(character)
-            local armorset = Osi.GetArmourSet(character)
-            self.equipment[character] = equipment
-            self.armorset[character] = armorset
-        end
-    
+     
 
     end
 
@@ -388,7 +389,7 @@ end
 ----------------------------------------------------------------------------------------------------
 
 -- Teleports any entity/actor/props to a new location
----@param entity        uuid    - The caster of the spell and entity to check which scene belongs to them
+---@param entity        string    - The caster of the spell and entity to check which scene belongs to them
 ---@param newLocation   table   - The new location
 function Scene:MoveSceneToLocation(entity, newLocation)
     local scene = Scene:FindSceneByEntity(entity)
@@ -459,15 +460,21 @@ local function sceneEntityReset(character)
     -- dress them
     -- give out of scene genitals back
 
-    local outOfSexGenital = SexUserVars:GetGenital("BG3SX_Flaccid", character)
+    local entity = Ext.Entity.Get(character)
+    if not entity then
+        Debug.Print("is not a valid entity ".. character)
+    end
+
+    Debug.Print("Scene reset for character " .. character)
+    local outOfSexGenital = SexUserVars.GetGenital("BG3SX_OutOfSexGenital", entity)
     local scene = Scene:FindSceneByEntity(character)
-    local equipment = scene.equipment[character]
-    local armorset = scene.armorset[character]
     local startLocation
 
     
-    Entity:Redress(character, armorset, equipment)
-    Genital:OverrideGenital(outOfSexGenital, character)
+    Entity:Redress(character, scene.armorset[character], scene.equipment[character], scene.slots[character])
+    
+    print("Out of sex genital is ", outOfSexGenital)
+    Genital.OverrideGenital(outOfSexGenital, entity)
 
 
     -- Getting old position
@@ -478,9 +485,8 @@ local function sceneEntityReset(character)
         end
     end
 
+    --NOsi:TeleportToPosition(character, {startLocation.position[1], startLocation.position[2], startLocation.position[3]})
 
-    Osi.TeleportToPosition(character, startLocation.position[1], startLocation.position[2], startLocation.position[3], "", 0, 0, 0, 0, 1)
-    
 
     UIEvents.RequestRotation:Broadcast({character = character, target = startLocation.rotation})
 
@@ -495,23 +501,23 @@ end
 
 -- Destroys a scene instance
 function Scene:Destroy()
+    
 
-
-
+    
     self:CancelAllSoundTimers()
     self:DestroyProps()
     self:ToggleSummonVisibility()
-
-
-
+    
+    
+    
     for _, entity in pairs(self.entities) do
-
-
+        
+        
         sceneEntityReset(entity)
         
-
-         -- TODO - has issues cancelling animations 
-        Osi.PlayAnimation(entity, "")
+        
+        local nothing = "88f5df46-921d-4a28-93b6-202df636966c" -- Random UUID - This is nothing, NULL or "" doesn't work, crashes the game.
+        Osi.PlayAnimation(entity, nothing) -- To cancel out of any ongoing animations
         Osi.PlaySound(entity, Data.Sounds.Orgasm[math.random(1, #Data.Sounds.Orgasm)]) -- TODO - change this to a generic sound for when we use this for non-sex instead
 
 
@@ -525,7 +531,6 @@ function Scene:Destroy()
 
         if Entity:IsNPC(entity) then
             NPC:RemoveGenitals(entity)
-            NPC:Redress(entity)
         end
 
 
@@ -545,15 +550,10 @@ function Scene.TerminateAllScenes()
     if Data.SavedScenes and #Data.SavedScenes > 0 then
         for i = #Data.SavedScenes, 1, -1 do
             local scene = Data.SavedScenes[i]
-            for _,parent in pairs(scene.entities) do
-                if Entity:IsNPC(parent) then
-                    NPC:RemoveGenitals(parent)
-                    NPC:Redress(parent)
-                end
-            end
             scene:Destroy()
         end
     end
 end
+--ConsoleCommand.New(Scene.TerminateAllScenes, "Terminates all Scenes")
 Ext.RegisterConsoleCommand("BG3SX.TerminateScenes", Scene.TerminateAllScenes) -- Killswitch
 

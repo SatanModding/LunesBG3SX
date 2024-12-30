@@ -1520,6 +1520,22 @@ Data.BodyLibrary.PENIS = {
     }
 }
 
+
+
+-- Function to set Kid Tags to disallowed every 10 seconds
+local function saveTheKids()
+    Ext.Timer.WaitFor(10000, function()
+        if Data.AllowedTagsAndRaces["KID"].Allowed == true then
+            Data.AllowedTagsAndRaces["KID"].Allowed = false
+        end
+        if Data.AllowedTagsAndRaces["GOBLIN_KID"].Allowed == true then
+            Data.AllowedTagsAndRaces["GOBLIN_KID"].Allowed = false
+        end
+        saveTheKids()
+    end)
+end
+saveTheKids()
+
 ---------------------------------------------------------------------------------------------------------
 
 --                                        MrFunSize Erections
@@ -1850,6 +1866,13 @@ end
 
 -- TODO - should probably be moved to genitals 
 function Data.CreateUIGenitalPayload(uuid)
+
+
+    local entity = Ext.Entity.Get(uuid)
+    if not entity then
+        Debug.Print("Not a valid entity uuid " .. uuid)
+    end
+
     local payload = {}
     local hardCodedGenitalTypesChangeThis =
     {
@@ -1860,23 +1883,21 @@ function Data.CreateUIGenitalPayload(uuid)
     }
   
 
-    local permittedGenitals = Genital:getPermittedGenitals(uuid)
-
-
+    local permittedGenitals = Genital.getPermittedGenitals(entity)
 
     for _, mod in pairs(hardCodedGenitalTypesChangeThis) do
         payload[mod] = {}
         local genitalContent = {}
-        local genitals = Genital:getFilteredGenitals(mod, permittedGenitals)
+        local genitals = Genital.getFilteredGenitals(mod, permittedGenitals)
+
 
         for _, genital in pairs(genitals) do
-            local name = Genital:GetName(genital)
+            local name = Visual.GetName(genital)
             table.insert(genitalContent, {name = name, uuid = genital})
         end
 
         payload[mod] = genitalContent
     end
-
     --Debug.Dump(payload)
     return payload
 end

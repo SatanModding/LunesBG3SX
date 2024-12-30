@@ -1,11 +1,11 @@
 Ext.Events.NetMessage:Subscribe(function(e) 
     if (e.Channel == "BG3SX_NPCStrip") then
-        local strip = Ext.Json.Parse(e.Payload)
-        Ext.Resource.Get(strip.resource,"CharacterVisual").VisualSet.Slots = strip.naked
+        local character = Ext.Json.Parse(e.Payload)
+        Debug.Print("Stripping for NPC in multiplayer required")
     end
     if (e.Channel == "BG3SX_NPCDress") then
-        local dress = Ext.Json.Parse(e.Payload)
-        Ext.Resource.Get(dress.resource,"CharacterVisual").VisualSet.Slots = dress.dressed
+        local character = Ext.Json.Parse(e.Payload)
+        Debug.Print("Redressing for NPC in multiplayer required")
     end
 end)
 

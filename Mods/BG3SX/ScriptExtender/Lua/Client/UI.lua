@@ -121,7 +121,7 @@ function UI:InputRecieved(inputPayload)
     if self.Await.Reason == "NewScene" then
         UIEvents.AskForSex:SendToServer({ID = self.ID, Caster = _C().Uuid.EntityUuid, Target = inputPayload})
     elseif self.Await.Reason == "MoveScene" then
-        UIEvents.ChangePosition:SendToServer({ID = self.ID, Scene = self.Await.Payload, Position = inputPayload})
+        UIEvents.SwapPosition:SendToServer({ID = self.ID, Scene = self.Await.Payload, Position = inputPayload})
     end
     Ext.Events.MouseButtonInput:Unsubscribe(self.EventHandler)
     self.Await = nil

@@ -35,5 +35,5 @@ end
 ---@param entity any
 ---@param effect any
 function Effect:Trigger(entity, effect)
-    Osi.ApplyStatus(entity, effect, 1)
+   Osi.ApplyStatus(entity, effect, 1)
 end

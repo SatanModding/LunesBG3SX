@@ -9,13 +9,15 @@ UIEvents.ChangeCharacter:SetHandler(function (payload)
 
     Ext.Timer.WaitFor(200, function ()
         local entity = Helper.GetLocalControlledEntity()
+        if entity then
+            print("target of change control: ", payload)
+            print("current client host ", entity.Uuid.EntityUuid)
 
-        print("target of change control: ", payload)
-        print("current client host ", entity.Uuid.EntityUuid)
-
-        Debug.Print("ChangeCharacter EventHandler")
-        UIInstance.GenitalsTab:FetchGenitals()
-            
+            Debug.Print("ChangeCharacter EventHandler")
+            UIInstance.GenitalsTab:FetchGenitals()
+        else
+            Debug.Print("No entity")
+        end
     end)
 
 end)
@@ -84,7 +86,10 @@ UIEvents.SendAllAnimations:SetHandler(function (payload)
     -- end
 end)
 
-
+UIEvents.SendWhitelist:SetHandler(function (payload)
+    UIInstance.WhitelistTab.Whitelist = payload
+    UIInstance.WhitelistTab:GenerateWhitelistArea()
+end)
 
 
 

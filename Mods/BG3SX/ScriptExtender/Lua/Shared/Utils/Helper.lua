@@ -113,7 +113,7 @@ end
 ---@param obj           - The object from which to retrieve the property value.
 ---@param propertyName  - The name of the property to retrieve.
 ---@param defaultValue  - The default value to return if the property is not found.
----@return value        - The value of the property if found; otherwise, the default value.
+---@return any           - The value of the property if found; otherwise, the default value.
 function Helper:GetPropertyOrDefault(obj, propertyName, defaultValue)
     local success, value = pcall(function() return obj[propertyName] end)
     if success then
@@ -304,4 +304,20 @@ function Helper.GetAllClients()
     end
 
     return clients
+end
+
+
+
+
+---@param func function
+---@param delay number|nil
+function Helper.OptionalDelay(func, delay)
+
+    if not delay then
+        func()
+    else
+        Ext.Timer.WaitFor(delay, function() 
+            func()
+        end)
+    end
 end

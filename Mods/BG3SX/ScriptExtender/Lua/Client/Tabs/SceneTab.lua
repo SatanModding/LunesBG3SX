@@ -38,17 +38,17 @@ function SceneTab:RefreshAvailableAnimations(targetSceneControl, animationTable)
 end
 
 function SceneTab:CreateNewSceneArea()
-    local table = self.Tab:AddTable("", 1)
-    self.NoSceneText = table:AddRow():AddCell():AddText("No Scenes found, create one!")
-    self.CreateSceneButton = table:AddRow():AddCell():AddButton("Create Scene")
+    local sceneTable = self.Tab:AddTable("", 1)
+    self.NoSceneText = sceneTable:AddRow():AddCell():AddText("No Scenes found, create one!")
+    self.CreateSceneButton = sceneTable:AddRow():AddCell():AddButton("Create Scene")
     self.CreateSceneButton.OnClick = function()
         self:AwaitNewScene()
     end
-    -- self.DestroySceneButton = table:AddRow():AddCell():AddButton("End Scene")
+    -- self.DestroySceneButton = Table.AddRow():AddCell():AddButton("End Scene")
     -- self.DestroySceneButton.OnClick = function()
     --     UIEvents.StopSex:SendToServer({ID = USERID, Caster = _C().Uuid.EntityUuid})
     -- end
-    return table
+    return sceneTable
 end
 
 function SceneTab:AwaitNewScene()

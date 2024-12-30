@@ -10,7 +10,7 @@ function OnSessionLoaded()
                                                  ---- Setup Functions ----
     ------------------------------------------------------------------------------------------------------------------------------------------
 
-    Genital:Initialize() -- Initializes genitals, check Genitals.lua
+    Genital.Initialize() -- Initializes genitals, check Genitals.lua
 
     Ext.Osiris.RegisterListener("LevelGameplayStarted", 2, "after", function(_, _)
         local party = Osi.DB_PartyMembers:Get(nil)
@@ -18,8 +18,17 @@ function OnSessionLoaded()
         for i = #party, 1, -1 do
             if Entity:IsWhitelisted(party[i][1]) then
                 Sex:AddMainSexSpells(party[i][1])
-                Genital:AddGenitalIfHasNone(party[i][1])
-                Genital:AssignDefaultIfHasNotYet(party[i][1])
+
+                local entity = Ext.Entity.Get(party[i][1])
+                if not entity then
+                    Debug.Print("is not a entity " .. party[i][1])
+                else
+                    print("adding genital for ", party[i][1])
+                    Genital.AddGenitalIfHasNone(entity)
+                    Genital.AssignDefaultIfHasNotYet(entity)
+                end
+
+                
             end
         end
     end)
@@ -30,7 +39,13 @@ function OnSessionLoaded()
         if string.find(character, "CharacterCreationDummy") == nil then
             if not Osi.IsSummon(character) and Entity:IsWhitelisted(character) then
                 Sex:AddMainSexSpells(character)
-                Genital:AddGenitalIfHasNone(character)
+
+                local entity = Ext.Entity.Get(character)
+                if not entity then
+                    Debug.Print("is not a entity " .. character)
+                else
+                    Genital.AddGenitalIfHasNone(entity)
+                end
             end
         end
     end)

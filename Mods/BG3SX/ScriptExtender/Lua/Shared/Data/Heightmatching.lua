@@ -2,7 +2,7 @@ Heightmatching = {}
 Heightmatching.__index = Heightmatching
 HeightmatchingInstances = {} -- Don't create it as Heightmatching.Instance so we don't replicate all instances for every instance:new()
 
--- TODO: Move some table functions over to Table:
+-- TODO: Move some table functions over to Table.
 
 ---Retrieves a Heightmatching instance by its animation name.
 ---@param animName string - The animation name used as the unique identifier for the instance.
@@ -172,7 +172,7 @@ Heightmatching.BodyShapeOverrides = {
 local function bodyShapeOverrides(raceTags)
     local bs 
     for tag,value in pairs(Heightmatching.BodyShapeOverrides) do
-        if Table:Contains(raceTags, tag) then
+        if Table.Contains(raceTags, tag) then
             bs = value
         end
     end
@@ -220,12 +220,12 @@ function Heightmatching.GetEntityBody(uuid)
     -- Performs a check on the entity if its an NPC and either gets its current UserVars or sets the genital to a default 
     if Entity:IsNPC(uuid) then
         local vulva = "a0738fdf-ca0c-446f-a11d-6211ecac3291"
-        local genital = SexUserVars:GetGenital("BG3SX_Flaccid", uuid)
+        local genital = SexUserVars.GetGenital("BG3SX_OutOfSexGenital", entity)
         
         if genital then
         -- genital has been set once before (for example by user)
             local genitalTags =  Ext.StaticData.Get(genital, "CharacterCreationAppearanceVisual").Tags
-            if Table:Contains(genitalTags, vulva) then
+            if Table.Contains(genitalTags, vulva) then
                 g = "_V"
             else
                 g = "_P"
@@ -525,6 +525,8 @@ local function getBestValueOfAllScores(scores)
 end
 
 
+-- TODO - check if this correctly assigns NPC bodytype.
+-- gortash might have been considered tall with shart?
 function Heightmatching:NewGetAnimation(character1, character2)
 
     local matchingTable = self.matchingTable

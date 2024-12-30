@@ -4,9 +4,9 @@ UIEvents.FetchScenes:SetHandler(function (payload)
     if Data.SavedScenes and #Data.SavedScenes > 0 then
         _P("SavedScenes exists")
         UIEvents.SendScenes:SendToClient(Data.SavedScenes, payload.ID)
+        UIEvents.UpdateScenes:Broadcast(Data.SavedScenes)
     else
-        _P("SavedScenes doesn't exist")
-        UIEvents.SendScenes:Broadcast("Empty")
+        UIEvents.SendScenes:SendToClient("Empty", payload.ID)
     end
 end)
 UIEvents.AskForSex:SetHandler(function (payload)
@@ -18,6 +18,9 @@ UIEvents.AskForSex:SetHandler(function (payload)
     --Debug.Print("TARGET ".. target)
 
     -- masturbation 
+
+    -- TODO - don't allow scenes to start when one entity is already in a scene
+
     if target == caster then
         if Entity:IsWhitelisted(caster, true) then
             Ext.Timer.WaitFor(200, function() -- Wait for erections
@@ -47,7 +50,7 @@ UIEvents.ChangeAnimation:SetHandler(function (payload)
     local animation = payload.Animation
     Osi.PlayAnimation(caster, animation)
 end)
-UIEvents.ChangePosition:SetHandler(function (payload)
+UIEvents.SwapPosition:SetHandler(function (payload)
     local scene = Scene:FindSceneByEntity(payload.Caster)
     local position = payload.Position
 end)
@@ -65,7 +68,6 @@ end)
 
         
 UIEvents.StopSex:SetHandler(function (payload)
-    print("stop sex event received")
     local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
     scene:Destroy()
 end)
@@ -117,6 +119,14 @@ UIEvents.FetchParty:SetHandler(function (payload)
     local party = Osi.DB_PartyMembers:Get(nil)
     UIEvents.SendParty:SendToClient(party, payload)
 end)
+
+UIEvents.FetchWhitelist:SetHandler(function (payload)
+    local newPayload = {Whitelist = Data.AllowedTagsAndRaces, ModdedTags = Data.ModdedTags, Whitelisted = Data.WhitelistedEntities, Blacklisted = Data.BlacklistedEntities}
+    UIEvents.SendWhitelist:SendToClient(newPayload, payload.ID)
+end)
+
+
+
 
 UIEvents.CustomEvent:SetHandler(function (payload)
     CreateAnimationFilter()

@@ -24,8 +24,8 @@ local initialize
 function Actor:new(parent)
     local instance       = setmetatable({
         parent           = parent,
-        genital          = Genital:GetCurrentGenital(parent),
-        autoErection     = Ext.Entity.Get(parent).Vars.BG3SX_AutoErection,
+        genital          = Genital.GetCurrentGenital(parent),
+        autoErection     = Ext.Entity.Get(parent).Vars.BG3SX_AutoSexGenital,
         oldArmourSet     = Osi.GetArmourSet(parent),
         oldEquipment     = Entity:GetEquipment(parent),
         isStripped       = Entity:HasEquipment(parent),
@@ -256,7 +256,7 @@ initialize = function(self)
     Ext.ModEvents.BG3SX.ActorInit:Throw({self.uuid})
     
     Osi.SetDetached(self.uuid, 1)
-    Osi.ApplyStatus(self.uuid, "BG3SX_SEXACTOR", -1) -- Marks them for SweatySex and IdleExpressions - TODO: Change those mods to just get an entities actor and do their thing without the boost
+   Osi.ApplyStatus(self.uuid, "BG3SX_SEXACTOR", -1) -- Marks them for SweatySex and IdleExpressions - TODO: Change those mods to just get an entities actor and do their thing without the boost
     Entity:ToggleWalkThrough(self.uuid)
     -- Entity:ToggleMovement(self.uuid) -- TODO: fix this
     Osi.AddBoosts(self.uuid, "ActionResourceBlock(Movement)", "", "")

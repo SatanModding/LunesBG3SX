@@ -11,57 +11,53 @@
 
 
 -- TODO - these have to be set to a default
-Ext.Vars.RegisterUserVariable("BG3SX_Flaccid", {})
-Ext.Vars.RegisterUserVariable("BG3SX_Erect", {})
-Ext.Vars.RegisterUserVariable("BG3SX_AutoErection", {})
+Ext.Vars.RegisterUserVariable("BG3SX_OutOfSexGenital", {})
+Ext.Vars.RegisterUserVariable("BG3SX_SexGenital", {})
+Ext.Vars.RegisterUserVariable("BG3SX_AutoSexGenital", {})
 
 -- This should be a modvars instead, since its global
 Ext.Vars.RegisterUserVariable("BG3SX_AnimationFilter", {})
 
 -- _P("[BG3SX - SEXUSERVARS] Registered AutoErection")
 
----@param type string - either "BG3SX_Flaccid" or "BG3SX_Erect"
+---@param type string - either "BG3SX_OutOfSexGenital" or "BG3SX_SexGenital"
 ---@param genital string - uuid
----@param character string - uuid
-function SexUserVars:AssignGenital(type, genital, character)
-      local e = Ext.Entity.Get(character)
-      if type == "BG3SX_Flaccid" then
-            e.Vars.BG3SX_Flaccid = genital
-      elseif type == "BG3SX_Erect" then
-            e.Vars.BG3SX_Erect = genital
+---@param entity EntityHandle - uuid
+function SexUserVars.AssignGenital(type, genital, entity)
+      if type == "BG3SX_OutOfSexGenital" then
+            entity.Vars.BG3SX_OutOfSexGenital = genital
+      elseif type == "BG3SX_SexGenital" then
+            entity.Vars.BG3SX_SexGenital = genital
       else
-            _P("Invalid type ", type , " please choose ’BG3SX_Flaccid’ or ’BG3SX_Erect’ ")
+            _P("Invalid type ", type , " please choose ’OutOfSexGenital’ or ’SexGenital’ ")
       end
 end
 
----@param type string - either "BG3SX_Flaccid" or "BG3SX_Erect"
----@param character string - uuid
+---@param type string - either "BG3SX_OutOfSexGenital" or "BG3SX_SexGenital"
+---@param entity EntityHandle - uuid
 ---@return string
-function SexUserVars:GetGenital(type, character)
-      local e = Ext.Entity.Get(character)
-      if type == "BG3SX_Flaccid" then
-            return e.Vars.BG3SX_Flaccid
-      elseif type == "BG3SX_Erect" then
-            return e.Vars.BG3SX_Erect
+function SexUserVars.GetGenital(type, entity)
+
+      if type == "BG3SX_OutOfSexGenital" then
+            return entity.Vars.BG3SX_OutOfSexGenital
+      elseif type == "BG3SX_SexGenital" then
+            return entity.Vars.BG3SX_SexGenital
       else
-            _P("Invalid type ", type , " please choose ’BG3SX_Flaccid’ or ’BG3SX_Erect’ ")
+            _P("Invalid type ", type , " please choose ’OutOfSexGenital’ or ’SexGenital’ ")
       end
 end
 
 
----@param BG3SX_AutoErection boolean
----@param character string - uuid
-function SexUserVars:SetAutoErection(autoErection, character)
-    local e = Ext.Entity.Get(character)
-    e.Vars.BG3SX_AutoErection = autoErection
+---@param autoErection boolean
+---@param entity EntityHandle - uuid
+function SexUserVars.SetAutoSexGenital(autoErection, entity)
+      entity.Vars.BG3SX_AutoSexGenital = autoErection
 end
 
 
----@param BG3SX_AutoErection boolean
----@param character string - uuid
-function SexUserVars:GetAutoErection(character)
-    local e = Ext.Entity.Get(character)
-    return e.Vars.BG3SX_AutoErection
+---@param entity EntityHandle - uuid
+function SexUserVars.GetAutoSexGenital(entity)
+    return entity.Vars.BG3SX_AutoSexGenital
 end
 
 

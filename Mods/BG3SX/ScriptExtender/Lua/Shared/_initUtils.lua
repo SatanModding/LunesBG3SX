@@ -1,3 +1,4 @@
+Ext.Require("Shared/Utils/ConsoleCommands.lua")
 Ext.Require("Shared/Utils/UIEvents.lua")
 
 
@@ -11,6 +12,7 @@ Ext.Require("Shared/Utils/NOsi.lua")
 Ext.Require("Shared/Utils/Math.lua")
 Ext.Require("Shared/Utils/Table.lua")
 Ext.Require("Shared/Utils/Visual.lua")
+Ext.Require("Shared/Utils/Shapeshift.lua")
 Ext.Require("Shared/Utils/Entity.lua")
 Ext.Require("Shared/Utils/Helper.lua")
 

@@ -70,7 +70,7 @@ end
 
 -- Create new SaveFile with default values
 local function instantiateDefaultSettings()
-    Genital:SetAutoErection(1)
+    Genital.SetAutoErection(1)
 end
 
 
