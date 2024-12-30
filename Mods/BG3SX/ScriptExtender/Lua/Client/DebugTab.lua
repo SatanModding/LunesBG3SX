@@ -76,7 +76,7 @@ function DebugTab:AddAnimationPicker()
             Debug.Print("Combo OnChange")
             if animationPicker.SelectedIndex ~= 0 then
                 UIEvents.ChangeAnimation:SendToServer({
-                    ID = UIInstance.ID,
+                    ID = USERID,
                     Caster = _C().Uuid.EntityUuid,
                     Animation = animationPicker.Options[animationPicker.SelectedIndex + 1]
                 })

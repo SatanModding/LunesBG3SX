@@ -46,8 +46,11 @@ function Scene:new(entities)
     }, Scene)
 
     -- Somehow can't set rootPosition/rotation within the metatable construction, it poops itself trying to do this - rootPosition.x, rootPosition.y, rootPosition.z = Osi.GetPosition(entities[1])
-    instance.rootPosition.x, instance.rootPosition.y, instance.rootPosition.z = Osi.GetPosition(entities[1])
-    instance.rotation.x, instance.rotation.y, instance.rotation.z = Osi.GetRotation(entities[1])
+    
+    --local position = entities[1].Transfrom.Transform.Translate
+    --instance.rootPosition.x, instance.rootPosition.y, instance.rootPosition.z = position[1], position[2], position[3]
+    --local rotation = entities[1].Transfrom.Transform.RotationQuat
+    --.rotation.x, instance.rotation.y, instance.rotation.z, instance.rotation.w = rotation[1],rotation[2],rotation[3],rotation[4]
 
     initialize(instance)
 
@@ -64,14 +67,19 @@ end
 -- Sets an entities start location before possibly getting teleported during a scene for an easy reset on Scene:Destroy() with getStartLocation
 ---@param entity string - UUID of the entity 
 local function setStartLocations(scene)
-    for _,entity in pairs(scene.entities) do
-        local position = {}
-        position.x, position.y, position.z = Osi.GetPosition(entity)
-        local rotationHelper = Entity:SaveEntityRotation(entity)
+    for _,character in pairs(scene.entities) do
+        
+        local entity = Ext.Entity.Get(character)
+        --local position = {}
+        --position.x, position.y, position.z = Osi.GetPosition(entity)
+        --local rotationHelper = Entity:SaveEntityRotation(entity)
+        local position = entity.Transform.Transform.Translate
+        local rotation = entity.Steering.TargetRotation
 
-        table.insert(scene.startLocations, {entity = entity, position = position, rotationHelper = rotationHelper})
+        table.insert(scene.startLocations, {entity = character, position = position, rotation = rotation})
     end
 end
+
 
 
 -- TODO: Actually use it - we currently just call the table manually every time
@@ -156,6 +164,26 @@ end
 -- Summons/Follower Management
 -----------------------------------------------------
 
+--Checks if the summon to hide is a participating entity in any scene
+function Scene.ExistsInScene(uuid)
+    for _,scene in pairs(Data.SavedScenes) do
+        for _,entity in pairs(scene.entities) do
+            if entity == uuid then
+                return false
+            end
+        end
+    end
+    return true
+end
+
+function Scene:HideSummons()
+    for _,entry in pairs(self.summons) do
+        if Scene.ExistsInScene(entry.summon.Uuid.EntityUuid) then
+
+        end
+    end 
+end
+
 -- TODO: See if we can squish it a bit
 -- Toggles visibility of all summons of entities involved in a scene
 function Scene:ToggleSummonVisibility()
@@ -186,13 +214,13 @@ function Scene:ToggleSummonVisibility()
         self.summons = {}
     else
         -- _P("Setting summons invisible and adding them to scene.summons")
-        local partymembers = Ext.Entity.GetAllEntitiesWithComponent("PartyMember")
         for _,entry in pairs(self.entities) do
             local entity = Ext.Entity.Get(entry)
+            local partymembers = Ext.Entity.GetAllEntitiesWithComponent("PartyMember")
             for _,potentialSummon in pairs(partymembers) do
                 if potentialSummon.IsSummon then
                     local summon = potentialSummon
-                    local summoner = summon.IsSummon.field_20 -- or field_8 - of of them might be owner and the other one the summoner
+                    local summoner = summon.IsSummon.field_20 -- or field_8 - of them might be owner and the other one the summoner
                     -- _P("Entity: ", entity, " with uuid: ", entity.Uuid.EntityUuid)
                     -- _P("Summon: ", summon, " with uuid: ", summon.Uuid.EntityUuid)
                     -- _P("Summoner: ", summoner, " with uuid: ", summoner.Uuid.EntityUuid)
@@ -291,26 +319,44 @@ initialize = function(self)
     table.insert(Data.SavedScenes, self)
     Ext.ModEvents.BG3SX.SceneInit:Throw({self})
 
+
+    print("initializing scene")
+
     setStartLocations(self) -- Save start location of each entity to later teleport them back
     saveCampFlags(self) -- Saves which entities had campflags applied before
     self:ToggleSummonVisibility() -- Toggles summon visibility and collision - on Scene:Destroy() it also teleports them back to start location
 
+
     -- We do this before in a seperate loop to already apply this to all entities before actors are spawned one by one
-    for i, entity in pairs(self.entities) do
-        Osi.AddBoosts(entity, "ActionResourceBlock(Movement)", "", "") -- Blocks movement
-        Osi.SetDetached(entity, 1)              -- Make entity untargetable
-        Osi.DetachFromPartyGroup(entity)        -- Detach from party to stop party members from following
+    for _, character in pairs(self.entities) do
+        Osi.AddBoosts(character, "ActionResourceBlock(Movement)", "", "") -- Blocks movement
+        Osi.SetDetached(character, 1)              -- Make entity untargetable
+        Osi.DetachFromPartyGroup(character)        -- Detach from party to stop party members from following
         --self:DetachSummons(entity) -- TODO: Add something to handle summon/follower movement here
         -- Osi.SetVisible(entity, 0)               -- 0 = Invisible
-        Entity:ToggleWalkThrough(entity)        -- To prevent interactions with other entities even while invisible and untargetable
-        self:ToggleCampFlags(entity)            -- Toggles camp flags so companions don't return to tents
-        Sex:RemoveMainSexSpells(entity)         -- Removes the regular sex spells
+        Entity:ToggleWalkThrough(character)        -- To prevent interactions with other entities even while invisible and untargetable
+        self:ToggleCampFlags(character)            -- Toggles camp flags so companions don't return to tents
+        --Sex:RemoveMainSexSpells(entity)         -- Removes the regular sex spells
         --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Body"])
         --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Face"])
-        
 
+
+        if Sex:IsStripper(character) then
+            local equipment = Entity:UnequipAll(character)
+            local armorset = Osi.GetArmourSet(character)
+            self.equipment[character] = equipment
+            self.armorset[character] = armorset
+        end
+    
+
+    end
+
+        -- TODO - why do we wait?
         Ext.Timer.WaitFor(100, function ()
-            Osi.TeleportTo(entity, self.entities[1])
+            print("requesting teleport")
+            for _, character in pairs(self.entities) do
+                UIEvents.RequestTeleport:Broadcast({character= character, target = self.entities[1]})
+            end
         end)
         
         
@@ -321,15 +367,7 @@ initialize = function(self)
         --Entity:RotateEntity(entity, startLocation.rotationHelper)
        
 
-        print("Stripping ", entity )
-        if Sex:IsStripper(entity) then
-            local equipment = Entity:UnequipAll(entity)
-            local armorset = Osi.GetArmourSet(entity)
-            self.equipment[entity] = equipment
-            self.armorset[entity] = armorset
-        end
-    end
-
+     
     -- for _, entity in pairs(self.entities) do
     --     table.insert(self.actors, Actor:new(entity))
     --     self:ScaleEntity(entity) -- After creating the actor to not create one with a smaller scale
@@ -337,6 +375,8 @@ initialize = function(self)
 
 
     UIEvents.NewScene:Broadcast(self)
+
+
     Ext.ModEvents.BG3SX.SceneCreated:Throw({self})
 end
 
@@ -389,13 +429,19 @@ end
 ---@param caster any
 ---@param location any
 function Scene:RotateScene(caster, location)
-    local scene = Scene:FindSceneByEntity(caster)
-    local helper = Osi.CreateAt("06f96d65-0ee5-4ed5-a30a-92a3bfe3f708", location.x, location.y, location.z, 0, 0, "")
-    for _, actor in pairs(scene.actors) do
-        Entity:ClearActionQueue(actor.uuid) -- Clears any stuff the actor might be stuck on
-        Osi.SteerTo(actor.uuid, helper, 1) -- 1 = instant
-    end
-    Osi.RequestDeleteTemporary(helper) -- Deletes the rotationHelper after rotating
+
+    print("called rotate scene")
+    
+
+    NOsi.CopyRotation(caster, location)
+
+    -- local scene = Scene:FindSceneByEntity(caster)
+    -- local helper = Osi.CreateAt("06f96d65-0ee5-4ed5-a30a-92a3bfe3f708", location.x, location.y, location.z, 0, 0, "")
+    -- for _, actor in pairs(scene.actors) do
+    --     Entity:ClearActionQueue(actor.uuid) -- Clears any stuff the actor might be stuck on
+    --     Osi.SteerTo(actor.uuid, helper, 1) -- 1 = instant
+    -- end
+    -- Osi.RequestDeleteTemporary(helper) -- Deletes the rotationHelper after rotating
 
     scene:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
     Sex:PlayAnimation(caster, scene.currentAnimation) -- Play prior animation again
@@ -408,37 +454,42 @@ end
 ----------------------------------------------------------------------------------------------------
 
 -- Handles the generic stuff to reset on an entity on Scene:Destroy()
-local function sceneEntityReset(entity)
+local function sceneEntityReset(character)
 
     -- dress them
     -- give out of scene genitals back
 
-    local outOfSexGenital = SexUserVars:GetGenital("BG3SX_Flaccid", entity)
-    local scene = Scene:FindSceneByEntity(entity)
-    local equipment = scene.equipment[entity]
-    local armorset = scene.armorset[entity]
+    local outOfSexGenital = SexUserVars:GetGenital("BG3SX_Flaccid", character)
+    local scene = Scene:FindSceneByEntity(character)
+    local equipment = scene.equipment[character]
+    local armorset = scene.armorset[character]
     local startLocation
 
-
-    Entity:Redress(entity, armorset, equipment)
-    Genital:OverrideGenital(outOfSexGenital, entity)
+    
+    Entity:Redress(character, armorset, equipment)
+    Genital:OverrideGenital(outOfSexGenital, character)
 
 
     -- Getting old position
+
     for _, entry in ipairs(scene.startLocations) do
-        if entry.entity == entity then
+        if entry.entity == character then
             startLocation = entry
         end
     end
 
-    Osi.TeleportToPosition(entity, startLocation.position.x, startLocation.position.y, startLocation.position.z, "", 0, 0, 0, 0, 1)
-    Entity:RotateEntity(entity, startLocation.rotationHelper) -- Rotate the entity back to what it was looking at prior to the scene
-    Osi.RemoveBoosts(entity, "ActionResourceBlock(Movement)", 0, "", "") -- Unlocks movement
 
-    scene:ToggleCampFlags(entity) -- Toggles camp flags so companions return to tents IF they had them before
+    Osi.TeleportToPosition(character, startLocation.position[1], startLocation.position[2], startLocation.position[3], "", 0, 0, 0, 0, 1)
+    
+
+    UIEvents.RequestRotation:Broadcast({character = character, target = startLocation.rotation})
+
+    Osi.RemoveBoosts(character, "ActionResourceBlock(Movement)", 0, "", "") -- Unlocks movement
+
+    scene:ToggleCampFlags(character) -- Toggles camp flags so companions return to tents IF they had them before
     
     -- Re-attach entity to make it selectable again
-    Osi.SetDetached(entity, 0)
+    Osi.SetDetached(character, 0)
 end
 
 

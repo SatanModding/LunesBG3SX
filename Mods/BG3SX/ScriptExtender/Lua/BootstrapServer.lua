@@ -93,3 +93,32 @@ end
 
 
 Ext.Events.SessionLoaded:Subscribe(OnSessionLoaded)
+
+
+
+Ext.Timer.WaitFor(1000, function ()
+        print("printing newlines for readability")
+        for i=1, 10 do
+                print()
+        end
+end)
+
+
+
+filenames = {
+        "Passives"
+    }
+
+local function OnReset()
+
+        for _, file in pairs(filenames) do
+        Ext.Stats.LoadStatsFile("Public/BG3SX/Stats/Generated/Data/"..file..".txt")
+        end
+
+        for _, stats in pairs(Ext.Stats.GetStats()) do
+                Ext.Stats.Sync(stats)
+        end
+end
+
+
+Ext.Events.ResetCompleted:Subscribe(OnReset)    

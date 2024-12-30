@@ -48,6 +48,9 @@ function UIEvents:Initialize()
 
 
     self.CustomEvent = Ext.Net.CreateChannel(ModuleUUID, "CustomEvent")
+
+    self.RequestTeleport = Ext.Net.CreateChannel(ModuleUUID, "RequestTeleport")
+    self.RequestRotation = Ext.Net.CreateChannel(ModuleUUID, "RequestRotation")
 end
 UIEvents:Initialize()
 

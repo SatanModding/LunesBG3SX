@@ -442,7 +442,7 @@ function Entity:SaveEntityRotation(uuid)
     entityPosition.x,entityPosition.y,entityPosition.z = Osi.GetPosition(uuid)
     local entityRotation = {}
     entityRotation.x,entityRotation.y,entityRotation.z = Osi.GetRotation(uuid)
-    local entityDegree = Math:DegreeToRadian(entityRotation.y)
+    local entityDegree = Math.DegreeToRadian(entityRotation.y)
     local distanceAwayFromEntity = 1 -- Can be changed
     local x = entityPosition.x + (distanceAwayFromEntity * math.cos(entityDegree))
     local y = entityPosition.y + (distanceAwayFromEntity * math.sin(entityDegree))

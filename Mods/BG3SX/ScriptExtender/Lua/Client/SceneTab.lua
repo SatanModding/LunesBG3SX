@@ -44,10 +44,10 @@ function SceneTab:CreateNewSceneArea()
     self.CreateSceneButton.OnClick = function()
         self:AwaitNewScene()
     end
-    self.DestroySceneButton = table:AddRow():AddCell():AddButton("End Scene")
-    self.DestroySceneButton.OnClick = function()
-        UIEvents.StopSex:SendToServer({ID = UIInstance.ID, Caster = _C().Uuid.EntityUuid})
-    end
+    -- self.DestroySceneButton = table:AddRow():AddCell():AddButton("End Scene")
+    -- self.DestroySceneButton.OnClick = function()
+    --     UIEvents.StopSex:SendToServer({ID = USERID, Caster = _C().Uuid.EntityUuid})
+    -- end
     return table
 end
 

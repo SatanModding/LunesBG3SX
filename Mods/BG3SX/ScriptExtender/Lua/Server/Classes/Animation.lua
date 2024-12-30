@@ -41,11 +41,13 @@ function Animation:new(actor, animSpell)
         -- else the animation aborts
 
 
-        Ext.Timer.WaitFor(200, function ()
+        -- TODO - check if timer is still necessary now that we dont use osi 
+
+
+        -- TODO - check if on anim reset (when host has changed) a time ris still necessary
+        --Ext.Timer.WaitFor(200, function ()
             playAnimation(instance) -- Automatically calls this function on creation
-        end)
-  
- 
+        --end)
         
 
         return instance
@@ -66,6 +68,8 @@ end
 ---@param animation     string  - The actual animation to play because there could be multiple ("Top"/"Bottom")
 playAnimation = function(self)
 
+    print("playing animation ", self.animation)
+
   --  Osi.PlayAnimation(self.actor.uuid, "") -- First, stop current animation on actor
     if self.animationData.Loop == true then
         -- _P("Playing ", self.animation, " for ", self.actor.parent)
@@ -81,9 +85,17 @@ end
 -- or to switch between vulva/penis animations when the genital has been changed while a scene is active
 function Animation.ResetAnimation(character)
     -- while sex is active.... 
+
+    print("resetting animation")
     local currentScene = Scene:FindSceneByEntity(character)
     if currentScene then
-        playAnimation(Animation:new(character, currentScene.currentAnimation))
+        print("scene exists. Resetting")
+        -- ClientChanged takes a bit, If aniamtion is called too early, it gets reset again
+        -- If we could put the animations "idle" we coudl circumvent this
+        Ext.Timer.WaitFor(100, function ()
+            playAnimation(Animation:new(character, currentScene.currentAnimation))
+        end)
+        
     end
 end
 
@@ -93,6 +105,62 @@ end
 
 Ext.Osiris.RegisterListener("GainedControl", 1, "after", function(target)  
 
+    Ext.IO.SaveFile("host_trace_gainedControl.json", Ext.DumpExport(Ext.Entity.GetTrace()))
+
     Animation.ResetAnimation(target)
 
 end)
+
+
+
+
+
+-- TODO - put back to server, as animations are added there
+
+function Animation.GetFilteredAnimations(filter)
+    filter = filter or nil
+
+    local animations = {}
+
+    for AnimationName,Animation in pairs(Data.Animations) do
+        print(AnimationName)
+        if not (AnimationName == "New") then
+
+            local Category = Animation.Category
+            local categories
+
+            if type (Category) == "string" then
+                categories = Helper:StringToTable(Category)
+            elseif type(Category) == "table" then
+                categories = Category
+            else
+                print("category is weird. its a ", type(Category))
+                _D(Category)
+            end
+
+            for _,category in pairs(categories) do
+                print("Category ", category)
+                if Animation.Enabled and category == filter then
+                    animations[AnimationName] = Animation
+                end
+            end
+        end
+    end
+
+    return animations
+end
+
+
+
+UIEvents.FetchAnimations:SetHandler(function (payload)
+    
+end)
+
+
+UIEvents.FetchAnimations = Ext.Net.CreateChannel(ModuleUUID, "FetchAnimations")
+UIEvents.FetchAllAnimations = Ext.Net.CreateChannel(ModuleUUID, "FetchAllAnimations")
+UIEvents.FetchFilteredAnimations = Ext.Net.CreateChannel(ModuleUUID, "FetchFilteredAnimations")
+
+
+UIEvents.SendAllAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendAllAnimations")
+UIEvents.SendFilteredAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendFilteredAnimations")

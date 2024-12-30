@@ -233,4 +233,75 @@ function pairsByKeys (t, f)
 end
 
 
+---@By @Aahz - https://i.imgur.com/zfwND3b.gif
+---Gets a table of entity uuid's for current party
+---@return table<string>|nil
+function Helper.GetCurrentParty()
+    if Ext.IsServer() then
+        local party = Osi.DB_PartyMembers:Get(nil)
+        local partymembers = {}
+        for k, v in pairs(party) do
+            local g = Helper.Object:GetGuid(v[1])
+            if g ~= nil then
+                table.insert(partymembers, g)
+            else
+                -- don't count summons...?
+                -- Debug.Print("Unable to get party member (%s), remember to delay slightly after party changes.", v[1])
+            end
+        end
+        return partymembers
+    else
+        local party = Ext.Entity.GetAllEntitiesWithComponent("PartyMember")
+        local partyMembers = {}
+        for k,v in pairs(party) do
+            local g = Helper.Object:GetGuid(v)
+            if g ~= nil then
+                table.insert(partyMembers, g)
+            else
+                Debug.Print("Can't get UUID for party member: %s", v)
+            end
+        end
+        return partyMembers
+    end
+end
 
+
+-- Takes a comma separated string and returns a table of the single entries
+-- Example:  "Straight, Lesbian, Vaginal, Anal" returns
+-- {"Straight","Lesbian","Vaginal","Anal"}
+---@param str string
+---@return table
+function Helper:StringToTable(str)
+    -- Create an empty table to store the results
+    local result = {}
+
+    -- Use a pattern to match each value between commas
+    for entry in string.gmatch(str, "([^,]+)") do
+        -- Trim leading and trailing spaces and insert into the result table
+        table.insert(result, entry:match("^%s*(.-)%s*$"))
+    end
+
+    return result
+end
+
+function Helper.GetName(uuid)
+    local entity = Ext.Entity.Get(uuid)
+    return Ext.Loca.GetTranslatedString(entity.DisplayName.Name.Handle.Handle) or Ext.Loca.GetTranslatedString(entity.DisplayName.NameKey.Handle.Handle)
+end
+
+
+function Helper.GetAllClients()
+
+    local clients = {}
+
+    local partymembers = Ext.Entity.GetAllEntitiesWithComponent("PartyMember")
+
+    for _, partymember in pairs(partymembers) do
+        if Ext.Entity.Get(partymember).ClientControl then
+            table.insert(clients, partymember)
+        end
+        
+    end
+
+    return clients
+end

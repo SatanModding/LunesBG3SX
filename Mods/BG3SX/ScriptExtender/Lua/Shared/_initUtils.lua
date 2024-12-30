@@ -1,3 +1,9 @@
+Ext.Require("Shared/Utils/UIEvents.lua")
+
+
+-- Initialize NOsi
+Ext.Require("Shared/Utils/NOsi.lua")
+
 -- Initialize Events
 -- Ext.Require("Shared/Utils/ModEventsTester.lua") -- Event Testing (See here how to listen to them)
 
@@ -7,7 +13,7 @@ Ext.Require("Shared/Utils/Table.lua")
 Ext.Require("Shared/Utils/Visual.lua")
 Ext.Require("Shared/Utils/Entity.lua")
 Ext.Require("Shared/Utils/Helper.lua")
-Ext.Require("Shared/Utils/UIEvents.lua")
+
 
 -- Initialize Usersettings
 Ext.Require("Shared/Utils/UserSettings.lua")

@@ -169,14 +169,13 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
         
         -- Delay the rest as well, since scene initilization is delayed for 1 second to avoid user seeing behind the scenes stuff
         local function haveSex()
-            scene = Scene:new(sexHavers)
-            
+            Scene:new(sexHavers)
             -- erections
             for _, actor in pairs(sexHavers) do
                 Genital:GiveErection(actor)
             end
                           
-            Sex:InitSexSpells(scene)
+            --Sex:InitSexSpells(scene)
             Sex:PlayAnimation(caster, animationData)
         end
 

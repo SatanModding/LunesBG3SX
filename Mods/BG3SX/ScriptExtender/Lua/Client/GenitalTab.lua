@@ -14,9 +14,8 @@ function GenitalsTab:Initialize()
 end
 
 function GenitalsTab:FetchGenitals()
-    Debug.Print("fetching genitals")
     self.AwaitingGenitals = true
-    UIEvents.FetchGenitals:SendToServer({ID = UIInstance.ID, Character = _C().Uuid.EntityUuid})
+    UIEvents.FetchGenitals:SendToServer({ID = USERID, Character = _C().Uuid.EntityUuid})
 end
 
 function GenitalsTab:UpdateGenitalTable()
@@ -35,10 +34,10 @@ function GenitalsTab:UpdateGenitalTable()
             buttonID = buttonID + 1
             inactiveGenitalButton.IDContext = buttonID
             activeGenitalButton.OnClick = function()
-                UIEvents.SetActiveGenital:SendToServer({ID = UIInstance.ID, Genital = Genital.uuid, uuid = _C().Uuid.EntityUuid})
+                UIEvents.SetActiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = _C().Uuid.EntityUuid})
             end
             inactiveGenitalButton.OnClick = function()
-                UIEvents.SetInactiveGenital:SendToServer({ID = UIInstance.ID, Genital = Genital.uuid, uuid = _C().Uuid.EntityUuid})
+                UIEvents.SetInactiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = _C().Uuid.EntityUuid})
             end
         end
     end

@@ -10,13 +10,13 @@ function SceneTab:NewSceneControl(Scene)
     }, SceneControl)
     local involved = instance.Scene.entities
     if involved[1] and type(involved[1]) == "string" then
-        instance.Window.Label = "Scene: " .. involved[1]
+        instance.Window.Label = "Scene: " .. Helper.GetName(involved[1])
         if involved[2] and type(involved[2]) == "string" then
-            instance.Window.Label = "Scene: " .. involved[1] .. " + " .. involved[2]
+            instance.Window.Label = "Scene: " .. Helper.GetName(involved[1]) .. " + " .. Helper.GetName(involved[2])
         end
     end
-    instance:Initialize()
     table.insert(self.ActiveSceneControls, instance)
+    instance:Initialize()
     return instance
 end
 
@@ -30,9 +30,16 @@ end
 function SceneControl:Initialize()
     self.Window:SetSize({500, 500}, "FirstUseEver")
     self.Window.Closeable = true
-    self.Window.OnClose = function (e)
-        UIEvents.StopSex:SendToServer({ID = UIInstance.ID, Caster = self.Scene.entities[1]})
+    self.Window.OnClose = function ()
+        print("sending stop sex event")
+        UIEvents.StopSex:SendToServer({ID = USERID, Scene = self.Scene})
+        --Debug.DumpS(self.Window)
         self.Window:Destroy()
+        self.Window:Destroy() -- 2nd
+        self.Window:Destroy() -- 3 times the charm
+        print("printing window (destroyed) ", self.Window)
+        self = nil
+        print("printing window (nil) ", self)
     end
 
     self.Animations = {} 
@@ -65,16 +72,17 @@ function SceneControl:UseSceneControlButton(buttonLabel)
         UIInstance:AwaitInput("ChangePosition", self.Scene)
     elseif buttonLabel == "RotateScene" then
         UIInstance:AwaitInput("RotateScene", self.Scene)
-        --UIEvents.RotateScene:SendToServer({ID = UIInstance.ID, Scene = self.Scene})
+        --UIEvents.RotateScene:SendToServer({ID = USERID, Scene = self.Scene})
 
     elseif buttonLabel == "ChangeCameraHeight" then
-        UIEvents.ChangeCameraHeight:SendToServer({ID = UIInstance.ID, Scene = self.Scene})
+        UIEvents.ChangeCameraHeight:SendToServer({ID = USERID, Scene = self.Scene})
 
     elseif buttonLabel == "MoveScene" then
         UIInstance:AwaitInput("MoveScene", self.Scene)
-        --UIEvents.MoveScene:SendToServer({ID = UIInstance.ID, Scene = self.Scene})
+        --UIEvents.MoveScene:SendToServer({ID = USERID, Scene = self.Scene})
 
     elseif buttonLabel == "StopSex" then
+        print("Window.OnClose")
         self.Window.OnClose()
     end
 end
@@ -84,9 +92,9 @@ end
 function SceneControl:CreateAnimationControlArea()
     self:AddControlButtons()
     if UIInstance.Settings.ShowAllAnimations == true then
-        UIEvents.FetchAllAnimations:SendToServer({ID = UIInstance.ID, SceneControl = self.ID, Caster = _C().Uuid.EntityUuid})
+        UIEvents.FetchAllAnimations:SendToServer({ID = USERID, SceneControl = self.ID, Caster = _C().Uuid.EntityUuid})
     elseif UIInstance.Settings.ShowAllAnimations ~= true then
-        UIEvents.FetchAllAnimations:SendToServer({ID = UIInstance.ID, SceneControl = self.ID, Caster = _C().Uuid.EntityUuid})
+        UIEvents.FetchAllAnimations:SendToServer({ID = USERID, SceneControl = self.ID, Caster = _C().Uuid.EntityUuid})
     end
     --self:AddAnimationPicker()
 end
@@ -150,7 +158,7 @@ function SceneControl:AddAnimationPicker()
         animationPicker.OnChange = function ()
             if animationPicker.SelectedIndex ~= 0 then
                 UIEvents.ChangeAnimation:SendToServer({
-                    ID = UIInstance.ID,
+                    ID = USERID,
                     Caster = _C().Uuid.EntityUuid,
                     Animation = animationPicker.Options[animationPicker.SelectedIndex + 1]
                 })
@@ -168,3 +176,18 @@ function SceneControl:AddAnimationPicker()
     
     Debug.USEPREFIX = debugbefore
 end
+
+
+
+
+
+
+
+-- sending events not secessary as this is accessible on the client
+-- UIEvents.FetchFilteredAnimations:SetHandler(function (payload)
+--     local filter = payload.filter
+--     local animations = getFilteredAnimations(filter)
+--     UIEvents:SendFilteredAnimations(animations, payload.ID)
+
+-- end)
+

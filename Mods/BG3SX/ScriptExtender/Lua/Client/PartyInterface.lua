@@ -1,3 +1,6 @@
+-- TODO - fetch party on client by checking Entitities with component PartyMember (check if it includes summons)
+
+
 PartyInterface = {}
 PartyInterface.__index = PartyInterface
 function UI:NewPartyInterface()
@@ -11,9 +14,8 @@ end
 
 
 function PartyInterface:Initialize()
-    print("HOST")
     local userUUID = _C().Uuid.EntityUuid
-    --UIEvents.FetchParty:SendToServer({ID = UIInstance.ID})
+    --UIEvents.FetchParty:SendToServer({ID = USERID})
     UIEvents.FetchParty:SendToServer(userUUID)
 end
 

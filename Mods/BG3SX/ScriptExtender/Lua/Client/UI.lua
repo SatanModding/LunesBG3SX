@@ -1,5 +1,5 @@
 -- TODO Skiz. I need an autoerection setting  and a Stop Sex button
-
+USERID = nil
 UI = {}
 UI.__index = UI
 UIInstance = nil
@@ -24,12 +24,12 @@ function UI.New(mcm)
         workingArea = Ext.IMGUI.NewWindow("")
     end
 
-    local id = _C().Uuid.EntityUuid
     --local u = _C().UserReservedFor.UserID
     --local id = Helper.UserToPeerID(u)
     local instance = setmetatable({
         ID = id,
         Window = workingArea,
+        Settings = {},
         HotKeys = {},
     }, UI)
     if not mcm then
@@ -39,6 +39,7 @@ function UI.New(mcm)
         --     instance.Window:Destroy()
         -- end
     end
+    USERID = _C().Uuid.EntityUuid
     UIInstance = instance
     instance:Initialize()
     return instance
@@ -64,51 +65,66 @@ end
 
 
 
-function UI:AwaitInput(whatFor, payload)
+function UI:AwaitInput(reason, payload)
     local payload = payload or nil
-    self.Await = {whatFor = whatFor, payload = payload}
+    self.Await = {Reason = reason, Payload = payload}
     if not self.EventListener then
-        self.EventListener = self:CreateListener()
+        self.EventHandler = self:CreateEventHandler()
     end
 end
 
+-- function LuaEventBase:PreventListenerAction(bool)
+--     if self.CanPreventAction then
+--         self.ActionPrevented = bool
+--     end
+-- end
 
-function UI:CreateListener()
-    --jjdoorframe()
-    local listener = Ext.Events.MouseButtonInput:Subscribe(function (e)
+function UI:CreateEventHandler()
+    
+    local handler = Ext.Events.MouseButtonInput:Subscribe(function (e)
+        local reason = self.Await.Reason
+        local mouseoverPosition = nil
+        local mouseoverTarget = nil
         -- we currently don't want to stop an event
         if not self.Await then
             return
         end
-        e:PreventAction()
+        e:PreventAction() --jjdoorframe()
         if e.Button == 1 and e.Pressed == true then
-            if getMouseover() and getMouseover().Inner and getMouseover().Inner.Inner[1] and getMouseover().Inner.Inner[1].Character then
-                if self.Await.whatFor == "NewScene" then
-                    self:InputRecieved()
+            if getMouseover() and getMouseover().Inner then
+                mouseoverPosition = getMouseover().Inner.WorldPosition
+                if reason == "MoveScene" then
+                    self:InputRecieved(mouseoverPosition)
+                    return
+                end
+                if getMouseover().Inner.Inner[1] then
+                    if getMouseover().Inner.Inner[1].Character then
+                        mouseoverTarget = getUUIDFromUserdata(getMouseover())
+                        if reason == "NewScene" then
+                            self:InputRecieved(mouseoverTarget)
+                        elseif reason == "" then
+
+                        elseif reason == "" then
+
+                        elseif reason == "" then
+
+                        end
+                    end
                 end
             end
         end
     end)
-    return listener
+    return handler
 end
 
-function UI:InputRecieved()
-    if self.Await.whatFor == "NewScene" then
-        self.Await = nil
-        -- target is not set correcty, sends userID instead
-
-        local target = getUUIDFromUserdata(getMouseover())
-
-        -- if no target exists, do nothing. Then a non entity has been clicked
-        if not target then
-            return
-        end
-
-        UIEvents.AskForSex:SendToServer({ID = self.ID, Caster = _C().Uuid.EntityUuid, Target = target})
-    elseif self.Await.whatFor == "ChangePosition" then
-        UIEvents.ChangePosition:SendToServer({ID = self.ID, Scene = self.Await.payload, Position = getMouseover().Inner.WorldPosition})
+function UI:InputRecieved(inputPayload)
+    if self.Await.Reason == "NewScene" then
+        UIEvents.AskForSex:SendToServer({ID = self.ID, Caster = _C().Uuid.EntityUuid, Target = inputPayload})
+    elseif self.Await.Reason == "MoveScene" then
+        UIEvents.ChangePosition:SendToServer({ID = self.ID, Scene = self.Await.Payload, Position = inputPayload})
     end
-    self.EventListener = nil -- Destroy event listener after recieving input
+    Ext.Events.MouseButtonInput:Unsubscribe(self.EventHandler)
+    self.Await = nil
 end
 
 function UI.DestroyChildren(obj)
@@ -120,7 +136,7 @@ function UI.DestroyChildren(obj)
 end
 
 function UI.GetAnimations()
-    UIEvents.FetchAllAnimations:SendToServer({ID = UIInstance.ID})
+    UIEvents.FetchAllAnimations:SendToServer({ID = USERID})
 end
 
 --function UI.GetUIByID(id)

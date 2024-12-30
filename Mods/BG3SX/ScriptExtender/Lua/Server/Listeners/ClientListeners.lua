@@ -14,8 +14,8 @@ UIEvents.AskForSex:SetHandler(function (payload)
     -- Debug.Dump(payload)
     local caster = payload.Caster
     local target = payload.Target
-    -- Debug.Print("CASTER ".. caster)
-    -- Debug.Print("TARGET ".. target)
+    --Debug.Print("CASTER ".. caster)
+    --Debug.Print("TARGET ".. target)
 
     -- masturbation 
     if target == caster then
@@ -55,10 +55,18 @@ UIEvents.ChangeCameraHeight:SetHandler(function (payload)
     Debug.Print("Currently not Implemented - Needs access to Camera Control")
 end)
 UIEvents.MoveScene:SetHandler(function (payload)
-    local scene = Scene:FindSceneByEntity(payload)
+    local scene = Scene:FindSceneByEntity(payload.Scene)
+    local position = payload.Position -- vec3 WorldPosition table {x,y,z}
+
+    for _, character in pairs(scene.entities) do
+        UIEvents.RequestTeleport:Broadcast({character= character, target = position})
+    end
 end)
+
+        
 UIEvents.StopSex:SetHandler(function (payload)
-    local scene = Scene:FindSceneByEntity(payload.Caster)
+    print("stop sex event received")
+    local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
     scene:Destroy()
 end)
 UIEvents.FetchGenitals:SetHandler(function (payload)
@@ -107,7 +115,6 @@ end)
 
 UIEvents.FetchParty:SetHandler(function (payload)
     local party = Osi.DB_PartyMembers:Get(nil)
-    Debug.Print("sending message to client ".. payload)
     UIEvents.SendParty:SendToClient(party, payload)
 end)
 

@@ -52,16 +52,16 @@ end
 function SettingsTab:SetSceneSettings(Checkbox)
     if Checkbox.Label == "Show All Animations" then
         if Checkbox.Checked == true then
-            UIEvents.FetchAllAnimations:SendToServer({ID = UIInstance.ID})
+            UIEvents.FetchAllAnimations:SendToServer({ID = USERID})
         else
             -- TODO - send the .Filter in the payload
-            UIEvents.FetchFilteredAnimations:SendToServer({ID = UIInstance.ID})
+            UIEvents.FetchFilteredAnimations:SendToServer({ID = USERID})
         end
     elseif Checkbox.Label == "Automatic Erections" then
         if Checkbox.Checked == true then
-            UIEvents.AutoErectionOn:SendToServer({ID = UIInstance.ID})
+            UIEvents.AutoErectionOn:SendToServer({ID = USERID})
         else
-            UIEvents.AutoErectionOff:SendToServer({ID = UIInstance.ID})
+            UIEvents.AutoErectionOff:SendToServer({ID = USERID})
         end
     end
 end
