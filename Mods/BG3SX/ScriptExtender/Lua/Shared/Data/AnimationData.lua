@@ -99,6 +99,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     wanking.SoundBottom = Data.Sounds.Kissing
     local bottlesit = anims.New("BG3SX_BottleSit", {"Masturbation"},  anim["BottleSit"].MapKey, nil, {"0f2ccca6-3ce8-4271-aec0-820f6581c551"}) -- Prop: Bottle
     local vampireThrust = anims.New("YOUR_LAST_THRUST", {"Test"},  anim["VampireLord"].MapKey)
+
     -- Heightmatching:
     ----------------------------------------------------
     local hmi = hm.GetInstanceByAnimName("BG3SX_MasturbateStanding")

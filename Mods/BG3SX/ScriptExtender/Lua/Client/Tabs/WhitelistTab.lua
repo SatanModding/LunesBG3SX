@@ -5,7 +5,7 @@ function UI:NewWhitelistTab()
     local instance = setmetatable({
         --UI = self.ID,
         Tab = self.TabBar:AddTabItem("Whitelist"),
-    }, SettingsTab)
+    }, WhitelistTab)
     return instance
 end
 
@@ -13,82 +13,125 @@ function WhitelistTab:Initialize()
     self:FetchWhitelist()
 end
 function WhitelistTab.FetchWhitelist()
-    UIEvents.FetchWhitelist:SendToServer({ID = UIInstance.ID})
+    UIEvents.FetchWhitelist:SendToServer({ID = USERID})
 end
 
 function WhitelistTab:GenerateWhitelistArea()
-    if self.Whitelist then
-        Debug.Dump(self.Whitelist)
-        
+    if self.Whitelists then   
+        for _,wList in pairs(self.Whitelists) do
+            Table.SortData(wList)
+            --Debug.Dump(wList)
+        end
+
         -- Every type of whitelist gets its own header with different ways to deal with the data
+        self:GenerateWhitelist()
+        self:GenerateModdedWhitelist()
+        self:GenerateWhitelistedEntities()
+        self:GenerateBlacklistedEntities()        
+    end
+end
 
-        -- Whitelist - Every entry also may have entry.racesUsingTag with multiple entries
-        self.WhitelistHeader = self.Tab:AddCollapsableHeader("Whitelist")
-        for TagName,Content in pairs(self.Whitelist.Whitelist) do
-            local whitelistTree = self.WhitelistHeader:AddTree(TagName)
-            local tagTable = self.WhitelistHeader:AddTable("",2)
-            local row = tagTable:AddRow()
-            local uuid = row:AddCell():AddText(Content.TAG)
-            local enabledStatus = row:AddCell():AddCombo("")
-            if Content.Enabled == true then
-                enabledStatus.Checked = true
-                enabledStatus.OnChange = function()
-                    enabledStatus.Checked = true
+function WhitelistTab:GenerateWhitelist()
+-- Whitelist - Every entry also may have entry.racesUsingTag with multiple entries
+    if not self.WhitelistHeader then
+        self.WhitelistHeader = self.Tab:AddCollapsingHeader("Whitelist")
+    end
+    for TagName,Content in pairs(self.Whitelists.Whitelist) do
+        if Helper.IsUpperCase(TagName) then
+            if TagName ~= "KID" and TagName ~= "GOBLIN_KID" then
+                local tagTree = self.WhitelistHeader:AddTree(TagName)
+                if Content.TAG then
+                    local uuid = tagTree:AddInputText("Tag:")
+                    uuid.Text = Content.TAG
                 end
-            else
-                enabledStatus.Checked = false
-                enabledStatus.OnChange = function()
-                    enabledStatus.Checked = false
-                end
-                if Content.Reason then
-                    local tooltip = enabledStatus:Tooltip()
-                    local tooltipText = tooltip:AddText(Content.Reason)
+                if Content.Allowed then
+                    local allowedStatus = tagTree:AddCheckbox("Allowed")
+                    allowedStatus.SameLine = true
+                    if Content.Allowed == true then
+                        allowedStatus.Checked = true
+                        allowedStatus.OnChange = function()
+                            allowedStatus.Checked = true
+                        end
+                    else
+                        allowedStatus.Checked = false
+                        allowedStatus.OnChange = function()
+                            allowedStatus.Checked = false
+                        end
+                        if Content.Reason then
+                            local tooltip = allowedStatus:Tooltip()
+                            local tooltipText = tooltip:AddText(Content.Reason)
+                        end
+                    end
                 end
             end
         end
+    end
+end
 
-        -- ModdedTags - Overrides entries of the whitelist ----- Maybe show before whitelist
-        self.ModdedTagsHeader = self.Tab:AddCollapsableHeader("Modded Entries")
-        local moddedTagsTable = self.ModdedTagsHeader:AddTable("", 3)
-        for TagName,Content in pairs(self.Whitelist.ModdedTags) do
-            local row = moddedTagsTable:AddRow()
-            local name = row:AddCell():AddText(TagName)
-            local uuid = row:AddCell():AddText(Content.TAG)
-            local enabledStatus = row:AddCell():AddCombo("")
-            if Content.Enabled == true then
-                enabledStatus.Checked = true
-                -- enabledStatus.OnChange = function()
-                --     enabledStatus.Checked = true
-                -- end
-            else
-                enabledStatus.Checked = false
-                -- enabledStatus.OnChange = function()
-                --     enabledStatus.Checked = false
-                -- end
-                if Content.Reason then
-                    local tooltip = enabledStatus:Tooltip()
-                    local tooltipText = tooltip:AddText(Content.Reason)
+function WhitelistTab:GenerateModdedWhitelist()
+-- ModdedTags - Overrides entries of the whitelist ----- Maybe show before whitelist
+    if not self.ModdedTagsHeader then    
+        self.ModdedTagsHeader = self.Tab:AddCollapsingHeader("Modded Entries")
+    end
+    
+    for TagName,Content in pairs(self.Whitelists.ModdedTags) do
+        if Helper.IsUpperCase(TagName) then
+            if TagName ~= "KID" and TagName ~= "GOBLIN_KID" then
+                local tagTree = self.ModdedTagsHeader:AddTree(TagName)
+                if Content.TAG then
+                    local uuid = tagTree:AddInputText("Tag:")
+                    uuid.Text = Content.TAG
+                end
+            if Content.Allowed then
+                    local allowedStatus = tagTree:AddCheckbox("Allowed")
+                    allowedStatus.SameLine = true
+                    if Content.Allowed == true then
+                        allowedStatus.Checked = true
+                        allowedStatus.OnChange = function()
+                            allowedStatus.Checked = true
+                        end
+                    else
+                        allowedStatus.Checked = false
+                        allowedStatus.OnChange = function()
+                            allowedStatus.Checked = false
+                        end
+                        if Content.Reason then
+                            local tooltip = allowedStatus:Tooltip()
+                            local tooltipText = tooltip:AddText(Content.Reason)
+                        end
+                    end
                 end
             end
-            enabledStatus.Disabled = true
         end
+    end
+end
 
-        -- Whitelisted Entities
-        self.WhitelistedEntitiesHeader = self.Tab:AddCollapsableHeader("Whitelisted Entities")
-        local whitelistedEntitiesTable = self.WhitelistedEntitiesHeader:AddTable("",2)
-        for _,entry in pairs(self.Whitelist.Whitelisted) do
-            local row = whitelistedEntitiesTable:AddRow()
-            local name = row:AddCell():AddText(Helper.GetName(entry))
-            local uuid = row:AddCell():AddText(entry)
-        end
-        
-        -- Blacklisted Entities
-        self.BlacklistedEntitiesHeader = self.Tab:AddCollapsableHeader("Blacklisted Entities")
-        local blacklistedEntitiesTable = self.BlackistedEntitiesHeader:AddTable("",2)
-        for _,entry in pairs(self.Whitelist.Blacklisted) do
-            local row = blacklistedEntitiesTable:AddRow()
-            local name = row:AddCell():AddText(Helper.GetName(entry))
-            local uuid = row:AddCell():AddText(entry)
-        end
+function WhitelistTab:GenerateWhitelistedEntities()
+-- Whitelisted Entities
+    if not self.WhitelistedEntitiesHeader then
+        self.WhitelistedEntitiesHeader = self.Tab:AddCollapsingHeader("Whitelisted Entities")
+    end
+    local whitelistedEntitiesTable = self.WhitelistedEntitiesHeader:AddTable("",2)
+    for _,entry in pairs(self.Whitelists.Whitelisted) do
+        local row = whitelistedEntitiesTable:AddRow()
+        -- Debug.Print("Whitelist entry:")
+        -- Debug.Dump(entry)
+        local name = row:AddCell():AddText(Helper.GetName(entry))
+        local uuid = row:AddCell():AddText(entry)
+    end
+end
+
+function WhitelistTab:GenerateBlacklistedEntities()
+-- Blacklisted Entities
+    if not self.BlacklistedEntitiesHeader then
+        self.BlacklistedEntitiesHeader = self.Tab:AddCollapsingHeader("Blacklisted Entities")
+    end
+    local blacklistedEntitiesTable = self.BlacklistedEntitiesHeader:AddTable("",2)
+    for _,entry in pairs(self.Whitelists.Blacklisted) do
+        local row = blacklistedEntitiesTable:AddRow()
+        -- Debug.Print("Blacklist entry:")
+        -- Debug.Dump(entry)
+        local name = row:AddCell():AddText(Helper.GetName(entry))
+        local uuid = row:AddCell():AddText(entry)
     end
 end

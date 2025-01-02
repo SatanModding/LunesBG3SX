@@ -82,7 +82,7 @@ function Entity:HasPenis(uuid)
     -- current gential to get the correct animation
     local sexGenital = SexUserVars.GetGenital("BG3SX_SexGenital", entity)
     if sexGenital then
-
+        print(uuid, " has sex genital. Determining genital type")
         local genitalTags =  Ext.StaticData.Get(sexGenital, "CharacterCreationAppearanceVisual").Tags
         if Table.Contains(genitalTags, vulva) then
             return false
@@ -106,6 +106,7 @@ function Entity:HasPenis(uuid)
     -- NPCs never get the tags. "Future" companions don't have them too.
     -- E.g., Halsin in Act 1 has no GENITAL_PENIS, he gets it only when his story allows him to join the active party in Act 2.
     if Entity:IsPlayable(uuid) then
+        print(uuid, " is playable. Determining genital type")
         if Osi.IsTagged(uuid, "GENITAL_PENIS_d27831df-2891-42e4-b615-ae555404918b") == 1 then
             return true
         end
@@ -144,7 +145,7 @@ end
 
 -- NPCs don't have CharacterCreationStats
 function Entity:IsNPC(uuid)
-    local E = Helper:GetPropertyOrDefault(Ext.Entity.Get(uuid),"CharacterCreationStats", nil)
+    local E = Helper.GetPropertyOrDefault(Ext.Entity.Get(uuid),"CharacterCreationStats", nil)
     if E then
         return false
     else
@@ -203,11 +204,11 @@ function Entity:TryCopyEntityComponent(uuid_1, uuid_2, componentName)
     if componentName == "ServerItem" then
         for k, v in pairs(srcComponent) do
             if k ~= "Template" and k ~= "OriginalTemplate" then
-                Helper:TryToReserializeObject(dstComponent[k], v)
+                Helper.TryToReserializeObject(dstComponent[k], v)
             end
         end
     else
-        local serializeResult = Helper:TryToReserializeObject(srcComponent, dstComponent)
+        local serializeResult = Helper.TryToReserializeObject(srcComponent, dstComponent)
         if serializeResult then
             _P("[BG3SX][Entity.lua] - TryCopyEntityComponent, with component: " .. componentName)
             _P("[BG3SX][Entity.lua] - Serialization fail")
@@ -284,23 +285,23 @@ function Entity:TryGetEntityValue(uuid, previousComponent, components)
     local entity = Ext.Entity.Get(uuid)
     if #components == 1 then -- End of recursion
         if not previousComponent then
-            local value = Helper:GetPropertyOrDefault(entity, components[1], nil)
+            local value = Helper.GetPropertyOrDefault(entity, components[1], nil)
             return value
         else
-            local value = Helper:GetPropertyOrDefault(previousComponent, components[1], nil)
+            local value = Helper.GetPropertyOrDefault(previousComponent, components[1], nil)
             return value
         end
     end
 
     local currentComponent
     if not previousComponent then -- Recursion
-        currentComponent = Helper:GetPropertyOrDefault(entity, components[1], nil)
+        currentComponent = Helper.GetPropertyOrDefault(entity, components[1], nil)
         -- obscure cases
         if not currentComponent then
             return nil
         end
     else
-        currentComponent = Helper:GetPropertyOrDefault(previousComponent, components[1], nil)
+        currentComponent = Helper.GetPropertyOrDefault(previousComponent, components[1], nil)
     end
 
     table.remove(components, 1)
@@ -350,7 +351,11 @@ end
 ---@paran slots table -  Format: {uuid = entry.VisualResource, index = i}
 function Entity:Redress(entity, oldArmourSet, oldEquipment, slots)
 
-    Osi.SetArmourSet(entity, oldArmourSet)
+
+    if oldArmourSet and (type(oldArmourSet) == "number") then
+        Osi.SetArmourSet(entity, oldArmourSet)
+    end
+
     for _, item in ipairs(oldEquipment) do
         Osi.Equip(entity, item)
     end
@@ -414,7 +419,7 @@ end
 --@param bs int           - bodyshape [0,1]
 local function getBody(character)
     -- Get the properties for the character
-    local E = Helper:GetPropertyOrDefault(Ext.Entity.Get(character),"CharacterCreationStats", nil)
+    local E = Helper.GetPropertyOrDefault(Ext.Entity.Get(character),"CharacterCreationStats", nil)
     local bt =  Ext.Entity.Get(character).BodyType.BodyType
     local bs = 0
     if E then

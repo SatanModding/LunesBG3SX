@@ -37,7 +37,6 @@ function NPC.StripNPC(entity)
         table.insert(removed, removedEntry)
     end
 
-
     Visual.Replicate(entity)
 
     local payload = {uuid = entity.Uuid.EntityUuid}
@@ -51,6 +50,7 @@ end
 ---@param entity EntityHandle
 ---@param toBeRestored table
 function NPC.Redress(entity, toBeRestored)
+
 
     for _, entry in pairs(toBeRestored) do
         Visual.addVisualSetSlot(entity, entry)

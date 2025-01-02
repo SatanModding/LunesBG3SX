@@ -49,7 +49,8 @@ UIEvents.SendScenes:SetHandler(function (payload)
 end)
 UIEvents.NewScene:SetHandler(function (payload)
     local scene = payload
-    local newSceneControl = UIInstance.SceneTab:NewSceneControl(scene)
+    UIInstance.SceneTab:NewSceneControl(scene)
+    UIInstance.SceneTab.NoSceneText.Visible = false
 end)
 
 UIEvents.SendGenitals:SetHandler(function (payload)
@@ -87,7 +88,7 @@ UIEvents.SendAllAnimations:SetHandler(function (payload)
 end)
 
 UIEvents.SendWhitelist:SetHandler(function (payload)
-    UIInstance.WhitelistTab.Whitelist = payload
+    UIInstance.WhitelistTab.Whitelists = payload
     UIInstance.WhitelistTab:GenerateWhitelistArea()
 end)
 

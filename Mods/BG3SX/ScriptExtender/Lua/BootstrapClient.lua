@@ -27,6 +27,7 @@ Ext.Require("Client/SceneControl.lua")
 Ext.Require("Client/Tabs/GenitalTab.lua")
 Ext.Require("Client/Tabs/SettingsTab.lua")
 Ext.Require("Client/Tabs/WhitelistTab.lua")
+Ext.Require("Client/Tabs/NPCTab.lua")
 Ext.Require("Client/Tabs/DebugTab.lua")
 
 Ext.Require("Client/UIEventHandler.lua")
@@ -71,4 +72,20 @@ local function satanTest(self)
 
 end
 
-Ext.RegisterConsoleCommand("s", satanTest)
+
+-- https://discord.com/channels/1211056047784198186/1211069350157488209/1324459469891047525
+function _C()
+        -- 4294901760 is the null user ID 
+        local controlled = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
+        
+        for _,entity in pairs(controlled) do
+
+                if entity.ClientCharacter and entity.ClientCharacter.OwnerUserID == 1 then
+                return entity
+                end
+
+        end
+
+        return nil
+end
+

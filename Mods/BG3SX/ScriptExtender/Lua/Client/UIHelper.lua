@@ -23,7 +23,7 @@ end
 -- function adapted from Aahz  https://www.nexusmods.com/baldursgate3/mods/9832
 ---Gets a table of entity uuid's for current party
 ---@return table<string>|nil
-function UIHelper:GetCurrentParty()
+function UIHelper.GetCurrentParty()
     local party = Ext.Entity.GetAllEntitiesWithComponent("PartyMember")
     local partyMembers = {}
     for _,partyMember in pairs(party) do

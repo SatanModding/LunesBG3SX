@@ -78,9 +78,9 @@ function Genital.getModGenitals(modName)
     for _, genital in pairs(allGenitals) do -- Rens Aasimar contains a Vulva without a linked VisualResource which might cause problems since it outputs nil
         local visualResource = Ext.StaticData.Get(genital, "CharacterCreationAppearanceVisual").VisualResource
 		local resource = Ext.Resource.Get(visualResource, "Visual") -- Visualbank
-	    local sourceFile = Helper:GetPropertyOrDefault(resource, "SourceFile", nil)
+	    local sourceFile = Helper.GetPropertyOrDefault(resource, "SourceFile", nil)
 		if sourceFile then 
-			if Helper:StringContains(sourceFile, modName) then
+			if Helper.StringContains(sourceFile, modName) then
 				table.insert(modGenitals, genital)
 			end
 		end
@@ -116,7 +116,7 @@ end
 
 -- 	if modName then
 --         for _, race in pairs(Data.BodyLibrary.Races) do
--- 			if Helper:StringContains(modName, race) then
+-- 			if Helper.StringContains(modName, race) then
 --                 _P("Error: Mod name matches a race name, which suggests improper directory structure.")
 -- 				_P("Error: Spell will be added to \"Other Genitals\"")
 --                 return "BG3SX_OtherGenitals"
@@ -164,7 +164,7 @@ function Genital.Initialize()
 		end
 	end
 
-	table.insert(allAdditionalGenitals, modGenitals)
+	allAdditionalGenitals = modGenitals
 
 end
 
@@ -219,7 +219,7 @@ function Genital.getFilteredGenitals(modName, listOfGenitals)
 	-- Modded Dicks (including MrFunSize)	
 	elseif modName == "BG3SX_SimpleErections" then
 		modGenitals = allFunErections
-	-- Modded Dicks		
+	-- Modded Dicks
 	else
 		modGenitals = Genital.getModGenitals(modName)
 	end
@@ -253,9 +253,13 @@ function Genital.GetFirstBestGenital(entity)
 	local allPermittedGenitals = Genital.getPermittedGenitals(entity)
 	local permittedVanilla = Table.ConcatenateTables(permittedVulvas, permittedPenises)
 
+	print("Has Penis ", hasPenis)
+
 	if permittedVanilla then
+		print("Vanilla genitals exist")
 		genitalsToSearch = permittedVanilla
 	elseif allPermittedGenitals then
+		print("No Vanilla genitals exist, but modded ones")
 		genitalsToSearch = permittedVanilla
 	else
 		Debug.Print("[BG3SX] No genitals available after filtering for this entity. Adding default human genitals")
@@ -267,9 +271,11 @@ function Genital.GetFirstBestGenital(entity)
 		end
 	end
 	
+
 	for _, genital in pairs(genitalsToSearch) do
 		-- alternatively if hasPenis == false and IsPenis == false, also reuturn (both are/have vulva)
-		if hasPenis and Genital.IsPenis(genital) then
+		if hasPenis == Genital.IsPenis(genital) then
+			print("hasPenis ", hasPenis, " and ", genital, " ispenis ", Genital.IsPenis(genital))
 			return genital
 		end
 	end
@@ -291,9 +297,12 @@ end
 
 -- Get the current genital of the entity
 ---@param entity EntityHandle	- uuid of entity that has a genital
----@return string		- ID of CharacterCreationAppearaceVisual
+---@return table		        - table of IDs of CharacterCreationAppearaceVisual
 function Genital.GetCurrentGenital(entity)
-	Visual.getCurrentVisualOfType(entity, "Private Parts", "CharacterCreationAppearanceVisual")
+	local allGenitals =  Visual.getCurrentVisualOfType(entity, "Private Parts", "CharacterCreationAppearanceVisual")
+	if (allGenitals) and (#allGenitals > 0) then
+		return allGenitals[1]
+	end
 end
 
 
@@ -336,7 +345,7 @@ function Genital.OverrideGenital(newGenital, entity)
 		Debug.Print(entity.Uuid.EntityUuid.. " is not whitelisted to receive genitals")
 	end
 
-	print("overriding genitals with " .. newGenital)
+	print("overriding genitals with " , newGenital)
 
 	Visual.Replicate(entity)
 end
@@ -347,26 +356,24 @@ end
 function Genital.AddGenitalIfHasNone(entity)
 
 	-- TODO - something is fucky wuck here. Shart gets a penis, and gale gets 2
-
-	print("giving ", entity.Uuid.EntityUuid, " a genital")
-
 	local toBeAdded
 	local currentGenital = Genital.GetCurrentGenital(entity)
 
-	if allowedToHaveGenitals(entity.Uuid.EntityUuid) then
+	print("curretGenital for ", entity.Uuid.EntityUuid, " " ,currentGenital)
+
+	if (allowedToHaveGenitals(entity.Uuid.EntityUuid)) and (not currentGenital) then
 
 		local favorite = SexUserVars.GetGenital("BG3SX_OutOfSexGenital", entity)
 
 		if favorite then
 			print("a facorited genital exists. Adding ", favorite)
 			toBeAdded = favorite
-		elseif currentGenital then
-			print("a current genital exists. adding ", currentGenital)
-			toBeAdded = currentGenital
 		else
 			print("no genital exists. Getting a random one")
 			toBeAdded = Genital.GetFirstBestGenital(entity)
+			print("fetched ", toBeAdded)
 		end
+
 
 		Visual.BetterAddVisualOverride(entity, toBeAdded)
 		Visual.Replicate(entity)
@@ -416,13 +423,30 @@ function Genital.GiveSexGenital(entity)
 	local autoerection = Entity:TryGetEntityValue(entity.Uuid.EntityUuid, nil, {"Vars", "BG3SX_AutoSexGenital"})
 	local currentGenital = Genital.GetCurrentGenital(entity)
 	local hasPenis = Entity:HasPenis(entity.Uuid.EntityUuid)
+	local hasVisuals = Visual.HasCharacterCreationAppearance(entity)
 
+
+	if not hasVisuals then
+		Visual.GiveVisualComponentIfHasNone(entity)
+	end
+
+
+	print("giving genitals")
 	if not sexGenital then
-		--print("NO SEX GENITAL HAS BEEN SET")
+		print("NO SEX GENITAL HAS BEEN SET")
 		if not hasPenis then
-			sexGenital = currentGenital
+			print("NO PENIS")
+			if currentGenital then
+				-- if already has vulva, no need to add another
+				print("ALREADY HAS VULVA. RETURNING")
+				SexUserVars.AssignGenital("BG3SX_SexGenital", currentGenital, entity)
+				return
+			else
+				sexGenital = Genital.GetFirstBestGenital(entity)
+				print("CHOSE VULVA ", sexGenital)
+			end
 		else
-			--print("CHOOSING SIMPLE ERECTION")
+			print("CHOOSING SIMPLE ERECTION")
 			sexGenital = Genital.GetDefaultErection(entity)
 		end
 	end
@@ -432,20 +456,21 @@ function Genital.GiveSexGenital(entity)
 
 	SexUserVars.AssignGenital("BG3SX_SexGenital", sexGenital, entity)
 
-	if ((autoerection == nil) or (entity.Vars.BG3SX_AutoSexGenital == true)) then
+	if ((autoerection == nil) or (autoerection == true)) then
 		-- change genitals
 		Visual.overrideVisual(sexGenital, entity, "Private Parts")
 		Visual.Replicate(entity)
 	end
+
 	
+end
+
 	
+-- removes erections from all characters in the list, if applicable
+---@entity EntityHandle
+function  Genital.RemoveSexGenital(entity)
 	
-	-- removes erections from all characters in the list, if applicable
-	---@entity EntityHandle
-	function  Genital.RemoveSexGenital(entity)
-		
-		local normalGenital = SexUserVars.GetGenital("BG3SX_OutOfSexGenital", entity)
-		Genital.OverrideGenital(normalGenital, entity)
-		
-	end
-	end
+	local normalGenital = SexUserVars.GetGenital("BG3SX_OutOfSexGenital", entity)
+	Genital.OverrideGenital(normalGenital, entity)
+	
+end

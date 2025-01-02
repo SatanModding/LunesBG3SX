@@ -240,6 +240,8 @@ function Heightmatching.GetEntityBody(uuid)
         end
     end
 
+    print("HEINGHTMATCHING")
+    print(uuid, " has the body  bt = ", bt, " bs = ", bs , " g = ", g)
     return bs, bt, g  -- TallM_P, MedF_V, etc.
 end
 
@@ -544,11 +546,11 @@ function Heightmatching:NewGetAnimation(character1, character2)
 
     -- if Masturbation
     if not character2 then
-        --print("BEST MATCH IS " .. bestHMEntityOne .. " with animation " , matchingTable[bestHMEntityOne].Solo)
+        print("BEST MATCH IS " .. bestHMEntityOne .. " with animation " , matchingTable[bestHMEntityOne].Solo)
         return matchingTable[bestHMEntityOne].Solo
     else
-        --print("BEST MATCH IS " .. bestHMEntityOne .. " with the animations ")
-        --_D(matchingTable[bestHMEntityOne])
+        print("BEST MATCH IS " .. bestHMEntityOne .. " with the animations ")
+        _D(matchingTable[bestHMEntityOne])
     end
 
     -- if Sex
@@ -563,7 +565,7 @@ function Heightmatching:NewGetAnimation(character1, character2)
     end
 
     local bestHMEntityTwo = getBestValueOfAllScores(scoresEntityTwo)
-    --print("BEST MATCH IS " .. bestHMEntityTwo .. " with animation " , matchingTable[bestHMEntityOne][bestHMEntityTwo].Bottom)
+    print("BEST MATCH IS " .. bestHMEntityTwo .. " with animation " , matchingTable[bestHMEntityOne][bestHMEntityTwo].Bottom)
 
     local animationSet = matchingTable[bestHMEntityOne][bestHMEntityTwo]
 

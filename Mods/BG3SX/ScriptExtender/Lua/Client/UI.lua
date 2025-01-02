@@ -1,4 +1,3 @@
--- TODO Skiz. I need an autoerection setting  and a Stop Sex button
 USERID = nil
 UI = {}
 UI.__index = UI
@@ -54,11 +53,15 @@ function UI:Initialize()
     self.SceneTab = self:NewSceneTab()
     self.GenitalsTab = self:NewGenitalsTab()
     self.SettingsTab = self:NewSettingsTab()
+    self.WhitelistTab = self:NewWhitelistTab()
+    self.NPCTab = self:NewNPCTab()
     self.DebugTab = self:NewDebugTab()
 
     self.SceneTab:Initialize()
     self.GenitalsTab:Initialize()
     self.SettingsTab:Initialize()
+    self.WhitelistTab:Initialize()
+    self.NPCTab:Initialize()
     self.DebugTab:Initialize()
 end
 
@@ -66,6 +69,7 @@ end
 
 
 function UI:AwaitInput(reason, payload)
+
     local payload = payload or nil
     self.Await = {Reason = reason, Payload = payload}
     if not self.EventListener then
@@ -80,7 +84,6 @@ end
 -- end
 
 function UI:CreateEventHandler()
-    
     local handler = Ext.Events.MouseButtonInput:Subscribe(function (e)
         local reason = self.Await.Reason
         local mouseoverPosition = nil
@@ -92,23 +95,21 @@ function UI:CreateEventHandler()
         e:PreventAction() --jjdoorframe()
         if e.Button == 1 and e.Pressed == true then
             if getMouseover() and getMouseover().Inner then
-                mouseoverPosition = getMouseover().Inner.WorldPosition
+                mouseoverPosition = getMouseover().Inner.Position
                 if reason == "MoveScene" then
                     self:InputRecieved(mouseoverPosition)
-                    return
+                elseif reason == "RotateScene" then
+                    self:InputRecieved(mouseoverPosition)
                 end
                 if getMouseover().Inner.Inner[1] then
                     if getMouseover().Inner.Inner[1].Character then
                         mouseoverTarget = getUUIDFromUserdata(getMouseover())
                         if reason == "NewScene" then
                             self:InputRecieved(mouseoverTarget)
-                        elseif reason == "" then
-
-                        elseif reason == "" then
-
-                        elseif reason == "" then
-
                         end
+                    else
+                        -- No Character Found
+                        self:CancelAwaitInput()
                     end
                 end
             end
@@ -117,14 +118,22 @@ function UI:CreateEventHandler()
     return handler
 end
 
-function UI:InputRecieved(inputPayload)
-    if self.Await.Reason == "NewScene" then
-        UIEvents.AskForSex:SendToServer({ID = self.ID, Caster = _C().Uuid.EntityUuid, Target = inputPayload})
-    elseif self.Await.Reason == "MoveScene" then
-        UIEvents.SwapPosition:SendToServer({ID = self.ID, Scene = self.Await.Payload, Position = inputPayload})
-    end
+function UI:CancelAwaitInput()
     Ext.Events.MouseButtonInput:Unsubscribe(self.EventHandler)
     self.Await = nil
+end
+
+function UI:InputRecieved(inputPayload)
+    local reason = self.Await.Reason
+    if reason == "NewScene" then
+        _P("Ask for sex received. Caster: ", _C().Uuid.EntityUuid, " target = ", inputPayload)
+        UIEvents.AskForSex:SendToServer({ID = USERID, Caster = _C().Uuid.EntityUuid, Target = inputPayload})
+    elseif reason == "RotateScene" then
+        UIEvents.RotateScene:SendToServer({ID = USERID, Scene = self.Await.Payload, Position = inputPayload})
+    elseif reason == "MoveScene" then
+        UIEvents.MoveScene:SendToServer({ID = USERID, Scene = self.Await.Payload, Position = inputPayload})
+    end
+    self:CancelAwaitInput()
 end
 
 function UI.DestroyChildren(obj)

@@ -15,3 +15,4 @@ data "Description" "h5b7303dfgde02g417dgbb26g0843d58ebef4"
 data "Icon" "BG3SX_ICON_TOGGLE_Stripping"
 data "StackId" "BG3SX_BLOCK_STRIPPING_BOOST"
 data "StatusPropertyFlags" "DisableOverhead;DisableCombatlog"
+

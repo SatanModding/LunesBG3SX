@@ -12,7 +12,7 @@ local playAnimation
 function Animation:new(actor, animSpell)
 
     local instance = setmetatable({
-        actor = Helper:CleanPrefix(actor),
+        actor = Helper.CleanPrefix(actor),
         animationData = animSpell, -- The chosen animations data table
         animation = ""
     }, Animation)
@@ -130,7 +130,7 @@ function Animation.GetFilteredAnimations(filter)
             local categories
 
             if type (Category) == "string" then
-                categories = Helper:StringToTable(Category)
+                categories = Helper.StringToTable(Category)
             elseif type(Category) == "table" then
                 categories = Category
             else

@@ -246,7 +246,7 @@
 --     local characterButton
 --     local foundOrigin = false
 --     for uuid,origin in pairs(Data.Origins) do
---         if Helper:StringContains(uuid, character.Uuid.EntityUuid) then
+--         if Helper.StringContains(uuid, character.Uuid.EntityUuid) then
 --             foundOrigin = true
 --             characterButton = row:AddCell():AddImageButton("","EC_Portrait_"..origin, size)
 --         end
@@ -277,7 +277,7 @@
 --     local row = charTable.AddRow()
 --     --row:AddCell():AddText("Test")
 --     local characterCount = 0
---     local party = UIHelper:GetCurrentParty()
+--     local party = UIHelper.GetCurrentParty()
 --     for _, uuid in pairs(party) do
 --         if characterCount > 0 and characterCount % 4 == 0 then
 --             row = charTable.AddRow()

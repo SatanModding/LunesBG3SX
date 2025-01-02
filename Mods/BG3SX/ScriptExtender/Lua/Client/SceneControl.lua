@@ -4,7 +4,7 @@ function SceneTab:NewSceneControl(Scene)
     -- Check if there are any viable leftover SceneControl instances
     if self.ActiveSceneControls and #self.ActiveSceneControls > 0 then
         for _,sceneControl in pairs(self.ActiveSceneControls) do
-            if sceneControl.Unused == true then
+            if sceneControl.Unused then
                 sceneControl.Scene = Scene
                 sceneControl.Window.Open = true
                 sceneControl:UpdateWindowName()
@@ -15,16 +15,16 @@ function SceneTab:NewSceneControl(Scene)
         end
     end
     -- If no viable leftover was found, create a new one
-    _DS(self.ActiveSceneControls)
-    _P("ActiveSceneControls " .. #self.ActiveSceneControls)
-    local id = #self.ActiveSceneControls + 1
+    --_DS(self.ActiveSceneControls)
+    --_P("ActiveSceneControls " .. #self.ActiveSceneControls)
+    local id = #self.ActiveSceneControls + 1  -- this seems wonky. It always increases
     local instance = setmetatable({
         ID = id,
-        Scene = Scene,
+        Scene = Scene, --check if it needs to be updated when scene changes or iif this points to the original one
         Window = Ext.IMGUI.NewWindow(id),
         }, SceneControl)
     instance:UpdateWindowName()
-    table.insert(self.ActiveSceneControls, instance)
+    table.insert(self.ActiveSceneControls, {Instance = instance})
     instance:Initialize()
     return instance
 end
@@ -53,6 +53,13 @@ end
 -- On new SceneControl creation, pick up on if there are any empty ones and use these first before creating a new one
 function SceneControl:Destroy()
     UIEvents.StopSex:SendToServer({ID = self.ID, Scene = self.Scene})
+    for _,SceneControl in pairs(UIInstance.SceneTab.ActiveSceneControls) do
+        if SceneControl.Instance == self then
+            SceneControl.Reference:Destroy() -- Delete SceneTab Reference Imgui Element
+            SceneControl.Reference = nil -- Set to nil for NoSceneText update
+            UIInstance.SceneTab:UpdateNoSceneText()
+        end
+    end
     for componentName,component in pairs(self) do
         if (component ~= self.ID) and (component ~= self.Window) then
             component = nil
@@ -62,57 +69,75 @@ function SceneControl:Destroy()
             --self.Window:Destroy()
         end
     end
-    self = nil
+    self.Unused = true
+    --self = nil
 end
 
 function SceneControl:Initialize()
     -- Don't have to redo basic Window settings if it was used before, thats why we reset this value after initialization
     if not self.Unused then
         self.Window:SetSize({500, 500}, "FirstUseEver")
-        self.Window:SetStyle("WindowRounding", 4.0)
+        -- self.Window:SetStyle("WindowRounding", 4.0)
         self.Window.Closeable = true
         self.Window.OnClose = function ()
-            self:Destroy()
+            self.Window.Open = false
         end
     end
 
     self.Animations = {} 
     self.AnimationPicker = {}
     self:CreateAnimationControlArea()
+    self:CreateSceneTabReference()
+end
+
+function SceneControl:CreateSceneTabReference()
+    local refGroup = UIInstance.SceneTab.Tab:AddGroup("")
+    local openButton = refGroup:AddButton("Open")
+    local closeButton = refGroup:AddButton("Close")
+    local ref = refGroup:AddText(self.Window.Label)
+    closeButton.SameLine = true
+    ref.SameLine = true
+    openButton.OnClick = function()
+        self.Window.Open = true
+    end
+    closeButton.OnClick = function()
+        self:Destroy()
+    end
+    for _,SceneControl in pairs(UIInstance.SceneTab.ActiveSceneControls) do
+        if SceneControl.Instance == self then
+            SceneControl.Reference = refGroup
+        end
+    end
 end
 
 function SceneControl:AddControlButtons()
     local buttons = {
-        "Swap Position",
-        "Rotate Scene",
-        "Change Camera Height",
-        "Move Scene",
-        "Stop Sex",
+        ["Swap Position"] = "BG3SX_ICON_Scene_SwitchPlaces",
+        ["Rotate Scene"] = "BG3SX_ICON_Scene_Rotate",
+        --"Change Camera Height",
+        ["Move Scene"] = "BG3SX_ICON_Scene_Move",
+        ["Stop Sex"] = "BG3SX_ICON_Scene_End",
     }
-    for _,button in pairs(buttons) do
-        local controlButton = self.Window:AddButton(button)
-        controlButton.OnClick = function()
-           self:UseSceneControlButton(controlButton.Label) 
+    for buttonName,buttonIcon in pairs(buttons) do
+        local iconButton = self.Window:AddImageButton(buttonName, buttonIcon, {50,50})
+        iconButton.SameLine = true
+        iconButton.OnClick = function()
+           self:UseSceneControlButton(iconButton.Label) 
         end
-        controlButton.SameLine = true
+        iconButton:Tooltip():AddText(iconButton.Label)
     end
 end
 
 function SceneControl:UseSceneControlButton(buttonLabel)
     --local UI = UI.GetUIByID(self.UI)
     if buttonLabel == "Swap Position" then
-        UIInstance:AwaitInput("SwapPosition", self.Scene)
+        UIEvents.SwapPosition:SendToServer({ID = USERID, Scene = self.Scene})
     elseif buttonLabel == "Rotate Scene" then
         UIInstance:AwaitInput("RotateScene", self.Scene)
-        --UIEvents.RotateScene:SendToServer({ID = USERID, Scene = self.Scene})
-
     elseif buttonLabel == "Change Camera Height" then
-        UIEvents.ChangeCameraHeight:SendToServer({ID = USERID, Scene = self.Scene})
-
+        UIEvents.ChangeCameraHeight:SendToServer({ID = USERID})
     elseif buttonLabel == "Move Scene" then
         UIInstance:AwaitInput("MoveScene", self.Scene)
-        --UIEvents.MoveScene:SendToServer({ID = USERID, Scene = self.Scene})
-
     elseif buttonLabel == "Stop Sex" then
         self:Destroy()
     end
@@ -280,16 +305,9 @@ function SceneControl:AddWindowSizeTest()
     end
 end
 
-
-
-
-
-
 -- sending events not secessary as this is accessible on the client
 -- UIEvents.FetchFilteredAnimations:SetHandler(function (payload)
 --     local filter = payload.filter
 --     local animations = getFilteredAnimations(filter)
 --     UIEvents:SendFilteredAnimations(animations, payload.ID)
-
 -- end)
-

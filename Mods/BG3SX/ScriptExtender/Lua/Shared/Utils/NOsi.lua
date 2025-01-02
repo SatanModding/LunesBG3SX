@@ -2,12 +2,20 @@
 NOsi = {}
 NOsi.__index = NOsi
 
+
+------------------------------------------------------------------------
+-- Teleport
+------------------------------------------------------------------------
+
+
 ---@param character string -- uuid of an entity
 ---@param character2 string -- uuid of an entity to "teleport to"
-function NOsi:TeleportTo(character, character2)
+function NOsi.TeleportTo(character, character2)
+
+        print("Calling NOsi.TeleportTo")
 
     if Ext.IsServer() then
-        Debug.Print("NOsi:TeleportTo is not available on the Server")
+        Debug.Print("NOsi.TeleportTo is not available on the Server")
         return
     else
         local entity = Ext.Entity.Get(character)
@@ -19,6 +27,7 @@ function NOsi:TeleportTo(character, character2)
                 Debug.Print("Character" .. character2 .. " is not an entity")
                 return
         else
+                print("Ttransforming")
                 local targetposition = entity2.Transform.Transform.Translate
                 entity.Transform.Transform.Translate = targetposition
                 entity.Visual.Visual:SetWorldTranslate(targetposition)
@@ -29,10 +38,13 @@ end
 
 ---@param character string -- uuid of an entity
 ---@param position table   -- table of {x,y,z} 
-function NOsi:TeleportToPosition(character, position)
+function NOsi.TeleportToPosition(character, position)
+
+        print("teleporting ", character ," to position ")
+        _D(position)
 
     if Ext.IsServer() then
-        Debug.Print("NOsi:TeleportToPosition is not available on the Server")
+        Debug.Print("NOsi.TeleportToPosition is not available on the Server")
         return
     else
         local entity = Ext.Entity.Get(character)
@@ -48,35 +60,9 @@ function NOsi:TeleportToPosition(character, position)
 end
 
 
----@param character string -- uuid of an entity
----@param position number   -- number (radian)
-function NOsi:RotateToPosition(character, position)
-
-    if Ext.IsServer() then
-        Debug.Print("NOsi:RotateToPosition is not available on the Server")
-        return
-    else
-
-
-        local entity = Ext.Entity.Get(character)
-        if not entity then
-                Debug.Print("Character" .. character .. " is not an entity")
-                return
-        else
-       
-                entity.Steering.TargetRotation = position
-        end
-    end 
-
-
-end
-
-
-
-
-
-
-
+------------------------------------------------------------------------
+-- Rotate
+------------------------------------------------------------------------
 
 -- use a helper object and Osi to make an entity rotate
 ---@param uuid string
@@ -97,7 +83,6 @@ function Entity:SaveEntityRotation(uuid)
     return helper
 end
 
-
 -- Finds the angle degree of an entity based on position difference to a target
 ---@param entity string - The entities uuid
 ---@param target string - The targets uuid
@@ -115,10 +100,55 @@ function Entity:FindAngleToTarget(entity, target)
         return degree
 end
 
-function NOsi.Rotate(character, position)
+---@param character string -- uuid of an entity
+---@param position number   -- number (radian)
+function NOsi.SetRotate(character, position)
+    if Ext.IsServer() then
+        Debug.Print("NOsi.RotateToPosition is not available on the Server")
+        return
+    else
+        local entity = Ext.Entity.Get(character)
+        if not entity then
+                Debug.Print("Character" .. character .. " is not an entity")
+                return
+        else
+                entity.Steering.TargetRotation = position
+        end
+    end 
+end
+
+-- Don't touch, this works
+function NOsi.RotateByDegree(character, degree)
+        if degree and type(degree) == "string" then
+                degree = tonumber(degree)
+        elseif degree and type(degree) == "number" then
+                -- Do nothing           
+        elseif not degree or (type(degree) ~= "string" and type(degree) ~= "number") then
+                        Debug.Print("Not a valid number")
+                return 
+        end
 
         if Ext.IsServer() then
-                Debug.Print("NOsi:RotateToPosition is not available on the Server")
+                Debug.Print("NOsi.RotateToPosition is not available on the Server")
+                return
+        elseif Ext.IsClient() then
+                local entity = Ext.Entity.Get(character)
+                if not entity then
+                        Debug.Print("Character" .. character .. " is not an entity")
+                        return
+                else
+                        local currentRotation = entity.Steering.TargetRotation
+                        local radian = Math.DegreeToRadian(degree)
+                        local newRotation = currentRotation + radian
+                        entity.Steering.TargetRotation = newRotation
+                end
+        end
+end             
+
+function NOsi.RotateToPosition(character, position)
+
+        if Ext.IsServer() then
+                Debug.Print("NOsi.RotateToPosition is not available on the Server")
                 return
         elseif Ext.IsClient() then
                 local entity = Ext.Entity.Get(character)
@@ -126,28 +156,30 @@ function NOsi.Rotate(character, position)
                         Debug.Print("Character" .. character .. " is not an entity")
                         return
                 elseif not position then
-                                Debug.Print("Not a valid position to rotate towards")
+                        Debug.Print("Not a valid position to rotate towards")
                         return
                 else
                         local entityPos = entity.Transform.Transform.Translate
                         local targetPos = position
-                        local currentRotation = entity.Transform.Transform.RotationQuat
                         local dif = {
                                 y = entityPos[1] - targetPos[1],
                                 x = entityPos[2] - targetPos[2],
                                 z = entityPos[3] - targetPos[3],  
                         }
-                        local degree = math.atan(dif.y, dif.x)
-                        local newRotation = {currentRotation[1], degree, currentRotation[3], currentRotation[4]}
-                        entity.Transform.Transform.RotationQuat = newRotation
-                        entity.Visual.Visual:SetWorldRotate(newRotation)
+                        local angle = Ext.Math.Atan2(dif.y, dif.x)
+                        local degree = math.deg(angle)
+
+                        local currentRotation = entity.Steering.TargetRotation
+                        local newRotation = currentRotation + degree
+                        local newRotRadian = Math.DegreeToRadian(newRotation)
+                        entity.Steering.TargetRotation = newRotRadian
                 end
         end 
 end
 
 function NOsi.RotateTo(character, character2)
         if Ext.IsServer() then
-                Debug.Print("NOsi:RotateToPosition is not available on the Server")
+                Debug.Print("NOsi.RotateToPosition is not available on the Server")
                 return
         elseif Ext.IsClient() then
 
@@ -173,41 +205,13 @@ function NOsi.RotateTo(character, character2)
                         --entity.Transform.Transform.RotationQuat = newRotation
                         --entity.Visual.Visual:SetWorldRotate(newRotation)
                         entity.Steering.TargetRotation = degree
-                        end
-        end
-end
-
-function NOsi.RotateByDegree(character, degree)
-        if degree and type(degree) == "string" then
-                degree = tonumber(degree)
-        elseif degree and type(degree) == "number" then
-                -- Do nothing
-        elseif not degree or (type(degree) ~= "string" and type(degree) ~= "number") then
-                        Debug.Print("Not a valid number")
-                return 
-        end
-
-        if Ext.IsServer() then
-                Debug.Print("NOsi:RotateToPosition is not available on the Server")
-                return
-        elseif Ext.IsClient() then
-                local entity = Ext.Entity.Get(character)
-                if not entity then
-                        Debug.Print("Character" .. character .. " is not an entity")
-                        return
-                else
-                        local currentSteeringRotation = entity.Steering.TargetRotation
-                        local radian = Math.DegreeToRadian(degree)
-                        local newRotation = currentSteeringRotation + radian
-                        entity.Steering.TargetRotation = newRotation
                 end
         end
 end
 
-
 function NOsi.CopyRotation(character, character2)
         if Ext.IsServer() then
-                Debug.Print("NOsi:RotateToPosition is not available on the Server")
+                Debug.Print("NOsi.RotateToPosition is not available on the Server")
                 return
         elseif Ext.IsClient() then
                 local entity = Ext.Entity.Get(character)
@@ -247,28 +251,31 @@ if Ext.IsClient() then
 
                 if type(targetPosition) == "table" then
                         -- targetPosition is coordinates
-                        --NOsi:TeleportToPosition(character, targetPosition)
+                        NOsi.TeleportToPosition(character, targetPosition)
                 else
                         -- targetposition is another character
-                        --NOsi:TeleportTo(character, targetPosition)
+                        NOsi.TeleportTo(character, targetPosition)
                 end
         end)
 
 
         UIEvents.RequestRotation:SetHandler(function (payload)
 
-                print("receeived rotation request")
+                print("received rotation request")
                 _D(payload)
 
                 local character = payload.character
                 local targetRotation = payload.target
 
-                if type(targetRotation) == "number" then
+                if type(targetRotation) == "number" then -- 81
                         -- targetPosition is coordinates
-                        --NOsi:RotateToPosition(character, targetRotation)
+                        NOsi.SetRotate(character, targetRotation)
+                elseif type(targetRotation) == "table" then -- x,y,z
+
+                        NOsi.RotateToPosition(character, targetRotation)
                 else
                         -- targetposition is another character
-                        --NOsi.RotateTo(character, targetRotation)
+                        NOsi.RotateTo(character, targetRotation)
                 end
         end)
 end

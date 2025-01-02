@@ -120,6 +120,12 @@ end
 ---@return 		concatenatedTable   - Returns both Tables as a single new one
 function Table.ConcatenateTables(t1, t2)
     local result = {}
+    if not t1 then
+        return t2
+    elseif not t2 then
+        return t1
+    end
+    
     for i = 1, #t1 do
         result[#result + 1] = t1[i]
     end

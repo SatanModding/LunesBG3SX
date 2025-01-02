@@ -17,10 +17,10 @@ UIEvents.AskForSex:SetHandler(function (payload)
     --Debug.Print("CASTER ".. caster)
     --Debug.Print("TARGET ".. target)
 
-    -- masturbation 
-
+    
     -- TODO - don't allow scenes to start when one entity is already in a scene
-
+    
+    -- masturbation 
     if target == caster then
         if Entity:IsWhitelisted(caster, true) then
             Ext.Timer.WaitFor(200, function() -- Wait for erections
@@ -48,22 +48,24 @@ UIEvents.ChangeAnimation:SetHandler(function (payload)
     Debug.Dump(payload)
     local caster = payload.Caster
     local animation = payload.Animation
+    if animation.NextAnimation then
+        
+    end
     Osi.PlayAnimation(caster, animation)
 end)
 UIEvents.SwapPosition:SetHandler(function (payload)
-    local scene = Scene:FindSceneByEntity(payload.Caster)
-    local position = payload.Position
+    local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
+    scene:SwapPosition()
 end)
+
 UIEvents.ChangeCameraHeight:SetHandler(function (payload)
     Debug.Print("Currently not Implemented - Needs access to Camera Control")
 end)
 UIEvents.MoveScene:SetHandler(function (payload)
-    local scene = Scene:FindSceneByEntity(payload.Scene)
+    local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
     local position = payload.Position -- vec3 WorldPosition table {x,y,z}
 
-    for _, character in pairs(scene.entities) do
-        UIEvents.RequestTeleport:Broadcast({character= character, target = position})
-    end
+    scene:MoveSceneToLocation(position)
 end)
 
         
@@ -83,6 +85,11 @@ UIEvents.FetchGenitals:SetHandler(function (payload)
 end)
     
     
+UIEvents.RotateScene:SetHandler(function (payload)
+    local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
+    local position = payload.Position
+    scene:RotateScene(position)
+end)
    
 UIEvents.FetchAnimations:SetHandler(function (payload)
     local sceneType = Scene:FindSceneByEntity(payload.Caster)

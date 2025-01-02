@@ -55,7 +55,7 @@ function UIEvents:Initialize()
 
     -- Whitelist Tab
         -- Client -> Server
-    self.FetchWhitelist = Ext.Net.CreateChannel(ModuleUUID, "RequestWhitelist")
+    self.FetchWhitelist = Ext.Net.CreateChannel(ModuleUUID, "FetchWhitelist")
         -- Server -> Client
     self.SendWhitelist = Ext.Net.CreateChannel(ModuleUUID, "SendWhitelist")
 end

@@ -75,7 +75,6 @@ local function playAnimationAndSound(scene, animSpell)
     local newAnimation
     local newSound
 
-
     for _,actor in pairs(scene.entities) do
         --print("creating new animation class for ", actor, " with animation ", animSpell)
         newAnimation = Animation:new(actor, animSpell)
@@ -103,12 +102,14 @@ function Sex:PlayAnimation(character, animSpell)
 
     if sceneType == "MasturbateMale" or sceneType == "MasturbateFemale" then
     elseif sceneType == "Straight" then -- Handle this in a different way to enable actor swapping even for straight animations
+        
         -- In case of actor1 not being male, swap them around to still assign correct animations
         if not Entity:HasPenis(scene.entities[1]) then
             local savedActor = scene.entities[1]
             scene.entities[1] = scene.entities[2]
             scene.entities[2] = savedActor
         end
+
     -- Might need to switch to free-form animation choosing because Heightmatching already is pretty complicated with 2 entities
     -- elseif sceneType == "FFF" then
     -- elseif sceneType == "FFM" then
@@ -177,9 +178,9 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
                     slots[character] = slot
                 end
 
-                Scene:new(sexHavers, equipments, armorsets, slots)
-
             end
+
+            Scene:new(sexHavers, equipments, armorsets, slots)
                           
             --Sex:InitSexSpells(scene)
             Sex:PlayAnimation(caster, animationData)
@@ -269,10 +270,15 @@ function Sex:Strip(character)
     local equipment = {}
     local slot = {}
 
+    local entity = Ext.Entity.Get(character)
+    if not entity then
+        Debug.Print("Is not a valid entity ", character)
+    end
+
 
     if Entity:IsNPC(character) then
     -- NPCs only have slots in their CharacterVisualResourceID
-        slot = NPC.StripNPC(character)
+        slot = NPC.StripNPC(entity)
         
     else
         equipment = Entity:UnequipAll(character)
@@ -309,3 +315,4 @@ function Sex:ChangeCameraHeight(uuid)
     end
     Ext.ModEvents.BG3SX.CameraHeightChange:Throw({uuid}) 
 end
+

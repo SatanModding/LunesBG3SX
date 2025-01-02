@@ -32,9 +32,10 @@ end
 playSound = function(self)
     local scene = Scene:FindSceneByEntity(self.actor)
     if scene then
+        local nothing = "1f012ea2-236e-473c-b261-4523753ab9bb"
         local minRepeatTime = self.duration - 200
         local maxRepeatTime = self.duration + 200
-        Osi.PlaySound(self.actor, "") -- First, stop current sound
+        Osi.PlaySound(self.actor, nothing) -- First, stop current sound
 
         local sound = self.soundTable[math.random(1, #self.soundTable)]
         Osi.PlaySound(self.actor, sound) -- Plays a random entry of sounds on an actor

@@ -839,7 +839,7 @@ Data.BlacklistedEntities = {
 --- @return boolean|string - Returns true for whitelisted entities, false if it is not listed.
 function Entity:IsWhitelistedEntity(uuid)
     for _, whitelistedUUID in ipairs(Data.WhitelistedEntities) do
-        if Helper:StringContains(uuid, whitelistedUUID) then
+        if Helper.StringContains(uuid, whitelistedUUID) then
             return true -- The UUID is whitelisted
         end
     end
@@ -852,7 +852,7 @@ end
 --- @return boolean|string - Returns true for blacklisted entities, false if it is not listed.
 function Entity:IsBlacklistedEntity(uuid)
     for _, blacklistedUUID in ipairs(Data.BlacklistedEntities) do
-        if Helper:StringContains(uuid, blacklistedUUID) then
+        if Helper.StringContains(uuid, blacklistedUUID) then
             return true -- The UUID is blacklisted
         end
     end

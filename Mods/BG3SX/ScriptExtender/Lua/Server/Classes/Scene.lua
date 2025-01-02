@@ -111,7 +111,7 @@ function Scene:FindSceneByEntity(entityToSearch)
 
     for i, scene in ipairs(Data.SavedScenes) do
         for _, entity in pairs(scene.entities) do
-            if Helper:StringContains(entityToSearch, entity) then
+            if Helper.StringContains(entityToSearch, entity) then
                 return scene
             end
         end
@@ -326,6 +326,12 @@ initialize = function(self)
     table.insert(Data.SavedScenes, self)
     Ext.ModEvents.BG3SX.SceneInit:Throw({self})
 
+    print("all saved scenes")
+    for _, scene in pairs(Data.SavedScenes) do
+        _D(scene.entities)
+    end
+  
+
 
     print("initializing scene")
 
@@ -353,12 +359,13 @@ initialize = function(self)
     end
 
         -- TODO - why do we wait?
-        Ext.Timer.WaitFor(100, function ()
+        --Ext.Timer.WaitFor(100, function ()
             print("requesting teleport")
             for _, character in pairs(self.entities) do
                 UIEvents.RequestTeleport:Broadcast({character= character, target = self.entities[1]})
+                UIEvents.RequestRotation:Broadcast({character = character, target = self.entities[1]})
             end
-        end)
+        --end)
         
         
         --Osi.TeleportToPosition(entity, self.rootPosition.x, self.rootPosition.y, self.rootPosition.z) -- now handled correctly in actor initialization
@@ -391,12 +398,12 @@ end
 -- Teleports any entity/actor/props to a new location
 ---@param entity        string    - The caster of the spell and entity to check which scene belongs to them
 ---@param newLocation   table   - The new location
-function Scene:MoveSceneToLocation(entity, newLocation)
-    local scene = Scene:FindSceneByEntity(entity)
-    local oldLocation = scene.rootPosition -- Only used for Event payload
-    scene.rootPosition = newLocation -- Always update rootPosition of a scene after changing it
+function Scene:MoveSceneToLocation(newLocation)
 
-    for _, actor in ipairs(scene.actors) do
+    local oldLocation = self.rootPosition -- Only used for Event payload
+    self.rootPosition = newLocation -- Always update rootPosition of a scene after changing it
+
+    for _, character in ipairs(self.entities) do
 
         -- Keep this in case we want to re-enable a maximum allowed distance to teleport
         ---------------------------------------------------------------------------------------
@@ -410,42 +417,39 @@ function Scene:MoveSceneToLocation(entity, newLocation)
         -- end
         ---------------------------------------------------------------------------------------
 
-        Osi.TeleportToPosition(actor.uuid, newLocation.x, newLocation.y, newLocation.z)
-        Osi.TeleportToPosition(actor.parent, newLocation.x, newLocation.y, newLocation.z)
-        if #scene.props > 0 then
-            for _, prop in pairs(scene.props) do
-                Osi.TeleportToPosition(prop, newLocation.x, newLocation.y, newLocation.z)
-            end
-        end
+        UIEvents.RequestTeleport:Broadcast({character = character, target = newLocation})
     end
 
-    scene:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
-    Sex:PlayAnimation(entity, scene.currentAnimation) -- Play prior animation again
+        if #self.props > 0 then
+            for _, prop in pairs(self.props) do
+                UIEvents.RequestTeleport:Broadcast({character = prop, target = newLocation})
+            end
+        end
+    
 
-    Ext.ModEvents.BG3SX.SceneMove:Throw({scene = scene, oldLoca = oldLocation, newLoca = newLocation})
+    --scene:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
+    --Sex:PlayAnimation(entity, self.currentAnimation) -- Play prior animation again
+
+    Ext.ModEvents.BG3SX.SceneMove:Throw({scene = self, oldLoca = oldLocation, newLoca = newLocation})
 end
 
 
 -- Rotates a scene by creating an invisible helper the actors can steer to
 ---@param caster any
 ---@param location any
-function Scene:RotateScene(caster, location)
+function Scene:RotateScene(location)
 
     print("called rotate scene")
     
 
-    NOsi.CopyRotation(caster, location)
+    for _, character in pairs(self.entities) do
+        UIEvents.RequestRotation:Broadcast({character = character, target = location})
+    end
 
-    -- local scene = Scene:FindSceneByEntity(caster)
-    -- local helper = Osi.CreateAt("06f96d65-0ee5-4ed5-a30a-92a3bfe3f708", location.x, location.y, location.z, 0, 0, "")
-    -- for _, actor in pairs(scene.actors) do
-    --     Entity:ClearActionQueue(actor.uuid) -- Clears any stuff the actor might be stuck on
-    --     Osi.SteerTo(actor.uuid, helper, 1) -- 1 = instant
-    -- end
-    -- Osi.RequestDeleteTemporary(helper) -- Deletes the rotationHelper after rotating
-
-    scene:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
-    Sex:PlayAnimation(caster, scene.currentAnimation) -- Play prior animation again
+   
+    -- TODO - probably not required whenb using Nosi 
+    --self:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
+    --Sex:PlayAnimation(character, self.currentAnimation) -- Play prior animation again
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -479,15 +483,19 @@ local function sceneEntityReset(character)
 
     -- Getting old position
 
+    print("all startLoctions")
+    _D(scene.startLocations)
+
     for _, entry in ipairs(scene.startLocations) do
         if entry.entity == character then
             startLocation = entry
         end
     end
 
-    --NOsi:TeleportToPosition(character, {startLocation.position[1], startLocation.position[2], startLocation.position[3]})
 
+    print("teleporting ", character , " to the startposition ", startLocation.position[1], startLocation.position[2],startLocation.position[3] )
 
+    UIEvents.RequestTeleport:Broadcast({character = character, target = {startLocation.position[1], startLocation.position[2], startLocation.position[3]}})
     UIEvents.RequestRotation:Broadcast({character = character, target = startLocation.rotation})
 
     Osi.RemoveBoosts(character, "ActionResourceBlock(Movement)", 0, "", "") -- Unlocks movement
@@ -557,3 +565,20 @@ end
 --ConsoleCommand.New(Scene.TerminateAllScenes, "Terminates all Scenes")
 Ext.RegisterConsoleCommand("BG3SX.TerminateScenes", Scene.TerminateAllScenes) -- Killswitch
 
+
+
+function Scene:SwapPosition()
+
+    local savedActor = self.entities[1]
+
+    Ext.ModEvents.BG3SX.SceneSwitchPlacesBefore:Throw({self.entities})
+
+    self.entities[1] = self.entities[2]
+    self.entities[2] = savedActor
+
+    Ext.ModEvents.BG3SX.SceneSwitchPlacesAfter:Throw({self.entities})
+
+    self:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
+    Sex:PlayAnimation(savedActor, self.currentAnimation)
+
+end

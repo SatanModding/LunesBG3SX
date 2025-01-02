@@ -23,7 +23,7 @@ STRINGIFY_OPTIONS = {
 
 -- TODO: Check if that even works
 -- Generates a new UUID
-function Helper:GenerateUUID()
+function Helper.GenerateUUID()
     local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
     return string.gsub(template, '[xy]', function (c)
         local v = (c == 'x') and math.random(0, 0xf) or math.random(8, 0xb)
@@ -42,14 +42,14 @@ end
 --        _P(i .. " is odd")
 --    end
 -- end
-function Helper:isEven(n)
+function Helper.isEven(n)
     return n % 2 == 0
 end
 
 
 -- Checks if a number is odd
 ---@param n int - The number to check
-function Helper:isOdd(n)
+function Helper.isOdd(n)
     return n % 2 ~= 0
 end
 
@@ -58,7 +58,7 @@ end
 -- TODO: Description
 ---@param srcObject any
 ---@param dstObject any
-function Helper:TryToReserializeObject(srcObject, dstObject)
+function Helper.TryToReserializeObject(srcObject, dstObject)
     local serializer = function()
         local serialized = Ext.Types.Serialize(srcObject)
         Ext.Types.Unserialize(dstObject, serialized)
@@ -73,7 +73,7 @@ end
 
 -- Function to clean the prefix and return only the ID
 ---@return string   - UUID
-function Helper:CleanPrefix(fullString)
+function Helper.CleanPrefix(fullString)
     -- Use pattern matching to extract the ID part
     local id = fullString:match(".*_(.*)")
 
@@ -85,7 +85,7 @@ end
 
 
 -- Function to check if not all values are false
-function Helper:NotAllFalse(data)
+function Helper.NotAllFalse(data)
     for _, value in pairs(data) do
         if value then
             return true
@@ -99,14 +99,14 @@ end
 ---@param str string 	- The string to search within.
 ---@param sub string 	- The substring to look for.
 ---@return bool			- Returns true if 'sub' is found within 'str', otherwise returns false.
-function Helper:StringContains(str, sub)
+function Helper.StringContains(str, sub)
     -- Make the comparison case-insensitive
     str = str:lower()
     sub = sub:lower()
     return (string.find(str, sub, 1, true) ~= nil)
 end
 
-function Helper:ResetWhitelistToDefault()
+function Helper.ResetWhitelistToDefault()
 end
 
 -- Retrieves the value of a specified property from an object or returns a default value if the property doesn't exist.
@@ -114,7 +114,7 @@ end
 ---@param propertyName  - The name of the property to retrieve.
 ---@param defaultValue  - The default value to return if the property is not found.
 ---@return any           - The value of the property if found; otherwise, the default value.
-function Helper:GetPropertyOrDefault(obj, propertyName, defaultValue)
+function Helper.GetPropertyOrDefault(obj, propertyName, defaultValue)
     local success, value = pcall(function() return obj[propertyName] end)
     if success then
         return value or defaultValue
@@ -127,7 +127,7 @@ end
 -- Creates a helper object to later find a position with
 ---@param uuid  string  - The UUID to create a Marker for
 ---@return      entity  - The Marker entity (invisible, save with a new name or in a table to use)
-function Helper:CreateLocationMarker(uuid)
+function Helper.CreateLocationMarker(uuid)
     local Marker = {}
     Marker.x, Marker.y, Marker.z = Osi.GetPosition(uuid)
     -- returns GUIDstring
@@ -138,7 +138,7 @@ end
 
 -- Destroys a marker
 ---@param marker    string  - The Marker UUID to destroy 
-function Helper:DestroyMarker(marker)
+function Helper.DestroyMarker(marker)
     Osi.RequestDelete(marker) -- Check if we don't need Osi.RequestDeleteTemporary
 end
 
@@ -146,7 +146,7 @@ end
 -- Credit to FallenStar  https://github.com/FallenStar08/SharedCode
 -- Slightly modified version
 ---@return goodies  - Table of all summons, avatars and Origins
-function Helper:GetEveryoneThatIsRelevant()
+function Helper.GetEveryoneThatIsRelevant()
     local goodies = {}
     local avatarsDB = Osi.DB_Avatars:Get(nil)
     local originsDB = Osi.DB_Origins:Get(nil)
@@ -170,7 +170,7 @@ end
 
 -- Returns a table of all summons/followers
 ---@return PlayerSummons    - Table of player summons
-function Helper:GetPlayerSummons()
+function Helper.GetPlayerSummons()
     return Osi.DB_PlayerSummons:Get(nil)
 end
 
@@ -271,7 +271,7 @@ end
 -- {"Straight","Lesbian","Vaginal","Anal"}
 ---@param str string
 ---@return table
-function Helper:StringToTable(str)
+function Helper.StringToTable(str)
     -- Create an empty table to store the results
     local result = {}
 
@@ -285,8 +285,20 @@ function Helper:StringToTable(str)
 end
 
 function Helper.GetName(uuid)
+    local translate = Ext.Loca.GetTranslatedString
     local entity = Ext.Entity.Get(uuid)
-    return Ext.Loca.GetTranslatedString(entity.DisplayName.Name.Handle.Handle) or Ext.Loca.GetTranslatedString(entity.DisplayName.NameKey.Handle.Handle)
+    if entity then
+        return translate(entity.DisplayName.Name.Handle.Handle) or translate(entity.DisplayName.NameKey.Handle.Handle)
+    else
+        if Ext.IsClient() then
+            local character = Ext.Template.GetTemplate(uuid)
+            if character then
+                return translate(character.DisplayName)
+            end
+        end
+    end
+    Debug.Print("No entity found on Server / No character template found on client")
+    return "Name not Found"
 end
 
 
@@ -320,4 +332,37 @@ function Helper.OptionalDelay(func, delay)
             func()
         end)
     end
+end
+
+function Helper.SortWithPrio(tableToSort, prioTable)
+    local keys = {}
+    for key in pairs(tableToSort) do
+        table.insert(keys, key)
+    end
+
+    table.sort(keys, function(a, b)
+        local aInPriority = prioTable[a] or false
+        local bInPriority = prioTable[b] or false
+        
+        if aInPriority and not bInPriority then
+            return true
+        end
+        
+        if not aInPriority and bInPriority then
+            return false
+        end
+        
+        return a < b
+    end)
+
+    local sortedTable = {}
+    for _, key in ipairs(keys) do
+        sortedTable[key] = tableToSort[key]
+    end
+
+    return sortedTable
+end
+
+function Helper.IsUpperCase(str)
+    return str == string.upper(str)
 end

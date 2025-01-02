@@ -28,7 +28,7 @@ UIEvents.SetInactiveGenital:SetHandler(function (payload)
     for _, scene in pairs(Data.SavedScenes) do
         
         for _, entity in pairs(scene.entities) do
-            if Helper:StringContains(entity, uuid) then
+            if Helper.StringContains(entity, uuid) then
                 return
             end
         end
@@ -48,15 +48,16 @@ UIEvents.SetActiveGenital:SetHandler(function (payload)
     local genital = payload.Genital
     local entity = Ext.Entity.Get(uuid)
 
+    print("Assigning new sex genital to ", genital)
     SexUserVars.AssignGenital("BG3SX_SexGenital", genital, entity)
 
     -- If active is changed, update UserVars, search for active actors, and change their genitals as well
 
     for _, scene in pairs(Data.SavedScenes) do
         
-        for _, entity in pairs(scene.entities) do
-            if Helper:StringContains(entity, uuid) then
-                Genital.OverrideGenital(genital, entity)
+        for _, character in pairs(scene.entities) do
+            if Helper.StringContains(character, uuid) then
+                Genital.OverrideGenital(genital, Ext.Entity.Get(character))
                 Animation.ResetAnimation(uuid)
                 return
             end
@@ -75,16 +76,6 @@ end)
 -- TODO - test for shapeshifts, rsculpts etc.
 Ext.Events.NetMessage:Subscribe(function(e)
 
-
-    if (e.Channel == "BG3SX_StopSex") then
-
-        local scene = Ext.Json.Parse(e.Payload)
-
-        -- TODO - check if the returned entities are the OG parents
-        Scene:EntitiesByScene(scene)
-
-
-    end
 
 
     if (e.Channel == "BG3SX_ChangeAutoErection") then

@@ -4,6 +4,28 @@
 --
 ----------------------------------------------------------------------------------------
 
+
+local function initializeParty()
+    local party = Osi.DB_PartyMembers:Get(nil)
+    -- _P("---------------------OnSessionLoaded Whitelist Check---------------------")
+    for i = #party, 1, -1 do
+        if Entity:IsWhitelisted(party[i][1]) then
+            Sex:AddMainSexSpells(party[i][1])
+
+            local entity = Ext.Entity.Get(party[i][1])
+            if not entity then
+                Debug.Print("is not a entity " .. party[i][1])
+            else
+                print("adding genital for ", party[i][1])
+                Genital.AddGenitalIfHasNone(entity)
+                Genital.AssignDefaultIfHasNotYet(entity)
+            end
+
+            
+        end
+    end
+end
+
 -- Runs every time a save is loaded --
 function OnSessionLoaded()
     ------------------------------------------------------------------------------------------------------------------------------------------
@@ -13,40 +35,18 @@ function OnSessionLoaded()
     Genital.Initialize() -- Initializes genitals, check Genitals.lua
 
     Ext.Osiris.RegisterListener("LevelGameplayStarted", 2, "after", function(_, _)
-        local party = Osi.DB_PartyMembers:Get(nil)
-        -- _P("---------------------OnSessionLoaded Whitelist Check---------------------")
-        for i = #party, 1, -1 do
-            if Entity:IsWhitelisted(party[i][1]) then
-                Sex:AddMainSexSpells(party[i][1])
+        initializeParty()
+    end)
 
-                local entity = Ext.Entity.Get(party[i][1])
-                if not entity then
-                    Debug.Print("is not a entity " .. party[i][1])
-                else
-                    print("adding genital for ", party[i][1])
-                    Genital.AddGenitalIfHasNone(entity)
-                    Genital.AssignDefaultIfHasNotYet(entity)
-                end
-
-                
-            end
-        end
+	Ext.Osiris.RegisterListener("DB_PartOfTheTeam", 1, "afterDelete", function (character)
+        initializeParty()
     end)
 
     -- TODO: Check if CharacterCreationDummy might cause issues with "Make NPC into Partymember" mods
     Ext.Osiris.RegisterListener("CharacterJoinedParty", 1, "after", function(character)
         -- _P("---------------------CharacterJoinedParty Whitelist Check---------------------")
         if string.find(character, "CharacterCreationDummy") == nil then
-            if not Osi.IsSummon(character) and Entity:IsWhitelisted(character) then
-                Sex:AddMainSexSpells(character)
-
-                local entity = Ext.Entity.Get(character)
-                if not entity then
-                    Debug.Print("is not a entity " .. character)
-                else
-                    Genital.AddGenitalIfHasNone(entity)
-                end
-            end
+            initializeParty()
         end
     end)
 end

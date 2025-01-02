@@ -133,8 +133,10 @@ function Visual.AddListOfVisuals(entity, listToAdd)
   
     if listToAdd then
 
-        if Shapeshift:IsShapeshifted(entity) then 
-            Shapeshift:AddListOfVisuals(entity, listToAdd)
+        if Shapeshift.IsShapeshifted(entity) then 
+            Shapeshift.MakeEditable(entity)
+            Shapeshift.AddListOfVisuals(entity, listToAdd)
+            Shapeshift.RevertEditability(entity, 0)
         else
             for _, entry in pairs(listToAdd) do
                 Visual.BetterAddVisualOverride(entity, entry)
@@ -151,8 +153,10 @@ function Visual.RemoveListOfVisuals(entity, listToRemove)
 
     if listToRemove then
 
-        if Shapeshift:IsShapeshifted(entity) then 
-            Shapeshift:RemoveListOfVisuals(entity, listToRemove)
+        if Shapeshift.IsShapeshifted(entity) then 
+            Shapeshift.MakeEditable(entity)
+            Shapeshift.RemoveListOfVisuals(entity, listToRemove)
+            Shapeshift.RevertEditability(entity, 0)
         else
 
             for _, entry in pairs(listToRemove) do
@@ -169,10 +173,10 @@ end
 function Visual.GetAllVisuals(entity)
 
     -- if they don't have a CCA entry, they are an NPC and need to have one created
-    local cca = Helper:GetPropertyOrDefault(entity,"CharacterCreationAppearance", nil)
+    local cca = Helper.GetPropertyOrDefault(entity,"CharacterCreationAppearance", nil)
 
-    if Shapeshift:IsShapeshifted(entity) then 
-        return Shapeshift:GetAllVisuals(entity)
+    if Shapeshift.IsShapeshifted(entity) then 
+        return Shapeshift.GetAllVisuals(entity)
     else
 
         if cca then
@@ -292,6 +296,29 @@ end
 ----------------------------------------------------------------------------------------------------
 
 
+function Visual.HasCharacterCreationStats(entity)
+
+    local E = Helper.GetPropertyOrDefault(entity,"CharacterCreationStats", nil)
+    
+	if E then
+		return true
+    else
+        return false
+    end
+end
+
+
+function Visual.HasCharacterCreationAppearance(entity)
+
+    local E = Helper.GetPropertyOrDefault(entity,"CharacterCreationAppearance", nil)
+    
+	if E then
+		return true
+    else
+        return false
+    end
+end
+
 -- Get all allowed Visual for entity (Ex: all vulva for human)
 ---@param entity EntityHandle
 ---@return integer,integer,string	  - bodytype, bodyshape, race
@@ -301,12 +328,11 @@ function Visual.getEntityProperties(entity)
     local halsin = "S_GLO_Halsin_7628bc0e-52b8-42a7-856a-13a6fd413323"
     local human = "0eb594cb-8820-4be6-a58d-8be7a1a98fba"
 
-	local E = Helper:GetPropertyOrDefault(entity,"entityCreationStats", nil)
 	local bt =  entity.BodyType.BodyType
-	local bs = 0
-
-	if E then
-		bs = E.BodyShape
+    local bs = 0
+    
+	if Visual.HasCharacterCreationStats(entity) then
+		bs = entity.CharacterCreationStats.BodyShape
 	end
 
 	-- NPCs only have race tags
@@ -320,6 +346,7 @@ function Visual.getEntityProperties(entity)
 		end
 	end
 
+	
 	if not Data.BodyLibrary.Races[race] then
 		race = human
 	end
@@ -373,6 +400,7 @@ function Visual.getPermittedVisual(entity, allVisual, visualType, filter, usePar
 	-- Bodytype, Bodyshape, Race
 	local bt,bs,race = Visual.getEntityProperties(entity)
 
+
     -- TODO - check if this is necessary for other races/usecases too
     if useParentRace then
         local newRace = getParent(race)
@@ -387,9 +415,9 @@ function Visual.getPermittedVisual(entity, allVisual, visualType, filter, usePar
 
 		local G = Ext.StaticData.Get(visual, visualType)
 
-		local gbt = Helper:GetPropertyOrDefault(G, "BodyType", bt)
-		local gbs = Helper:GetPropertyOrDefault(G, "BodyShape", bs)
-		local gru = Helper:GetPropertyOrDefault(G, "RaceUUID", race)
+		local gbt = Helper.GetPropertyOrDefault(G, "BodyType", bt)
+		local gbs = Helper.GetPropertyOrDefault(G, "BodyShape", bs)
+		local gru = Helper.GetPropertyOrDefault(G, "RaceUUID", race)
 
 		if not filter then
 			gru = race
@@ -434,7 +462,11 @@ end
 ---@param entity EntityHandle 	    - uuid of entity that has a Visual
 ---@return table			        - table of IDs of entityCreationAppearaceVisual
 function Visual.getCurrentVisual(entity)
-	local entityVisuals =  entity:GetAllComponents().CharacterCreationAppearance.Visuals
+    if not Visual.HasCharacterCreationAppearance(entity) then
+        return
+    end
+
+	local entityVisuals =  entity.CharacterCreationAppearance.Visuals
     return entityVisuals
 end
 
@@ -446,10 +478,15 @@ end
 ---@param visualType string      - "CharacterCreationAppearanceVisual" or "CharacterCreationSharedVisual"
 ---@return table			     - table of IDs of entityCreationAppearaceVisual
 function Visual.getCurrentVisualOfType(entity, type, visualType)
+    
 	local currentVisual = Visual.getCurrentVisual(entity)
 	local VisualOfType = Visual.getAllVisualsOfType(type, visualType)
 
     local visualsOfType = {}
+
+    if not currentVisual then
+        return
+    end
 
 	for _, visual in pairs(currentVisual)do
         if Table.Contains(VisualOfType, visual) then
@@ -470,7 +507,7 @@ end
 function Visual.GiveVisualComponentIfHasNone(entity)
 
     -- if they don't have a CCA entry, they are an NPC and need to have one created
-    local cca = Helper:GetPropertyOrDefault(entity,"CharacterCreationAppearance", nil)
+    local cca = Helper.GetPropertyOrDefault(entity,"CharacterCreationAppearance", nil)
 
     if not cca then
         entity:CreateComponent("CharacterCreationAppearance")
@@ -487,19 +524,20 @@ function Visual.overrideVisual(newVisual, entity, type)
 	local currentCCSV = Visual.getCurrentVisualOfType(entity, type, "CharacterCreationSharedVisual")
 	local currentVisuals = Table.ConcatenateTables(currentCCAV, currentCCSV)
 
-    if Entity:IsNPC(entity.Uuid.EntityUuid) then
+
+    if not Visual.HasCharacterCreationAppearance(entity) then
         Visual.OverrideVisualSetSlot(newVisual, entity, type)
         return
     end
 
-    _P("current visuals for " , entity.Uuid.EntityUuid, " of type " , type)
-    _D(currentVisuals)
 
     for _, visual in pairs(currentVisuals) do
         -- TODO - why is this check necessary?
 	    if not (visual == newVisual) then
-            if Shapeshift:IsShapeshifted(entity) then
-                Shapeshift:BetterRemoveVisualOvirride(entity, visual)
+            if Shapeshift.IsShapeshifted(entity) then
+                Shapeshift.MakeEditable(entity)
+                Shapeshift.RemoveCustomVisualOvirride(entity, visual)
+                Shapeshift.RevertEditability(entity,200)
             end
 
             Visual.BetterRemoveVisualOvirride(entity, visual)
@@ -507,16 +545,13 @@ function Visual.overrideVisual(newVisual, entity, type)
 	end
 
 	if newVisual then
-        print("adding ", newVisual)
-        if Shapeshift:IsShapeshifted(entity) then
-            Shapeshift:BetterAddVisualOverride(entity, visual)
+        if Shapeshift.IsShapeshifted(entity) then
+            Shapeshift.MakeEditable(entity)
+            Shapeshift.AddCustomVisualOverride(entity, newVisual)
+            Shapeshift.RevertEditability(entity,200)
         end
         Visual.BetterAddVisualOverride(entity, newVisual)
-	end
-
-    _P("new visuals")
-    _D(Visual.getCurrentVisualOfType(entity, type, "CharacterCreationAppearanceVisual"))
-    
+	end 
 end
 
 ------------------------------------------------------------------------------------------------------------------------------
@@ -539,7 +574,6 @@ function Visual.getVisualResourceID(entity)
 -- returns the VisualSet.Slots
 ---@param  entity EntityHandle - uuid of the entity possibly wearing a visual
 function Visual.getSlots(entity)
-
     local resource = entity.ServerCharacter.Template.CharacterVisualResourceID
     local slots = Ext.Resource.Get(resource, "CharacterVisual").VisualSet.Slots
     return slots
@@ -579,9 +613,8 @@ function Visual.removeVisualSetBySlot(entity, type)
     for i, entry in pairs(slots) do
 
         if  entry.Slot == type then
-            entry.VisualResource = ""
-            
             table.insert(removed, {uuid = entry.VisualResource, index = i})
+            entry.VisualResource = ""
         end
     end
 
