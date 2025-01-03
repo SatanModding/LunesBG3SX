@@ -238,6 +238,20 @@ function Entity:RotateEntity(uuid, helper)
 end
 
 
+Lunisole = {}
+
+function Lunisole.Rotate(character, location)
+
+    print("Lunisole Rotate")
+
+    local charx = Ext.Entity.Get(character).Transform.Transform.Translate[1]
+    local chary = Ext.Entity.Get(character).Transform.Transform.Translate[3]
+    local vecx = charx - location[1]
+    local vecy = chary - location[3]
+    local RadToLookAt = Ext.Math.Atan2(vecx,vecy)
+    Ext.Entity.Get(character).Steering.TargetRotation = RadToLookAt
+
+end
 
 
 
@@ -272,7 +286,8 @@ if Ext.IsClient() then
                         NOsi.SetRotate(character, targetRotation)
                 elseif type(targetRotation) == "table" then -- x,y,z
 
-                        NOsi.RotateToPosition(character, targetRotation)
+                        --NOsi.RotateToPosition(character, targetRotation)
+                        Lunisole.Rotate(character, targetRotation)
                 else
                         -- targetposition is another character
                         NOsi.RotateTo(character, targetRotation)
