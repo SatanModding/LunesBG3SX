@@ -9,7 +9,7 @@
 --------------------------------------------------------------
 
 local playAnimation
-function Animation:new(actor, animSpell)
+function Animation:New(actor, animSpell)
 
     local instance = setmetatable({
         actor = Helper.CleanPrefix(actor),
@@ -24,16 +24,21 @@ function Animation:new(actor, animSpell)
     local hmAnim2
     if hmInstance then
 
+
+        local vars = Ext.Vars.GetModVariables(ModuleUUID)
+        local unlocked = vars.BG3SX_ShowAllAnimations
+        
+
         if #scene.entities == 1 then
-            instance.animation = hmInstance:NewGetAnimation(actor)
+            instance.animation = hmInstance:NewGetAnimation(actor, unlocked)
         else
-            hmAnim, hmAnim2 = hmInstance:NewGetAnimation(scene.entities[1], scene.entities[2])
+            hmAnim, hmAnim2 = hmInstance:NewGetAnimation(scene.entities[1], scene.entities[2], unlocked)
             if scene.entities[1] == instance.actor then
                 instance.animation = hmAnim
             elseif scene.entities[2] == instance.actor then
                 instance.animation = hmAnim2
             else
-                _P("[BG3SX][Animation.lua] Something went wrong! Contact mod author! [Error 1]")
+                Debug.Print("Something went wrong! Contact mod author! [Error 1]")
             end
         end
 
@@ -52,7 +57,7 @@ function Animation:new(actor, animSpell)
 
         return instance
     else
-        _P("[BG3SX][Animation.lua] Something went wrong! Contact mod author! [Error 2]")
+        Debug.Print("Something went wrong! Contact mod author! [Error 2]")
     end
 end
 
@@ -77,7 +82,7 @@ playAnimation = function(self)
     else
         Osi.PlayAnimation(self.actor, self.animation)
     end
-    -- _P("[BG3SX][Animation.lua] - Animation:new() - playAnimation - Begin to play ", self.animation, " on ", self.actor.uuid)
+    -- _P("[BG3SX][Animation.lua] - Animation:New() - playAnimation - Begin to play ", self.animation, " on ", self.actor.uuid)
 end
 
 
@@ -93,7 +98,7 @@ function Animation.ResetAnimation(character)
         -- ClientChanged takes a bit, If aniamtion is called too early, it gets reset again
         -- If we could put the animations "idle" we coudl circumvent this
         Ext.Timer.WaitFor(100, function ()
-            playAnimation(Animation:new(character, currentScene.currentAnimation))
+            playAnimation(Animation:New(character, currentScene.currentAnimation))
         end)
         
     end
@@ -111,65 +116,5 @@ Ext.Osiris.RegisterListener("GainedControl", 1, "after", function(target)
 
 end)
 
-
-
-
-
--- TODO - put back to server, as animations are added there
-
-function Animation.GetFilteredAnimations(filter)
-    filter = filter or nil
-
-    local animations = {}
-
-    for AnimationName,Animation in pairs(Data.Animations) do
-        print(AnimationName)
-        if not (AnimationName == "New") then
-
-            local Category = Animation.Category
-            local categories
-
-            if type (Category) == "string" then
-                categories = Helper.StringToTable(Category)
-            elseif type(Category) == "table" then
-                categories = Category
-            else
-                print("category is weird. its a ", type(Category))
-                _D(Category)
-            end
-
-            for _,category in pairs(categories) do
-                print("Category ", category)
-                if Animation.Enabled and category == filter then
-                    animations[AnimationName] = Animation
-                end
-            end
-        end
-    end
-
-    return animations
-end
-
-
-
-UIEvents.FetchAnimations:SetHandler(function (payload)
-    Debug.Print("Received message FetchAnimations with payload")
-    _D(payload)
-    
-end)
-
-
-UIEvents.FetchAllAnimations:SetHandler(function (payload)
-    Debug.Print("Received message FetchAllAnimations with payload")
-    _D(payload)
-    
-end)
-
-
-UIEvents.FetchFilteredAnimations:SetHandler(function (payload)
-    Debug.Print("Received message FetchFilteredAnimations with payload")
-    _D(payload)
-    
-end)
 
 

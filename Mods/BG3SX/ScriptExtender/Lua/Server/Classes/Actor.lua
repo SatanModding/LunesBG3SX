@@ -153,21 +153,21 @@ end
 -- TODO - Make sections within into their own functions
 -- TODO - Change type from 2 back to original type since it screws with other game stuff 
 -- https://discord.com/channels/1211056047784198186/1211069623835828345/1262896149962952936
-function Actor:TransformAppearance()
-    -- Get Looks
-    ----------------------------------------------------------------------------
-    local looksTemplate = self:GetLooks()
-    self:CopyEntityAppearanceOverrides()
-    Osi.Transform(self.uuid, looksTemplate, "8ec4cf19-e98e-465e-8e46-eba3a6204a39") -- Stripped
-    -- Osi.Transform(self.uuid, looksTemplate, "296bcfb3-9dab-4a93-8ab1-f1c53c6674c9") -- Invoke Duplicity
+-- function Actor:TransformAppearance()
+--     -- Get Looks
+--     ----------------------------------------------------------------------------
+--     local looksTemplate = self:GetLooks()
+--     self:CopyEntityAppearanceOverrides()
+--     Osi.Transform(self.uuid, looksTemplate, "8ec4cf19-e98e-465e-8e46-eba3a6204a39") -- Stripped
+--     -- Osi.Transform(self.uuid, looksTemplate, "296bcfb3-9dab-4a93-8ab1-f1c53c6674c9") -- Invoke Duplicity
 
-    -- Get Equipment
-    ----------------------------------------------------------------------------
-    local isStripper = Sex:IsStripper(self.parent)
-    if not isStripper then
-        self:DressActor()
-    end
-end
+--     -- Get Equipment
+--     ----------------------------------------------------------------------------
+--     local isStripper = Sex:IsStripper(self.parent)
+--     if not isStripper then
+--         self:DressActor()
+--     end
+-- end
 
 
 --- Copies the equipment from the parent entity to the actor

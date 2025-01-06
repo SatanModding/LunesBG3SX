@@ -366,3 +366,7 @@ end
 function Helper.IsUpperCase(str)
     return str == string.upper(str)
 end
+
+function Helper.GetModName(moduleUUID)
+    return Ext.Mod.GetMod(moduleUUID).Info.Name
+end

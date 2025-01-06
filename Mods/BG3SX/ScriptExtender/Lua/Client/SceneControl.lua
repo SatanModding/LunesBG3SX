@@ -147,53 +147,217 @@ end
 -- Sends an Event to Server, requesting Animations 
 function SceneControl:CreateAnimationControlArea()
     self:AddControlButtons()
-    if UIInstance.Settings.ShowAllAnimations == true then
-        UIEvents.FetchAllAnimations:SendToServer({ID = USERID, SceneControl = self.ID, Caster = _C().Uuid.EntityUuid})
-    elseif UIInstance.Settings.ShowAllAnimations ~= true then
-        UIEvents.FetchAllAnimations:SendToServer({ID = USERID, SceneControl = self.ID, Caster = _C().Uuid.EntityUuid})
+
+    -- if UIInstance.Settings.ShowAllAnimations == true then
+    --     UIEvents.FetchAllAnimations:SendToServer({ID = USERID, SceneControl = self.ID, Caster = _C().Uuid.EntityUuid})
+    -- elseif UIInstance.Settings.ShowAllAnimations == false then
+    --     UIEvents.FetchFilteredAnimations:SendToServer({ID = USERID, SceneControl = self.ID, Caster = _C().Uuid.EntityUuid})
+    -- end
+
+    Debug.Print("----------------FETCHANIMATIONS")
+    UIEvents.FetchAllAnimations:SendToServer({ID = _C().Uuid.EntityUuid, SceneControl = self.ID})
+
+    --self:CreateFilters()
+
+    --self:AddAnimationPicker()
+    -- local left = self.Window:AddButton(" <- ")
+    -- local pick = self.Window:AddCombo("")
+    -- local right = self.Window:AddButton(" -> ")
+    -- pick.SameLine = true
+    -- right.SameLine = true
+    
+end
+
+function SceneControl:UpdateAnimationData(animationData)
+    Debug.Print("Test+")
+    self.Animations = animationData
+    table.sort(self.Animations)
+    self:CreateFilters()
+    self:AddAnimationPicker()
+end
+
+
+
+local function getAllMods(animationData)
+
+    local mods = {}
+
+
+    for AnimationName,Animation in pairs(animationData) do
+        if not (AnimationName == "New") then
+
+            local modName = Animation.Mod
+            if Animation.Enabled then
+                mods[modName] = true
+            end
+        end
     end
-    self.Window:AddSeparator("")
+
+    return mods
+end
+
+
+
+local function getAllCategories(animationData)
+
+local categories = {}
+
+    for AnimationName,Animation in pairs(animationData) do
+        if not (AnimationName == "New") then
+
+            local Category = Animation.Category
+            local categories
+
+            if type (Category) == "string" then
+                categories = Helper.StringToTable(Category)
+            elseif type(Category) == "table" then
+                categories = Category
+            else
+                print("category is weird. its a ", type(Category))
+                _D(Category)
+            end
+
+            for _,category in pairs(categories) do
+                if Animation.Enabled then
+                    categories[category] = true
+                end
+            end
+        end
+    end
+
+    return categories
+
+end
+
+function SceneControl:FilterAnimationsByCategory(filter)
+    filter = filter or nil
+
+    local animations = {}
+
+    if not filter then
+        return self.Animations
+    end
+
+    for AnimationName,Animation in pairs(self.Animations) do
+        print(AnimationName)
+        if not (AnimationName == "New") then
+
+            local Category = Animation.Category
+            local categories
+
+            if type (Category) == "string" then
+                categories = Helper.StringToTable(Category)
+            elseif type(Category) == "table" then
+                categories = Category
+            else
+                print("category is weird. its a ", type(Category))
+                _D(Category)
+            end
+
+            for _,category in pairs(categories) do
+                print("Category ", category)
+                if Animation.Enabled and category == filter then
+                    animations[AnimationName] = Animation
+                end
+            end
+        end
+    end
+
+    return animations
+end
+
+function SceneControl:FilterAnimationsByMod(filter)
+    filter = filter or nil
+
+    local animations = {}
+
+    if not filter then
+        return self.Animations
+    end
+
+    for AnimationName,Animation in pairs(self.Animations) do
+        print(AnimationName)
+        if not (AnimationName == "New") then
+            if Animation.Enabled and Animation.Mod == filter then
+                
+                animations[AnimationName] = Animation
+            end
+        end
+    end
+
+    return animations
+end
+
+
+function SceneControl:GetFilteredAnimations(modFilter, animationFilter)
+    tbl1 = self:FilterAnimationsByMod(modFilter)
+    tbl2 = self:FilterAnimationsByCategory(animationFilter)
+    
+    return Table.GetIntersection(tbl1, tbl2)
+end
+
+function SceneControl:CreateFilters()
+    if self.Filter and #self.Filter >0 and self.Filter.Group then
+        UI.DestroyChildren(self.Filter.Group)
+        self.Filter = nil
+        if self.Filter and #self.Filter >0 then -- Sanity Check
+            for _,elem in pairs(self.Filter) do
+                UI.DestroyChildren(elem)
+            end
+        end
+    end
+
+    self.Filter = {}
+    self.Filter.Group = self.Window:AddGroup("")
+    local g = self.Filter.Group
+    g:AddSeparator("")
 
     -- Filter Area
     self.Filter = {}
-    local byMod = self.Window:AddCheckbox("Filter by Mod")
+    local byMod = g:AddCheckbox("Filter by Mod")
     byMod.Checked = false
     self.Filter.Mod = byMod
     
-    local byCategory = self.Window:AddCheckbox("Filter by Category")
+    local byCategory = g:AddCheckbox("Filter by Category")
     byCategory.Checked = false
     byCategory.SameLine = true
     self.Filter.Category = byCategory
 
-    local modPicker = self.Window:AddCombo("Choose Mod")
+    local modPicker = g:AddCombo("Choose Mod")
     modPicker.Visible = false
     self.Filter.ModPicker = modPicker
 
-    local categoryPicker = self.Window:AddCombo("Choose Category")
-    categoryPicker.Visible = false
-    self.Filter.CategoryPicker = categoryPicker
+    local catPicker = g:AddCombo("Choose Category")
+    catPicker.Visible = false
+    self.Filter.CategoryPicker = catPicker
     
     byMod.OnChange = function()
         if byMod.Checked == true then
-            self.Filter.ModPicker.Visible = true
+            modPicker.Visible = true
+            modPicker.OnChange = function()
+                local modSelection = modPicker.Options[modPicker.SelectedIndex+1]
+                local catSelection = catPicker.Options[catPicker.SelectedIndex+1]
+                self:GetFilteredAnimations(modSelection, catSelection)
+            end
         else
-            self.Filter.ModPicker.Visible = false
+            modPicker.Visible = false
+            modPicker.SelectedIndex = 0
         end
     end
     byCategory.OnChange = function()
         if byCategory.Checked == true then
-            self.Filter.CategoryPicker.Visible = true
+            catPicker.Visible = true
+            local modSelection = modPicker.Options[modPicker.SelectedIndex+1]
+            local catSelection = catPicker.Options[catPicker.SelectedIndex+1]
+            self:GetFilteredAnimations(modSelection, catSelection)
         else
-            self.Filter.CategoryPicker.Visible = false
+            catPicker.Visible = false
+            catPicker.SelectedIndex = 0
         end
     end
-    self.Window:AddSeparator("")
-    --self:AddAnimationPicker()
-    local left = self.Window:AddButton(" <- ")
-    local pick = self.Window:AddCombo("")
-    local right = self.Window:AddButton(" -> ")
-    pick.SameLine = true
-    right.SameLine = true
+
+    getAllMods(self.Animations)
+    getAllCategories(self.Animations)
 end
 
 local function getAllHeightmatchingAnims(heightmatchingtable)
@@ -228,86 +392,100 @@ local function updateCombo(combo, val)
     combo.OnChange()
 end
 
+function SceneControl:GetAnimationsBySceneType()
+    local type = self.Scene.SceneType
+    local animsByType = {}
+    for AnimationName,AnimationData in pairs(self.Animations) do
+        if AnimationData.Enabled == true then
+            local hmi = AnimationData.Heightmatching
+            if (type == "SoloP") or (type == "SoloV") then
+                local matchT = hmi.matchingTable
+                if matchT and #matchT > 0 then
+                    for _,matchup in pairs(matchT) do
+                        if matchup.Solo then
+                            if not Table.Contains(animsByType, AnimationName) then
+                                if type == "SoloP" and Table.Contains(AnimationData.Category, type) then
+                                    table.insert(animsByType, AnimationName)
+                                elseif type == "SoloV" and Table.Contains(AnimationData.Category, type) then
+                                    table.insert(animsByType, AnimationName)
+                                end
+                            end
+                        end
+                    end
+                end
+            elseif (type == "Lesbian") or (type == "Straight") or (type == "Gay") then
+                if hmi.fallbackTop and hmi.fallbackBottom then
+                    if not Table.Contains(animsByType, AnimationName) then
+                        if type == "Lesbian" and Table.Contains(AnimationData.Category, type) then
+                            table.insert(animsByType, AnimationName)
+                        elseif type == "Straight" and Table.Contains(AnimationData.Category, type) then
+                            table.insert(animsByType, AnimationName)
+                        elseif type == "Gay" and Table.Contains(AnimationData.Category, type) then
+                            table.insert(animsByType, AnimationName)
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return animsByType
+end
+
 function SceneControl:AddAnimationPicker()
     local debugbefore = Debug.USEPREFIX
     Debug.USEPREFIX = false
+    
+    Debug.Print("SceneControl Animations")
+    Debug.DumpS(self.Animations)
 
-    self.AnimationsTable = self.Window:AddTable("", 2)
-
-    table.sort(self.Animations)
-    for AnimationName,Animation in pairsByKeys(self.Animations) do
-        if AnimationName ~= "New" then
-            local animRow = self.AnimationsTable.AddRow()
-            local animName = animRow:AddCell():AddText(AnimationName)
-            local buttonCell = animRow:AddCell()
-            local allAnimAnims = getAllHeightmatchingAnims(Animation.Heightmatching)
-
-            local animationPicker
-            local previousButton = buttonCell:AddButton("<")
-            previousButton.OnClick = function()
-                updateCombo(animationPicker, -1)
+    if self.AnimationPicker and #self.AnimationPicker >0 and self.AnimationPicker.Group then
+        UI.DestroyChildren(self.AnimationPicker.Group)
+        self.AnimationPicker = nil
+        if self.AnimationPicker and #self.AnimationPicker >0 then -- Sanity Check
+            for _,elem in pairs(self.AnimationPicker) do
+                UI.DestroyChildren(elem)
             end
-            previousButton.SameLine = true
-
-            animationPicker = buttonCell:AddCombo("")
-            animationPicker.Options = allAnimAnims
-            animationPicker.SelectedIndex = 1
-            animationPicker.OnChange = function ()
-                if animationPicker.SelectedIndex ~= 0 then
-                    UIEvents.ChangeAnimation:SendToServer({
-                        ID = USERID,
-                        Caster = _C().Uuid.EntityUuid,
-                        Animation = animationPicker.Options[animationPicker.SelectedIndex + 1]
-                    })
-                end
-            end
-            animationPicker.SameLine = true
-
-            local nextButton = buttonCell:AddButton(">")
-            nextButton.OnClick = function()
-                updateCombo(animationPicker, 1)
-            end
-            nextButton.SameLine = true
-            table.insert(self.AnimationPicker, {Previous = previousButton, AnimationPicker = animationPicker, Next = nextButton})
         end
     end
+
+    self.AnimationPicker.Group = self.Window:AddGroup("")
+    local g = self.AnimationPicker.Group
+    g:AddSeparator("")
+
+    local animationPicker -- Create before to use within previousButton.OnClick function
+    local previousButton = g:AddButton("<-")
+    previousButton.OnClick = function()
+        updateCombo(animationPicker, -1)
+    end
+    previousButton.SameLine = true
+
+    local anims = self:GetAnimationsBySceneType()
+    animationPicker = g:AddCombo("")
+    animationPicker.Options = anims -- Will get overwritten by filters
+    animationPicker.SelectedIndex = 1
+    animationPicker.OnChange = function ()
+        if animationPicker.SelectedIndex ~= 0 then
+            UIEvents.ChangeAnimation:SendToServer({
+                ID = USERID,
+                Caster = _C().Uuid.EntityUuid,
+                Animation = animationPicker.Options[animationPicker.SelectedIndex]
+            })
+        end
+    end
+    animationPicker.SameLine = true
+
+    local nextButton = g:AddButton("->")
+    nextButton.OnClick = function()
+        updateCombo(animationPicker, 1)
+    end
+    nextButton.SameLine = true
+
+    local authorName = g:AddText("By: NAN")
+
+    self.AnimationPicker.Previous = previousButton
+    self.AnimationPicker.AnimationPicker = animationPicker
+    self.AnimationPicker.Next = nextButton
+    self.AnimationPicker.Author = authorName
+
     Debug.USEPREFIX = debugbefore
-
-    self:AddWindowSizeTest()
 end
-
-local function Unsub(handler)
-    handler:Unsubscribe()
-end
-
-function WaitForClick()
-    local handler = Ext.Events.MouseButtonInput:Subscribe(function (e)
-        e:PreventAction()
-        if e.Button == 1 and e.Pressed == true then
-            if getMouseover() then
-                _D(getMouseover())
-            end
-        end
-    end)
-end
-
-function SceneControl:AddWindowSizeTest()
-    local testbutton = self.Window:AddButton("GetWindowSize")
-    local clickedBefore = true
-    testbutton.OnClick = function()
-        local handler = WaitForClick()
-        if clickedBefore == true then
-            Unsub(handler)
-            clickedBefore = false
-        else
-            clickedBefore = true
-        end
-    end
-end
-
--- sending events not secessary as this is accessible on the client
--- UIEvents.FetchFilteredAnimations:SetHandler(function (payload)
---     local filter = payload.filter
---     local animations = getFilteredAnimations(filter)
---     UIEvents:SendFilteredAnimations(animations, payload.ID)
--- end)

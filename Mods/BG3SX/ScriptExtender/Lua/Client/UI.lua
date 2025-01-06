@@ -55,14 +55,14 @@ function UI:Initialize()
     self.SettingsTab = self:NewSettingsTab()
     self.WhitelistTab = self:NewWhitelistTab()
     self.NPCTab = self:NewNPCTab()
-    self.DebugTab = self:NewDebugTab()
+    --self.DebugTab = self:NewDebugTab()
 
     self.SceneTab:Initialize()
     self.GenitalsTab:Initialize()
     self.SettingsTab:Initialize()
     self.WhitelistTab:Initialize()
     self.NPCTab:Initialize()
-    self.DebugTab:Initialize()
+    --self.DebugTab:Initialize()
 end
 
 

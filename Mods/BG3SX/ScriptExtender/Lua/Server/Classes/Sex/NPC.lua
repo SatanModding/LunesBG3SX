@@ -97,3 +97,29 @@ end
 -- @param           - uuid of the NPC
 local function addHairIfNecessary(uuid)
 end
+
+
+UIEvents.RequestStripNPC:SetHandler(function (payload)
+    local entity = Ext.Entity.Get(payload.uuid)
+    if not entity then
+        Debug.Print(payload.uuid .. " is not an entity")
+    end
+
+    local clothes = NPC.StripNPC(entity)
+    SexUserVars.SetNPCClothes(clothes, entity)
+
+end)
+
+
+
+UIEvents.RequestDressNPC:SetHandler(function (payload)
+    local entity = Ext.Entity.Get(payload.uuid)
+    if not entity then
+        Debug.Print(payload.uuid .. " is not an entity")
+    end
+
+
+    local clothes = SexUserVars.GetNPCClothes(entity)
+    NPC.Redress(entity, clothes)
+    SexUserVars.SetNPCClothes(nil, entity)
+end)

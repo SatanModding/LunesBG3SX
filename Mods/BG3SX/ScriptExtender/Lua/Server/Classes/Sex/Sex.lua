@@ -77,7 +77,7 @@ local function playAnimationAndSound(scene, animSpell)
 
     for _,actor in pairs(scene.entities) do
         --print("creating new animation class for ", actor, " with animation ", animSpell)
-        newAnimation = Animation:new(actor, animSpell)
+        newAnimation = Animation:New(actor, animSpell)
         newSound = Sound:new(actor, animSpell)
     end
 
@@ -171,7 +171,7 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
                 Genital.GiveSexGenital(entity)
 
                  -- stripping
-                if Sex:IsStripper(character) then
+                if not SexUserVars.GetBlockStripping(entity) then 
                     armorset, equipment, slot = Sex:Strip(character)
                     armorsets[character] = armorset
                     equipments[character] = equipment
@@ -252,16 +252,6 @@ function Sex:InitSexSpells(scene)
 end
 
 
--- Checks an uuid against the nonStripper table in EntityListeners.lua
----@param uuid any
-function Sex:IsStripper(uuid)
-    if Osi.HasActiveStatus(uuid, "BG3SX_BLOCK_STRIPPING_BOOST") == 1 then
-        -- _P("Has status ", uuid)
-        return false
-    else
-        return true
-    end 
-end
 
 -- TODO - implement NPC logic
 function Sex:Strip(character)

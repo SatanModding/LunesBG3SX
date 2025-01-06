@@ -58,11 +58,18 @@ function UIEvents:Initialize()
     self.FetchWhitelist = Ext.Net.CreateChannel(ModuleUUID, "FetchWhitelist")
         -- Server -> Client
     self.SendWhitelist = Ext.Net.CreateChannel(ModuleUUID, "SendWhitelist")
+
+
+
+    self.RequestStripNPC = Ext.Net.CreateChannel(ModuleUUID, "RequestStripNPC")
+    self.RequestDressNPC = Ext.Net.CreateChannel(ModuleUUID, "RequestDressNPC")
+
 end
+
 UIEvents:Initialize()
 
 
--- example usage
+-- example usaCge
 
 -- Client -> Server
 -- UIEvents.FetchAllAnimations:SendToServer({ID = UI.ID})

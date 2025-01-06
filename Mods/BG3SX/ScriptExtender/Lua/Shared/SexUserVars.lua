@@ -8,15 +8,15 @@
 
 -- CONSTRUCTOR
 --------------------------------------------------------------
-
+SexUserVars = {}
 
 -- TODO - these have to be set to a default
 Ext.Vars.RegisterUserVariable("BG3SX_OutOfSexGenital", {})
 Ext.Vars.RegisterUserVariable("BG3SX_SexGenital", {})
 Ext.Vars.RegisterUserVariable("BG3SX_AutoSexGenital", {})
+Ext.Vars.RegisterUserVariable("BG3SX_NPCClothes", {})
+Ext.Vars.RegisterUserVariable("BG3SX_BlockStripping", {})
 
--- This should be a modvars instead, since its global
-Ext.Vars.RegisterUserVariable("BG3SX_AnimationFilter", {})
 
 -- _P("[BG3SX - SEXUSERVARS] Registered AutoErection")
 
@@ -62,4 +62,27 @@ end
 
 
 
+---@param autoErection boolean
+---@param entity EntityHandle - uuid
+function SexUserVars.SetNPCClothes(clothes, entity)
+      entity.Vars.BG3SX_NPCClothes = clothes
+end
+
+
+---@param entity EntityHandle - uuid
+function SexUserVars.GetNPCClothes(entity)
+    return entity.Vars.BG3SX_NPCClothes
+end
+
+
+
+function SexUserVars.SetBlockStripping(value, entity)
+      entity.Vars.BG3SX_BlockStripping = value
+end
+
+
+---@param entity EntityHandle - uuid
+function SexUserVars.GetBlockStripping(entity)
+    return entity.Vars.BG3SX_BlockStripping
+end
 

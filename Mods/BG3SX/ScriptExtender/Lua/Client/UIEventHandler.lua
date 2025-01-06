@@ -64,6 +64,15 @@ UIEvents.SendGenitals:SetHandler(function (payload)
     end
 end)
 
+UIEvents.SendWhitelist:SetHandler(function (payload)
+    UIInstance.WhitelistTab.Whitelists = payload
+    UIInstance.WhitelistTab:GenerateWhitelistArea()
+end)
+
+---------------------------------------------------------------------
+--- Animations
+---------------------------------------------------------------------
+
 UIEvents.SendFilteredAnimations:SetHandler(function (payload)
     local animations = payload.Data
     local sceneTab = UIInstance.SceneTab
@@ -74,23 +83,20 @@ UIEvents.SendFilteredAnimations:SetHandler(function (payload)
         end
     end
 end)
-
-
-
-
-
 UIEvents.SendAllAnimations:SetHandler(function (payload)
-    local animations = payload
-    -- if UIInstance.DebugTab then
-    --     UIInstance.DebugTab.Animations = animations
-    --     UIInstance.DebugTab:AddAnimationPicker()
-    -- end
+    Debug.Print("---------------CLAPPI--------------------")
+    Debug.DumpS(payload)
+    local animData = payload.Animations
+    local sceneID = payload.SceneControl
+    local sceneTab = UIInstance.SceneTab
+    for _,sceneControl in pairs(sceneTab.ActiveSceneControls) do
+        if sceneControl.Instance.ID == sceneID then
+            Debug.Print("FOUND SCENECONTROL")
+            sceneControl.Instance:UpdateAnimationData(animData)
+        end
+    end
 end)
 
-UIEvents.SendWhitelist:SetHandler(function (payload)
-    UIInstance.WhitelistTab.Whitelists = payload
-    UIInstance.WhitelistTab:GenerateWhitelistArea()
-end)
 
 
 

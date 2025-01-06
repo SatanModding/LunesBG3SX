@@ -30,6 +30,7 @@ Ext.Require("Server/Listeners/_init.lua")
 ------------------------------------------------------------------------------------------------------------------------------------------------
 -- "Channel" (Event Name)                                   - Payload Info                              - Where it Triggers
 
+Ext.RegisterModEvent("BG3SX", "AddAnimation")               --(modUUID, animationData)                  - AnimationData.lua
 Ext.RegisterModEvent("BG3SX", "StartSexSpellUsed")          --{caster, target, spellData}               - SexListeners.lua
 Ext.RegisterModEvent("BG3SX", "SexAnimationChange")         --{caster, animData}                        - SexListeners.lua
 Ext.RegisterModEvent("BG3SX", "SceneInit")                  --{scene}                                   - Scene.lua
@@ -78,7 +79,7 @@ local function OnSessionLoaded()
         if not vars.BG3SX_ShowAllAnimations then
         print("BG3SX_ShowAllAnimations mod variable not initialized yet")
         print("setting it to default value = false")
-        vars.BG3SX_ShowAllAnimations = "false"
+        vars.BG3SX_ShowAllAnimations = false
         end
 
         Ext.Log.Print("BG3SX_ShowAllAnimations")

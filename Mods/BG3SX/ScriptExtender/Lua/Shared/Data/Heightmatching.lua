@@ -188,7 +188,9 @@ end
 ---@return string, string, string - A concatenated string representing the body shape and body type (e.g., "TallM", "MedF").
 function Heightmatching.GetEntityBody(uuid)
 
-    --print("Heightmatching.GetEntityBody for " , uuid )
+    --print("Heightmatching  for " , uuid )
+
+    print("getting body type LOCKED")
 
     local entity = Ext.Entity.Get(uuid)
     local raceTags = Entity:TryGetEntityValue(uuid, nil, {"ServerRaceTag", "Tags"})
@@ -246,6 +248,40 @@ function Heightmatching.GetEntityBody(uuid)
 end
 
 
+function Heightmatching.GetEntityBodyUnlocked(uuid)
+
+    print("Getting bodytype UNLOCKED")
+
+    --print("Heightmatching for " , uuid )
+
+    local entity = Ext.Entity.Get(uuid)
+    local raceTags = Entity:TryGetEntityValue(uuid, nil, {"ServerRaceTag", "Tags"})
+    local bs = 0 -- Default Medium bodyShape
+    local bt = entity.BodyType.BodyType
+
+    
+    if Entity:IsNPC(uuid) == false then
+        bs = entity.CharacterCreationStats.BodyShape
+    end
+
+    -- Apply body shape overrides based on race tags
+    local bsOverride = bodyShapeOverrides(raceTags)
+    if bsOverride ~= nil then
+        bs = bsOverride
+    end
+
+    -- Translate to Human-readable
+    bs = Data.BodyLibrary.BodyShape[bs]
+    bt = Data.BodyLibrary.BodyType[bt]
+
+    --Debug.Print("bt = ".. bt.. " bs = ".. bs .. " g = " .. g )
+
+    print("HEINGHTMATCHING")
+    print(uuid, " has the body  bt = ", bt, " bs = ", bs )
+    return bs, bt  -- TallM_P, MedF_V, etc.
+end
+
+
 
 
 --- Retrieves the appropriate animations for a given body type pairing or solo entry.
@@ -259,14 +295,14 @@ end
 -- function Heightmatching:GetAnimation(entity, entity2)
 
 --     local entity2 = entity2 or nil
---     local bs1, bt1, g1 = Heightmatching.GetEntityBody(entity)
+--     local bs1, bt1, g1 = Heightmatching_GetEntityBody(entity)
 --     local eB1 = bs1 .. bt1 .. g1
 --     Debug.Print("Entity 1 Body: " .. eB1)
 
 --     if entity2 then
 --         Debug.Print("Entity 2 found for Heightmatching")
 --         -- Get body type, shape, and genital for entity2
---         local bs2, bt2, g2 = Heightmatching.GetEntityBody(entity2)
+--         local bs2, bt2, g2 = Heightmatching_GetEntityBody(entity2)
 --         local eB2 = bs2 .. bt2 .. g2
 --         Debug.Print("Entity 2 Body: " .. eB2)
 
@@ -526,13 +562,31 @@ local function getBestValueOfAllScores(scores)
     return bestString
 end
 
-
+-- TODO - test if the "unlocked" works
 -- TODO - check if this correctly assigns NPC bodytype.
 -- gortash might have been considered tall with shart?
-function Heightmatching:NewGetAnimation(character1, character2)
+function Heightmatching:NewGetAnimation(character1, character2, unlocked)
+
+    print("Heightmatching for ", character1, "and ", character2, "unlocked: ", unlocked)
 
     local matchingTable = self.matchingTable
-    local bs, bt, g = Heightmatching.GetEntityBody(character1)
+
+    print("Dumping matchingtable ")
+
+    _D(matchingTable)
+
+    if #matchingTable == 0 then
+      return self.fallbackTop, self.fallbackBottom
+    end
+
+    bs,bt,g = 0,0, "__" 
+    if unlocked then
+        print("is unlocked true ", unlocked)
+        bs, bt = Heightmatching.GetEntityBodyUnlocked(character1)
+    else
+        bs, bt, g = Heightmatching.GetEntityBody(character1)
+    end
+
     local body = bs..bt..g
 
     local scoresEntityOne = {}
@@ -554,7 +608,13 @@ function Heightmatching:NewGetAnimation(character1, character2)
     end
 
     -- if Sex
-    local bs2, bt2, g2 = Heightmatching.GetEntityBody(character2)
+    bs2,bt2,g2 = 0,0, "__" 
+    if unlocked then
+        bs2, bt2 = Heightmatching.GetEntityBodyUnlocked(character2)
+    else
+        bs2, bt2, g = Heightmatching.GetEntityBody(character2)
+    end
+
     local body2 = bs2..bt2..g2
 
     local secondEntityTable = matchingTable[bestHMEntityOne]

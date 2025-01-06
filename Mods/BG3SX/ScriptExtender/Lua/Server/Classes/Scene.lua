@@ -47,12 +47,15 @@ function Scene:new(entities, equipment, armorset, slots)
         slots           = slots,
     }, Scene)
 
+
     -- Somehow can't set rootPosition/rotation within the metatable construction, it poops itself trying to do this - rootPosition.x, rootPosition.y, rootPosition.z = Osi.GetPosition(entities[1])
     
     --local position = entities[1].Transfrom.Transform.Translate
     --instance.rootPosition.x, instance.rootPosition.y, instance.rootPosition.z = position[1], position[2], position[3]
     --local rotation = entities[1].Transfrom.Transform.RotationQuat
     --.rotation.x, instance.rotation.y, instance.rotation.z, instance.rotation.w = rotation[1],rotation[2],rotation[3],rotation[4]
+
+    instance.SceneType = Sex:DetermineSceneType(instance)
 
     initialize(instance)
 
@@ -381,10 +384,7 @@ initialize = function(self)
     --     self:ScaleEntity(entity) -- After creating the actor to not create one with a smaller scale
     -- end
 
-
     UIEvents.NewScene:Broadcast(self)
-
-
     Ext.ModEvents.BG3SX.SceneCreated:Throw({self})
 end
 

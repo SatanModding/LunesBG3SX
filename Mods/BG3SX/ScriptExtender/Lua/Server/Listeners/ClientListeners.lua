@@ -44,15 +44,7 @@ end)
 
 
 
-UIEvents.ChangeAnimation:SetHandler(function (payload)
-    Debug.Dump(payload)
-    local caster = payload.Caster
-    local animation = payload.Animation
-    if animation.NextAnimation then
-        
-    end
-    Osi.PlayAnimation(caster, animation)
-end)
+
 UIEvents.SwapPosition:SetHandler(function (payload)
     local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
     scene:SwapPosition()
@@ -141,4 +133,51 @@ end)
 
 Ext.Osiris.RegisterListener("GainedControl", 1, "after", function(target)  
     UIEvents.ChangeCharacter:Broadcast(target)
+end)
+
+
+
+-- UIEvents.FetchAllAnimations:SetHandler(function (payload)
+
+--     print("-----------------------------------------------------")
+--     print("YAPYAPYAPYAP")
+--     print("---------------------------------------")
+-- end)
+
+
+
+
+UIEvents.FetchAllAnimations:SetHandler(function (payload)
+    Debug.Print("Received message FetchAllAnimations with payload")
+    local animations = Data.Animations
+    local client = payload.ID
+    UIEvents.SendAllAnimations:SendToClient({Animations = animations, SceneControl = payload.SceneControl}, client)
+end)
+
+
+-- UIEvents.FetchFilteredAnimations:SetHandler(function (payload)
+--     Debug.Print("Received message FetchFilteredAnimations with payload")
+--     _D(payload)
+--     local filter = payload.filter
+--     local animations = Animation.GetFilteredAnimations(filter)
+--     local client = payload.USERID
+--     UIEvents.SendFiltered:SendToClient({Animations = animations, SceneControl = payload.SceneControl}, client)
+-- end)
+
+
+
+UIEvents.ChangeAnimation:SetHandler(function (payload)
+    print("Received Change Animation event with payload")
+    _D(payload)
+    
+    local caster = payload.Caster
+    local animation = payload.Animation
+    local scene = Scene:FindSceneByEntity(caster)
+
+    for _, char in pairs (scene.entities) do
+        Animation:New(char, Data.Animations[animation])
+    end
+
+    scene.currentAnimation = Data.Animations[animation]
+
 end)

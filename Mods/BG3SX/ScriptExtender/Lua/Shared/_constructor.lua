@@ -2,6 +2,7 @@
 -- E.g. Shared/Data/RaceWhitelist.lua
 
 Ext.Require("Shared/Utils/Debug.lua")
+Ext.Require("Shared/SexUserVars.lua")
 -- Main Classes
 Entity = {}
 Entity.__index = Entity
@@ -27,8 +28,6 @@ Genital = {}
 Genital.__index = Genital
 Sex = {}
 Sex.__index = Sex
-SexUserVars = {}
-SexUserVars.__index = Sex
 
 -- Utils
 Helper = {}

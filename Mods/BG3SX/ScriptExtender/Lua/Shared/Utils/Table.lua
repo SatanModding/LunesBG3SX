@@ -163,3 +163,28 @@ function Table.SortData(data)
         return data, data
     end
 end
+
+
+
+--https://en.wikipedia.org/wiki/Intersection_(set_theory)
+function Table.GetIntersection(tbl1, tbl2)
+    local result = {}
+    local lookup = {}
+
+    -- Add all elements of table2 to a lookup table
+    for _, value in ipairs(tbl2) do
+        lookup[value] = true
+    end
+
+    -- Check if elements in table1 exist in the lookup table
+    for _, value in ipairs(tbl1) do
+        if lookup[value] then
+            table.insert(result, value)
+        end
+    end
+
+    return result
+end
+
+
+

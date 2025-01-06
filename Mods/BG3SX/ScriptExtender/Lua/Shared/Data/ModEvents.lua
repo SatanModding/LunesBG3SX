@@ -1,4 +1,5 @@
 Data.ModEvents = {
+    "AddAnimation",
     "StartSexSpellUsed",
     "SexAnimationChange",
     "SceneInit",
