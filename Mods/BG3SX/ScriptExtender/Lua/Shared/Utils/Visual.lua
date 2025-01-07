@@ -78,6 +78,7 @@ function Visual.Replicate(entity, delay)
 
     local function func()
         entity:Replicate("CharacterCreationAppearance")
+        entity:Replicate("GameObjectVisual")
     end
 
     Helper.OptionalDelay(func, delay)

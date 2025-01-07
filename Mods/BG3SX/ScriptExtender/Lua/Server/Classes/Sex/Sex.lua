@@ -78,11 +78,14 @@ local function playAnimationAndSound(scene, animSpell)
     for _,actor in pairs(scene.entities) do
         --print("creating new animation class for ", actor, " with animation ", animSpell)
         newAnimation = Animation:New(actor, animSpell)
-        newSound = Sound:new(actor, animSpell)
+        Ext.ModEvents.BG3SX.AnimationChange:Throw({newAnimation})
+        
+        -- Only play sound if is enabled for a given animation entry
+        if animSpell.Sound == true then
+            newSound = Sound:New(actor, animSpell)
+            Ext.ModEvents.BG3SX.SoundChange:Throw({newSound})
+        end
     end
-
-    Ext.ModEvents.BG3SX.AnimationChange:Throw({newAnimation})
-    Ext.ModEvents.BG3SX.SoundChange:Throw({newSound})
 end
 
 

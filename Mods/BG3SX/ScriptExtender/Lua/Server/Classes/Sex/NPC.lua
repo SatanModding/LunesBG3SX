@@ -29,12 +29,15 @@ SLOTS_TO_BE_REMOVED_FOR_SEX = {
 ---@return table
 function NPC.StripNPC(entity)
 
+    print("striping ", entity.Uuid.EntityUuid)
+
     removed = {}
 
     for type,_ in pairs(SLOTS_TO_BE_REMOVED_FOR_SEX) do
         
         local removedEntry = Visual.removeVisualSetBySlot(entity, type)
         table.insert(removed, removedEntry)
+        print("removing ", type)
     end
 
     Visual.Replicate(entity)
@@ -83,7 +86,7 @@ end
 
 -- Remove the genital
 ---@param  entity EntityHandle 
-function NPC:RemoveGenitals(entity)
+function NPC.RemoveGenitals(entity)
     local genital = Genital.GetCurrentGenital(entity)
     if genital then
         Visual.BetterRemoveVisualOvirride(entity, genital)
@@ -106,7 +109,11 @@ UIEvents.RequestStripNPC:SetHandler(function (payload)
     end
 
     local clothes = NPC.StripNPC(entity)
-    SexUserVars.SetNPCClothes(clothes, entity)
+    -- safeguarding against overwriting the saved things with an empty table
+    -- in case users strip twice
+    if not (clothes[1][1].uuid == "") then
+        SexUserVars.SetNPCClothes(clothes, entity)
+    end
 
 end)
 
@@ -123,3 +130,21 @@ UIEvents.RequestDressNPC:SetHandler(function (payload)
     NPC.Redress(entity, clothes)
     SexUserVars.SetNPCClothes(nil, entity)
 end)
+
+
+
+
+    UIEvents.RequestGiveGenitalsNPC:SetHandler(function(payload)
+    local uuid = payload.uuid
+    local entity = Ext.Entity.Get(uuid)
+    NPC.GiveGenitals(entity)
+    
+    end) 
+    
+    UIEvents.RequestRemoveGenitalsNPC:SetHandler(function(payload)
+    local uuid = payload.uuid
+    local entity = Ext.Entity.Get(uuid)
+    NPC.RemoveGenitals(entity)
+    
+
+    end)

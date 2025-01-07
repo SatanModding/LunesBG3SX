@@ -538,7 +538,7 @@ function Scene:Destroy()
 
 
         if Entity:IsNPC(entity) then
-            NPC:RemoveGenitals(entity)
+            NPC.RemoveGenitals(entity)
         end
 
 

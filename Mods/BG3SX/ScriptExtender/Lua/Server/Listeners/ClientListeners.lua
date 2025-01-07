@@ -22,22 +22,22 @@ UIEvents.AskForSex:SetHandler(function (payload)
     
     -- masturbation 
     if target == caster then
-        if Entity:IsWhitelisted(caster, true) then
+        if Entity:IsWhitelisted(caster, true, true) then
             Ext.Timer.WaitFor(200, function() -- Wait for erections
-                Sex:StartSexSpellUsed(caster, {target}, Data.StartSexSpells["BG3SX_StartMasturbating"])
+                Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Start Masturbating"])
             end)
-            Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.StartSexSpells["BG3SX_StartMasturbating"]})
+            Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Start Masturbating"]})
         end
         
 
     -- sex
     else
-        if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
+        if Entity:IsWhitelisted(caster, true, true) and Entity:IsWhitelisted(target, true) then
             Ext.Timer.WaitFor(200, function() -- Wait for erections
-                Sex:StartSexSpellUsed(caster, {target}, Data.StartSexSpells["BG3SX_AskForSex"])
+                Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Ask for Sex"])
             end)
 
-            Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.StartSexSpells["BG3SX_AskForSex"]})
+            Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Ask for Sex"]})
         end
     end
 end)
@@ -176,8 +176,27 @@ UIEvents.ChangeAnimation:SetHandler(function (payload)
 
     for _, char in pairs (scene.entities) do
         Animation:New(char, Data.Animations[animation])
+
+        -- Only play sound if is enabled for a given animation entry
+        if Data.Animations[animation].Sound == true then
+            Sound:New(char, Data.Animations[animation])
+        end
     end
 
     scene.currentAnimation = Data.Animations[animation]
+end)
+
+
+
+UIEvents.RequestFilterTableForWhitelisted:SetHandler(function(payload)
+    local tbl = payload.tbl
+    local filtered = {}
+
+    for _, character in pairs(tbl) do
+        if Entity:IsWhitelisted(character) then
+            table.insert(filtered, character)
+        end
+    end
+    UIEvents.FilterTableAndReturnWhitelisted:SendToClient(filtered, payload.client) 
 
 end)

@@ -205,22 +205,17 @@ local categories = {}
     for AnimationName,Animation in pairs(animationData) do
         if not (AnimationName == "New") then
 
-            local Category = Animation.Category
-            local categories
+            local categories = Animation.Categories
 
-            if type (Category) == "string" then
-                categories = Helper.StringToTable(Category)
-            elseif type(Category) == "table" then
-                categories = Category
-            else
-                print("category is weird. its a ", type(Category))
-                _D(Category)
-            end
-
-            for _,category in pairs(categories) do
-                if Animation.Enabled then
-                    categories[category] = true
+            if categories then
+        
+                for _,category in pairs(categories) do
+                    if Animation.Enabled then
+                        categories[category] = true
+                    end
                 end
+            else
+                Debug.Print(Animation.Name .. " does not have a category assigned")
             end
         end
     end
@@ -242,23 +237,19 @@ function SceneControl:FilterAnimationsByCategory(filter)
         print(AnimationName)
         if not (AnimationName == "New") then
 
-            local Category = Animation.Category
-            local categories
+            local categories = Animation.Categories
 
-            if type (Category) == "string" then
-                categories = Helper.StringToTable(Category)
-            elseif type(Category) == "table" then
-                categories = Category
-            else
-                print("category is weird. its a ", type(Category))
-                _D(Category)
-            end
+            if categories then
 
-            for _,category in pairs(categories) do
-                print("Category ", category)
-                if Animation.Enabled and category == filter then
-                    animations[AnimationName] = Animation
+                for _,category in pairs(categories) do
+                    Debug.Print("Category ".. category)
+                    if Animation.Enabled and category == filter then
+                        animations[AnimationName] = Animation
+                    end
                 end
+
+            else
+                Debug.Print(Animation.Name .. " does not have a category assigned")
             end
         end
     end
@@ -404,9 +395,9 @@ function SceneControl:GetAnimationsBySceneType()
                     for _,matchup in pairs(matchT) do
                         if matchup.Solo then
                             if not Table.Contains(animsByType, AnimationName) then
-                                if type == "SoloP" and Table.Contains(AnimationData.Category, type) then
+                                if type == "SoloP" and Table.Contains(AnimationData.Categories, type) then
                                     table.insert(animsByType, AnimationName)
-                                elseif type == "SoloV" and Table.Contains(AnimationData.Category, type) then
+                                elseif type == "SoloV" and Table.Contains(AnimationData.Categories, type) then
                                     table.insert(animsByType, AnimationName)
                                 end
                             end
@@ -416,11 +407,11 @@ function SceneControl:GetAnimationsBySceneType()
             elseif (type == "Lesbian") or (type == "Straight") or (type == "Gay") then
                 if hmi.fallbackTop and hmi.fallbackBottom then
                     if not Table.Contains(animsByType, AnimationName) then
-                        if type == "Lesbian" and Table.Contains(AnimationData.Category, type) then
+                        if type == "Lesbian" and Table.Contains(AnimationData.Categories, type) then
                             table.insert(animsByType, AnimationName)
-                        elseif type == "Straight" and Table.Contains(AnimationData.Category, type) then
+                        elseif type == "Straight" and Table.Contains(AnimationData.Categories, type) then
                             table.insert(animsByType, AnimationName)
-                        elseif type == "Gay" and Table.Contains(AnimationData.Category, type) then
+                        elseif type == "Gay" and Table.Contains(AnimationData.Categories, type) then
                             table.insert(animsByType, AnimationName)
                         end
                     end

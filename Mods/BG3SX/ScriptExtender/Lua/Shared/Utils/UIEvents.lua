@@ -64,6 +64,13 @@ function UIEvents:Initialize()
     self.RequestStripNPC = Ext.Net.CreateChannel(ModuleUUID, "RequestStripNPC")
     self.RequestDressNPC = Ext.Net.CreateChannel(ModuleUUID, "RequestDressNPC")
 
+
+    self.RequestGiveGenitalsNPC = Ext.Net.CreateChannel(ModuleUUID, "RequestGiveGenitalsNPC")
+    self.RequestRemoveGenitalsNPC = Ext.Net.CreateChannel(ModuleUUID, "RequestRemoveGenitalsNPC")
+
+    self.RequestFilterTableForWhitelisted = Ext.Net.CreateChannel(ModuleUUID,"RequestFilterTableForWhitelisted")
+    self.FilterTableAndReturnWhitelisted = Ext.Net.CreateChannel(ModuleUUID, "FilterTableAndReturnWhitelisted")
+
 end
 
 UIEvents:Initialize()

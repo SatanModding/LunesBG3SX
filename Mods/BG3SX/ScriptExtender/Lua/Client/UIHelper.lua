@@ -36,12 +36,13 @@ function UIHelper.GetCurrentParty()
 end
 
 local sceneTypes = {
-    ["SoloFemale"] = {InvolvedEntities = 1, Penises = 0},
-    ["SoloMale"] = {InvolvedEntities = 1, Penises = 1},
+    ["SoloV"] = {InvolvedEntities = 1, Penises = 0},
+    ["SoloP"] = {InvolvedEntities = 1, Penises = 1},
     ["Lesbian"] = {InvolvedEntities = 2, Penises = 0},
     ["Straight"] = {InvolvedEntities = 2, Penises = 1},
     ["Gay"] = {InvolvedEntities = 2, Penises = 2}
 }
+
 function Helper.DetermineSceneType(scene)
     local InvolvedEntities = 0
     local Penises = 0
@@ -56,4 +57,21 @@ function Helper.DetermineSceneType(scene)
             return entry.sceneType
         end
     end
+end
+
+function Helper.IsNSFW(scene)
+    return not Table.Contains(scene.Categories, "SFW") or Table.Contains(scene.Categories, "NSFW")
+end
+
+
+-- great for showing debug messages
+function UIHelper.AddTemporaryTooltip(uiElement, duration, text)
+    
+    local tooltip = uiElement:Tooltip()
+    tooltip:AddText(text)
+
+    Ext.Timer.WaitFor(duration, function()
+        tooltip:Destroy()
+    end) 
+
 end

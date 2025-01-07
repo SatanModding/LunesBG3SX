@@ -287,18 +287,27 @@ end
 function Helper.GetName(uuid)
     local translate = Ext.Loca.GetTranslatedString
     local entity = Ext.Entity.Get(uuid)
-    if entity then
-        return translate(entity.DisplayName.Name.Handle.Handle) or translate(entity.DisplayName.NameKey.Handle.Handle)
-    else
-        if Ext.IsClient() then
-            local character = Ext.Template.GetTemplate(uuid)
-            if character then
-                return translate(character.DisplayName)
-            end
-        end
+    local displayName
+
+    if not entity then
+         Debug.Print("No entity found on Server / No character template found on client")
+        return "Name not Found"
     end
-    Debug.Print("No entity found on Server / No character template found on client")
-    return "Name not Found"
+
+
+    if Ext.IsClient() then
+        displayName = entity.ClientCharacter.Template.DisplayName
+
+    elseif Ext.IsServer then
+        displayName = entity.DisplayName.Name or entity.DisplayName.NameKey
+    end
+
+    if displayName then
+        return translate(displayName.Handle.Handle) or translate(displayName.Handle.Handle)
+    else
+        return "No Name"
+    end
+ 
 end
 
 

@@ -14,7 +14,7 @@ local playSound
 ---@param soundTable    Table   - A list of sounds to use
 ---@param minRepeatTime Time    - Minimum Repeat Time
 ---@param maxRepeatTime Time    - Maximum Repeat Time
-function Sound:new(actor, animSpell)
+function Sound:New(actor, animSpell)
     local instance = setmetatable({
         actor = actor,
         soundTable = animSpell.SoundTop or animSpell.SoundBottom,
@@ -32,9 +32,9 @@ end
 playSound = function(self)
     local scene = Scene:FindSceneByEntity(self.actor)
     if scene then
-        local nothing = "1f012ea2-236e-473c-b261-4523753ab9bb"
         local minRepeatTime = self.duration - 200
         local maxRepeatTime = self.duration + 200
+        local nothing = "1f012ea2-236e-473c-b261-4523753ab9bb" -- Can't use NULL
         Osi.PlaySound(self.actor, nothing) -- First, stop current sound
 
         local sound = self.soundTable[math.random(1, #self.soundTable)]
@@ -49,9 +49,9 @@ playSound = function(self)
             playSound(self)
         end)
         scene:RegisterNewSoundTimer(newSoundTimer)
-        -- _P("[BG3SX][Sound.lua] - Sound:new() - Begin to play ", sound, " on Actor ", self.actor.uuid)
+        -- _P("[BG3SX][Sound.lua] - Sound:New() - Begin to play ", sound, " on Actor ", self.actor.uuid)
     else
-        -- _P("[BG3SX][Sound.lua] - Sound:new() - Scene does not exist anymore")
+        -- _P("[BG3SX][Sound.lua] - Sound:New() - Scene does not exist anymore")
         -- This else situation can still happen when sound timers are running out after a scene got destroyed, tho we destroy everything and nothing should happen
     end
 end

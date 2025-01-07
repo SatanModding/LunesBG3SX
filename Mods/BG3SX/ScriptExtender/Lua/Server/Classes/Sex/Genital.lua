@@ -297,7 +297,7 @@ end
 
 -- Get the current genital of the entity
 ---@param entity EntityHandle	- uuid of entity that has a genital
----@return table		        - table of IDs of CharacterCreationAppearaceVisual
+---@return string		        - table of IDs of CharacterCreationAppearaceVisual
 function Genital.GetCurrentGenital(entity)
 	local allGenitals =  Visual.getCurrentVisualOfType(entity, "Private Parts", "CharacterCreationAppearanceVisual")
 	if (allGenitals) and (#allGenitals > 0) then
