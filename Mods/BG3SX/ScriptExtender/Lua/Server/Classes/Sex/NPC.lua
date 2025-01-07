@@ -102,6 +102,30 @@ local function addHairIfNecessary(uuid)
 end
 
 
+-- on closing the game, template changes are yeeted.
+-- To restore them, grab the uservars and strip all stripped NPCs
+function NPC.RestoreNudity()
+
+    local allNPCs = {}
+    local allEntities = Ext.Entity.GetAllEntitiesWithComponent("ServerCharacter")
+    for _,entity in pairs(allEntities) do
+        if Entity:IsNPC(entity.Uuid.EntityUuid) then
+        table.insert(allNPCs, entity)
+        end
+    end
+
+    for _, npc in pairs (allNPCs) do
+        local clothes = SexUserVars.GetNPCClothes(npc)
+        --print("checking npc ", npc.Uuid.EntityUuid)
+        if clothes then
+            print("Stripping ", npc.Uuid.EntityUuid)
+            NPC.StripNPC(npc)
+            NPC.GiveGenitals(npc)
+        end
+    end
+end
+
+
 UIEvents.RequestStripNPC:SetHandler(function (payload)
     local entity = Ext.Entity.Get(payload.uuid)
     if not entity then
@@ -111,9 +135,18 @@ UIEvents.RequestStripNPC:SetHandler(function (payload)
     local clothes = NPC.StripNPC(entity)
     -- safeguarding against overwriting the saved things with an empty table
     -- in case users strip twice
-    if not (clothes[1][1].uuid == "") then
+
+    local notHasEmpty
+    for _,entry in pairs(clothes[1])do
+        if not (entry.uuid == "") then
+            notHasEmpty = true
+        end
+    end
+
+    if not notHasEmpty then
         SexUserVars.SetNPCClothes(clothes, entity)
     end
+
 
 end)
 
@@ -125,26 +158,26 @@ UIEvents.RequestDressNPC:SetHandler(function (payload)
         Debug.Print(payload.uuid .. " is not an entity")
     end
 
-
     local clothes = SexUserVars.GetNPCClothes(entity)
+
+    if not clothes then
+        print("no clothes saved for ", entity.Uuid.EntityUuid)
+        return
+    end
+
     NPC.Redress(entity, clothes)
     SexUserVars.SetNPCClothes(nil, entity)
 end)
 
 
-
-
-    UIEvents.RequestGiveGenitalsNPC:SetHandler(function(payload)
+UIEvents.RequestGiveGenitalsNPC:SetHandler(function(payload)
     local uuid = payload.uuid
     local entity = Ext.Entity.Get(uuid)
     NPC.GiveGenitals(entity)
+end) 
     
-    end) 
-    
-    UIEvents.RequestRemoveGenitalsNPC:SetHandler(function(payload)
+UIEvents.RequestRemoveGenitalsNPC:SetHandler(function(payload)
     local uuid = payload.uuid
     local entity = Ext.Entity.Get(uuid)
     NPC.RemoveGenitals(entity)
-    
-
-    end)
+end)

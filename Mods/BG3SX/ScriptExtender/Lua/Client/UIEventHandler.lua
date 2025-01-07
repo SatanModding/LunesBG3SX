@@ -64,9 +64,17 @@ UIEvents.SendGenitals:SetHandler(function (payload)
     end
 end)
 
+UIEvents.SendUserTags:SetHandler(function (payload)
+    _P("1")
+    _D(payload)
+    UIInstance.WhitelistTab.UserTags.Tags = payload
+    UIInstance.WhitelistTab:UpdateUserTags(payload)
+end)
 UIEvents.SendWhitelist:SetHandler(function (payload)
     UIInstance.WhitelistTab.Whitelists = payload
     UIInstance.WhitelistTab:GenerateWhitelistArea()
+    _D(UIInstance.WhitelistTab.UserTags.Tags)
+    UIInstance.WhitelistTab:UpdateUserTags(UIInstance.WhitelistTab.UserTags.Tags)
 end)
 
 ---------------------------------------------------------------------
@@ -96,7 +104,6 @@ UIEvents.SendAllAnimations:SetHandler(function (payload)
         end
     end
 end)
-
 
 
 

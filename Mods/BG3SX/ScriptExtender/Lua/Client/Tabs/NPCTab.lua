@@ -26,6 +26,7 @@ function NPCTab:RequestStripNPC()
 
         UIEvents.RequestStripNPC:SendToServer({uuid = npc})
         UIEvents.RequestGiveGenitalsNPC:SendToServer({uuid = npc})
+
 end
 
 
@@ -54,12 +55,12 @@ function NPCTab:ScanForNPCs()
         table.insert(allCharacters, entity.Uuid.EntityUuid)
     end
 
-    UIEvents.RequestFilterTableForWhitelisted:SendToServer({tbl = allCharacters, client = _C().Uuid.EntityUuid}) 
+    UIEvents.FetchWhitelistedNPCs:SendToServer({tbl = allCharacters, client = _C().Uuid.EntityUuid}) 
 end
 
 
 
-UIEvents.FilterTableAndReturnWhitelisted:SetHandler(function (payload)
+UIEvents.SendWhitelistedNPCs:SetHandler(function (payload)
     local whitelisted = payload
 
     local inRange = {}
@@ -91,10 +92,29 @@ UIEvents.FilterTableAndReturnWhitelisted:SetHandler(function (payload)
         choice.SelectedIndex = choice.SelectedIndex +1
     end
 
+
+    choice.OnChange = function()
+
+        Debug.Print("OnChange")
+        _DS(UIInstance.GenitalsTab)
+
+        Debug.Print("Chose an NPC")
+        Debug.Print("Remeber to change the text in genitals tab")
+
+        local npc = choice.Options[choice.SelectedIndex + 1]
+        local text = UIInstance.GenitalsTab.CurrentCharacter.Label
+
+        text = "Current Character: " .. npc
+        text.Visible = true
+
+    end
+
 end) 
 
 
 function UI:NewNPCTab()
+    if self.NPCTab then return end -- Fix for infinite UI repopulation
+
     local instance = setmetatable({
         --UI = self.ID,
         Tab = self.TabBar:AddTabItem("NPCs"),
@@ -110,7 +130,7 @@ function NPCTab:Initialize()
 
     self.InRange = {}
     local r = self.InRange
-    r.Range = self.Tab:AddSliderInt("", 20,1,500)
+    r.Range = self.Tab:AddSliderInt("", 5,1,10)
     r.NPCs = {}
     r.Select = nil
     r.Choice = self.Tab:AddCombo("")

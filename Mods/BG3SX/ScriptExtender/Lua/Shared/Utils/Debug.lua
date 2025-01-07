@@ -67,5 +67,5 @@ function Debug.PrintError(message)
 end
 Debug.PW = Debug.PrintWarn
 Debug.PE = Debug.PrintError
-Debug.PW("Test Warning")
-Debug.PE("Test Error")
+-- Debug.PW("Test Warning")
+-- Debug.PE("Test Error")

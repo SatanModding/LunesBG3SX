@@ -19,15 +19,21 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
             instance = setmetatable({
                 Enabled = true,
                 Name = name,
-                AnimTop = animTop,
-                AnimBtm = animBtm or nil,
                 Categories = categories or nil,
-                Props = props or nil
+                Heightmatching = hm:New(name, animTop, animBtm),
+                Props = props or nil,
+                Duration = 3600,
+                Loop = nil,
+                Sound = true,
+                SoundTop = nil,
+                SoundBottom = nil
             }, AnimationData)
+            instance._animTop = animTop
+            instance._animBtm = animBtm
+            return instance
         else
             Debug.Print("Creating an AnimationData metatable failed for animation " .. name .. ". Missing ModuleUUID!")
         end
-        return instance
     end
 
     function CreateAnimationData(moduleUUID, name, animTop, animBtm, categories, props)
@@ -37,11 +43,6 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
 
         local animData = AnimationData.New(moduleUUID, name, animTop, animBtm, categories, props)
         if animData then
-            if animData.AnimBtm then
-                animData.Heightmatching = hm:New(name, animTop, animBtm)
-            else
-                animData.Heightmatching = hm:New(name, animTop)
-            end
 
             Ext.Timer.WaitFor(100, function() -- To wait for mods editing their animation entry or adding their ModuleUUID before throwing the event
                 Ext.ModEvents.BG3SX.AddAnimation:Throw({animData})
@@ -152,28 +153,42 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     local milking = addMainAnim("Milking",  anim["MilkingTop"].MapKey, anim["MilkingBtm"].MapKey, {"Straight", "Gay"})
     milking.SoundBottom = Data.Sounds.Kissing
 
-    local masturbateStanding = addMainAnim("Masturbate Standing", anim["MasturbateStanding_V"].MapKey, {"SoloV"})
+    local masturbateStanding = addMainAnim("Masturbate Standing", anim["MasturbateStanding_V"].MapKey, nil, {"SoloV"})
 
-    local wanking = addMainAnim("Wanking",  anim["MasturbateWank"].MapKey, {"SoloP"})
+    local wanking = addMainAnim("Wanking",  anim["MasturbateWank"].MapKey, nil, {"SoloP"})
     wanking.SoundBottom = Data.Sounds.Kissing
 
     local bottlesit = addMainAnim("BottleSit",  anim["BottleSit"].MapKey, nil, {"Solo"}, {"0f2ccca6-3ce8-4271-aec0-820f6581c551"}) -- Prop: Bottle
 
     local vampireThrust = addMainAnim("YOUR_LAST_THRUST",  anim["VampireLord"].MapKey, nil, {"Test"})
-    
-    for name,animData in pairs(anims) do
-        if name ~= "Ask for Sex" or name ~= "Start Masturbating" then
-            if not Table.Contains(animData.Categories, "NSFW") then
-                table.insert(animData.Categories, "NSFW")
-            end
-        end
-    end
 
     -- Heightmatching:
     ----------------------------------------------------
     local hmi = masturbateStanding.Heightmatching
     if hmi then
         hmi:SetAnimation("Tall_V",  nil, anim["MasturbateStanding_Tall_V"].MapKey)
+    end
+
+    -- Automatic NSFW Tag adding
+    for uuid,modanims in pairs(anims) do
+        if uuid == ModuleUUID then -- Only for this mod
+            for name,animData in pairs(modanims) do
+                -- Debug.Print("Dump " .. name)
+                -- Debug.Dump(animData.Categories)
+                if not Table.Contains(animData.Categories, "NSFW") then
+                    table.insert(animData.Categories, "NSFW")
+                    -- _D(animData.Categories)
+                end
+                animData.SoundTop = Data.Sounds.Moaning
+                if animData._animBtm then
+                    if Table.Contains(animData.Categories, "Lesbian") then
+                        animData.SoundBottom = Data.Sounds.Kissing
+                    else
+                        animData.SoundBottom = Data.Sounds.Moaning
+                    end
+                end
+            end
+        end
     end
 
     -- Data.FilteredAnimations = {}

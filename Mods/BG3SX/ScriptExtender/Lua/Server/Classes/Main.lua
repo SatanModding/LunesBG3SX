@@ -34,8 +34,12 @@ function OnSessionLoaded()
 
     Genital.Initialize() -- Initializes genitals, check Genitals.lua
 
+    -- strips NPCs that have been stripped before the game was ended
+    
+
     Ext.Osiris.RegisterListener("LevelGameplayStarted", 2, "after", function(_, _)
         initializeParty()
+        NPC.RestoreNudity()
     end)
 
 	Ext.Osiris.RegisterListener("DB_PartOfTheTeam", 1, "afterDelete", function (character)

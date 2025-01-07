@@ -889,7 +889,7 @@ local popuphandle = "h594ca12dga310g4324ga6f5ge889a614967d"
 local popupkey = "BG3SX_Popup"
 -- Checks if an entity is part of our whitelisted tags/races table
 ---@param uuid string - UUID of an entity
-function Entity:IsWhitelistedTagOrRace(uuid, debug, showMessage)
+function Entity:IsWhitelistedTagOrRace(uuid, debug)
     local debug = debug or false
     local tags = Entity:TryGetEntityValue(uuid, nil, {"ServerRaceTag", "Tags"})
     if Ext.IsClient() then
@@ -899,7 +899,7 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug, showMessage)
     for _,quickTag in pairs(quickTagCheck) do
         if quickTag == Data.AllowedTagsAndRaces["KID"].TAG or quickTag == Data.AllowedTagsAndRaces["GOBLIN_KID"].TAG then
             -- sometimes Whitelisted check is used internally to filter lists. We dont want to show messages in that case
-            if showMessage then
+            if debug then
                 local msg = "[BG3SX][Whitelist.lua]\nCheck failed on:\n" .. uuid .. "\nFound disallowed tag with UUID:\n" .. quickTag .. "\nReason: 69"
                 _P(msg)
                 Ext.Loca.UpdateTranslatedString(popuphandle, msg)
@@ -1057,7 +1057,7 @@ end
 --- Checks if an entity is allowed based on its UUID and current settings of Data.WhitelistedEntities, Data.BlacklistedEntities and Data.AllowedTagsAndRaces.
 --- @param uuid any - The UUID of the entity to check.
 --- @return boolean - Returns true if the entity is allowed, false otherwise.
-function Entity:IsWhitelisted(uuid, debug,showmessage)
+function Entity:IsWhitelisted(uuid, debug)
     if Entity:HasTags(uuid) then
         local debug = debug or false
         if Entity:IsBlacklistedEntity(uuid) then -- If true it is NOT allowed - return false
@@ -1066,7 +1066,7 @@ function Entity:IsWhitelisted(uuid, debug,showmessage)
             return true -- We do this seperately from the other checks to just immediately return true if they are indeed whitelisted here
         end
         
-        if Entity:IsWhitelistedTagOrRace(uuid, debug, showmessage) then
+        if Entity:IsWhitelistedTagOrRace(uuid, debug) then
             return true -- Entity allowed by race/tags
         else
             return false -- Entity not allowed by race/tags

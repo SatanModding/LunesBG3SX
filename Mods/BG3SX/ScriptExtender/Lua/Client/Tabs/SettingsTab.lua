@@ -1,6 +1,8 @@
 SettingsTab = {}
 SettingsTab.__index = SettingsTab
 function UI:NewSettingsTab()
+    if self.SettingsTab then return end -- Fix for infinite UI repopulation
+    
     local instance = setmetatable({
         --UI = self.ID,
         Tab = self.TabBar:AddTabItem("Settings"),

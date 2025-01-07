@@ -198,42 +198,43 @@ end
 
 
 
-local function getAllCategories(animationData)
+local function getAllCategories(allAnims)
+    local categories = {}
 
-local categories = {}
+    for moduleUUID,animations in pairs(allAnims) do
+        for AnimationName,AnimationData in pairs(animations) do
+            if not (AnimationName == "New") then
 
-    for AnimationName,Animation in pairs(animationData) do
-        if not (AnimationName == "New") then
+                local categories = Animation.Categories
 
-            local categories = Animation.Categories
-
-            if categories then
-        
-                for _,category in pairs(categories) do
-                    if Animation.Enabled then
-                        categories[category] = true
+                if categories then
+            
+                    for _,category in pairs(categories) do
+                        if Animation.Enabled then
+                            categories[category] = true
+                        end
                     end
+                else
+                    Debug.Print(AnimationName .. " does not have a category assigned")
                 end
-            else
-                Debug.Print(Animation.Name .. " does not have a category assigned")
             end
         end
     end
 
     return categories
-
 end
 
 function SceneControl:FilterAnimationsByCategory(filter)
     filter = filter or nil
 
-    local animations = {}
+    local validAnimations = {}
 
     if not filter then
         return self.Animations
     end
 
-    for AnimationName,Animation in pairs(self.Animations) do
+for modUUID,animations in pairs(self.Animations) do
+    for AnimationName,Animation in pairs(animations) do
         print(AnimationName)
         if not (AnimationName == "New") then
 
@@ -244,7 +245,7 @@ function SceneControl:FilterAnimationsByCategory(filter)
                 for _,category in pairs(categories) do
                     Debug.Print("Category ".. category)
                     if Animation.Enabled and category == filter then
-                        animations[AnimationName] = Animation
+                        validAnimations[AnimationName] = Animation
                     end
                 end
 
@@ -253,30 +254,33 @@ function SceneControl:FilterAnimationsByCategory(filter)
             end
         end
     end
+end
 
-    return animations
+    return validAnimations
 end
 
 function SceneControl:FilterAnimationsByMod(filter)
     filter = filter or nil
 
-    local animations = {}
+    local validAnimations = {}
 
     if not filter then
         return self.Animations
     end
 
-    for AnimationName,Animation in pairs(self.Animations) do
-        print(AnimationName)
-        if not (AnimationName == "New") then
-            if Animation.Enabled and Animation.Mod == filter then
-                
-                animations[AnimationName] = Animation
+    for moduleUUID,animations in pairs(self.Animations) do
+        for AnimationName,Animation in pairs(animations) do
+            print(AnimationName)
+            if not (AnimationName == "New") then
+                if Animation.Enabled and moduleUUID == filter then
+                    
+                    validAnimations[AnimationName] = Animation
+                end
             end
         end
     end
 
-    return animations
+    return validAnimations
 end
 
 
@@ -385,34 +389,41 @@ end
 
 function SceneControl:GetAnimationsBySceneType()
     local type = self.Scene.SceneType
+    Debug.Print(type)
     local animsByType = {}
-    for AnimationName,AnimationData in pairs(self.Animations) do
-        if AnimationData.Enabled == true then
-            local hmi = AnimationData.Heightmatching
-            if (type == "SoloP") or (type == "SoloV") then
-                local matchT = hmi.matchingTable
-                if matchT and #matchT > 0 then
-                    for _,matchup in pairs(matchT) do
-                        if matchup.Solo then
-                            if not Table.Contains(animsByType, AnimationName) then
+    for moduleUUID,Anims in pairs(self.Animations) do
+        for AnimationName,AnimationData in pairs(Anims) do
+            if AnimationData.Enabled == true then
+                local hmi = AnimationData.Heightmatching
+                if (type == "SoloP") or (type == "SoloV") then
+                    local matchT = hmi.matchingTable
+                    if matchT and #matchT > 0 then
+                        for _,matchup in pairs(matchT) do
+                            if matchup.Solo then
+                                if not animsByType[moduleUUID] then
+                                    animsByType[moduleUUID] = {}
+                                end
                                 if type == "SoloP" and Table.Contains(AnimationData.Categories, type) then
-                                    table.insert(animsByType, AnimationName)
+                                    animsByType[moduleUUID][AnimationName] = AnimationData
                                 elseif type == "SoloV" and Table.Contains(AnimationData.Categories, type) then
-                                    table.insert(animsByType, AnimationName)
+                                    animsByType[moduleUUID][AnimationName] = AnimationData
                                 end
                             end
                         end
                     end
-                end
-            elseif (type == "Lesbian") or (type == "Straight") or (type == "Gay") then
-                if hmi.fallbackTop and hmi.fallbackBottom then
-                    if not Table.Contains(animsByType, AnimationName) then
+                elseif (type == "Lesbian") or (type == "Straight") or (type == "Gay") then
+                    if hmi.fallbackTop and hmi.fallbackBottom then
+                        if not animsByType[moduleUUID] then
+                            animsByType[moduleUUID] = {}
+                        end
                         if type == "Lesbian" and Table.Contains(AnimationData.Categories, type) then
-                            table.insert(animsByType, AnimationName)
+                            animsByType[moduleUUID][AnimationName] = AnimationData
                         elseif type == "Straight" and Table.Contains(AnimationData.Categories, type) then
-                            table.insert(animsByType, AnimationName)
+                            _P("YEEEEEEEEEEES")
+                            _DS(AnimationData.Name)
+                            animsByType[moduleUUID][AnimationName] = AnimationData
                         elseif type == "Gay" and Table.Contains(AnimationData.Categories, type) then
-                            table.insert(animsByType, AnimationName)
+                            animsByType[moduleUUID][AnimationName] = AnimationData
                         end
                     end
                 end
@@ -420,6 +431,22 @@ function SceneControl:GetAnimationsBySceneType()
         end
     end
     return animsByType
+end
+
+function SceneControl:ConvertAnimationsForPicker(animsByType)
+    local pickerEntries = {}
+    for moduleUUID,Anims in pairs(animsByType) do
+        local sameNameCounter = 1
+        for AnimationName,AnimationData in pairs(Anims) do
+            if pickerEntries[AnimationName] then
+                sameNameCounter = sameNameCounter + 1
+                pickerEntries[AnimationName .. " " .. sameNameCounter] = {moduleUUID = moduleUUID, AnimationData = AnimationData}
+            end
+            pickerEntries[AnimationName] = {moduleUUID = moduleUUID, AnimationData = AnimationData}
+        end
+    end
+
+    return pickerEntries
 end
 
 function SceneControl:AddAnimationPicker()
@@ -450,17 +477,31 @@ function SceneControl:AddAnimationPicker()
     end
     previousButton.SameLine = true
 
-    local anims = self:GetAnimationsBySceneType()
+    local authorName
+    local animsByType = self:GetAnimationsBySceneType()
+    local animPickerAnims = self:ConvertAnimationsForPicker(animsByType)
+    Debug.Print("AnimPickerAnims")
+    Debug.DumpS(animPickerAnims) 
     animationPicker = g:AddCombo("")
-    animationPicker.Options = anims -- Will get overwritten by filters
+    animationPicker.UserData = animPickerAnims
+    local animNames = {}
+    for AnimName,Data in pairs(animationPicker.UserData) do
+        table.insert(animNames, AnimName)
+    end
+    animationPicker.Options = animNames -- Will get overwritten by filters
     animationPicker.SelectedIndex = 1
     animationPicker.OnChange = function ()
         if animationPicker.SelectedIndex ~= 0 then
+            local pick = animationPicker.UserData[animationPicker.Options[animationPicker.SelectedIndex+1]]
             UIEvents.ChangeAnimation:SendToServer({
                 ID = USERID,
                 Caster = _C().Uuid.EntityUuid,
-                Animation = animationPicker.Options[animationPicker.SelectedIndex]
+                moduleUUID = pick.moduleUUID,
+                AnimationData = pick.AnimationData,
             })
+            Debug.Print("MOD AUTHOR")
+            Debug.Print(Helper.GetModAuthor(pick.moduleUUID))
+            authorName.Label = Helper.GetModAuthor(pick.moduleUUID)
         end
     end
     animationPicker.SameLine = true

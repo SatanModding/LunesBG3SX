@@ -17,8 +17,8 @@ local playSound
 function Sound:New(actor, animSpell)
     local instance = setmetatable({
         actor = actor,
-        soundTable = animSpell.SoundTop or animSpell.SoundBottom,
-        duration = animSpell.AnimLength
+        soundTable = animSpell.SoundTop or animSpell.SoundBottom or nil,
+        duration = animSpell.Duration
     }, Animation)
     playSound(instance) -- Automatically calls this function on creation
 
@@ -37,19 +37,23 @@ playSound = function(self)
         local nothing = "1f012ea2-236e-473c-b261-4523753ab9bb" -- Can't use NULL
         Osi.PlaySound(self.actor, nothing) -- First, stop current sound
 
-        local sound = self.soundTable[math.random(1, #self.soundTable)]
-        Osi.PlaySound(self.actor, sound) -- Plays a random entry of sounds on an actor
-        
-        -- Will be an infinite loop until registered timer gets canceled on Scene:Destroy()
-        local newSoundTimer = Ext.Timer.WaitFor(math.random(minRepeatTime, maxRepeatTime), function()
-            for i = #scene.timerHandles, 1, -1 do -- Remove oldest timerHandle before creating a new one
-                table.remove(scene.timerHandles, i)
+        if self.SoundTable then
+            local sound = self.soundTable[math.random(1, #self.soundTable)]
+            if sound then
+                Osi.PlaySound(self.actor, sound) -- Plays a random entry of sounds on an actor
+                
+                -- Will be an infinite loop until registered timer gets canceled on Scene:Destroy()
+                local newSoundTimer = Ext.Timer.WaitFor(math.random(minRepeatTime, maxRepeatTime), function()
+                    for i = #scene.timerHandles, 1, -1 do -- Remove oldest timerHandle before creating a new one
+                        table.remove(scene.timerHandles, i)
+                    end
+                    -- _D(scene.timerHandles)
+                    playSound(self)
+                end)
+                scene:RegisterNewSoundTimer(newSoundTimer)
+                -- _P("[BG3SX][Sound.lua] - Sound:New() - Begin to play ", sound, " on Actor ", self.actor.uuid)
             end
-            -- _D(scene.timerHandles)
-            playSound(self)
-        end)
-        scene:RegisterNewSoundTimer(newSoundTimer)
-        -- _P("[BG3SX][Sound.lua] - Sound:New() - Begin to play ", sound, " on Actor ", self.actor.uuid)
+        end
     else
         -- _P("[BG3SX][Sound.lua] - Sound:New() - Scene does not exist anymore")
         -- This else situation can still happen when sound timers are running out after a scene got destroyed, tho we destroy everything and nothing should happen

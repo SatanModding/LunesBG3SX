@@ -176,7 +176,9 @@ end
 
 
 
-
+function Helper.GetComponentValue(uuid, something, path)
+    -- Redo Entity.TryGetEntityValue() maybe?
+end
 
 
 ---@return EntityHandle|nil
@@ -290,7 +292,7 @@ function Helper.GetName(uuid)
     local displayName
 
     if not entity then
-         Debug.Print("No entity found on Server / No character template found on client")
+        Debug.Print("No entity found on Server / No character template found on client")
         return "Name not Found"
     end
 
@@ -310,6 +312,11 @@ function Helper.GetName(uuid)
  
 end
 
+function Helper.IsUUID(val)
+    local uuid_pattern = "^[0-9a-fA-F]{8}%-[0-9a-fA-F]{4}%-[1-5][0-9a-fA-F]{3}%-[89abAB][0-9a-fA-F]{3}%-[0-9a-fA-F]{12}$"
+    return type(val) == "string" and val:match(uuid_pattern) ~= nil
+end
+    
 
 function Helper.GetAllClients()
 
@@ -376,6 +383,36 @@ function Helper.IsUpperCase(str)
     return str == string.upper(str)
 end
 
+function Helper.GetModInfo(moduleUUID)
+    return Ext.Mod.GetMod(moduleUUID).Info
+end
 function Helper.GetModName(moduleUUID)
     return Ext.Mod.GetMod(moduleUUID).Info.Name
 end
+function Helper.GetModAuthor(moduleUUID)
+    return Ext.Mod.GetMod(moduleUUID).Info.Author
+end
+
+
+
+function getControlledCharacter()
+
+    if not Ext.IsClient() then
+        Debug.Print("Cannot find controlled character on server")
+    end
+
+
+
+    local controlled = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
+    
+    for _,entity in pairs(controlled) do
+
+            if entity.ClientCharacter and entity.ClientCharacter.OwnerUserID == 1 then
+            return entity
+            end
+
+    end
+
+    return nil
+end
+

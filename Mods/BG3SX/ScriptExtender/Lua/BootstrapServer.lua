@@ -1,3 +1,6 @@
+-- If I don't define this, the console yells at me
+ModuleUUID = "df8b9877-5662-4411-9d08-9ee2ec4d8d9e"
+
 ------------------------------------
         -- Init Classes --
 ------------------------------------
@@ -6,11 +9,11 @@
 -- Pre-Construct our classes
 Ext.Require("Shared/_constructor.lua")
 
--- Initialize Data Tables
-Ext.Require("Shared/_initData.lua")
-
 -- Initialize Utils
 Ext.Require("Shared/_initUtils.lua")
+
+-- Initialize Data Tables
+Ext.Require("Shared/_initData.lua")
 
 -- Initialize Sex Classes
 Ext.Require("Server/Classes/Sex/_init.lua")
@@ -48,13 +51,7 @@ Ext.RegisterModEvent("BG3SX", "ActorDressed")               --{uuid, equipment} 
 Ext.RegisterModEvent("BG3SX", "GenitalChange")              --{uuid, newGenital}                        - Genital.lua
 
 
-
-
--- If I don't define this, the console yells at me
-ModuleUUID = "df8b9877-5662-4411-9d08-9ee2ec4d8d9e" 
-
-
--- USers can set whether they want to "unlock" all animations
+-- Users can set whether they want to "unlock" all animations
 -- or only use "genital based" ones
 -- This means that 2 characters with penises will have accesss
 -- to the "lesbian" animations like "grinding", or "eating pussy" 

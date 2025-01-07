@@ -2,6 +2,8 @@
 DebugTab = {}
 DebugTab.__index = DebugTab
 function UI:NewDebugTab()
+    if self.DebugTab then return end -- Fix for infinite UI repopulation
+
     local instance = setmetatable({
         Tab = self.TabBar:AddTabItem("Debug")
     }, DebugTab)

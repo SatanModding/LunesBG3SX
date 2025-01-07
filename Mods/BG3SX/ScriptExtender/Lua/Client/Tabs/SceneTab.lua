@@ -2,6 +2,8 @@
 SceneTab = {}
 SceneTab.__index = SceneTab
 function UI:NewSceneTab()
+    if self.SceneTab then return end -- Fix for infinite UI repopulation
+    
     local instance = setmetatable({
         --UI = self.ID,
         Tab = self.TabBar:AddTabItem("Scenes"),

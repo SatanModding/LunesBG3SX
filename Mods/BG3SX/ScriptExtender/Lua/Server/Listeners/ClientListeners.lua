@@ -22,7 +22,7 @@ UIEvents.AskForSex:SetHandler(function (payload)
     
     -- masturbation 
     if target == caster then
-        if Entity:IsWhitelisted(caster, true, true) then
+        if Entity:IsWhitelisted(caster, true) then
             Ext.Timer.WaitFor(200, function() -- Wait for erections
                 Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Start Masturbating"])
             end)
@@ -32,7 +32,7 @@ UIEvents.AskForSex:SetHandler(function (payload)
 
     -- sex
     else
-        if Entity:IsWhitelisted(caster, true, true) and Entity:IsWhitelisted(target, true) then
+        if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
             Ext.Timer.WaitFor(200, function() -- Wait for erections
                 Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Ask for Sex"])
             end)
@@ -171,24 +171,25 @@ UIEvents.ChangeAnimation:SetHandler(function (payload)
     _D(payload)
     
     local caster = payload.Caster
-    local animation = payload.Animation
+    local moduleUUID = payload.moduleUUID
+    local animationData = payload.AnimationData
     local scene = Scene:FindSceneByEntity(caster)
 
     for _, char in pairs (scene.entities) do
-        Animation:New(char, Data.Animations[animation])
+        Animation:New(char, Data.Animations[moduleUUID][animationData.Name])
 
         -- Only play sound if is enabled for a given animation entry
-        if Data.Animations[animation].Sound == true then
-            Sound:New(char, Data.Animations[animation])
+        if Data.Animations[moduleUUID][animationData.Name].Sound == true then
+            Sound:New(char, Data.Animations[moduleUUID][animationData.Name])
         end
     end
 
-    scene.currentAnimation = Data.Animations[animation]
+    scene.currentAnimation = Data.Animations[moduleUUID][animationData.Name]
 end)
 
 
 
-UIEvents.RequestFilterTableForWhitelisted:SetHandler(function(payload)
+UIEvents.FetchWhitelistedNPCs:SetHandler(function(payload)
     local tbl = payload.tbl
     local filtered = {}
 
@@ -197,6 +198,17 @@ UIEvents.RequestFilterTableForWhitelisted:SetHandler(function(payload)
             table.insert(filtered, character)
         end
     end
-    UIEvents.FilterTableAndReturnWhitelisted:SendToClient(filtered, payload.client) 
+    UIEvents.SendWhitelistedNPCs:SendToClient(filtered, payload.client) 
 
+end)
+
+UIEvents.FetchUserTags:SetHandler(function(payload)
+    local tags = Entity:TryGetEntityValue(payload.Character, nil, {"ServerRaceTag", "Tags"})
+    
+     -- Can't send array over as event payloads so we add every entry to a table and send that one instead
+    local nonArrayTags = {}
+    for _,tagUUID in pairs(tags) do
+        table.insert(nonArrayTags,tagUUID)
+    end
+    UIEvents.SendUserTags:SendToClient(nonArrayTags, payload.ID)
 end)

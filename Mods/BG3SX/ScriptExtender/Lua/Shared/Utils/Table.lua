@@ -143,7 +143,7 @@ function Table.SortData(data)
         local array = {}
 
         for key, value in pairs(data)do
-        table.insert(array, {key = key, value = value})
+            table.insert(array, {key = key, value = value})
         end
 
         table.sort(array, function(a, b)

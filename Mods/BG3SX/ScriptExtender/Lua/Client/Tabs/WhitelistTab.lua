@@ -2,6 +2,8 @@ WhitelistTab = {}
 WhitelistTab.__index = WhitelistTab
 
 function UI:NewWhitelistTab()
+    if self.WhiteListTab then return end -- Fix for infinite UI repopulation
+
     local instance = setmetatable({
         --UI = self.ID,
         Tab = self.TabBar:AddTabItem("Whitelist"),
@@ -10,9 +12,16 @@ function UI:NewWhitelistTab()
 end
 
 function WhitelistTab:Initialize()
+    self.UserTags = {Header = self.Tab:AddCollapsingHeader("Character Tags")}
+    self.Whitelists = {}
+    self:FetchUserTags()
     self:FetchWhitelist()
 end
-function WhitelistTab.FetchWhitelist()
+
+function WhitelistTab:FetchUserTags()
+    UIEvents.FetchUserTags:SendToServer({ID = USERID, Character = _C().Uuid.EntityUuid})
+end
+function WhitelistTab:FetchWhitelist()
     UIEvents.FetchWhitelist:SendToServer({ID = USERID})
 end
 
@@ -31,6 +40,48 @@ function WhitelistTab:GenerateWhitelistArea()
     end
 end
 
+function WhitelistTab:IsAllowed(tag)
+    return self.Whitelists.Whitelist[tag].Allowed
+end
+function WhitelistTab:GetReason(tag)
+    return self.Whitelists.Whitelist[tag].Reason
+end
+
+function WhitelistTab:UpdateUserTags(tags)
+    if self.UserTags.Header then
+        UI.DestroyChildren(self.UserTags.Header)
+    end
+    self.UserTags.Tags = tags
+    local header = self.UserTags.Header
+    for _,tag in pairs(tags) do
+        local name = Ext.StaticData.Get(tag, "Tag").Name
+        local tagTreeNode = header:AddTree(name)
+        local uuidText = tagTreeNode:AddText("UUID:")
+        local uuid = tagTreeNode:AddInputText("")
+        uuid.Text = tag
+        uuid.SameLine = true
+        local allowedStatus = tagTreeNode:AddCheckbox("Allowed")
+        allowedStatus.SameLine = true
+        if self.Whitelists and #self.Whitelists > 0 then -- Only add an allowedStatus when WhitelistTab is found
+            if self.IsAllowed(tag) then
+                allowedStatus.Checked = true
+                allowedStatus.OnChange = function()
+                    allowedStatus.Checked = true
+                end
+            else
+                allowedStatus.Checked = false
+                allowedStatus.OnChange = function()
+                    allowedStatus.Checked = false
+                end
+                if self.GetReason(tag) then
+                    local tooltip = allowedStatus:Tooltip()
+                    local tooltipText = tooltip:AddText(self.GetReason(tag))
+                end
+            end
+        end
+    end
+end
+
 function WhitelistTab:GenerateWhitelist()
 -- Whitelist - Every entry also may have entry.racesUsingTag with multiple entries
     if not self.WhitelistHeader then
@@ -41,7 +92,8 @@ function WhitelistTab:GenerateWhitelist()
             if TagName ~= "KID" and TagName ~= "GOBLIN_KID" then
                 local tagTree = self.WhitelistHeader:AddTree(TagName)
                 if Content.TAG then
-                    local uuid = tagTree:AddInputText("Tag:")
+                    local tagText = tagTree:AddText("UUID:")
+                    local uuid = tagTree:AddInputText("")
                     uuid.Text = Content.TAG
                 end
                 if Content.Allowed then
