@@ -49,6 +49,7 @@ function UI:Initialize()
     self.PartyInterface = self:NewPartyInterface()
     self.PartyInterface:Initialize()
     -- PartyTable on top of Tabs so we can make everything Character specific depending on which one is selected
+    
     self.TabBar = self.Window:AddTabBar("")
     self.SceneTab = self:NewSceneTab()
     self.GenitalsTab = self:NewGenitalsTab()

@@ -65,7 +65,7 @@ Ext.Events.GameStateChanged:Subscribe(function(e)
     -- end
     if (e.FromState == "Running" and e.ToState == "Save")
     or (e.FromState == "Running" and e.ToState == "UnloadLevel") then -- Terminate also while loading so it doesn't carry over naked npc's
-        Scene.TerminateAllScenes()
+        Scene.DestroyAllScenes()
     end
 end)
 

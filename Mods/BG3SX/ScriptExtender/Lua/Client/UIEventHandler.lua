@@ -59,7 +59,7 @@ UIEvents.SendGenitals:SetHandler(function (payload)
     local tab = UIInstance.GenitalsTab
     if tab.AwaitingGenitals == true then
         tab.Genitals = genitals
-        tab:UpdateGenitalTable()
+        tab:UpdateGenitalGroup()
         tab.AwaitingGenitals = false
     end
 end)

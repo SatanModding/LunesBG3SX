@@ -14,12 +14,14 @@ end
 function GenitalsTab:Initialize()
     self.CurrentCharacter = self.Tab:AddText("Current Character: NAN")
     self.CurrentCharacter.Visible = false
-
     self.ClearChoiceButton = self.Tab:AddButton("Clear Choice")
+    self.ClearChoiceButton.Visible = false
 
     self.ClearChoiceButton.OnClick = function()
         Debug.Print("Clearing choice and resetitng to host character")
         self.CurrentCharacter.Label = Helper.GetName(_C().Uuid.EntityUuid .. " - " .. _C().Uuid.EntityUuid)
+        self.CurrentCharacter.Visible = false
+        self.ClearChoiceButton.Visible = false
     end
 
     self:FetchGenitals()
@@ -30,11 +32,14 @@ function GenitalsTab:FetchGenitals()
     UIEvents.FetchGenitals:SendToServer({ID = USERID, Character = _C().Uuid.EntityUuid})
 end
 
-function GenitalsTab:UpdateGenitalTable()
-    UI.DestroyChildren(self.Tab)
+function GenitalsTab:UpdateGenitalGroup()
+    if not self.GenitalArea then
+        self.GenitalArea = self.Tab:AddGroup("")
+    end
+    UI.DestroyChildren(self.GenitalArea)
     local buttonID = 0
     for Category,Genitals in pairs(self.Genitals) do
-        local categoryHeader = self.Tab:AddCollapsingHeader(Category)
+        local categoryHeader = self.GenitalArea:AddCollapsingHeader(Category)
         for i,Genital in ipairs(Genitals) do
             if (not Genital.name) or (Genital.name == "") then
                 return
@@ -69,7 +74,7 @@ UIEvents.ChangeCharacter:SetHandler(function (payload)
     local selectedNPC = npcChoice.Options[npcChoice.SelectedIndex + 1]
 
     if selectedNPC then
-        Debug.Print("An NPC is selected, not chaning the text")
+        Debug.Print("An NPC is selected, not changing the text")
         return
     end
 
@@ -82,11 +87,20 @@ UIEvents.ChangeCharacter:SetHandler(function (payload)
 end)
 
 
-
-for i=1000,5000 do
-    Ext.Timer.WaitFor(i, function()
-        print("dumping genitals")
-        _DS(UIInstance.GenitalsTab)
-    end)
-
-end
+-- Check for NULL REFERENCEs because of too early destroyed IMGUI elements
+-- for i = 1000, 5000 do
+--     Ext.Timer.WaitFor(i, function()
+--         if UIInstance.GenitalsTab then
+--             if UIInstance.GenitalsTab.Tab then
+--                 print("Dumping GenitalsTab state...")
+--                 for k, v in pairs(UIInstance.GenitalsTab) do
+--                     print(k, v)
+--                 end
+--             else
+--                 print("GenitalsTab.Tab is invalid or was destroyed!")
+--             end
+--         else
+--             print("GenitalsTab object no longer exists!")
+--         end
+--     end)
+-- end

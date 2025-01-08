@@ -12,9 +12,9 @@ local function getDebugPrefix()
 
     if Ext.Debug.IsDeveloperMode() and Debug.USEPREFIX then
         local info = debug.getinfo(3, "nfSlu")
-        local fileLocation = string.format("\"%s\" IN FILE \"%s\" AT LINE", info.name or "unknown", info.source or "unknown")
-        local line = string.format("%d] :", info.currentline or 0)
-        return string.format("\n %s %s %s", prefix , fileLocation , line)
+        local fileLocation = string.format("\"%s\" IN FILE \"%s\" AT LINE", info.name or "Unknown", info.source or "Unknown Source")
+        local line = string.format("%d] :", info.currentline or "Unknown")
+        return string.format("\n%s[DEBUG][Function %s %s", "[BG3SX]" , fileLocation , line)
     else
         return ""
     end
@@ -37,7 +37,8 @@ function Debug.Dump(table)
 
         local pre = getDebugPrefix()
 
-        _D(pre .. "Dump:")
+        _P(pre)
+        _P("Dump:")
         _D(table)
     end
 end

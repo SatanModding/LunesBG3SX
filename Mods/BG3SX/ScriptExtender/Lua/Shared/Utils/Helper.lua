@@ -292,10 +292,13 @@ function Helper.GetName(uuid)
     local displayName
 
     if not entity then
-        Debug.Print("No entity found on Server / No character template found on client")
+        -- Debug.Print("No entity found on Server / No character template found on client")
         return "Name not Found"
     end
 
+    if entity.CustomName and entity.CustomName.Name then -- PlayerCharacter Name
+        return entity.CustomName.Name
+    end
 
     if Ext.IsClient() then
         displayName = entity.ClientCharacter.Template.DisplayName

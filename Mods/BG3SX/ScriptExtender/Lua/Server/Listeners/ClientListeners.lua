@@ -116,7 +116,7 @@ end)
 
 UIEvents.FetchParty:SetHandler(function (payload)
     local party = Osi.DB_PartyMembers:Get(nil)
-    UIEvents.SendParty:SendToClient(party, payload)
+    UIEvents.SendParty:SendToClient(party, payload.ID)
 end)
 
 UIEvents.FetchWhitelist:SetHandler(function (payload)
@@ -192,6 +192,8 @@ end)
 UIEvents.FetchWhitelistedNPCs:SetHandler(function(payload)
     local tbl = payload.tbl
     local filtered = {}
+
+    _D(tbl)
 
     for _, character in pairs(tbl) do
         if Entity:IsWhitelisted(character) then

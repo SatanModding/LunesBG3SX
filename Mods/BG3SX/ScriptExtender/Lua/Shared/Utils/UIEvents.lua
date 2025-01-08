@@ -27,6 +27,8 @@ function UIEvents:Initialize()
     self.RequestRotation = Ext.Net.CreateChannel(ModuleUUID, "RequestRotation")
     -- Server -> Client
     self.NewScene = Ext.Net.CreateChannel(ModuleUUID, "NewScene")
+    self.DestroyAllSceneControls = Ext.Net.CreateChannel(ModuleUUID, "DestroyAllSceneControls")
+
 
     -- Genitals
     -- Client -> Server
@@ -49,9 +51,6 @@ function UIEvents:Initialize()
 
     --self.SendAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendAnimations")
 
-
-    
-    
     -- Whitelist Tab
     -- Client -> Server
     self.FetchUserTags = Ext.Net.CreateChannel(ModuleUUID, "FetchUserTags")

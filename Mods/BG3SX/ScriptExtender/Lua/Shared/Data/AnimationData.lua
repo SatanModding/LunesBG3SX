@@ -24,7 +24,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
                 Props = props or nil,
                 Duration = 3600,
                 Loop = nil,
-                Sound = true,
+                Sound = false,
                 SoundTop = nil,
                 SoundBottom = nil
             }, AnimationData)
@@ -42,6 +42,13 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         props = props or nil
 
         local animData = AnimationData.New(moduleUUID, name, animTop, animBtm, categories, props)
+
+        if categories and Table.Contains(categories, "NSFW") then -- If its an NSFW animation enable/add sound by default
+            animData.Sound = true
+            animData.SoundTop = Data.Sounds.Moaning
+            animData.SoundBtm = Data.Sounds.Moaning
+        end
+
         if animData then
 
             Ext.Timer.WaitFor(100, function() -- To wait for mods editing their animation entry or adding their ModuleUUID before throwing the event
@@ -52,6 +59,9 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         end
     end
 
+    -- These 2 local functions need to be recreated by every modauthor wanting to add animations to our system
+    -- So new animation entries are actually added to a subtable named after their modUUID
+    
     local function addIntroAnim(name, animTop, animBtm, categories, props)
         animBtm = animBtm or nil
         categories = categories or nil
@@ -84,7 +94,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     end
 
     -- Every other still gets shown, but these are the main categories we sort for
-    local mainAnimCategories = {
+    local animCategories = {
         "SFW", "NSFW", "Solo Penis", "Solo Vulva", "Masturbation", "Masturbate", "Paired", "Straight", "Same-Sex", "Lesbian", "Gay", "Vaginal", "Oral", "Anal", "Third-Wheel"
     }
     local mainGenitalTypes = {

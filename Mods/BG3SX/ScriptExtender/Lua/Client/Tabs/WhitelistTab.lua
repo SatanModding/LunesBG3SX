@@ -96,7 +96,7 @@ function WhitelistTab:GenerateWhitelist()
                     local uuid = tagTree:AddInputText("")
                     uuid.Text = Content.TAG
                 end
-                if Content.Allowed then
+                if Content.Allowed ~= nil then
                     local allowedStatus = tagTree:AddCheckbox("Allowed")
                     allowedStatus.SameLine = true
                     if Content.Allowed == true then
@@ -134,7 +134,7 @@ function WhitelistTab:GenerateModdedWhitelist()
                     local uuid = tagTree:AddInputText("Tag:")
                     uuid.Text = Content.TAG
                 end
-            if Content.Allowed then
+            if Content.Allowed ~= nil then
                     local allowedStatus = tagTree:AddCheckbox("Allowed")
                     allowedStatus.SameLine = true
                     if Content.Allowed == true then

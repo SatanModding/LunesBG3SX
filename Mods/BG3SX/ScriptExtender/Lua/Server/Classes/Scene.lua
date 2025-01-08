@@ -111,18 +111,17 @@ end
 -- Goes through every currently running scene until it finds the entityToSearch
 ---@param entityToSearch uuid
 function Scene:FindSceneByEntity(entityToSearch)
-
+    -- _P(entityToSearch)
     for i, scene in ipairs(Data.SavedScenes) do
         for _, entity in pairs(scene.entities) do
             if Helper.StringContains(entityToSearch, entity) then
+                -- _D(scene)
                 return scene
             end
         end
     end
     -- _P("[BG3SX][Scene.lua] - Scene:FindSceneByEntity - Entity not found in any existing scenes! This shouldn't happen anymore. Contact mod author about what you did.")
 end
-
-
 
 -- Returns all entities (parents) from a scene
 ---@param sceneToSearch Scene
@@ -554,17 +553,17 @@ function Scene:Destroy()
 end
 
 -- Terminates all running scenes
-function Scene.TerminateAllScenes()
+function Scene.DestroyAllScenes()
     if Data.SavedScenes and #Data.SavedScenes > 0 then
         for i = #Data.SavedScenes, 1, -1 do
             local scene = Data.SavedScenes[i]
             scene:Destroy()
         end
     end
+    UIEvents.DestroyAllSceneControls:Broadcast()
 end
---ConsoleCommand.New(Scene.TerminateAllScenes, "Terminates all Scenes")
-Ext.RegisterConsoleCommand("BG3SX.TerminateScenes", Scene.TerminateAllScenes) -- Killswitch
-
+--ConsoleCommand.New(Scene.DestroyAllScenes, "Terminates all Scenes")
+ConsoleCommand.New("DestroyAllScenes", Scene.DestroyAllScenes, "Destroys all ongoing scenes") -- Killswitch
 
 
 function Scene:SwapPosition()

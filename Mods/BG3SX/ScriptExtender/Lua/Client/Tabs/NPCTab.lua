@@ -94,7 +94,6 @@ UIEvents.SendWhitelistedNPCs:SetHandler(function (payload)
 
 
     choice.OnChange = function()
-
         Debug.Print("OnChange")
         _DS(UIInstance.GenitalsTab)
 
@@ -102,13 +101,13 @@ UIEvents.SendWhitelistedNPCs:SetHandler(function (payload)
         Debug.Print("Remeber to change the text in genitals tab")
 
         local npc = choice.Options[choice.SelectedIndex + 1]
-        local text = UIInstance.GenitalsTab.CurrentCharacter.Label
-
-        text = "Current Character: " .. npc
+        local text = UIInstance.GenitalsTab.CurrentCharacter
+        local clear = UIInstance.GenitalsTab.ClearChoiceButton
+        
+        text.Label = "Current Character: " .. npc
         text.Visible = true
-
+        clear.Visible = true
     end
-
 end) 
 
 

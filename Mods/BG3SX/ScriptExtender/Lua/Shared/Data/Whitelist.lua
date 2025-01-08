@@ -763,20 +763,6 @@ local unimportantTags = { -- These tags will get skipped by Whitelist
     "d2f86ec3-c41f-47e1-8acd-984872a4d7d5", -- RARE
     "0006ca6f-28f9-48e9-9f34-3deb32ff0fef", -- WPN_VFX_DAGGER
     --#endregion
-    --#region Classes
-    "02913f9a-f696-40cf-acdf-32032afab32c", -- Barbarian
-    "d93434bd-6b71-4789-b128-ee24156057cc", -- Bard
-    "1671b4bf-4f47-4bb7-9cb9-80bb1f6009d5", -- Cleric
-    "44ac4317-4d38-4d28-80e2-94024c6e42f0", -- Druid
-    "1ae7017c-4884-4a43-bc4a-742fa0d201c0", -- Fighter
-    "e1e460bb-d0ae-4452-8529-c9e176558731", -- Monk
-    "6d85ab2d-5c23-498c-a61e-98f05a00177a", -- Paladin
-    "37a733c1-a862-4157-b92a-9cff46232c6a", -- Ranger
-    "f8a0608b-666c-4be6-a49c-03b369c10bd2", -- Rogue
-    "18266c0b-efbc-4c80-8784-ada4a37218d7", -- Sorcerer
-    "6fe3ae27-dc6c-4fc9-9245-710c790c396c", -- Wizard
-    "5804f55a-93f7-4281-9512-8d548a9e2a22", -- Warlock
-    --#endregion
     --#region REALLY
     "264a6880-9a51-429c-a9fc-97f8952baf90", -- REALLY Generic
     "2d0a73b9-f113-4d35-bdee-a31ab9163d74", -- REALLY Underdark
@@ -795,6 +781,20 @@ local unimportantTags = { -- These tags will get skipped by Whitelist
     "cd611d7d-b67d-42b4-a75c-a0c6091ef8a2", -- REALLY Dark Urge
     "ffd08582-7396-4cac-bcd4-8f9cd0fd8ef3", -- REALLY Astarion
     --#endregion
+}
+Data.ClassTags = {
+    "02913f9a-f696-40cf-acdf-32032afab32c", -- Barbarian
+    "d93434bd-6b71-4789-b128-ee24156057cc", -- Bard
+    "1671b4bf-4f47-4bb7-9cb9-80bb1f6009d5", -- Cleric
+    "44ac4317-4d38-4d28-80e2-94024c6e42f0", -- Druid
+    "1ae7017c-4884-4a43-bc4a-742fa0d201c0", -- Fighter
+    "e1e460bb-d0ae-4452-8529-c9e176558731", -- Monk
+    "6d85ab2d-5c23-498c-a61e-98f05a00177a", -- Paladin
+    "37a733c1-a862-4157-b92a-9cff46232c6a", -- Ranger
+    "f8a0608b-666c-4be6-a49c-03b369c10bd2", -- Rogue
+    "18266c0b-efbc-4c80-8784-ada4a37218d7", -- Sorcerer
+    "6fe3ae27-dc6c-4fc9-9245-710c790c396c", -- Wizard
+    "5804f55a-93f7-4281-9512-8d548a9e2a22", -- Warlock
 }
 
 Data.WhitelistedEntities = {
@@ -946,7 +946,12 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
             if tag == unimportantTag then
                 skip = true
             end
-        end 
+        end
+        for _,classTag in pairs(Data.ClassTags) do -- We don't check for class tags
+            if tag == classTag then
+                skip = true -- So skip if this tag is one
+            end
+        end
         if skip == false then
             local tagData = Ext.StaticData.Get(tag, "Tag")
             if tagData then
@@ -1054,10 +1059,54 @@ function Entity:HasTags(uuid)
     end
 end
 
+function Entity.GetClassTags(uuid)
+    local entity = Ext.Entity.Get(uuid)
+    local combinedTags = {}
+    local classes = Entity:TryGetEntityValue(uuid, nil, {"Classes", "Classes"})
+        for _,Classes in pairs(classes) do
+            local class = Classes.ClassUUID
+            local subclass = Classes.SubClassUUID
+            if class ~= "00000000-0000-0000-0000-000000000000" then
+                local classDesc = Ext.StaticData.Get(class, "ClassDescription")
+                local classTags = classDesc.Tags
+                for _,tag in pairs(classTags) do
+                    table.insert(combinedTags,tag)
+                end
+            end
+            if subclass ~= "00000000-0000-0000-0000-000000000000" then
+                local subclassDesc = Ext.StaticData.Get(subclass, "ClassDescription")
+                local subclassTags = subclassDesc.Tags
+                for _,tag in pairs(subclassTags) do
+                    table.insert(combinedTags,tag)
+                end
+            end
+        end
+    return combinedTags
+end
+
+local function whitelistTags(targetTable, tags)
+    if type(tags) == "string" then
+        if not Table.Contains(targetTable, tags) then
+            table.insert(targetTable,tags)
+        end
+    elseif type(tags) == "table" then
+        for _,uuid in pairs(tags) do
+            if not Table.Contains(targetTable, uuid) then
+                table.insert(targetTable,uuid)
+            end
+        end
+    end
+end
+
 --- Checks if an entity is allowed based on its UUID and current settings of Data.WhitelistedEntities, Data.BlacklistedEntities and Data.AllowedTagsAndRaces.
 --- @param uuid any - The UUID of the entity to check.
 --- @return boolean - Returns true if the entity is allowed, false otherwise.
 function Entity:IsWhitelisted(uuid, debug)
+    local classTags = Entity.GetClassTags(uuid)
+    whitelistTags(Data.ClassTags, classTags) -- To fill the Data.ClassTags table with custom classes automatically
+
+    -- TODO: Get all Items and possible Item Tags and whitelist them
+
     if Entity:HasTags(uuid) then
         local debug = debug or false
         if Entity:IsBlacklistedEntity(uuid) then -- If true it is NOT allowed - return false

@@ -39,9 +39,19 @@ function SceneControl:UpdateWindowName()
     end
 end
 
-function UI.FindSceneControlByEntity()
-
+function UI.DestroyAllSceneControls(backToServer)
+    if UIInstance.SceneTab then
+        local tab = UIInstance.SceneTab
+        if tab.ActiveSceneControls and #tab.ActiveSceneControls > 0 then
+            for _,sceneControl in pairs(tab.ActiveSceneControls) do
+                sceneControl.Instance:Destroy(backToServer)
+            end
+        end
+    end
 end
+UIEvents.DestroyAllSceneControls:SetHandler(function ()
+    UI.DestroyAllSceneControls(false)
+end)
 
 function UI.FetchScenes()
     UIEvents.FetchScenes:SendToServer("")
@@ -51,8 +61,10 @@ end
 -- Only the window and SceneControl ID remains
 -- Windows currently can't be destroyed so its closed instead
 -- On new SceneControl creation, pick up on if there are any empty ones and use these first before creating a new one
-function SceneControl:Destroy()
-    UIEvents.StopSex:SendToServer({ID = self.ID, Scene = self.Scene})
+function SceneControl:Destroy(backToServer)
+    if backToServer then
+        UIEvents.StopSex:SendToServer({ID = self.ID, Scene = self.Scene})
+    end
     for _,SceneControl in pairs(UIInstance.SceneTab.ActiveSceneControls) do
         if SceneControl.Instance == self then
             SceneControl.Reference:Destroy() -- Delete SceneTab Reference Imgui Element
@@ -101,7 +113,7 @@ function SceneControl:CreateSceneTabReference()
         self.Window.Open = true
     end
     closeButton.OnClick = function()
-        self:Destroy()
+        self:Destroy(true)
     end
     for _,SceneControl in pairs(UIInstance.SceneTab.ActiveSceneControls) do
         if SceneControl.Instance == self then
@@ -139,7 +151,7 @@ function SceneControl:UseSceneControlButton(buttonLabel)
     elseif buttonLabel == "Move Scene" then
         UIInstance:AwaitInput("MoveScene", self.Scene)
     elseif buttonLabel == "Stop Sex" then
-        self:Destroy()
+        self:Destroy(true)
     end
 end
 

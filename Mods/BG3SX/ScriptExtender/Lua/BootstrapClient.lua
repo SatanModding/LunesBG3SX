@@ -33,7 +33,7 @@ Ext.Require("Client/Tabs/DebugTab.lua")
 Ext.Require("Client/UIEventHandler.lua")
 
 
-
+Ext.Require("Shared/Data/Origins.lua")
 Ext.Require("Client/GenitalMessages.lua")
 
 

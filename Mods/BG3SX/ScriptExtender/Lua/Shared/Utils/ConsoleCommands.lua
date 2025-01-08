@@ -1,32 +1,33 @@
 ConsoleCommand = {}
 ConsoleCommand.__index = ConsoleCommand
 local ConsoleCommands = {}
-local function getFunctionName(func)
+
+-- Using stack inspection, but limited by Lua's restrictions on local variables
+local function getFunctionName()
     local info = debug.getinfo(3, "n")
-    Debug.Print("debug.getInfo")
-    Debug.Dump(info)
-    return info.name or "anonymous"
-end
-function ConsoleCommand.New(fn, info)
-    local name = getFunctionName(fn)
-    if fn then
-        info = info or nil
-        local prefix = "BG3SX."
-        Ext.RegisterConsoleCommand(prefix .. name, fn)
-        if info then
-            ConsoleCommands["!BG3SX." .. name] = info
-        else
-            ConsoleCommands["!BG3SX." .. name] = "Calls the " .. name .. " function"
-        end
-        Debug.Print("Created new console function = " .. prefix .. name)
-    else
-        Debug.PrintWarn("Not a valid function to setup ConsoleCommands")
+    if info and info.name then
+        return info.name
     end
+    return "anonymous"
+end
+
+function ConsoleCommand.New(name, fn, info)
+    if not fn then
+        Debug.PrintWarn("Not a valid function to setup ConsoleCommands")
+        return
+    end
+
+    local prefix = "BG3SX."
+    Ext.RegisterConsoleCommand(prefix .. name, fn)
+    if info then
+        ConsoleCommands["!BG3SX." .. name] = info
+    else
+        ConsoleCommands["!BG3SX." .. name] = "No description provided"
+    end
+    Debug.Print("Created new console function: !" .. prefix .. name .. "\n- " .. (info or "No description provided"))
 end
 function ConsoleCommand.GetAll()
+    Debug.Dump(ConsoleCommands)
     return ConsoleCommands
 end
-local function Help()
-    _D(ConsoleCommands)
-end
-ConsoleCommand.New(Help, "Dumps every available console command")
+ConsoleCommand.New("Help", ConsoleCommand.GetAll, "Dumps every available console command")
