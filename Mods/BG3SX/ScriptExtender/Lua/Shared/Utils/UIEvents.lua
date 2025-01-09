@@ -71,6 +71,8 @@ function UIEvents:Initialize()
     
 
     self.CustomEvent = Ext.Net.CreateChannel(ModuleUUID, "CustomEvent")
+
+    self.GenitalsLoaded = Ext.Net.CreateChannel(ModuleUUID, "GenitalsLoaded")
 end
 
 UIEvents:Initialize()

@@ -7,7 +7,8 @@
 
 UIEvents.ChangeCharacter:SetHandler(function (payload)
 
-    Ext.Timer.WaitFor(200, function ()
+
+    Ext.Timer.WaitFor(200, function () -- CharacterChanged event needs to delay what it wants to execute because Osiris is slow AF - ClientEntity ID's don't update quickly enough after its triggered
         local entity = Helper.GetLocalControlledEntity()
         if entity then
             print("target of change control: ", payload)
@@ -19,7 +20,11 @@ UIEvents.ChangeCharacter:SetHandler(function (payload)
             Debug.Print("No entity")
         end
     end)
-
+end)
+UIEvents.GenitalsLoaded:SetHandler(function (payload)
+    Debug.Print("GenitalsLoaded recieved on client, sending FetchGenitals event with currently selected Client character" .. _C().Uuid.EntityUuid)
+    _D(_C().Uuid.EntityUuid)
+    UIEvents.FetchGenitals:SendToServer({ID = USERID, Character = _C().Uuid.EntityUuid})
 end)
 
 UIEvents.SendParty:SetHandler(function (payload)
@@ -54,14 +59,12 @@ UIEvents.NewScene:SetHandler(function (payload)
 end)
 
 UIEvents.SendGenitals:SetHandler(function (payload)
+    Debug.Print("SendGenitals recieved on client, updating Genital tab for")
     local genitals = payload.Data
 
     local tab = UIInstance.GenitalsTab
-    if tab.AwaitingGenitals == true then
-        tab.Genitals = genitals
-        tab:UpdateGenitalGroup()
-        tab.AwaitingGenitals = false
-    end
+    tab.Genitals = genitals
+    tab:UpdateGenitalGroup()
 end)
 
 UIEvents.SendUserTags:SetHandler(function (payload)

@@ -79,6 +79,24 @@ function PartyInterface:AddCharacter(uuid)
 end
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+function PartyInterface:AddSelectedNPCSection()
+    
+end
+
+
 -- TODO:
 -- Add Character Selection
 ---- For Genitals

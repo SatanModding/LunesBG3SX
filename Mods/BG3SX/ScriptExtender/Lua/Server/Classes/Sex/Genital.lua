@@ -166,6 +166,15 @@ function Genital.Initialize()
 
 	allAdditionalGenitals = modGenitals
 
+	Debug.Print("GOT ALL GENITALS")
+
+	Ext.Timer.WaitFor(4000, function()
+	
+	Debug.Print("Sending GenitalsLoaded Event")
+	UIEvents.GenitalsLoaded:Broadcast("Hewwwo I have fetched all genitaws uwu")
+	end)
+
+	
 end
 
 ----------------------------------------------------------------------------------------------------

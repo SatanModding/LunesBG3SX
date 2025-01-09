@@ -67,6 +67,9 @@ UIEvents.StopSex:SetHandler(function (payload)
 end)
 UIEvents.FetchGenitals:SetHandler(function (payload)
 
+    Debug.Print("Recevied FetchGenitals for character ".. payload.Character)
+
+
     local conts = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
     if conts ~= nil then
         for k, v in pairs(conts) do

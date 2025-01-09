@@ -1868,6 +1868,8 @@ end
 function Data.CreateUIGenitalPayload(uuid)
 
 
+
+
     local entity = Ext.Entity.Get(uuid)
     if not entity then
         Debug.Print("Not a valid entity uuid " .. uuid)
@@ -1898,9 +1900,10 @@ function Data.CreateUIGenitalPayload(uuid)
         end
 
         payload[mod] = genitalContent
-        _D(genitalContent)
+        --_D(genitalContent)
     end
-    _D(payload)
+    --_P("Genital Payload")
+    --_DS(payload)
     --Debug.Dump(payload)
     return payload
 end

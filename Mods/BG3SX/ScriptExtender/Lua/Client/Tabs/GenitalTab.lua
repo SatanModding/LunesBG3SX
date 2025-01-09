@@ -6,6 +6,7 @@ function UI:NewGenitalsTab()
     local instance = setmetatable({
         --UI = self.ID,
         Tab = self.TabBar:AddTabItem("Genitals"),
+        GenitalsLoaded = nil,
         Genitals = {},
     }, GenitalsTab)
     return instance
@@ -23,12 +24,10 @@ function GenitalsTab:Initialize()
         self.CurrentCharacter.Visible = false
         self.ClearChoiceButton.Visible = false
     end
-
-    self:FetchGenitals()
 end
 
 function GenitalsTab:FetchGenitals()
-    self.AwaitingGenitals = true
+    -- self.AwaitingGenitals = true
     UIEvents.FetchGenitals:SendToServer({ID = USERID, Character = _C().Uuid.EntityUuid})
 end
 
@@ -36,23 +35,30 @@ function GenitalsTab:UpdateGenitalGroup()
     if not self.GenitalArea then
         self.GenitalArea = self.Tab:AddGroup("")
     end
+    Debug.DumpS(self.Genitals)
     UI.DestroyChildren(self.GenitalArea)
     local buttonID = 0
     for Category,Genitals in pairs(self.Genitals) do
         local categoryHeader = self.GenitalArea:AddCollapsingHeader(Category)
         for i,Genital in ipairs(Genitals) do
             if (not Genital.name) or (Genital.name == "") then
-                return
+                
             end
-            local genitalChoice = categoryHeader:AddText(Genital.name)
-            local activeGenitalButton = categoryHeader:AddButton("During Sex")
             local inactiveGenitalButton = categoryHeader:AddButton("Out of Sex")
+            local activeGenitalButton = categoryHeader:AddButton("During Sex")
+            local genitalChoice = categoryHeader:AddText(Genital.name)
+            genitalChoice.SameLine = true
             activeGenitalButton.SameLine = true
-            inactiveGenitalButton.SameLine = true
+
+            if Genital.name == "" then
+                genitalChoice.Label = "No Name"
+            end
+
             buttonID = buttonID + 1
             activeGenitalButton.IDContext = buttonID
             buttonID = buttonID + 1
             inactiveGenitalButton.IDContext = buttonID
+
             activeGenitalButton.OnClick = function()
                 local uuid = self.CurrentCharacter.Label:match(" %- (.+)")
                 UIEvents.SetActiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = _C().Uuid.EntityUuid})
