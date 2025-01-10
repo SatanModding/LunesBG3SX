@@ -187,4 +187,11 @@ function Table.GetIntersection(tbl1, tbl2)
 end
 
 
-
+function Table.GetNextFreeIndex(tbl)
+    for i = 1, math.max(#tbl, 1) do
+        if tbl[i] == nil then
+            return i  -- Return the first empty spot found
+        end
+    end
+    return #tbl + 1  -- If no gaps, return the next index
+end

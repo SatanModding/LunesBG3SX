@@ -1,0 +1,174 @@
+local function IsNPC(entity)
+    local E = Helper.GetPropertyOrDefault(entity,"CharacterCreationStats", nil)
+    if E then
+        return false
+    else
+        return true
+    end
+end
+
+
+AppearanceTab = {}
+AppearanceTab.__index = AppearanceTab
+function UI:NewAppearanceTab()
+    if self.AppearanceTab then return end -- Fix for infinite UI repopulation
+    
+    local instance = setmetatable({
+        --UI = self.ID,
+        Tab = self.TabBar:AddTabItem("Appearance"),
+        GenitalsLoaded = nil,
+        Genitals = {},
+    }, AppearanceTab)
+    return instance
+end
+
+
+function AppearanceTab:UpdateStrippingGroup(uuid)
+
+    UI.DestroyChildren(self.StrippingArea)
+
+    local entity = Ext.Entity.Get(uuid)
+    local stripping = SexUserVars.GetAllowStripping(entity)
+
+    local allowStripBox = self.StrippingArea:AddCheckbox("Allow Stripping")
+    
+    if (stripping == false) then
+
+        allowStripBox.Checked = false
+    else
+        allowStripBox.Checked = true
+    end
+
+    allowStripBox.OnChange = function()
+        if allowStripBox.Checked == true then
+            SexUserVars.SetAllowStripping(true, entity)
+        else
+            SexUserVars.SetAllowStripping(false, entity)
+        end
+    end
+end
+
+function AppearanceTab:UpdateEquipmentAreaGroup(uuid)
+
+    UI.DestroyChildren(self.EquipmentArea)
+    -- TODO- add the Strip and redress buttons when an NPC is selected ONLY
+
+    local entity = Ext.Entity.Get(uuid)
+
+    if not entity then
+        Debug.Print("Is not entity " .. uuid)
+        return
+    end
+
+    if IsNPC(entity) then
+        local npcTab = UIInstance.NPCTab
+        self.StripButton = self.EquipmentArea:AddButton("Strip NPC")
+
+        self.StripButton.OnClick = function()
+            -- print("Strip NPC button clicked")
+            npcTab:RequestStripNPC()
+        end
+
+
+        self.DressButton = self.EquipmentArea:AddButton("Dress NPC")
+        self.DressButton.SameLine = true
+
+        self.DressButton.OnClick = function()
+            -- print("Dress NPC button clicked")
+            npcTab:RequestDressNPC()
+        end
+
+    end
+    
+end
+
+function AppearanceTab:Initialize()
+    -- self.Tab:AddSeparatorText("Stripping:") -- Seems to take up too much space with stripping being just a single checkbox
+    if not self.StrippingArea then
+        self.StrippingArea = self.Tab:AddGroup("")
+    end
+
+    -- self.Tab:AddSeparatorText("Equipment:")
+    if not self.EquipmentArea then
+        self.EquipmentArea = self.Tab:AddGroup("")
+    end
+
+   
+
+    self.Tab:AddSeparatorText("Genitals:")
+    if not self.GenitalArea then
+        self.GenitalArea = self.Tab:AddGroup("")
+    end
+end
+
+
+function AppearanceTab:FetchGenitals()
+    -- self.AwaitingGenitals = true
+    UIEvents.FetchGenitals:SendToServer({ID = USERID, Character = UIInstance.GetSelectedCharacter() or _C().Uuid.EntityUuid})
+end
+
+function AppearanceTab:UpdateGenitalGroup()
+    UI.DestroyChildren(self.GenitalArea)
+    local buttonID = 0
+    for Category,Genitals in pairs(self.Genitals) do
+        local categoryHeader = self.GenitalArea:AddCollapsingHeader(Category)
+
+        if Category == "BG3SX_VanillaVulva" then
+            categoryHeader.Label = "Vanilla Vulvas"
+        elseif Category == "BG3SX_VanillaFlaccid" then
+            categoryHeader.Label = "Vanilla Penises"
+        elseif Category == "BG3SX_SimpleErections" then
+            categoryHeader.Label = "MrFunsize's Erections"
+        elseif Category == "BG3SX_OtherGenitals" then
+            categoryHeader.Label = "Modded Genitals"
+        end
+
+        for i,Genital in ipairs(Genitals) do
+            local inactiveGenitalButton = categoryHeader:AddButton("Out of Sex")
+            local activeGenitalButton = categoryHeader:AddButton("During Sex")
+            local genitalChoice = categoryHeader:AddText(Genital.name)
+            genitalChoice.SameLine = true
+            activeGenitalButton.SameLine = true
+
+            if Genital.name == "" then
+                genitalChoice.Label = "No Name"
+            end
+
+            buttonID = buttonID + 1
+            activeGenitalButton.IDContext = buttonID
+            buttonID = buttonID + 1
+            inactiveGenitalButton.IDContext = buttonID
+
+            activeGenitalButton.OnClick = function()
+                local uuid = UIInstance.GetSelectedCharacter()
+                print("current character accordin to the label is ", uuid)
+                UIEvents.SetActiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance.GetSelectedCharacter()})
+            end
+            inactiveGenitalButton.OnClick = function()
+                local uuid = UIInstance.GetSelectedCharacter()
+                print("current character accordin to the label is ", uuid)
+                UIEvents.SetInactiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance.GetSelectedCharacter()})
+            end
+        end
+    end
+end
+
+
+
+-- Check for NULL REFERENCEs because of too early destroyed IMGUI elements
+-- for i = 1000, 5000 do
+--     Ext.Timer.WaitFor(i, function()
+--         if UIInstance.AppearanceTab then
+--             if UIInstance.AppearanceTab.Tab then
+--                 print("Dumping AppearanceTab state...")
+--                 for k, v in pairs(UIInstance.AppearanceTab) do
+--                     print(k, v)
+--                 end
+--             else
+--                 print("AppearanceTab.Tab is invalid or was destroyed!")
+--             end
+--         else
+--             print("AppearanceTab object no longer exists!")
+--         end
+--     end)
+-- end

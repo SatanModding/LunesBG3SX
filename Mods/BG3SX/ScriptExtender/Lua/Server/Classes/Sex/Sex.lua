@@ -53,13 +53,6 @@ function Sex:DetermineSceneType(scene)
 end
 
 
--- Removes the sex spells on an entity when scene has ended
----@param entity    Entity  - The entity uuid to remove the spells from
-function Sex:RemoveSexSceneSpells(entity)
-    for _,spell in pairs(Data.Spells.SexSceneSpells) do -- Configurable in Shared/Data/Spells.lua
-     Osi.RemoveSpell(entity, spell)
-    end
-end
 
 
 -- Animations
@@ -174,7 +167,9 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
                 Genital.GiveSexGenital(entity)
 
                  -- stripping
-                if not SexUserVars.GetBlockStripping(entity) then 
+                local stripping = SexUserVars.GetAllowStripping(entity)
+                if not (stripping == false) then 
+    
                     armorset, equipment, slot = Sex:Strip(character)
                     armorsets[character] = armorset
                     equipments[character] = equipment
@@ -185,72 +180,11 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
 
             Scene:new(sexHavers, equipments, armorsets, slots)
                           
-            --Sex:InitSexSpells(scene)
             Sex:PlayAnimation(caster, animationData)
         end
 
 
         Ext.Timer.WaitFor(333, function() haveSex() end)
-    end
-end
-
-
---- Adds the main sex spells to an entity
----@param entity    string  - The entities UUID
-function Sex:AddMainSexSpells(entity)
-    if Entity:IsPlayable(entity) then
-        Osi.AddPassive(entity, "BG3SX_BLOCK_STRIPPING")
-        for _, spell in pairs(Data.Spells.MainSexSpells) do -- Configurable in Shared/Data/Spells.lua
-            Osi.AddSpell(entity, spell)
-        end
-    end
-end
-function Sex:RemoveMainSexSpells(entity)
-    for _, spell in pairs(Data.Spells.MainSexSpells) do  -- Configurable in Shared/Data/Spells.lua
-        Osi.RemoveSpell(entity, spell)
-    end
-end
-
-
--- Adds additional sex spells for an entity
----@param entity    string  - The entity UUID to give additional spells to
-local function addAdditionalSexActions(entity)
-    local scene = Scene:FindSceneByEntity(entity)
-    local spellCount = 1
-    for _,spell in pairs(Data.Spells.AdditionalSexActions) do  -- Configurable in Shared/Data/Spells.lua
-        -- If iteration lands on SwitchPlaces spell, check which scene type the entity is in and only add it if its not a solo one
-        if spell == "BG3SX_SwitchPlaces" then
-            local sceneType = Sex:DetermineSceneType(scene)
-            if not (sceneType == "MasturbateFemale" or sceneType == "MasturbateMale" or sceneType == "Straight") then
-                Ext.Timer.WaitFor(spellCount * 200, function()
-                    Osi.AddSpell(entity, spell)
-                    spellCount = spellCount + 1
-                end)
-            end            
-        else
-            Ext.Timer.WaitFor(spellCount*200, function()
-                Osi.AddSpell(entity, spell)
-                spellCount = spellCount+1
-            end)
-        end
-    end
-end
-
-
--- Give the entities the correct spells based on amount of entities and penises in the scene
--- Also add spells that everyone gets like end sex
----@param scene Scene   - The scene the function should get executed for
-function Sex:InitSexSpells(scene)
-    local sceneType = Sex:DetermineSceneType(scene)
-    for _, entity in pairs(scene.entities) do -- For each entity involved
-        if Entity:IsPlayable(entity) then -- Check if they are playable to not do this with NPCs
-            for _, entry in pairs(Data.SceneTypes) do
-                if sceneType == entry.sceneType then
-                    Osi.AddSpell(entity, entry.container) -- Add correct spellcontainer based on sceneType
-                end
-            end
-            addAdditionalSexActions(entity)
-        end
     end
 end
 

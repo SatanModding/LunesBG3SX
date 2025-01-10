@@ -10,12 +10,28 @@
 --------------------------------------------------------------
 SexUserVars = {}
 
+local settings = {
+      Server = true, 
+      Client = true, 
+      SyncToClient = true, 
+      SyncToServer = true,
+      SyncOnWrite = true,
+      WriteableOnClient = true,
+      WriteableOnServer = true
+      }
+
 -- TODO - these have to be set to a default
-Ext.Vars.RegisterUserVariable("BG3SX_OutOfSexGenital", {})
-Ext.Vars.RegisterUserVariable("BG3SX_SexGenital", {})
-Ext.Vars.RegisterUserVariable("BG3SX_AutoSexGenital", {})
-Ext.Vars.RegisterUserVariable("BG3SX_NPCClothes", {})
-Ext.Vars.RegisterUserVariable("BG3SX_BlockStripping", {})
+Ext.Vars.RegisterUserVariable("BG3SX_OutOfSexGenital", settings)
+Ext.Vars.RegisterUserVariable("BG3SX_SexGenital", settings)
+Ext.Vars.RegisterUserVariable("BG3SX_AutoSexGenital", settings)
+Ext.Vars.RegisterUserVariable("BG3SX_NPCClothes", settings)
+Ext.Vars.RegisterUserVariable("BG3SX_AllowStripping", settings)
+
+-- To allow modders to choose certain "sex visuals" for their modded
+-- characters (like fresh withers)
+-- They are set in the VisualResource and will be exchanged on sex start
+-- TODO - not implemented yet
+Ext.Vars.RegisterUserVariable("BG3SX_SexVisuals",  settings)
 
 
 -- _P("[BG3SX - SEXUSERVARS] Registered AutoErection")
@@ -76,13 +92,13 @@ end
 
 
 
-function SexUserVars.SetBlockStripping(value, entity)
-      entity.Vars.BG3SX_BlockStripping = value
+function SexUserVars.SetAllowStripping(value, entity)
+      entity.Vars.BG3SX_AllowStripping = value
 end
 
 
 ---@param entity EntityHandle - uuid
-function SexUserVars.GetBlockStripping(entity)
-    return entity.Vars.BG3SX_BlockStripping
+function SexUserVars.GetAllowStripping(entity)
+    return entity.Vars.BG3SX_AllowStripping
 end
 

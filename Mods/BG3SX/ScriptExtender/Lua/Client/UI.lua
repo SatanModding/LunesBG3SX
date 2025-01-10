@@ -52,17 +52,17 @@ function UI:Initialize()
     
     self.TabBar = self.Window:AddTabBar("")
     self.SceneTab = self:NewSceneTab()
-    self.GenitalsTab = self:NewGenitalsTab()
+    self.AppearanceTab = self:NewAppearanceTab()
     self.WhitelistTab = self:NewWhitelistTab()
-    self.SettingsTab = self:NewSettingsTab()
     self.NPCTab = self:NewNPCTab()
+    -- self.SettingsTab = self:NewSettingsTab()
     --self.DebugTab = self:NewDebugTab()
 
     self.SceneTab:Initialize()
-    self.GenitalsTab:Initialize()
+    self.AppearanceTab:Initialize()
     self.WhitelistTab:Initialize()
-    self.SettingsTab:Initialize()
     self.NPCTab:Initialize()
+    -- self.SettingsTab:Initialize()
     --self.DebugTab:Initialize()
 end
 
@@ -128,7 +128,7 @@ function UI:InputRecieved(inputPayload)
     local reason = self.Await.Reason
     if reason == "NewScene" then
         _P("Ask for sex received. Caster: ", _C().Uuid.EntityUuid, " target = ", inputPayload)
-        UIEvents.AskForSex:SendToServer({ID = USERID, Caster = _C().Uuid.EntityUuid, Target = inputPayload})
+        UIEvents.AskForSex:SendToServer({ID = USERID, Caster = UIInstance.GetSelectedCharacter(), Target = inputPayload})
     elseif reason == "RotateScene" then
         UIEvents.RotateScene:SendToServer({ID = USERID, Scene = self.Await.Payload, Position = inputPayload})
     elseif reason == "MoveScene" then

@@ -7,8 +7,8 @@ HeightmatchingInstances = {} -- Don't create it as Heightmatching.Instance so we
 ---Retrieves a Heightmatching instance by its animation name.
 ---@param animName string - The animation name used as the unique identifier for the instance.
 ---@return table|nil - The Heightmatching instance if found, or nil if not found.
-function Heightmatching.GetInstanceByAnimName(animName)
-    return HeightmatchingInstances[animName]
+function Heightmatching.GetInstanceByAnimName(moduleUUID, animName)
+    return HeightmatchingInstances[moduleUUID][animName]
 end
 
 -- TODO: Maybe keep or remove - This was used to pre-create the table structure we now create dynamically during testing
@@ -103,7 +103,7 @@ end
 ---@param fallbackTop string The default animation identifier for the top part.
 ---@param fallbackBottom string|nil The default animation identifier for the bottom part. If `nil`, no default is set.
 ---@return Heightmatching The newly created `Heightmatching` instance.
-function Heightmatching:New(animName, fallbackTop, fallbackBottom) -- TODO: Add possibility of inserting a table of possible additional fallbacks as 4th parameter which may get chosen randomly
+function Heightmatching:New(moduleUUID, animName, fallbackTop, fallbackBottom) -- TODO: Add possibility of inserting a table of possible additional fallbacks as 4th parameter which may get chosen randomly
     local instance = setmetatable({}, self)
     instance.fallbackTop = fallbackTop
     instance.fallbackBottom = fallbackBottom or nil
@@ -111,7 +111,10 @@ function Heightmatching:New(animName, fallbackTop, fallbackBottom) -- TODO: Add 
 
     -- instance:initializeTable() -- This was used to pre-create the table structure based on all the code above which we now do dynamically
 
-    HeightmatchingInstances[animName] = instance
+    if not HeightmatchingInstances[moduleUUID] then
+        HeightmatchingInstances[moduleUUID] = {}
+    end
+    HeightmatchingInstances[moduleUUID][animName] = instance
     return instance
 end
 
@@ -449,7 +452,8 @@ end
 local function custom_score(char1, char2)
 
     if char1 == "_" and char2 == "_" or char1 == "P" and char2 == "P" or  char1 == "V" and char2 == "V" then
-        return 10 -- Prioritize matching "_" with "P" or "V"
+        return 100000 -- Prioritize matching "_" with "P" or "V"
+        -- ridiculously high score for testing
     elseif char1 == char2 then
         return 1 -- High score for match
     else
@@ -571,11 +575,11 @@ function Heightmatching:NewGetAnimation(character1, character2, unlocked)
 
     local matchingTable = self.matchingTable
 
-    print("Dumping matchingtable ")
+    --print("Dumping matchingtable ")
 
-    _D(matchingTable)
+    --_D(matchingTable)
 
-    if #matchingTable == 0 then
+    if Table.TableSize(matchingTable) == 0 then
       return self.fallbackTop, self.fallbackBottom
     end
 

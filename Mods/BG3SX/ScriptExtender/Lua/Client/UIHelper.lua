@@ -66,7 +66,7 @@ end
 
 -- great for showing debug messages
 function UIHelper.AddTemporaryTooltip(uiElement, duration, text)
-    
+
     local tooltip = uiElement:Tooltip()
     tooltip:AddText(text)
 

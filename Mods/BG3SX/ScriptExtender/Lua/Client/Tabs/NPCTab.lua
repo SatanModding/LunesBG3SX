@@ -12,36 +12,37 @@ end
 
 
 function NPCTab:RequestStripNPC()
-        local npc = self.InRange.Choice.Options[self.InRange.Choice.SelectedIndex + 1]
-        local uuid = npc:match(" %- (.+)")
-        print("dumping options")
-        _D(self.InRange.Choice.Options)
+
+        local uuid = UIInstance.GetSelectedCharacter()
+        --print("dumping options")
+        --_D(self.InRange.Choice.Options)
         print("got ", uuid)
 
-        if not npc then
+        if not uuid then
+            
             local text = "            No NPC selected. Please select one first before clicking \"Strip\""
             UIHelper.AddTemporaryTooltip(self.StripButton, 2000, text)
             return
         end
 
-        UIEvents.RequestStripNPC:SendToServer({uuid = npc})
-        UIEvents.RequestGiveGenitalsNPC:SendToServer({uuid = npc})
+        UIEvents.RequestStripNPC:SendToServer({uuid = uuid})
+        UIEvents.RequestGiveGenitalsNPC:SendToServer({uuid = uuid})
 
 end
 
 
 function NPCTab:RequestDressNPC()
 
-        local npc = self.InRange.Choice.Options[self.InRange.Choice.SelectedIndex + 1]
+        local uuid = UIInstance.GetSelectedCharacter()
 
-        if not npc then
+        if not uuid then
             local text = "            No NPC selected. Please select one first before clicking \"Dress\""
             UIHelper.AddTemporaryTooltip(self.DressButton, 2000, text)
             return
         end
 
-        UIEvents.RequestDressNPC:SendToServer({uuid = npc})
-        UIEvents.RequestRemoveGenitalsNPC:SendToServer({uuid = npc})
+        UIEvents.RequestDressNPC:SendToServer({uuid = uuid})
+        UIEvents.RequestRemoveGenitalsNPC:SendToServer({uuid = uuid})
 end
 
 
@@ -55,7 +56,7 @@ function NPCTab:ScanForNPCs()
         table.insert(allCharacters, entity.Uuid.EntityUuid)
     end
 
-    UIEvents.FetchWhitelistedNPCs:SendToServer({tbl = allCharacters, client = _C().Uuid.EntityUuid}) 
+    UIEvents.FetchWhitelistedNPCs:SendToServer({tbl = allCharacters, client = USERID}) 
 end
 
 
@@ -66,8 +67,8 @@ UIEvents.SendWhitelistedNPCs:SetHandler(function (payload)
     local inRange = {}
     local hostPos = _C().Transform.Transform.Translate
     local distance = UIInstance.NPCTab.InRange.Range.Value[1]
-    print("scanning distance")
-    _P(distance)
+    -- print("scanning distance")
+    -- _P(distance)
 
     for _, character in pairs(whitelisted) do
 
@@ -83,7 +84,7 @@ UIEvents.SendWhitelistedNPCs:SetHandler(function (payload)
         end
     end
 
-    _D(inRange)
+    --_D(inRange)
 
     local choice = UIInstance.NPCTab.InRange.Choice
     choice.Options = inRange
@@ -94,19 +95,23 @@ UIEvents.SendWhitelistedNPCs:SetHandler(function (payload)
 
 
     choice.OnChange = function()
-        Debug.Print("OnChange")
-        _DS(UIInstance.GenitalsTab)
+        -- Debug.Print("OnChange")
+        -- _DS(UIInstance.AppearanceTab)
 
-        Debug.Print("Chose an NPC")
-        Debug.Print("Remeber to change the text in genitals tab")
+        -- Debug.Print("Chose an NPC")
+        -- Debug.Print("Remeber to change the text in genitals tab")
 
-        local npc = choice.Options[choice.SelectedIndex + 1]
-        local text = UIInstance.GenitalsTab.CurrentCharacter
-        local clear = UIInstance.GenitalsTab.ClearChoiceButton
+        -- local npc = choice.Options[choice.SelectedIndex + 1]
+        -- local text = UIInstance.AppearanceTab.CurrentCharacter
+        -- local clear = UIInstance.AppearanceTab.ClearChoiceButton
+
+        -- local uuid = npc:match(" %- (.+)")
+        -- UIInstance.PartyInterface:SetSelectedCharacter(uuid)
+        -- UIInstance.PartyInterface:UpdateNPCs()
         
-        text.Label = "Current Character: " .. npc
-        text.Visible = true
-        clear.Visible = true
+        -- text.Label = "Current Character: " .. npc
+        -- text.Visible = true
+        -- clear.Visible = true
     end
 end) 
 
@@ -122,54 +127,48 @@ function UI:NewNPCTab()
 end
 
 function NPCTab:Initialize()
+
     self.Tab:AddText("Select a range to scan for NPCs")
 
-    self.ScanButton = self.Tab:AddButton("Scan")
-    self.ScanButton:Tooltip():AddText("Scan Area for NPCs")
+    -- scan once on initializing
+    self:ScanForNPCs()
 
     self.InRange = {}
     local r = self.InRange
     r.Range = self.Tab:AddSliderInt("", 5,1,10)
+    
     r.NPCs = {}
     r.Select = nil
     r.Choice = self.Tab:AddCombo("")
     r.Choice.Options = r.NPCs
     r.Choice.SelectedIndex = 1
-    r.Choice.OnChange = function()
+        
+    r.Range.OnChange = function()
         if r.Choice.SelectedIndex ~= 0 then
-            
-            r.Select.Visible = true
+            self:ScanForNPCs()
         end
     end
 
-    --r.Select = self.Tab:AddButton("Select")
-    --r.Select.SameLine = true
-    --r.Select.OnClick = function()
-        
-       -- r.Select.Visible = false
-    --end
+    self.AddButton = self.Tab:AddButton("Add")
+    self.AddButton.OnClick = function()
+        print("Add NPC button clicked")
 
-    
-    self.StripButton = self.Tab:AddButton("Strip NPC")
+        local npc = self.InRange.Choice.Options[self.InRange.Choice.SelectedIndex + 1]
 
-    self.StripButton.OnClick = function()
-        print("Strip NPC button clicked")
-        self:RequestStripNPC()
+        if npc then
+            local uuid = npc:match(" %- (.+)")
+            local PI = UIInstance.PartyInterface
+            if PI then
+                if not Table.Contains(PI.NPCs, uuid) then
+                    table.insert(PI.NPCs, uuid)
+                    PI:UpdateNPCs()
+                else
+                    Debug.Print("This NPC has already been added!")
+                    -- UIHelper.AddTemporaryTooltip(self.AddButton, 2000, "This NPC has already been added!")
+                end
+            end
+        end
     end
-
-
-    self.DressButton = self.Tab:AddButton("Dress NPC")
-    self.DressButton.SameLine = true
-
-    self.DressButton.OnClick = function()
-        print("Dress NPC button clicked")
-        self:RequestDressNPC()
-    end
-
-    self.ScanButton.OnClick = function()
-        self:ScanForNPCs()
-    end
-
 end
 
 function NPCTab:UpdateRangeFinder()

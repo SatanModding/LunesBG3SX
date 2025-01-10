@@ -328,10 +328,10 @@ initialize = function(self)
     table.insert(Data.SavedScenes, self)
     Ext.ModEvents.BG3SX.SceneInit:Throw({self})
 
-    print("all saved scenes")
-    for _, scene in pairs(Data.SavedScenes) do
-        _D(scene.entities)
-    end
+    --print("all saved scenes")
+    --for _, scene in pairs(Data.SavedScenes) do
+       -- _D(scene.entities)
+    --end
   
 
 
@@ -351,7 +351,7 @@ initialize = function(self)
         -- Osi.SetVisible(entity, 0)               -- 0 = Invisible
         Entity:ToggleWalkThrough(character)        -- To prevent interactions with other entities even while invisible and untargetable
         self:ToggleCampFlags(character)            -- Toggles camp flags so companions don't return to tents
-        --Sex:RemoveMainSexSpells(entity)         -- Removes the regular sex spells
+    
         --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Body"])
         --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Face"])
 
@@ -361,13 +361,13 @@ initialize = function(self)
     end
 
         -- TODO - why do we wait?
-        --Ext.Timer.WaitFor(100, function ()
+        Ext.Timer.WaitFor(200, function ()
             print("requesting teleport")
             for _, character in pairs(self.entities) do
                 UIEvents.RequestTeleport:Broadcast({character= character, target = self.entities[1]})
                 UIEvents.RequestRotation:Broadcast({character = character, target = self.entities[1]})
             end
-        --end)
+        end)
         
         
         --Osi.TeleportToPosition(entity, self.rootPosition.x, self.rootPosition.y, self.rootPosition.z) -- now handled correctly in actor initialization
@@ -476,7 +476,7 @@ local function sceneEntityReset(character)
     
     Entity:Redress(character, scene.armorset[character], scene.equipment[character], scene.slots[character])
     
-    print("Out of sex genital is ", outOfSexGenital)
+    --print("Out of sex genital is ", outOfSexGenital)
     Genital.OverrideGenital(outOfSexGenital, entity)
 
 
@@ -527,13 +527,6 @@ function Scene:Destroy()
         Osi.PlayAnimation(entity, nothing) -- To cancel out of any ongoing animations
         Osi.PlaySound(entity, Data.Sounds.Orgasm[math.random(1, #Data.Sounds.Orgasm)]) -- TODO - change this to a generic sound for when we use this for non-sex instead
 
-
-
-
-        Sex:RemoveSexSceneSpells(entity) -- Removes any spells given for the scene
-        if Osi.IsPartyMember(entity, 0) == 1 then
-            Sex:AddMainSexSpells(entity) -- Readds the regular sex spells (StartSex, Options, ChangeGenitals)
-        end
 
 
         if Entity:IsNPC(entity) then

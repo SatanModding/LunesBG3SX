@@ -1888,7 +1888,7 @@ function Data.CreateUIGenitalPayload(uuid)
     local permittedGenitals = Genital.getPermittedGenitals(entity)
 
     for _, mod in pairs(hardCodedGenitalTypesChangeThis) do
-        _P(mod)
+        -- _P(mod)
         payload[mod] = {}
         local genitalContent = {}
         local genitals = Genital.getFilteredGenitals(mod, permittedGenitals)

@@ -24,6 +24,7 @@ Ext.Require("Server/Classes/_init.lua")
 -- Initiliaze Listeners
 Ext.Require("Server/Listeners/_init.lua")
 
+
 ------------------------------------
         -- Mod Events --
 ------------------------------------
@@ -69,19 +70,19 @@ local function OnSessionLoaded()
         local vars = Ext.Vars.GetModVariables(ModuleUUID)
 
 
-        print(vars)
+        -- print(vars)
 
 
 
         if not vars.BG3SX_ShowAllAnimations then
-        print("BG3SX_ShowAllAnimations mod variable not initialized yet")
-        print("setting it to default value = false")
+        -- print("BG3SX_ShowAllAnimations mod variable not initialized yet")
+        -- print("setting it to default value = false")
         vars.BG3SX_ShowAllAnimations = false
         end
 
-        Ext.Log.Print("BG3SX_ShowAllAnimations")
-        Ext.Log.Print(vars.BG3SX_ShowAllAnimations)
-        Ext.Log.Print("End BG3SX_ShowAllAnimations")
+        -- Ext.Log.Print("BG3SX_ShowAllAnimations")
+        -- Ext.Log.Print(vars.BG3SX_ShowAllAnimations)
+        -- Ext.Log.Print("End BG3SX_ShowAllAnimations")
 
 
         Ext.Vars.SyncModVariables(ModuleUUID)
@@ -94,12 +95,12 @@ Ext.Events.SessionLoaded:Subscribe(OnSessionLoaded)
 
 
 
-Ext.Timer.WaitFor(1000, function ()
-        print("printing newlines for readability")
-        for i=1, 10 do
-                print()
-        end
-end)
+-- Ext.Timer.WaitFor(1000, function ()
+--         print("printing newlines for readability")
+--         for i=1, 10 do
+--                 print()
+--         end
+-- end)
 
 
 

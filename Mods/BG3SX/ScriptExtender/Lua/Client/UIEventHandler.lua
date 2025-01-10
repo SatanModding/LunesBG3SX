@@ -11,24 +11,24 @@ UIEvents.ChangeCharacter:SetHandler(function (payload)
     Ext.Timer.WaitFor(200, function () -- CharacterChanged event needs to delay what it wants to execute because Osiris is slow AF - ClientEntity ID's don't update quickly enough after its triggered
         local entity = Helper.GetLocalControlledEntity()
         if entity then
-            print("target of change control: ", payload)
-            print("current client host ", entity.Uuid.EntityUuid)
+            -- print("target of change control: ", payload)
+            -- print("current client host ", entity.Uuid.EntityUuid)
 
-            Debug.Print("ChangeCharacter EventHandler")
-            UIInstance.GenitalsTab:FetchGenitals()
+            -- Debug.Print("ChangeCharacter EventHandler")
+            UIInstance.AppearanceTab:FetchGenitals()
         else
             Debug.Print("No entity")
         end
     end)
 end)
 UIEvents.GenitalsLoaded:SetHandler(function (payload)
-    Debug.Print("GenitalsLoaded recieved on client, sending FetchGenitals event with currently selected Client character" .. _C().Uuid.EntityUuid)
-    _D(_C().Uuid.EntityUuid)
-    UIEvents.FetchGenitals:SendToServer({ID = USERID, Character = _C().Uuid.EntityUuid})
+    -- Debug.Print("GenitalsLoaded recieved on client, sending FetchGenitals event with currently selected Client character" .. _C().Uuid.EntityUuid)
+    -- _D(_C().Uuid.EntityUuid)
+    -- UIEvents.FetchGenitals:SendToServer({ID = USERID, Character = _C().Uuid.EntityUuid})
 end)
 
 UIEvents.SendParty:SetHandler(function (payload)
-    print("client received SendParty message for id ", _C().UserReservedFor.UserID)
+    -- print("client received SendParty message for id ", _C().UserReservedFor.UserID)
     
     local party = payload
     UIInstance.PartyInterface.Party = party
@@ -59,24 +59,30 @@ UIEvents.NewScene:SetHandler(function (payload)
 end)
 
 UIEvents.SendGenitals:SetHandler(function (payload)
-    Debug.Print("SendGenitals recieved on client, updating Genital tab for")
+    -- Debug.Print("SendGenitals recieved on client, updating Genital tab for")
     local genitals = payload.Data
 
-    local tab = UIInstance.GenitalsTab
+
+   -- Ext.Timer.WaitFor(2000, function()
+
+    local tab = UIInstance.AppearanceTab
     tab.Genitals = genitals
     tab:UpdateGenitalGroup()
+
+    --end)
+
 end)
 
 UIEvents.SendUserTags:SetHandler(function (payload)
-    _P("1")
-    _D(payload)
+    --_P("1")
+    --_D(payload)
     UIInstance.WhitelistTab.UserTags.Tags = payload
     UIInstance.WhitelistTab:UpdateUserTags(payload)
 end)
 UIEvents.SendWhitelist:SetHandler(function (payload)
     UIInstance.WhitelistTab.Whitelists = payload
     UIInstance.WhitelistTab:GenerateWhitelistArea()
-    _D(UIInstance.WhitelistTab.UserTags.Tags)
+    --_D(UIInstance.WhitelistTab.UserTags.Tags)
     UIInstance.WhitelistTab:UpdateUserTags(UIInstance.WhitelistTab.UserTags.Tags)
 end)
 
@@ -95,14 +101,14 @@ UIEvents.SendFilteredAnimations:SetHandler(function (payload)
     end
 end)
 UIEvents.SendAllAnimations:SetHandler(function (payload)
-    Debug.Print("---------------CLAPPI--------------------")
-    Debug.DumpS(payload)
+    -- Debug.Print("---------------CLAPPI--------------------")
+    --Debug.DumpS(payload)
     local animData = payload.Animations
     local sceneID = payload.SceneControl
     local sceneTab = UIInstance.SceneTab
     for _,sceneControl in pairs(sceneTab.ActiveSceneControls) do
         if sceneControl.Instance.ID == sceneID then
-            Debug.Print("FOUND SCENECONTROL")
+            -- Debug.Print("FOUND SCENECONTROL")
             sceneControl.Instance:UpdateAnimationData(animData)
         end
     end

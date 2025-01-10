@@ -24,7 +24,7 @@ Ext.Require("Client/UI.lua")
 Ext.Require("Client/PartyInterface.lua")
 Ext.Require("Client/Tabs/SceneTab.lua")
 Ext.Require("Client/SceneControl.lua")
-Ext.Require("Client/Tabs/GenitalTab.lua")
+Ext.Require("Client/Tabs/AppearanceTab.lua")
 Ext.Require("Client/Tabs/SettingsTab.lua")
 Ext.Require("Client/Tabs/WhitelistTab.lua")
 Ext.Require("Client/Tabs/NPCTab.lua")
@@ -54,8 +54,8 @@ local function satanTest(self)
 
         local currentRotation = entity.Transform.Transform.RotationQuat
         
-        print("current rotation")
-        _D(currentRotation)
+        --print("current rotation")
+        --_D(currentRotation)
 
         local newRotation = {currentRotation[1], currentRotation[2] + 0.5, currentRotation[3], currentRotation[4]}
 
@@ -63,9 +63,9 @@ local function satanTest(self)
 
         entity.Visual.Visual:SetWorldRotate(newRotation)
 
-        print("rotation after setting entity")
+        --print("rotation after setting entity")
         local currentRotation = entity.Transform.Transform.RotationQuat
-        _D(currentRotation)
+        --_D(currentRotation)
 
         _C().Steering.TargetRotation =0,628319 -- 180 degrees in radian 
 

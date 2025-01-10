@@ -24,7 +24,7 @@ function ConsoleCommand.New(name, fn, info)
     else
         ConsoleCommands["!BG3SX." .. name] = "No description provided"
     end
-    Debug.Print("Created new console function: !" .. prefix .. name .. "\n- " .. (info or "No description provided"))
+    -- Debug.Print("Created new console function: !" .. prefix .. name .. "\n- " .. (info or "No description provided"))
 end
 function ConsoleCommand.GetAll()
     Debug.Dump(ConsoleCommands)

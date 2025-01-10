@@ -356,9 +356,12 @@ function Entity:Redress(entity, oldArmourSet, oldEquipment, slots)
         Osi.SetArmourSet(entity, oldArmourSet)
     end
 
-    for _, item in ipairs(oldEquipment) do
-        Osi.Equip(entity, item)
+    if oldEquipment then
+        for _, item in ipairs(oldEquipment) do
+            Osi.Equip(entity, item)
+        end
     end
+
     oldArmourSet = nil
     oldEquipment = nil
 
@@ -660,7 +663,7 @@ function Entity:DeleteCurrentVisualOfType(character, visual, type)
         end
         -- print("Debug: allowedVisuals = " .. tostring(allowedVisuals))
         Debug.Print("setting visuals to")
-        Debug.Dump(allowedVisuals)
+        --Debug.Dump(allowedVisuals)
         entity.AppearanceOverride.Visual.Visuals = allowedVisuals
         -- print("Debug: updated entity.AppearanceOverride.Visual.Visuals = " .. tostring(entity.AppearanceOverride.Visual.Visuals))
     end

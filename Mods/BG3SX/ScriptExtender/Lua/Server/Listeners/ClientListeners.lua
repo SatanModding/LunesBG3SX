@@ -17,29 +17,43 @@ UIEvents.AskForSex:SetHandler(function (payload)
     --Debug.Print("CASTER ".. caster)
     --Debug.Print("TARGET ".. target)
 
-    
-    -- TODO - don't allow scenes to start when one entity is already in a scene
-    
-    -- masturbation 
-    if target == caster then
-        if Entity:IsWhitelisted(caster, true) then
-            Ext.Timer.WaitFor(200, function() -- Wait for erections
-                Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Start Masturbating"])
-            end)
-            Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Start Masturbating"]})
-        end
-        
-
-    -- sex
-    else
-        if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
-            Ext.Timer.WaitFor(200, function() -- Wait for erections
-                Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Ask for Sex"])
-            end)
-
-            Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Ask for Sex"]})
+    local allow = true
+    for _,scene in pairs(Data.SavedScenes) do
+        for _,involved in pairs(scene.entities) do
+            if (caster == involved) or (target == involved) then
+                allow = false
+                Debug.Print("Requestee or target already in a scene")
+                -- TODO: Show this in UI as well
+            end
         end
     end
+
+    if allow then
+        -- masturbation 
+       
+
+        if (Helper.StringContains(target,caster)) or (Helper.StringContains(caster, target)) then
+            if Entity:IsWhitelisted(caster, true) then
+                Entity:ClearActionQueue(caster)
+                Ext.Timer.WaitFor(200, function() -- Wait for erections
+                    Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Start Masturbating"])
+                end)
+                Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Start Masturbating"]})
+            end
+
+        -- sex
+        else
+            if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
+                Entity:ClearActionQueue(caster)
+                Entity:ClearActionQueue(target)
+                Ext.Timer.WaitFor(200, function() -- Wait for erections
+                    Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Ask for Sex"])
+                end)
+                Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Ask for Sex"]})
+            end
+        end
+    end
+
 end)
 
 
@@ -170,15 +184,17 @@ end)
 
 
 UIEvents.ChangeAnimation:SetHandler(function (payload)
-    print("Received Change Animation event with payload")
-    _D(payload)
+    --print("Received Change Animation event with payload")
+    --_D(payload)
     
     local caster = payload.Caster
     local moduleUUID = payload.moduleUUID
     local animationData = payload.AnimationData
     local scene = Scene:FindSceneByEntity(caster)
 
+    print("-------------------------------------------------------")
     for _, char in pairs (scene.entities) do
+        print("creating animation for character ", char)
         Animation:New(char, Data.Animations[moduleUUID][animationData.Name])
 
         -- Only play sound if is enabled for a given animation entry
@@ -196,7 +212,7 @@ UIEvents.FetchWhitelistedNPCs:SetHandler(function(payload)
     local tbl = payload.tbl
     local filtered = {}
 
-    _D(tbl)
+    --_D(tbl)
 
     for _, character in pairs(tbl) do
         if Entity:IsWhitelisted(character) then

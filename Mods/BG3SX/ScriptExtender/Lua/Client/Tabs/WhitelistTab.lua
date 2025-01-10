@@ -12,9 +12,11 @@ function UI:NewWhitelistTab()
 end
 
 function WhitelistTab:Initialize()
+    self.Tab:AddSeparatorText("Tags of selected character:")
     self.UserTags = {Header = self.Tab:AddCollapsingHeader("Character Tags")}
     self.Whitelists = {}
     self:FetchUserTags()
+    self.Tab:AddSeparatorText("Whitelist")
     self:FetchWhitelist()
 end
 
@@ -62,8 +64,8 @@ function WhitelistTab:UpdateUserTags(tags)
         uuid.SameLine = true
         local allowedStatus = tagTreeNode:AddCheckbox("Allowed")
         allowedStatus.SameLine = true
-        if self.Whitelists and #self.Whitelists > 0 then -- Only add an allowedStatus when WhitelistTab is found
-            if self.IsAllowed(tag) then
+        if self.Whitelists and Table.TableSize(self.Whitelists) > 0 then -- Only add an allowedStatus when WhitelistTab is found
+            if self:IsAllowed(name) then
                 allowedStatus.Checked = true
                 allowedStatus.OnChange = function()
                     allowedStatus.Checked = true
@@ -75,7 +77,7 @@ function WhitelistTab:UpdateUserTags(tags)
                 end
                 if self.GetReason(tag) then
                     local tooltip = allowedStatus:Tooltip()
-                    local tooltipText = tooltip:AddText(self.GetReason(tag))
+                    local tooltipText = tooltip:AddText(self:GetReason(tag))
                 end
             end
         end

@@ -20,10 +20,10 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
                 Enabled = true,
                 Name = name,
                 Categories = categories or nil,
-                Heightmatching = hm:New(name, animTop, animBtm),
+                Heightmatching = hm:New(moduleUUID, name, animTop, animBtm),
                 Props = props or nil,
                 Duration = 3600,
-                Loop = nil,
+                Loop = true,
                 Sound = false,
                 SoundTop = nil,
                 SoundBottom = nil
@@ -71,7 +71,8 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
             intros[ModuleUUID] = {}
         end
         if not intros[ModuleUUID][name] then
-            intros[ModuleUUID][name] = CreateAnimationData(ModuleUUID, name, animTop, animBtm, categories, props)
+            local anim = CreateAnimationData(ModuleUUID, name, animTop, animBtm, categories, props)
+            intros[ModuleUUID][name] = anim
         else
             Debug.Print("An animation with the name (" .. name .. ") already exists for this mod, please choose a different name or add an unique identifier")
         end
@@ -86,26 +87,29 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
             anims[ModuleUUID] = {}
         end
         if not anims[ModuleUUID][name] then
-            anims[ModuleUUID][name] = CreateAnimationData(ModuleUUID, name, animTop, animBtm, categories, props)
+            local anim = CreateAnimationData(ModuleUUID, name, animTop, animBtm, categories, props)
+            anims[ModuleUUID][name] = anim -- Add it to the BG3SX table
+            return anim
         else
             Debug.Print("An animation with the name (" .. name .. ") already exists for this mod, please choose a different name or add an unique identifier")
         end
-        return anim
     end
 
     -- Every other still gets shown, but these are the main categories we sort for
-    local animCategories = {
+    Data.AnimationCategories = {
         "SFW", "NSFW", "Solo Penis", "Solo Vulva", "Masturbation", "Masturbate", "Paired", "Straight", "Same-Sex", "Lesbian", "Gay", "Vaginal", "Oral", "Anal", "Third-Wheel"
     }
-    local mainGenitalTypes = {
+    Data.GenitalTypes = {
         "Regular", "Strap-On", "Strapon", "StrapOn", "Tentacle"
     }
 
     -- Animation Entries:
     ----------------------------------------------------
+    -- Each of these is a metatable with additional parameters to set via object.Parameter, see AnimationData.New() -- Example: askForSex.Enabled = false
     
     -- Seperated from Data.Animations because these 2 are the start spells which are handled differently and will create a scene
     local startMasturbating = addIntroAnim("Start Masturbating", anim["MasturbateWank"].MapKey, anim["MasturbateStanding_V"].MapKey, {"NSFW", "Solo"})
+    
     local askForSex = addIntroAnim("Ask for Sex", anim["EmbraceTop"].MapKey, anim["EmbraceBtm"].MapKey, {"SFW", "NSFW"})
         
     -- Setting up heightmatching matchups
@@ -142,7 +146,6 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
 
 
     local grinding = addMainAnim("Grinding", anim["ScissorTop"].MapKey, anim["ScissorBtm"].MapKey, {"Lesbian"})
-    grinding.Enabled = true
 
     local eatpussy = addMainAnim("EatPussy",  anim["EatOutTop"].MapKey, anim["EatOutBtm"].MapKey, {"Straight", "Lesbian", "Oral"})
     eatpussy.SoundTop = Data.Sounds.Kissing

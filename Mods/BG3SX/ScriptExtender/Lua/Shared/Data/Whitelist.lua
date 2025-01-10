@@ -7,10 +7,7 @@
 -- end
 -- If your race has an out of the ordinary bodyshape please check our comments in Heightmatching.lua above our BodyShapeOverrides table (Ctrl+F is your friend)
 
-
-
-
-Debug.Print("Whitelist initialized")
+-- Debug.Print("Whitelist initialized")
 Data.AllowedTagsAndRaces = {
     ------------------------------------TAGS------------------------------------
     --- We keep sub-races allowed even when their parent race is disallowed to make it not too difficult for modders but keep them in here to not be unknown
@@ -681,7 +678,7 @@ Data.AllowedTagsAndRaces = {
     ["BrassDragonborn"] = {UUID = "32f676f0-41ca-4469-baa6-341d5c95a708", Allowed = true},
     ["BronzeDragonborn"] = {UUID = "48318453-8aa8-4924-827d-173c957ac1de", Allowed = true},
     ["Butler"] = {UUID = "4d50d868-4c03-4c4b-86f3-009a652c8a7f", Allowed = false},
-    ["Cambion"] = {UUID = "b278457e-a3ee-45b1-8ff4-620b868c9193", Allowed = false}, -- No Animation Support
+    ["Cambion"] = {UUID = "b278457e-a3ee-45b1-8ff4-620b868c9193", Allowed = false},
     ["Cloaker"] = {UUID = "4742d30d-97b0-4537-a78a-0a803518be54", Allowed = false},
     ["CopperDragonborn"] = {UUID = "3f7e4753-277e-4259-9b29-423b9149cfb4", Allowed = true},
     ["DeathKnight"] = {UUID = "7722d7b5-c734-429e-b0f2-fd768caa5ae6", Allowed = false},
@@ -890,8 +887,13 @@ local popupkey = "BG3SX_Popup"
 -- Checks if an entity is part of our whitelisted tags/races table
 ---@param uuid string - UUID of an entity
 function Entity:IsWhitelistedTagOrRace(uuid, debug)
+    --print("checking is whitelisted for  ", uuid, " with debug message ", debug)
     local debug = debug or false
     local tags = Entity:TryGetEntityValue(uuid, nil, {"ServerRaceTag", "Tags"})
+    local NPCRace
+    if Entity:IsNPC(uuid) then
+        NPCRace = Entity:TryGetEntityValue(uuid, nil, {"Race", "Race"})
+    end
     if Ext.IsClient() then
         tags = Entity:TryGetEntityValue(uuid, nil, {"Tag", "Tags",})
     end
@@ -903,6 +905,7 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
                 local msg = "[BG3SX][Whitelist.lua]\nCheck failed on:\n" .. uuid .. "\nFound disallowed tag with UUID:\n" .. quickTag .. "\nReason: 69"
                 _P(msg)
                 Ext.Loca.UpdateTranslatedString(popuphandle, msg)
+                --print("Opening messagebox")
                 Osi.OpenMessageBox(Osi.GetHostCharacter(), popupkey)
             end
             return false
@@ -952,6 +955,7 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
                 skip = true -- So skip if this tag is one
             end
         end
+
         if skip == false then
             local tagData = Ext.StaticData.Get(tag, "Tag")
             if tagData then
@@ -989,12 +993,13 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
                             end
                             _P(msg)
                             Ext.Loca.UpdateTranslatedString(popuphandle, msg)
+                            --print("Opening messagebox HERE")
                             Osi.OpenMessageBox(uuid, popupkey)
                         end
                         return false
                     elseif tagInfo.Allowed == true then
                         hasAllowedTag = true
-                        if tagInfo.racesUsingTag then
+                        if tagInfo.racesUsingTag then -- If the tag is allowed, we go deeper into all races using that tag
                             for _, race in pairs(tagInfo.racesUsingTag) do
                                 local raceAllowed = checkParentTags(race.RACE)
                                 if not raceAllowed then
@@ -1024,6 +1029,24 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
             else
                 if debug == true then
                     local msg = "[BG3SX][Whitelist.lua]\nCheck failed on:\n" .. uuid .. "\nUnknown Tag UUID:\n" .. tag
+                    _P(msg)
+                    Ext.Loca.UpdateTranslatedString(popuphandle, msg)
+                    Osi.OpenMessageBox(uuid, popupkey)
+                end
+                return false
+            end
+        end
+    end
+
+    -- Checking possible NPC races if not disallowed already
+    if NPCRace then
+        local raceName = Ext.StaticData.Get(NPCRace, "Race").Name
+        if Data.AllowedTagsAndRaces[raceName] then
+            if Data.AllowedTagsAndRaces[raceName].Allowed == true then
+                hasAllowedTag = true
+            else
+                if debug == true then
+                    local msg = "[BG3SX][Whitelist.lua]\nCheck failed on:\n" .. uuid .. "\nDisallowed NPC race found: " .. raceName
                     _P(msg)
                     Ext.Loca.UpdateTranslatedString(popuphandle, msg)
                     Osi.OpenMessageBox(uuid, popupkey)
@@ -1304,6 +1327,6 @@ local function showtags()
         local actualTag = Ext.StaticData.Get(tag, "Tag") or Ext.StaticData.Get(tag, "Race")
         output[actualTag.Name] = actualTag.UUID
     end
-    Debug.Dump(output)
+    --Debug.Dump(output)
 end
 Ext.RegisterConsoleCommand("showtags", showtags)

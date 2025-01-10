@@ -242,7 +242,7 @@ Lunisole = {}
 
 function Lunisole.Rotate(character, location)
 
-    print("Lunisole Rotate")
+--     print("Lunisole Rotate")
 
     local charx = Ext.Entity.Get(character).Transform.Transform.Translate[1]
     local chary = Ext.Entity.Get(character).Transform.Transform.Translate[3]
@@ -261,7 +261,7 @@ if Ext.IsClient() then
                 local character = payload.character
                 local targetPosition = payload.target
 
-                print("received teleport request for ", character, " to ", targetPosition)
+                -- print("received teleport request for ", character, " to ", targetPosition)
 
                 if type(targetPosition) == "table" then
                         -- targetPosition is coordinates
@@ -275,8 +275,8 @@ if Ext.IsClient() then
 
         UIEvents.RequestRotation:SetHandler(function (payload)
 
-                print("received rotation request")
-                _D(payload)
+                -- print("received rotation request")
+                -- _D(payload)
 
                 local character = payload.character
                 local targetRotation = payload.target

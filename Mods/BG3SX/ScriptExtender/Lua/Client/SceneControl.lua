@@ -2,22 +2,22 @@ SceneControl = {}
 SceneControl.__index = SceneControl
 function SceneTab:NewSceneControl(Scene)
     -- Check if there are any viable leftover SceneControl instances
-    if self.ActiveSceneControls and #self.ActiveSceneControls > 0 then
-        for _,sceneControl in pairs(self.ActiveSceneControls) do
-            if sceneControl.Unused then
-                sceneControl.Scene = Scene
-                sceneControl.Window.Open = true
-                sceneControl:UpdateWindowName()
-                sceneControl:Initialize()
-                sceneControl.Unused = nil
-                return sceneControl
-            end
-        end
-    end
+    -- if self.ActiveSceneControls and #self.ActiveSceneControls > 0 then
+    --     for _,sceneControl in pairs(self.ActiveSceneControls) do
+    --         if sceneControl.Unused then
+    --             sceneControl.Scene = Scene
+    --             sceneControl.Window.Open = true
+    --             sceneControl:UpdateWindowName()
+    --             sceneControl:Initialize()
+    --             sceneControl.Unused = nil
+    --             return sceneControl
+    --         end
+    --     end
+    -- end
     -- If no viable leftover was found, create a new one
     --_DS(self.ActiveSceneControls)
     --_P("ActiveSceneControls " .. #self.ActiveSceneControls)
-    local id = #self.ActiveSceneControls + 1  -- this seems wonky. It always increases
+    local id = Table.GetNextFreeIndex(self.ActiveSceneControls)  -- this seems wonky. It always increases
     local instance = setmetatable({
         ID = id,
         Scene = Scene, --check if it needs to be updated when scene changes or iif this points to the original one
@@ -32,9 +32,11 @@ end
 function SceneControl:UpdateWindowName()
     local involved = self.Scene.entities
     if involved[1] and type(involved[1]) == "string" then
-        self.Window.Label = "Window " .. self.ID .. " - Scene: " .. Helper.GetName(involved[1])
+        -- self.Window.Label = "Window " .. self.ID .. " - Scene: " .. Helper.GetName(involved[1])
+        self.Window.Label = "Scene: " .. Helper.GetName(involved[1])
         if involved[2] and type(involved[2]) == "string" then
-            self.Window.Label = "Window " .. self.ID .. " - Scene: " .. Helper.GetName(involved[1]) .. " + " .. Helper.GetName(involved[2])
+            -- self.Window.Label = "Window " .. self.ID .. " - Scene: " .. Helper.GetName(involved[1]) .. " + " .. Helper.GetName(involved[2])
+            self.Window.Label = "Scene: " .. Helper.GetName(involved[1]) .. " + " .. Helper.GetName(involved[2])
         end
     end
 end
@@ -76,13 +78,13 @@ function SceneControl:Destroy(backToServer)
         if (component ~= self.ID) and (component ~= self.Window) then
             component = nil
         elseif component == self.Window then
-            UI.DestroyChildren(self.Window)
-            self.Window.Open = false
-            --self.Window:Destroy()
+            -- UI.DestroyChildren(self.Window)
+            -- self.Window.Open = false
+            self.Window:Destroy()
         end
     end
-    self.Unused = true
-    --self = nil
+    -- self.Unused = true
+    self = nil
 end
 
 function SceneControl:Initialize()
@@ -104,11 +106,12 @@ end
 
 function SceneControl:CreateSceneTabReference()
     local refGroup = UIInstance.SceneTab.Tab:AddGroup("")
+    local sep = refGroup:AddSeparatorText(self.Window.Label)
     local openButton = refGroup:AddButton("Open")
     local closeButton = refGroup:AddButton("Close")
-    local ref = refGroup:AddText(self.Window.Label)
     closeButton.SameLine = true
-    ref.SameLine = true
+    -- local ref = refGroup:AddText(self.Window.Label)
+    -- ref.SameLine = true
     openButton.OnClick = function()
         self.Window.Open = true
     end
@@ -166,8 +169,8 @@ function SceneControl:CreateAnimationControlArea()
     --     UIEvents.FetchFilteredAnimations:SendToServer({ID = USERID, SceneControl = self.ID, Caster = _C().Uuid.EntityUuid})
     -- end
 
-    Debug.Print("----------------FETCHANIMATIONS")
-    UIEvents.FetchAllAnimations:SendToServer({ID = _C().Uuid.EntityUuid, SceneControl = self.ID})
+    -- Debug.Print("----------------FETCHANIMATIONS")
+    UIEvents.FetchAllAnimations:SendToServer({ID = USERID, SceneControl = self.ID})
 
     --self:CreateFilters()
 
@@ -181,10 +184,10 @@ function SceneControl:CreateAnimationControlArea()
 end
 
 function SceneControl:UpdateAnimationData(animationData)
-    Debug.Print("Test+")
+    -- Debug.Print("Test+")
     self.Animations = animationData
     table.sort(self.Animations)
-    self:CreateFilters()
+    -- self:CreateFilters() -- Fix
     self:AddAnimationPicker()
 end
 
@@ -211,19 +214,19 @@ end
 
 
 local function getAllCategories(allAnims)
-    local categories = {}
+    local allCategories = {}
 
     for moduleUUID,animations in pairs(allAnims) do
         for AnimationName,AnimationData in pairs(animations) do
             if not (AnimationName == "New") then
 
-                local categories = Animation.Categories
+                local categories = AnimationData.Categories
 
                 if categories then
             
                     for _,category in pairs(categories) do
-                        if Animation.Enabled then
-                            categories[category] = true
+                        if AnimationData.Enabled then
+                            allCategories[category] = true
                         end
                     end
                 else
@@ -233,7 +236,7 @@ local function getAllCategories(allAnims)
         end
     end
 
-    return categories
+    return allCategories
 end
 
 function SceneControl:FilterAnimationsByCategory(filter)
@@ -247,7 +250,7 @@ function SceneControl:FilterAnimationsByCategory(filter)
 
 for modUUID,animations in pairs(self.Animations) do
     for AnimationName,Animation in pairs(animations) do
-        print(AnimationName)
+        -- print(AnimationName)
         if not (AnimationName == "New") then
 
             local categories = Animation.Categories
@@ -282,7 +285,7 @@ function SceneControl:FilterAnimationsByMod(filter)
 
     for moduleUUID,animations in pairs(self.Animations) do
         for AnimationName,Animation in pairs(animations) do
-            print(AnimationName)
+            -- print(AnimationName)
             if not (AnimationName == "New") then
                 if Animation.Enabled and moduleUUID == filter then
                     
@@ -297,8 +300,8 @@ end
 
 
 function SceneControl:GetFilteredAnimations(modFilter, animationFilter)
-    tbl1 = self:FilterAnimationsByMod(modFilter)
-    tbl2 = self:FilterAnimationsByCategory(animationFilter)
+    local tbl1 = self:FilterAnimationsByMod(modFilter)
+    local tbl2 = self:FilterAnimationsByCategory(animationFilter)
     
     return Table.GetIntersection(tbl1, tbl2)
 end
@@ -386,8 +389,9 @@ local function getAllHeightmatchingAnims(heightmatchingtable)
     return hmiAnims
 end
 local function updateCombo(combo, val)
-    local newIndex = combo.SelectedIndex + val
-    if newIndex <= 0 then
+    local newIndex = combo.SelectedIndex
+    newIndex = newIndex + val
+    if newIndex < 1 then
         newIndex = #combo.Options
     elseif newIndex > #combo.Options then
         newIndex = 1
@@ -401,7 +405,6 @@ end
 
 function SceneControl:GetAnimationsBySceneType()
     local type = self.Scene.SceneType
-    Debug.Print(type)
     local animsByType = {}
     for moduleUUID,Anims in pairs(self.Animations) do
         for AnimationName,AnimationData in pairs(Anims) do
@@ -431,7 +434,7 @@ function SceneControl:GetAnimationsBySceneType()
                         if type == "Lesbian" and Table.Contains(AnimationData.Categories, type) then
                             animsByType[moduleUUID][AnimationName] = AnimationData
                         elseif type == "Straight" and Table.Contains(AnimationData.Categories, type) then
-                            _P("YEEEEEEEEEEES")
+
                             _DS(AnimationData.Name)
                             animsByType[moduleUUID][AnimationName] = AnimationData
                         elseif type == "Gay" and Table.Contains(AnimationData.Categories, type) then
@@ -465,8 +468,8 @@ function SceneControl:AddAnimationPicker()
     local debugbefore = Debug.USEPREFIX
     Debug.USEPREFIX = false
     
-    Debug.Print("SceneControl Animations")
-    Debug.DumpS(self.Animations)
+    -- Debug.Print("SceneControl Animations")
+    --Debug.DumpS(self.Animations)
 
     if self.AnimationPicker and #self.AnimationPicker >0 and self.AnimationPicker.Group then
         UI.DestroyChildren(self.AnimationPicker.Group)
@@ -492,8 +495,8 @@ function SceneControl:AddAnimationPicker()
     local authorName
     local animsByType = self:GetAnimationsBySceneType()
     local animPickerAnims = self:ConvertAnimationsForPicker(animsByType)
-    Debug.Print("AnimPickerAnims")
-    Debug.DumpS(animPickerAnims) 
+    -- Debug.Print("AnimPickerAnims")
+    --S(animPickerAnims) 
     animationPicker = g:AddCombo("")
     animationPicker.UserData = animPickerAnims
     local animNames = {}
@@ -501,20 +504,23 @@ function SceneControl:AddAnimationPicker()
         table.insert(animNames, AnimName)
     end
     animationPicker.Options = animNames -- Will get overwritten by filters
-    animationPicker.SelectedIndex = 1
+    -- animationPicker.SelectedIndex = 1
+    local newIndex
     animationPicker.OnChange = function ()
-        if animationPicker.SelectedIndex ~= 0 then
-            local pick = animationPicker.UserData[animationPicker.Options[animationPicker.SelectedIndex+1]]
-            UIEvents.ChangeAnimation:SendToServer({
-                ID = USERID,
-                Caster = _C().Uuid.EntityUuid,
-                moduleUUID = pick.moduleUUID,
-                AnimationData = pick.AnimationData,
-            })
-            Debug.Print("MOD AUTHOR")
-            Debug.Print(Helper.GetModAuthor(pick.moduleUUID))
-            authorName.Label = Helper.GetModAuthor(pick.moduleUUID)
+        -- _P(animationPicker.SelectedIndex)
+        local pick = animationPicker.UserData[animationPicker.Options[animationPicker.SelectedIndex]]
+        UIEvents.ChangeAnimation:SendToServer({
+            ID = USERID,
+            Caster = self.Scene.entities[1],
+            moduleUUID = pick.moduleUUID,
+            AnimationData = pick.AnimationData,
+        })
+        -- Debug.Dump(pick.AnimationData)
+        local actualAuthor = Helper.GetModAuthor(pick.moduleUUID)
+        if actualAuthor == "Lune, Skiz, Satan" then
+            actualAuthor = "Lune"
         end
+        authorName.Label = "By: " .. actualAuthor
     end
     animationPicker.SameLine = true
 
@@ -524,7 +530,7 @@ function SceneControl:AddAnimationPicker()
     end
     nextButton.SameLine = true
 
-    local authorName = g:AddText("By: NAN")
+    authorName = g:AddText("By: NAN")
 
     self.AnimationPicker.Previous = previousButton
     self.AnimationPicker.AnimationPicker = animationPicker

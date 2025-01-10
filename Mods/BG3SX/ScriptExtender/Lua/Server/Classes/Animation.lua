@@ -12,7 +12,7 @@ local playAnimation
 function Animation:New(actor, animSpell)
 
     local instance = setmetatable({
-        actor = Helper.CleanPrefix(actor),
+        actor = actor,
         animationData = animSpell, -- The chosen animations data table
         animation = ""
     }, Animation)
@@ -27,6 +27,9 @@ function Animation:New(actor, animSpell)
 
         local vars = Ext.Vars.GetModVariables(ModuleUUID)
         local unlocked = vars.BG3SX_ShowAllAnimations
+
+        print("dumping scene")
+        _D(scene.entities)
         
 
         if #scene.entities == 1 then
@@ -34,8 +37,10 @@ function Animation:New(actor, animSpell)
         else
             hmAnim, hmAnim2 = hmInstance:NewGetAnimation(scene.entities[1], scene.entities[2], unlocked)
             if scene.entities[1] == instance.actor then
+            print("entity is the first character (top)")
                 instance.animation = hmAnim
             elseif scene.entities[2] == instance.actor then
+             print("entity is the second character bottom")
                 instance.animation = hmAnim2
             else
                 Debug.Print("Something went wrong! Contact mod author! [Error 1]")
@@ -72,9 +77,6 @@ end
 ---@param animationData Table   - The chosen animations data table
 ---@param animation     string  - The actual animation to play because there could be multiple ("Top"/"Bottom")
 playAnimation = function(self)
-
-    print("playing animation ", self.animation)
-
   --  Osi.PlayAnimation(self.actor.uuid, "") -- First, stop current animation on actor
     if self.animationData.Loop == true then
         -- _P("Playing ", self.animation, " for ", self.actor.parent)

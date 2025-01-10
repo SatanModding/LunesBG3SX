@@ -136,14 +136,15 @@ UIEvents.RequestStripNPC:SetHandler(function (payload)
     -- safeguarding against overwriting the saved things with an empty table
     -- in case users strip twice
 
-    local notHasEmpty
+    local hasEmpty = false
+    _D(clothes)
     for _,entry in pairs(clothes[1])do
-        if not (entry.uuid == "") then
-            notHasEmpty = true
+        if (entry.uuid == "") then
+            hasEmpty = true
         end
     end
 
-    if not notHasEmpty then
+    if hasEmpty == false then
         SexUserVars.SetNPCClothes(clothes, entity)
     end
 

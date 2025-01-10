@@ -32,22 +32,22 @@ function Debug.Print(message)
         _P(pre .. "\n" .. message)
     end
 end
-function Debug.Dump(table)
+function Debug.Dump(tbl)
     if Debug.Active then
 
         local pre = getDebugPrefix()
 
         _P(pre)
         _P("Dump:")
-        _D(table)
+        _D(tbl)
     end
 end
-function Debug.DumpS(table)
+function Debug.DumpS(tbl)
     if Debug.Active then
 
         local pre = getDebugPrefix()
         _P(pre .. "Shallow Dump:")
-        _DS(table)
+        _DS(tbl)
     end
 end
 function Debug.PrintWarn(message)

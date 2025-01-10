@@ -41,11 +41,20 @@ end
 
 function SceneTab:CreateNewSceneArea()
     self.NoSceneText = self.Tab:AddText("No Scenes found, create one!")
-    self.CreateSceneButton = self.Tab:AddImageButton("Create Scene", "BG3SX_ICON_MAIN", {100,100})
-    self.CreateSceneButton:Tooltip():AddText("Create Scene")
-    self.CreateSceneButton.OnClick = function()
+
+    self.SFWSceneButton = self.Tab:AddImageButton("Create SFW Scene", "Action_Song_BardDance", {100,100})
+    self.SFWSceneButton:Tooltip():AddText("Create SFW Scene")
+    self.SFWSceneButton.OnClick = function()
+        self:AwaitNewScene() -- Currently does the same as regular new scene button
+    end
+    self.SFWSceneButton.Visible = false
+
+    self.NSFWSceneButton = self.Tab:AddImageButton("Create Scene", "BG3SX_ICON_MAIN", {100,100})
+    self.NSFWSceneButton:Tooltip():AddText("Create Scene")
+    self.NSFWSceneButton.OnClick = function()
         self:AwaitNewScene()
     end
+    -- self.NSFWSceneButton.SameLine = true
 end
 
 function SceneTab:AwaitNewScene()

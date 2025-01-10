@@ -10,7 +10,6 @@ local function initializeParty()
     -- _P("---------------------OnSessionLoaded Whitelist Check---------------------")
     for i = #party, 1, -1 do
         if Entity:IsWhitelisted(party[i][1]) then
-            Sex:AddMainSexSpells(party[i][1])
 
             local entity = Ext.Entity.Get(party[i][1])
             if not entity then
@@ -44,6 +43,8 @@ function OnSessionLoaded()
 
 	Ext.Osiris.RegisterListener("DB_PartOfTheTeam", 1, "afterDelete", function (character)
         initializeParty()
+        local party = Osi.DB_PartyMembers:Get(nil)
+        UIEvents.SendParty:Broadcast(party)
     end)
 
     -- TODO: Check if CharacterCreationDummy might cause issues with "Make NPC into Partymember" mods
@@ -52,8 +53,22 @@ function OnSessionLoaded()
         if string.find(character, "CharacterCreationDummy") == nil then
             initializeParty()
         end
+
+        local party = Osi.DB_PartyMembers:Get(nil)
+        UIEvents.SendParty:Broadcast(party) -- Update PartyInterface
     end)
+
+
+    Ext.Osiris.RegisterListener("CharacterLeftParty", 1, "after", function(character)
+    
+        local party = Osi.DB_PartyMembers:Get(nil)
+        UIEvents.SendParty:Broadcast(party) -- Update PartyInterface
+    end)
+
+
 end
+
+
 
 -- Subscribes to the SessionLoaded event and executes our OnSessionLoaded function
 Ext.Events.SessionLoaded:Subscribe(OnSessionLoaded)

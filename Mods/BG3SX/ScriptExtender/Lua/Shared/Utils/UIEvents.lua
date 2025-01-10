@@ -2,6 +2,7 @@
 function UIEvents:Initialize()
     -- Party
     -- Client -> Server
+    self.SetSelectedCharacter = Ext.Net.CreateChannel(ModuleUUID, "SetSelectedCharacter")
     self.FetchParty = Ext.Net.CreateChannel(ModuleUUID, "FetchParty")
     -- Server -> Client
     self.SendParty = Ext.Net.CreateChannel(ModuleUUID, "SendParty")
