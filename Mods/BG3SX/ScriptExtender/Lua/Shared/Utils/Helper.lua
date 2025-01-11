@@ -106,6 +106,11 @@ function Helper.StringContains(str, sub)
     return (string.find(str, sub, 1, true) ~= nil)
 end
 
+function Helper.StringsContainOne(str1, str2)
+    return Helper.StringContains(str1, str2) or Helper.StringContains(str2, str1)
+end
+
+
 function Helper.ResetWhitelistToDefault()
 end
 

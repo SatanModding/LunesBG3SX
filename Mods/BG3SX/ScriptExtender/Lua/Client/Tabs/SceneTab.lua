@@ -40,7 +40,7 @@ function SceneTab:RefreshAvailableAnimations(targetSceneControl, animationTable)
 end
 
 function SceneTab:CreateNewSceneArea()
-    self.NoSceneText = self.Tab:AddText("No Scenes found, create one!")
+    self.NoSceneText = self.Tab:AddText("No active scenes, create one by:\n1. Select a character in the UI.\n2. Click the BG3SX button.\n3. Select a character of your choice to start a scene with")
 
     self.SFWSceneButton = self.Tab:AddImageButton("Create SFW Scene", "Action_Song_BardDance", {100,100})
     self.SFWSceneButton:Tooltip():AddText("Create SFW Scene")

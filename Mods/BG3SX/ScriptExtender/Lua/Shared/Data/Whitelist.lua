@@ -467,7 +467,7 @@ Data.AllowedTagsAndRaces = {
     },
     ["REALLY_WOODHALFELF"] = {TAG = "8ac1b27c-c5c4-4a2c-95dd-256e4349e483", Allowed = true, -- Subrace
     },
-    ["REALLY_DISPLACER_BEAST"] = {TAG = "8fac3253-331c-4b9f-95fb-e2196fd1bc8d", Allowed = true,
+    ["REALLY_DISPLACER_BEAST"] = {TAG = "8fac3253-331c-4b9f-95fb-e2196fd1bc8d", Allowed = false, Reason = "BG3SX - No beasts"
     },
     ["REALLY_HILLDWARF"] = {TAG = "9a92ac6d-b7cc-4ccb-8965-074c6b36a342", Allowed = true, -- Subrace
     },

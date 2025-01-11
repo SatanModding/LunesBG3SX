@@ -93,14 +93,9 @@ function WhitelistTab:GenerateWhitelist()
         if Helper.IsUpperCase(TagName) then
             if TagName ~= "KID" and TagName ~= "GOBLIN_KID" then
                 local tagTree = self.WhitelistHeader:AddTree(TagName)
-                if Content.TAG then
-                    local tagText = tagTree:AddText("UUID:")
-                    local uuid = tagTree:AddInputText("")
-                    uuid.Text = Content.TAG
-                end
                 if Content.Allowed ~= nil then
-                    local allowedStatus = tagTree:AddCheckbox("Allowed")
-                    allowedStatus.SameLine = true
+                    local allowedStatus = tagTree:AddCheckbox("")
+                    -- allowedStatus.SameLine = true
                     if Content.Allowed == true then
                         allowedStatus.Checked = true
                         allowedStatus.OnChange = function()
@@ -116,6 +111,12 @@ function WhitelistTab:GenerateWhitelist()
                             local tooltipText = tooltip:AddText(Content.Reason)
                         end
                     end
+                end
+                if Content.TAG then
+                    -- local tagText = tagTree:AddText("UUID:")
+                    local uuid = tagTree:AddInputText("")
+                    uuid.Text = Content.TAG
+                    uuid.SameLine = true
                 end
             end
         end

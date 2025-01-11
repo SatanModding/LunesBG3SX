@@ -86,13 +86,17 @@ function PartyInterface:UpdateNPCs()
 end
 
 function UI:SelectedCharacterUpdates(character)
-    local entity = Ext.Entity.Get(character.Uuid)
-    self.PartyInterface:SetSelectedCharacter(character.Uuid)
-    self.AppearanceTab:UpdateStrippingGroup(character.Uuid)
-    self.AppearanceTab:UpdateEquipmentAreaGroup(character.Uuid)
-    self.AppearanceTab:FetchGenitals()
-    UIEvents.FetchUserTags:SendToServer({ID = USERID, Character = character.Uuid})
-    Camera:SnapCameraTo(entity)
+    if self.Await and self.Await.Reason == "NewScene" then
+        self:InputRecieved(character.Uuid)
+    else
+        local entity = Ext.Entity.Get(character.Uuid)
+        self.PartyInterface:SetSelectedCharacter(character.Uuid)
+        self.AppearanceTab:UpdateStrippingGroup(character.Uuid)
+        self.AppearanceTab:UpdateEquipmentAreaGroup(character.Uuid)
+        self.AppearanceTab:FetchGenitals()
+        UIEvents.FetchUserTags:SendToServer({ID = USERID, Character = character.Uuid})
+        Camera:SnapCameraTo(entity)
+    end
 end
 
 CharacterInterface = {}

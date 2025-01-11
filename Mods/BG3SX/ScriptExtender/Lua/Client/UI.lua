@@ -104,7 +104,7 @@ function UI:CreateEventHandler()
                 end
                 if getMouseover().Inner.Inner[1] then
                     if getMouseover().Inner.Inner[1].Character then
-                        mouseoverTarget = getUUIDFromUserdata(getMouseover())
+                        mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid
                         if reason == "NewScene" then
                             self:InputRecieved(mouseoverTarget)
                         end

@@ -34,9 +34,11 @@ function SceneControl:UpdateWindowName()
     if involved[1] and type(involved[1]) == "string" then
         -- self.Window.Label = "Window " .. self.ID .. " - Scene: " .. Helper.GetName(involved[1])
         self.Window.Label = "Scene: " .. Helper.GetName(involved[1])
-        if involved[2] and type(involved[2]) == "string" then
-            -- self.Window.Label = "Window " .. self.ID .. " - Scene: " .. Helper.GetName(involved[1]) .. " + " .. Helper.GetName(involved[2])
-            self.Window.Label = "Scene: " .. Helper.GetName(involved[1]) .. " + " .. Helper.GetName(involved[2])
+        if not Helper.StringsContainOne(involved[1],involved[2]) then
+            if involved[2] and type(involved[2]) == "string" then
+                -- self.Window.Label = "Window " .. self.ID .. " - Scene: " .. Helper.GetName(involved[1]) .. " + " .. Helper.GetName(involved[2])
+                self.Window.Label = "Scene: " .. Helper.GetName(involved[1]) .. " + " .. Helper.GetName(involved[2])
+            end
         end
     end
 end
@@ -107,8 +109,8 @@ end
 function SceneControl:CreateSceneTabReference()
     local refGroup = UIInstance.SceneTab.Tab:AddGroup("")
     local sep = refGroup:AddSeparatorText(self.Window.Label)
-    local openButton = refGroup:AddButton("Open")
-    local closeButton = refGroup:AddButton("Close")
+    local openButton = refGroup:AddButton("Open Scene Control")
+    local closeButton = refGroup:AddButton("End Scene")
     closeButton.SameLine = true
     -- local ref = refGroup:AddText(self.Window.Label)
     -- ref.SameLine = true
@@ -127,14 +129,15 @@ end
 
 function SceneControl:AddControlButtons()
     local buttons = {
-        ["Swap Position"] = "BG3SX_ICON_Scene_SwitchPlaces",
-        ["Rotate Scene"] = "BG3SX_ICON_Scene_Rotate",
+        {Name = "Swap Position", Icon = "BG3SX_ICON_Scene_SwitchPlaces"},
+        {Name = "Rotate Scene", Icon = "BG3SX_ICON_Scene_Rotate"},
         --"Change Camera Height",
-        ["Move Scene"] = "BG3SX_ICON_Scene_Move",
-        ["Stop Sex"] = "BG3SX_ICON_Scene_End",
+        {Name = "Move Scene", Icon = "BG3SX_ICON_Scene_Move"},
+        {Name = "Stop Sex", Icon = "BG3SX_ICON_Scene_End"},
     }
-    for buttonName,buttonIcon in pairs(buttons) do
-        local iconButton = self.Window:AddImageButton(buttonName, buttonIcon, {50,50})
+
+    for _,button in pairs(buttons) do
+        local iconButton = self.Window:AddImageButton(button.Name, button.Icon, {50,50})
         iconButton.SameLine = true
         iconButton.OnClick = function()
            self:UseSceneControlButton(iconButton.Label) 
@@ -464,6 +467,7 @@ function SceneControl:ConvertAnimationsForPicker(animsByType)
     return pickerEntries
 end
 
+
 function SceneControl:AddAnimationPicker()
     local debugbefore = Debug.USEPREFIX
     Debug.USEPREFIX = false
@@ -489,6 +493,7 @@ function SceneControl:AddAnimationPicker()
     local previousButton = g:AddButton("<-")
     previousButton.OnClick = function()
         updateCombo(animationPicker, -1)
+        authorName.Visible = true
     end
     previousButton.SameLine = true
 
@@ -521,16 +526,19 @@ function SceneControl:AddAnimationPicker()
             actualAuthor = "Lune"
         end
         authorName.Label = "By: " .. actualAuthor
+        authorName.Visible = true
     end
     animationPicker.SameLine = true
 
     local nextButton = g:AddButton("->")
     nextButton.OnClick = function()
         updateCombo(animationPicker, 1)
+        authorName.Visible = true
     end
     nextButton.SameLine = true
 
     authorName = g:AddText("By: NAN")
+    authorName.Visible = false -- Keep invisible initially
 
     self.AnimationPicker.Previous = previousButton
     self.AnimationPicker.AnimationPicker = animationPicker
