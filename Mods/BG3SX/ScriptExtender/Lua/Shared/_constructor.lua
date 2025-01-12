@@ -2,7 +2,7 @@
 -- E.g. Shared/Data/RaceWhitelist.lua
 
 Ext.Require("Shared/Utils/Debug.lua")
-Ext.Require("Shared/SexUserVars.lua")
+-- Ext.Require("Shared/SexUserVars.lua")
 -- Main Classes
 Entity = {}
 Entity.__index = Entity

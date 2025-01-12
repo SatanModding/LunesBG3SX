@@ -57,7 +57,11 @@ UIEvents.AskForSex:SetHandler(function (payload)
 end)
 
 
-
+UIEvents.TogglePause:SetHandler(function (payload)
+    local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
+    scene:TogglePause()
+    -- If we add transitioning animations - our own loop system we need to also pause potential scene timers
+end)
 
 UIEvents.SwapPosition:SetHandler(function (payload)
     local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
@@ -118,6 +122,16 @@ UIEvents.FetchAnimations:SetHandler(function (payload)
     end
     --UIEvents.SendAnimations:SendToClient({ID = payload.ID, Data = availableAnimations}, payload.ID)
 end)
+
+-- UIEvents.FetchAllAnimations:SetHandler(function (payload)
+
+--     print("-----------------------------------------------------")
+--     print("YAPYAPYAPYAP")
+--     print("---------------------------------------")
+-- end)
+
+
+
 UIEvents.FetchAllAnimations:SetHandler(function (payload)
     local anims = {}
     for anim,animData in pairs(Data.Animations) do
@@ -130,6 +144,13 @@ UIEvents.FetchAllAnimations:SetHandler(function (payload)
     UIEvents.SendAllAnimations:Broadcast(anims)
 end)
 
+
+UIEvents.FetchAllAnimations:SetHandler(function (payload)
+    Debug.Print("Received message FetchAllAnimations with payload")
+    local animations = Data.Animations
+    local client = payload.ID
+    UIEvents.SendAllAnimations:SendToClient({Animations = animations, SceneControl = payload.SceneControl}, client)
+end)
 
 UIEvents.FetchParty:SetHandler(function (payload)
     local party = Osi.DB_PartyMembers:Get(nil)
@@ -154,24 +175,6 @@ end)
 
 
 
--- UIEvents.FetchAllAnimations:SetHandler(function (payload)
-
---     print("-----------------------------------------------------")
---     print("YAPYAPYAPYAP")
---     print("---------------------------------------")
--- end)
-
-
-
-
-UIEvents.FetchAllAnimations:SetHandler(function (payload)
-    Debug.Print("Received message FetchAllAnimations with payload")
-    local animations = Data.Animations
-    local client = payload.ID
-    UIEvents.SendAllAnimations:SendToClient({Animations = animations, SceneControl = payload.SceneControl}, client)
-end)
-
-
 -- UIEvents.FetchFilteredAnimations:SetHandler(function (payload)
 --     Debug.Print("Received message FetchFilteredAnimations with payload")
 --     _D(payload)
@@ -191,19 +194,9 @@ UIEvents.ChangeAnimation:SetHandler(function (payload)
     local moduleUUID = payload.moduleUUID
     local animationData = payload.AnimationData
     local scene = Scene:FindSceneByEntity(caster)
-
-    print("-------------------------------------------------------")
-    for _, char in pairs (scene.entities) do
-        print("creating animation for character ", char)
-        Animation:New(char, Data.Animations[moduleUUID][animationData.Name])
-
-        -- Only play sound if is enabled for a given animation entry
-        if Data.Animations[moduleUUID][animationData.Name].Sound == true then
-            Sound:New(char, Data.Animations[moduleUUID][animationData.Name])
-        end
-    end
-
-    scene.currentAnimation = Data.Animations[moduleUUID][animationData.Name]
+    -- _D(scene)
+    -- _D(animationData)
+    scene:PlayAnimation(animationData)
 end)
 
 

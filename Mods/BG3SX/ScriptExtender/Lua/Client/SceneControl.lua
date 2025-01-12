@@ -34,10 +34,12 @@ function SceneControl:UpdateWindowName()
     if involved[1] and type(involved[1]) == "string" then
         -- self.Window.Label = "Window " .. self.ID .. " - Scene: " .. Helper.GetName(involved[1])
         self.Window.Label = "Scene: " .. Helper.GetName(involved[1])
-        if not Helper.StringsContainOne(involved[1],involved[2]) then
-            if involved[2] and type(involved[2]) == "string" then
-                -- self.Window.Label = "Window " .. self.ID .. " - Scene: " .. Helper.GetName(involved[1]) .. " + " .. Helper.GetName(involved[2])
-                self.Window.Label = "Scene: " .. Helper.GetName(involved[1]) .. " + " .. Helper.GetName(involved[2])
+        if involved[2] then
+            if not Helper.StringsContainOne(involved[1],involved[2]) then
+                if involved[2] and type(involved[2]) == "string" then
+                    -- self.Window.Label = "Window " .. self.ID .. " - Scene: " .. Helper.GetName(involved[1]) .. " + " .. Helper.GetName(involved[2])
+                    self.Window.Label = "Scene: " .. Helper.GetName(involved[1]) .. " + " .. Helper.GetName(involved[2])
+                end
             end
         end
     end
@@ -129,6 +131,7 @@ end
 
 function SceneControl:AddControlButtons()
     local buttons = {
+        {Name = "Pause/Unpause", Icon = "Spell_Abjuration_ArcaneLock"},
         {Name = "Swap Position", Icon = "BG3SX_ICON_Scene_SwitchPlaces"},
         {Name = "Rotate Scene", Icon = "BG3SX_ICON_Scene_Rotate"},
         --"Change Camera Height",
@@ -148,7 +151,9 @@ end
 
 function SceneControl:UseSceneControlButton(buttonLabel)
     --local UI = UI.GetUIByID(self.UI)
-    if buttonLabel == "Swap Position" then
+    if buttonLabel == "Pause/Unpause" then
+        UIEvents.TogglePause:SendToServer({ID = USERID, Scene = self.Scene})
+    elseif buttonLabel == "Swap Position" then
         UIEvents.SwapPosition:SendToServer({ID = USERID, Scene = self.Scene})
     elseif buttonLabel == "Rotate Scene" then
         UIInstance:AwaitInput("RotateScene", self.Scene)
@@ -487,19 +492,51 @@ function SceneControl:AddAnimationPicker()
 
     self.AnimationPicker.Group = self.Window:AddGroup("")
     local g = self.AnimationPicker.Group
-    g:AddSeparator("")
 
+    g:AddSeparator("")
+    
+    local authorName
     local animationPicker -- Create before to use within previousButton.OnClick function
+
     local previousButton = g:AddButton("<-")
     previousButton.OnClick = function()
-        updateCombo(animationPicker, -1)
+        -- updateCombo(animationPicker, -1)
+        local animData
+        local currentIndex = animationPicker.SelectedIndex
+        -- Debug.Print(currentIndex)
+        if currentIndex >= 1 then
+            animationPicker.SelectedIndex = currentIndex - 1
+        elseif currentIndex == 0 then
+            -- _P("Options count = " .. #animationPicker.Options)
+            -- _D(animationPicker.Options)
+            animationPicker.SelectedIndex = #animationPicker.Options - 1 -- While we do want to get to the maximum value, SelectedIndex counts from 0, while tables start with 1 wo we decrease by 1
+        end
+        -- Debug.Print(animationPicker.SelectedIndex)
+        local indexData = animationPicker.Options[animationPicker.SelectedIndex+1] -- SelectedIndex begins with 0 but table starts with 1 so we increase by 1
+        local moduleUUID = animationPicker.UserData[indexData].moduleUUID
+        local animData = animationPicker.UserData[indexData].AnimationData
+        if animData then
+            UIEvents.ChangeAnimation:SendToServer({
+                ID = USERID,
+                Caster = self.Scene.entities[1],
+                -- moduleUUID = moduleUUID,
+                AnimationData = animData,
+            })
+        end
+        local actualAuthor = Helper.GetModAuthor(animData.Mod)
+        if actualAuthor == "Lune, Skiz, Satan" then
+            actualAuthor = "Lune"
+        end
+        authorName.Label = "By: " .. actualAuthor
         authorName.Visible = true
     end
     previousButton.SameLine = true
 
-    local authorName
     local animsByType = self:GetAnimationsBySceneType()
     local animPickerAnims = self:ConvertAnimationsForPicker(animsByType)
+    -- if #animPickerAnims == 0 then
+    --     g.Visible = false
+    -- end
     -- Debug.Print("AnimPickerAnims")
     --S(animPickerAnims) 
     animationPicker = g:AddCombo("")
@@ -509,19 +546,19 @@ function SceneControl:AddAnimationPicker()
         table.insert(animNames, AnimName)
     end
     animationPicker.Options = animNames -- Will get overwritten by filters
-    -- animationPicker.SelectedIndex = 1
-    local newIndex
+    animationPicker.SelectedIndex = 0
     animationPicker.OnChange = function ()
         -- _P(animationPicker.SelectedIndex)
-        local pick = animationPicker.UserData[animationPicker.Options[animationPicker.SelectedIndex]]
+        local indexData = animationPicker.Options[animationPicker.SelectedIndex+1] -- SelectedIndex begins with 0 but table starts with 1 so we increase by 1
+        local moduleUUID = animationPicker.UserData[indexData].moduleUUID
+        local animData = animationPicker.UserData[indexData].AnimationData
         UIEvents.ChangeAnimation:SendToServer({
             ID = USERID,
             Caster = self.Scene.entities[1],
-            moduleUUID = pick.moduleUUID,
-            AnimationData = pick.AnimationData,
+            -- moduleUUID = moduleUUID,
+            AnimationData = animData,
         })
-        -- Debug.Dump(pick.AnimationData)
-        local actualAuthor = Helper.GetModAuthor(pick.moduleUUID)
+        local actualAuthor = Helper.GetModAuthor(animData.Mod)
         if actualAuthor == "Lune, Skiz, Satan" then
             actualAuthor = "Lune"
         end
@@ -532,13 +569,51 @@ function SceneControl:AddAnimationPicker()
 
     local nextButton = g:AddButton("->")
     nextButton.OnClick = function()
-        updateCombo(animationPicker, 1)
+        -- updateCombo(animationPicker, 1)
+        local animData
+        local currentIndex = animationPicker.SelectedIndex
+        -- Debug.Print(currentIndex)
+        if currentIndex < #animationPicker.Options - 1 then
+            animationPicker.SelectedIndex = currentIndex + 1
+        elseif currentIndex == #animationPicker.Options - 1 then
+            animationPicker.SelectedIndex = 0 -- SelectedIndex starts at 0
+        end
+        -- Debug.Print(animationPicker.SelectedIndex)
+        local indexData = animationPicker.Options[animationPicker.SelectedIndex+1] -- SelectedIndex begins with 0 but table starts with 1 so we increase by 1
+        local moduleUUID = animationPicker.UserData[indexData].moduleUUID
+        local animData = animationPicker.UserData[indexData].AnimationData
+        UIEvents.ChangeAnimation:SendToServer({
+            ID = USERID,
+            Caster = self.Scene.entities[1],
+            -- moduleUUID = moduleUUID,
+            AnimationData = animData,
+        })
+        local actualAuthor = Helper.GetModAuthor(animData.Mod)
+        if actualAuthor == "Lune, Skiz, Satan" then
+            actualAuthor = "Lune"
+        end
+        authorName.Label = "By: " .. actualAuthor
         authorName.Visible = true
     end
     nextButton.SameLine = true
 
+    -- local spacerdummy = g:AddDummy(0,0)
+    -- spacerdummy.Width = 200
     authorName = g:AddText("By: NAN")
-    authorName.Visible = false -- Keep invisible initially
+    
+    local indexData = animationPicker.Options[animationPicker.SelectedIndex+1] -- SelectedIndex begins with 0 but table starts with 1 so we increase by 1
+    local moduleUUID = animationPicker.UserData[indexData].moduleUUID
+    local animData = animationPicker.UserData[indexData].AnimationData
+    local actualAuthor = Helper.GetModAuthor(animData.Mod)
+    if actualAuthor then
+        if actualAuthor == "Lune, Skiz, Satan" then
+            actualAuthor = "Lune"
+        end
+        authorName.Label = "By: " .. actualAuthor
+        authorName.Visible = true
+    else
+        authorName.Visible = false -- Keep invisible initially
+    end
 
     self.AnimationPicker.Previous = previousButton
     self.AnimationPicker.AnimationPicker = animationPicker

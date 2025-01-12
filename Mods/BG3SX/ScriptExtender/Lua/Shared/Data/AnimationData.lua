@@ -18,6 +18,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         if moduleUUID then
             instance = setmetatable({
                 Enabled = true,
+                Mod = moduleUUID,
                 Name = name,
                 Categories = categories or nil,
                 Heightmatching = hm:New(moduleUUID, name, animTop, animBtm),
@@ -26,7 +27,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
                 Loop = true,
                 Sound = false,
                 SoundTop = nil,
-                SoundBottom = nil
+                SoundBottom = nil,
             }, AnimationData)
             instance._animTop = animTop
             instance._animBtm = animBtm
@@ -93,6 +94,24 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         else
             Debug.Print("An animation with the name (" .. name .. ") already exists for this mod, please choose a different name or add an unique identifier")
         end
+    end
+
+    function Data.GetAnimDataParent(animationData)
+        for moduleUuid,modAnims in pairs(intros) do
+            for animName,animData in pairs(modAnims) do
+                if moduleUuid == animationData.Mod and animName == animationData.Name then
+                    return Data.IntroAnimations
+                end
+            end
+        end
+        for moduleUuid,modAnims in pairs(anims) do
+            for animName,animData in pairs(modAnims) do
+                if moduleUuid == animationData.Mod and animName == animationData.Name then
+                    return Data.Animations
+                end
+            end
+        end
+        return nil
     end
 
     -- Every other still gets shown, but these are the main categories we sort for

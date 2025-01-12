@@ -12,11 +12,11 @@ function UI:NewWhitelistTab()
 end
 
 function WhitelistTab:Initialize()
-    self.Tab:AddSeparatorText("Tags of selected character:")
+    self.Tab:AddSeparatorText("(Read-only) Tags of selected character:")
     self.UserTags = {Header = self.Tab:AddCollapsingHeader("Character Tags")}
     self.Whitelists = {}
     self:FetchUserTags()
-    self.Tab:AddSeparatorText("Whitelist")
+    self.Tab:AddSeparatorText("(Read-only) Whitelist")
     self:FetchWhitelist()
 end
 

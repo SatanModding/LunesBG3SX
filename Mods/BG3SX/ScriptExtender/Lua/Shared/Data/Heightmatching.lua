@@ -193,7 +193,7 @@ function Heightmatching.GetEntityBody(uuid)
 
     --print("Heightmatching  for " , uuid )
 
-    print("getting body type LOCKED")
+    -- print("getting body type LOCKED")
 
     local entity = Ext.Entity.Get(uuid)
     local raceTags = Entity:TryGetEntityValue(uuid, nil, {"ServerRaceTag", "Tags"})
@@ -245,15 +245,15 @@ function Heightmatching.GetEntityBody(uuid)
         end
     end
 
-    print("HEINGHTMATCHING")
-    print(uuid, " has the body  bt = ", bt, " bs = ", bs , " g = ", g)
+    -- print("HEINGHTMATCHING")
+    -- print(uuid, " has the body  bt = ", bt, " bs = ", bs , " g = ", g)
     return bs, bt, g  -- TallM_P, MedF_V, etc.
 end
 
 
 function Heightmatching.GetEntityBodyUnlocked(uuid)
 
-    print("Getting bodytype UNLOCKED")
+    -- print("Getting bodytype UNLOCKED")
 
     --print("Heightmatching for " , uuid )
 
@@ -279,8 +279,8 @@ function Heightmatching.GetEntityBodyUnlocked(uuid)
 
     --Debug.Print("bt = ".. bt.. " bs = ".. bs .. " g = " .. g )
 
-    print("HEINGHTMATCHING")
-    print(uuid, " has the body  bt = ", bt, " bs = ", bs )
+    -- print("HEINGHTMATCHING")
+    -- print(uuid, " has the body  bt = ", bt, " bs = ", bs )
     return bs, bt  -- TallM_P, MedF_V, etc.
 end
 
@@ -585,7 +585,7 @@ function Heightmatching:NewGetAnimation(character1, character2, unlocked)
 
     bs,bt,g = 0,0, "__" 
     if unlocked then
-        print("is unlocked true ", unlocked)
+        -- print("is unlocked true ", unlocked)
         bs, bt = Heightmatching.GetEntityBodyUnlocked(character1)
     else
         bs, bt, g = Heightmatching.GetEntityBody(character1)

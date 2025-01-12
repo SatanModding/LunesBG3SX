@@ -86,7 +86,7 @@ end
 -- Determines which type of scene the entity is part of and assigns the appropriate animations and sounds to the actors involved
 ---@param character    string  - The entity which used a new animation spell
 ---@param spell     string   - The chosen animations data table
-function Sex:PlayAnimation(character, animSpell)
+function Sex:PlayAnimation(character, animData)
 
     -- TODO - make this dependant on actor instead of entity and refresh when genital has changed
 
@@ -113,12 +113,12 @@ function Sex:PlayAnimation(character, animSpell)
     -- elseif sceneType == "MMM" then
     end
 
-    playAnimationAndSound(scene, animSpell)
+    playAnimationAndSound(scene, animData)
 
     -- Prop handling
-    if animSpell ~= scene.currentAnimation then
+    if animData ~= scene.currentAnimation then
         -- If animation is not the same as before save the new animationData table to the scene to use for prop management, teleporting or rotating
-        scene.currentAnimation = animSpell
+        scene.currentAnimation = animData
         scene:DestroyProps() -- Props rely on scene.currentAnimation
         scene:CreateProps()
     end

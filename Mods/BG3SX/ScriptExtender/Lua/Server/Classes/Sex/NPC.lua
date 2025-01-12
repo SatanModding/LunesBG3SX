@@ -137,7 +137,7 @@ UIEvents.RequestStripNPC:SetHandler(function (payload)
     -- in case users strip twice
 
     local hasEmpty = false
-    _D(clothes)
+    -- _D(clothes)
     for _,entry in pairs(clothes[1])do
         if (entry.uuid == "") then
             hasEmpty = true

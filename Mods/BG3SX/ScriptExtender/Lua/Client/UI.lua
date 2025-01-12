@@ -72,10 +72,11 @@ end
 function UI:AwaitInput(reason, payload)
 
     local payload = payload or nil
-    self.Await = {Reason = reason, Payload = payload}
-    if not self.EventListener then
-        self.EventHandler = self:CreateEventHandler()
+    if self.MouseInputHandler or self.ControllerInputHandler then
+        self:CancelAwaitInput() -- Sanity Check Reset
     end
+    self.Await = {Reason = reason, Payload = payload}
+    self.KeyInputHandler, self.MouseInputHandler, self.ControllerInputHandler, self.ControllerAxisHandler = self:CreateEventHandler()
 end
 
 -- function LuaEventBase:PreventListenerAction(bool)
@@ -84,15 +85,31 @@ end
 --     end
 -- end
 
+-- Maybe move into its own class
 function UI:CreateEventHandler()
-    local handler = Ext.Events.MouseButtonInput:Subscribe(function (e)
-        local reason = self.Await.Reason
-        local mouseoverPosition = nil
-        local mouseoverTarget = nil
-        -- we currently don't want to stop an event
-        if not self.Await then
-            return
+    if not self.Await then -- Sanity Check
+        return nil,nil,nil
+    end
+
+    local reason = self.Await.Reason
+    local mouseoverPosition = nil
+    local mouseoverTarget = nil
+
+    ---------------------------------------------------------
+    --- KEYBOARD Keys
+    ---------------------------------------------------------
+
+    local keyHandler = Ext.Events.KeyInput:Subscribe(function (e)
+        if e.Key == "ESCAPE" and e.Pressed == true then -- .Pressed checks if it was the first input registered or a held down event - Check .Repeat for this
+            self:CancelAwaitInput("Canceled")
         end
+    end)
+
+    ---------------------------------------------------------
+    --- MOUSE Buttons
+    ---------------------------------------------------------
+
+    local mouseHandler = Ext.Events.MouseButtonInput:Subscribe(function (e)
         e:PreventAction() --jjdoorframe()
         if e.Button == 1 and e.Pressed == true then
             if getMouseover() and getMouseover().Inner then
@@ -104,23 +121,115 @@ function UI:CreateEventHandler()
                 end
                 if getMouseover().Inner.Inner[1] then
                     if getMouseover().Inner.Inner[1].Character then
-                        mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid
+                        Debug.Print("--------------------------------------------------")
+                        mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid
                         if reason == "NewScene" then
                             self:InputRecieved(mouseoverTarget)
                         end
                     else
                         -- No Character Found
-                        self:CancelAwaitInput()
+                        self:CancelAwaitInput("No entity found")
                     end
                 end
             end
+        elseif e.Button == 3 and e.Pressed == true then -- Button 3 is right click
+            _D(getMouseover())
+            self:CancelAwaitInput("Canceled") -- Cancel
         end
     end)
-    return handler
+
+    ---------------------------------------------------------
+    --- CONTROLLER Buttons
+    ---------------------------------------------------------
+    
+    local controllerHandler = Ext.Events.ControllerButtonInput:Subscribe(function (e)
+        local enteredTargeting
+        local collapsed
+        if not e.Button == "LeftStick" then -- Only allow "LeftStick" click to enable targeting  - TODO check PS5 Controller
+            e:PreventAction()
+        end
+
+        if e.Button == "LeftStick" and e.Pressed == true then
+            enteredTargeting = true
+            -- collapsed = self:ToggleCollapseWindow(true)
+        elseif e.Button == "A" and e.Pressed == true then -- Only check this if
+            if getMouseover() and getMouseover().UIEntity then -- In case a UI entity has been found
+                mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid
+                if reason == "NewScene" then
+                    self:InputRecieved(mouseoverTarget)
+                end
+            end
+        end
+        
+        if enteredTargeting then
+            if e.Button == "A" and e.Pressed == true then
+                if getMouseover() and getMouseover().Inner then
+                    mouseoverPosition = getMouseover().Inner.Position
+                    if reason == "MoveScene" then
+                        self:InputRecieved(mouseoverPosition)
+                        self:CancelAwaitInput()
+                    elseif reason == "RotateScene" then
+                        self:InputRecieved(mouseoverPosition)
+                        self:CancelAwaitInput()
+                    end
+                    if getMouseover().Inner.Inner[1] then
+                        if getMouseover().Inner.Inner[1].Character then
+                            mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid
+                            if reason == "NewScene" then
+                                self:InputRecieved(mouseoverTarget)
+                            end
+                        else
+                            self:CancelAwaitInput("No entity found")
+                            -- self:ToggleCollapseWindow(false)
+                        end
+                    end
+                end
+            end
+        elseif e.Button == "B" and e.Pressed == true then -- Cancel out of targeting
+            self:CancelAwaitInput("Canceled")
+            -- self:ToggleCollapseWindow(false) -- In case it was set to collapse
+        end
+    end)
+
+    ---------------------------------------------------------
+    --- CONTROLLER Axises
+    ---------------------------------------------------------
+
+    local controllerAxisHandler = Ext.Events.ControllerAxisInput:Subscribe(function (e)
+        if e.Axis == "TriggerLeft" or e.Axis == "TriggerRight" then
+            e:PreventAction()
+        end
+    end)
+    return keyHandler, mouseHandler, controllerHandler, controllerAxisHandler
 end
 
-function UI:CancelAwaitInput()
-    Ext.Events.MouseButtonInput:Unsubscribe(self.EventHandler)
+function UI:CancelAwaitInput(reason)
+    local reason = reason or nil
+    if reason then
+        local info = self.SceneTab.InfoText
+        info.Label = reason
+        info.Visible = true
+        Ext.Timer.WaitFor(3000, function()
+            info.Visible = false
+        end)
+    end
+
+    if self.KeyInputHandler then
+        Ext.Events.KeyInput:Unsubscribe(self.KeyInputHandler)
+        self.KeyInputHandler = nil
+    end
+    if self.MouseInputHandler then
+        Ext.Events.MouseButtonInput:Unsubscribe(self.MouseInputHandler)
+        self.MouseInputHandler = nil
+    end
+    if self.ControllerInputHandler then
+        Ext.Events.ControllerButtonInput:Unsubscribe(self.ControllerInputHandler)
+        self.ControllerInputHandler = nil
+    end
+    if self.ControllerAxisHandler then
+        Ext.Events.ControllerButtonInput:Unsubscribe(self.ControllerAxisHandler)
+        self.ControllerAxisHandler = nil
+    end
     self.Await = nil
 end
 
@@ -135,6 +244,26 @@ function UI:InputRecieved(inputPayload)
         UIEvents.MoveScene:SendToServer({ID = USERID, Scene = self.Await.Payload, Position = inputPayload})
     end
     self:CancelAwaitInput()
+end
+
+function UI:ToggleCollapseWindow(toggle)
+    local mcm
+    if self.Window.ParentElement then
+        mcm = true
+    else
+        mcm = false
+    end
+
+    if toggle then
+        if not mcm then
+            self.Window:SetCollapsed(toggle)
+        else
+            if Mods.BG3MCM and Mods.BG3MCM.MCM_WINDOW then
+                Mods.BG3MCM.MCM_WINDOW:SetCollapsed(toggle)
+            end
+        end
+    end
+    return toggle
 end
 
 function UI.DestroyChildren(obj)

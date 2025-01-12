@@ -92,6 +92,7 @@ function UI:SelectedCharacterUpdates(character)
         local entity = Ext.Entity.Get(character.Uuid)
         self.PartyInterface:SetSelectedCharacter(character.Uuid)
         self.AppearanceTab:UpdateStrippingGroup(character.Uuid)
+        -- self.AppearanceTab:UpdateToggleVisibilityGroup(character.Uuid)
         self.AppearanceTab:UpdateEquipmentAreaGroup(character.Uuid)
         self.AppearanceTab:FetchGenitals()
         UIEvents.FetchUserTags:SendToServer({ID = USERID, Character = character.Uuid})
@@ -219,13 +220,26 @@ function PartyInterface:SetSelectedCharacter(characterUuid)
     end
 end
 
-
-
-
-
-
-
-
+-- Only one can be hovered at a time
+function PartyInterface:GetHovered()
+    if UIInstance.PartyInterface.Characters then 
+        _P("1")
+        for _,character in pairs(UIInstance.PartyInterface.Characters) do
+            _P("2")
+            if character.CharacterButton.Statusflags["HoveredRect"] then
+                _P("3")
+                return character
+            end
+        end
+    end
+        if UIInstance.PartyInterface.CurrenNPCs then 
+        for _,npc in pairs(UIInstance.PartyInterface.CurrentNPCs) do
+            if npc.CharacterButton.Statusflags["HoveredRect"] then
+                return npc
+            end
+        end
+    end
+end
 
 function PartyInterface:AddSelectedNPCSection()
     

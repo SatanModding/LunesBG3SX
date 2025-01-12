@@ -26,6 +26,7 @@ function UIEvents:Initialize()
     self.StopSex = Ext.Net.CreateChannel(ModuleUUID, "StopSex")
     self.RequestTeleport = Ext.Net.CreateChannel(ModuleUUID, "RequestTeleport")
     self.RequestRotation = Ext.Net.CreateChannel(ModuleUUID, "RequestRotation")
+    self.TogglePause = Ext.Net.CreateChannel(ModuleUUID, "TogglePause")
     -- Server -> Client
     self.NewScene = Ext.Net.CreateChannel(ModuleUUID, "NewScene")
     self.DestroyAllSceneControls = Ext.Net.CreateChannel(ModuleUUID, "DestroyAllSceneControls")
@@ -36,6 +37,9 @@ function UIEvents:Initialize()
     self.FetchGenitals = Ext.Net.CreateChannel(ModuleUUID, "FetchGenitals")
     self.SetActiveGenital = Ext.Net.CreateChannel(ModuleUUID, "SetActiveGenital")
     self.SetInactiveGenital = Ext.Net.CreateChannel(ModuleUUID, "SetInactiveGenital")
+    self.SetupInvisUserVars = Ext.Net.CreateChannel(ModuleUUID, "SetupInvisUserVars")
+    self.ToggleInvisibility = Ext.Net.CreateChannel(ModuleUUID, "ToggleInvisibility")
+    self.SetInvisible = Ext.Net.CreateChannel(ModuleUUID, "SetInvisible")
         -- Server -> Client
     self.SendGenitals = Ext.Net.CreateChannel(ModuleUUID, "SendGenitals")
 

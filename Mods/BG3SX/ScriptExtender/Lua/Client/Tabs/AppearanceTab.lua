@@ -48,6 +48,39 @@ function AppearanceTab:UpdateStrippingGroup(uuid)
     end
 end
 
+function AppearanceTab:UpdateToggleVisibilityGroup(uuid)
+    UI.DestroyChildren(self.ToggleVisibilityArea)
+
+    local entity = Ext.Entity.Get(uuid)
+    local isInvis = SexUserVars.IsInvisible(entity)
+
+    self.IsInvisBox = self.ToggleVisibilityArea:AddCheckbox("Toggle Invisibility")
+    
+    if (self.IsInvisBox == false) then
+
+        self.IsInvisBox.Checked = false
+    else
+        self.IsInvisBox.Checked = true
+    end
+
+    self.IsInvisBox.OnChange = function()
+        if self.IsInvisBox.Checked == true then
+            self.IsInvisBox.Checked = false
+            UIEvents.ToggleInvisibility:SendToServer({Uuid = uuid, Value = true})
+        else
+            self.IsInvisBox.Checked = true
+            UIEvents.ToggleInvisibility:SendToServer({Uuid = uuid, Value = false})
+        end
+    end
+end
+
+UIEvents.SetInvisible:SetHandler(function (payload)
+    if UIInstance:GetSelectedCharacter() == payload.Uuid then
+        UIInstance.AppearanceTab.IsInvisBox.Checked = payload.Value
+    end
+end)
+
+
 function AppearanceTab:UpdateEquipmentAreaGroup(uuid)
 
     UI.DestroyChildren(self.EquipmentArea)
@@ -87,6 +120,11 @@ function AppearanceTab:Initialize()
     if not self.StrippingArea then
         self.StrippingArea = self.Tab:AddGroup("")
     end
+
+    -- if not self.ToggleVisibilityArea then
+    --     self.ToggleVisibilityArea = self.Tab:AddGroup("")
+    --     self.ToggleVisibilityArea.SameLine = true
+    -- end
 
     -- self.Tab:AddSeparatorText("Equipment:")
     if not self.EquipmentArea then

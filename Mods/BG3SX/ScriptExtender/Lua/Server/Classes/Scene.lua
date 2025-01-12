@@ -45,6 +45,7 @@ function Scene:new(entities, equipment, armorset, slots)
         equipment       = equipment,
         armorset        = armorset,
         slots           = slots,
+        UnlockedSwaps   = false,
     }, Scene)
 
 
@@ -324,9 +325,9 @@ end
 
 -- Initializes the actor
 ---@param self instance - The scene instance
-initialize = function(self)
-    table.insert(Data.SavedScenes, self)
-    Ext.ModEvents.BG3SX.SceneInit:Throw({self})
+initialize = function(scene)
+    table.insert(Data.SavedScenes, scene)
+    Ext.ModEvents.BG3SX.SceneInit:Throw({scene})
 
     --print("all saved scenes")
     --for _, scene in pairs(Data.SavedScenes) do
@@ -337,20 +338,20 @@ initialize = function(self)
 
     print("initializing scene")
 
-    setStartLocations(self) -- Save start location of each entity to later teleport them back
-    saveCampFlags(self) -- Saves which entities had campflags applied before
-    self:ToggleSummonVisibility() -- Toggles summon visibility and collision - on Scene:Destroy() it also teleports them back to start location
+    setStartLocations(scene) -- Save start location of each entity to later teleport them back
+    saveCampFlags(scene) -- Saves which entities had campflags applied before
+    scene:ToggleSummonVisibility() -- Toggles summon visibility and collision - on Scene:Destroy() it also teleports them back to start location
 
 
     -- We do this before in a seperate loop to already apply this to all entities before actors are spawned one by one
-    for _, character in pairs(self.entities) do
+    for _, character in pairs(scene.entities) do
         Osi.AddBoosts(character, "ActionResourceBlock(Movement)", "", "") -- Blocks movement
         Osi.SetDetached(character, 1)              -- Make entity untargetable
         Osi.DetachFromPartyGroup(character)        -- Detach from party to stop party members from following
         --self:DetachSummons(entity) -- TODO: Add something to handle summon/follower movement here
         -- Osi.SetVisible(entity, 0)               -- 0 = Invisible
         Entity:ToggleWalkThrough(character)        -- To prevent interactions with other entities even while invisible and untargetable
-        self:ToggleCampFlags(character)            -- Toggles camp flags so companions don't return to tents
+        scene:ToggleCampFlags(character)            -- Toggles camp flags so companions don't return to tents
     
         --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Body"])
         --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Face"])
@@ -363,9 +364,9 @@ initialize = function(self)
         -- TODO - why do we wait?
         Ext.Timer.WaitFor(200, function ()
             print("requesting teleport")
-            for _, character in pairs(self.entities) do
-                UIEvents.RequestTeleport:Broadcast({character= character, target = self.entities[1]})
-                UIEvents.RequestRotation:Broadcast({character = character, target = self.entities[1]})
+            for _, character in pairs(scene.entities) do
+                UIEvents.RequestTeleport:Broadcast({character= character, target = scene.entities[1]})
+                UIEvents.RequestRotation:Broadcast({character = character, target = scene.entities[1]})
             end
         end)
         
@@ -383,8 +384,19 @@ initialize = function(self)
     --     self:ScaleEntity(entity) -- After creating the actor to not create one with a smaller scale
     -- end
 
-    UIEvents.NewScene:Broadcast(self)
-    Ext.ModEvents.BG3SX.SceneCreated:Throw({self})
+    if scene.SceneType == "MasturbateMale" or scene.SceneType == "MasturbateFemale" then
+    elseif scene.SceneType == "Straight" then -- Handle this in a different way to enable actor swapping even for straight animations
+        
+        -- In case of actor1 not being male, swap them around to still assign correct animations initially
+        if not Entity:HasPenis(scene.entities[1]) then
+            local savedActor = scene.entities[1]
+            scene.entities[1] = scene.entities[2]
+            scene.entities[2] = savedActor
+        end
+    end
+
+    UIEvents.NewScene:Broadcast(scene)
+    Ext.ModEvents.BG3SX.SceneCreated:Throw({scene})
 end
 
 
@@ -451,6 +463,50 @@ function Scene:RotateScene(location)
     --Sex:PlayAnimation(character, self.currentAnimation) -- Play prior animation again
 end
 
+function Scene:StopAnimation()
+    for _, char in pairs (self.entities) do
+        Osi.StopAnimation(char,1)
+    end
+end
+
+function Scene:TogglePause()
+    if not self.Paused then
+        for _,character in pairs(self.entities) do
+            Osi.PlayLoopingAnimation(character, "", "", "", "", "", "", "")
+            -- Osi.PlayAnimation(character, "379d4f19-68df-61be-a802-9db20f5aa872", "") -- This animation bank id apparently pauses the animation
+        end
+        self.Paused = true
+    elseif self.Paused == true then
+        self:PlayAnimation(self.currentAnimation)
+    end
+end
+
+function Scene:PlayAnimation(animationData)
+    local animDataParent = Data.GetAnimDataParent(animationData)
+    -- Debug.DumpS(animDataParent)
+    if animDataParent then
+        for _, char in pairs (self.entities) do
+            Animation:New(char, animDataParent[animationData.Mod][animationData.Name])
+
+            -- Only play sound if is enabled for a given animation entry
+            if animDataParent[animationData.Mod][animationData.Name].Sound == true then
+                Sound:New(char, animDataParent[animationData.Mod][animationData.Name])
+            end
+        end
+
+        self.Paused = false
+
+        -- Prop handling
+        if animationData ~= self.currentAnimation then
+            -- If animation is not the same as before save the new animationData table to the scene to use for prop management, teleporting or rotating
+            self.currentAnimation = animationData
+            self:DestroyProps() -- Props rely on scene.currentAnimation
+            self:CreateProps()
+        end
+        self.currentAnimation = animDataParent[animationData.Mod][animationData.Name]
+    end
+end
+
 ----------------------------------------------------------------------------------------------------
 -- 
 -- 										Scene Stop
@@ -482,8 +538,8 @@ local function sceneEntityReset(character)
 
     -- Getting old position
 
-    print("all startLoctions")
-    _D(scene.startLocations)
+    -- print("all startLoctions")
+    -- _D(scene.startLocations)
 
     for _, entry in ipairs(scene.startLocations) do
         if entry.entity == character then
@@ -517,6 +573,7 @@ function Scene:Destroy()
     
     
     
+    -- self:StopAnimation() -- maybe use this new function instead of playing a "nothing" animation
     for _, entity in pairs(self.entities) do
         
         
@@ -560,17 +617,20 @@ ConsoleCommand.New("DestroyAllScenes", Scene.DestroyAllScenes, "Destroys all ong
 
 
 function Scene:SwapPosition()
+    if self.UnlockedSwaps then
+        local savedActor = self.entities[1]
 
-    local savedActor = self.entities[1]
+        Ext.ModEvents.BG3SX.SceneSwitchPlacesBefore:Throw({self.entities})
 
-    Ext.ModEvents.BG3SX.SceneSwitchPlacesBefore:Throw({self.entities})
+        
+        self.entities[1] = self.entities[2]
+        self.entities[2] = savedActor
 
-    self.entities[1] = self.entities[2]
-    self.entities[2] = savedActor
+        Ext.ModEvents.BG3SX.SceneSwitchPlacesAfter:Throw({self.entities})
 
-    Ext.ModEvents.BG3SX.SceneSwitchPlacesAfter:Throw({self.entities})
+        self:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
 
-    self:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
-    Sex:PlayAnimation(savedActor, self.currentAnimation)
-
+        self:PlayAnimation(self.currentAnimation)
+        -- Sex:PlayAnimation(savedActor, self.currentAnimation)
+    end
 end

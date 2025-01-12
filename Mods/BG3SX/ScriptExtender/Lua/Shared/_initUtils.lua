@@ -1,5 +1,6 @@
 Ext.Require("Shared/Utils/ConsoleCommands.lua")
 Ext.Require("Shared/Utils/UIEvents.lua")
+Ext.Require("Shared/SexUserVars.lua")
 
 
 -- Initialize NOsi

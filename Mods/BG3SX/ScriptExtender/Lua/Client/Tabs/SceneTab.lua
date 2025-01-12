@@ -40,7 +40,7 @@ function SceneTab:RefreshAvailableAnimations(targetSceneControl, animationTable)
 end
 
 function SceneTab:CreateNewSceneArea()
-    self.NoSceneText = self.Tab:AddText("No active scenes, create one by:\n1. Select a character in the UI.\n2. Click the BG3SX button.\n3. Select a character of your choice to start a scene with")
+    self.NoSceneText = self.Tab:AddText("No active scenes, create one by:\n1. Select a character in the UI.\n2. Click the BG3SX button.\n3. Select a character of your choice to start a scene with\n(In open world or UI)")
 
     self.SFWSceneButton = self.Tab:AddImageButton("Create SFW Scene", "Action_Song_BardDance", {100,100})
     self.SFWSceneButton:Tooltip():AddText("Create SFW Scene")
@@ -55,6 +55,12 @@ function SceneTab:CreateNewSceneArea()
         self:AwaitNewScene()
     end
     -- self.NSFWSceneButton.SameLine = true
+
+    self.ControlsText = self.Tab:AddText("Mouse:\nLeft click | Right click to cancel\nController:\nLeft stick to start targeting + X | B to cancel")
+    self.ControlsText.SameLine = true
+
+    self.InfoText = self.Tab:AddText("")
+    self.InfoText.Visible = false
 end
 
 function SceneTab:AwaitNewScene()
@@ -62,14 +68,14 @@ function SceneTab:AwaitNewScene()
 end
 
 function SceneTab:UpdateNoSceneText()
-    print("updating")
+    -- print("updating")
     local stillOneActive
-    print("elf.ActiveSceneControls? " ,self.ActiveSceneControls )
+    -- print("elf.ActiveSceneControls? " ,self.ActiveSceneControls )
     if self.ActiveSceneControls then
-        print("size of active scene ", #self.ActiveSceneControls)
+        -- print("size of active scene ", #self.ActiveSceneControls)
         for _,sceneControl in pairs(self.ActiveSceneControls) do
             if sceneControl.Reference then
-                print("Reference still exists ")
+                -- print("Reference still exists ")
                 stillOneActive = true
             end
         end
