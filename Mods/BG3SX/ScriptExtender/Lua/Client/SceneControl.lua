@@ -622,3 +622,40 @@ function SceneControl:AddAnimationPicker()
 
     Debug.USEPREFIX = debugbefore
 end
+
+function SceneControl:AddMoveControl()
+    self.Transform = {}
+    self.Transform.Transform = {}
+    self.Transform.Rotation = {}
+    
+    local sliderX = parent:AddSlider("Forward/Back", 0, -100, 100)
+    Style.Sliders.SliderDefault(sliderX)
+    sliderX.OnChange = function(value)
+        local currentValue = tonumber(value.Value[1])
+        if currentValue and currentValue ~= 0 then
+            MainPostToServer.MoveCharacter(0, 0, currentValue * 0.001)
+            sliderX.Value = {0, 0, 0, 0}
+        end
+    end
+
+    local sliderY = parent:AddSlider("Left/Right", 0, -100, 100)
+    Style.Sliders.SliderDefault(sliderY)
+    sliderY.OnChange = function(value)
+        local currentValue = tonumber(value.Value[1])
+        if currentValue and currentValue ~= 0 then
+            MainPostToServer.MoveCharacter(currentValue * 0.001, 0, 0)
+            sliderY.Value = {0, 0, 0, 0}
+        end
+    end
+
+    local sliderZ = parent:AddSlider("Up/Down", 0, -100, 100)
+    Style.Sliders.SliderDefault(sliderZ)
+    sliderZ.OnChange = function(value)
+        local currentValue = tonumber(value.Value[1])
+        if currentValue and currentValue ~= 0 then
+            MainPostToServer.MoveCharacter(0, currentValue * 0.001, 0)
+            sliderZ.Value = {0, 0, 0, 0}
+        end
+    end
+
+end

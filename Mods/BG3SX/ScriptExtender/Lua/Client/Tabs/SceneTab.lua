@@ -56,7 +56,7 @@ function SceneTab:CreateNewSceneArea()
     end
     -- self.NSFWSceneButton.SameLine = true
 
-    self.ControlsText = self.Tab:AddText("Mouse:\nLeft click | Right click to cancel\nController:\nLeft stick to start targeting + X | B to cancel")
+    self.ControlsText = self.Tab:AddText("Mouse:\nLeft click | Right click to cancel\nController:\nLeft stick to start targeting + A | B to cancel")
     self.ControlsText.SameLine = true
 
     self.InfoText = self.Tab:AddText("")
