@@ -75,7 +75,7 @@ function WhitelistTab:UpdateUserTags(tags)
                 allowedStatus.OnChange = function()
                     allowedStatus.Checked = false
                 end
-                if self.GetReason(tag) then
+                if self:GetReason(tag) then
                     local tooltip = allowedStatus:Tooltip()
                     local tooltipText = tooltip:AddText(self:GetReason(tag))
                 end

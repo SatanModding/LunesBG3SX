@@ -73,7 +73,6 @@ function UIEvents:Initialize()
     self.FetchWhitelistedNPCs = Ext.Net.CreateChannel(ModuleUUID,"FetchWhitelistedNPCs")
     --  Server -> Client
     self.SendWhitelistedNPCs = Ext.Net.CreateChannel(ModuleUUID, "SendWhitelistedNPCs")
-    
 
     self.CustomEvent = Ext.Net.CreateChannel(ModuleUUID, "CustomEvent")
 

@@ -110,6 +110,55 @@ function Helper.StringsContainOne(str1, str2)
     return Helper.StringContains(str1, str2) or Helper.StringContains(str2, str1)
 end
 
+--- @param e EntityHandle
+function Helper.GetEntityName(e)
+    if e == nil then return nil end
+    if Ext.Types.GetValueType(e) ~= "Entity" then return nil end
+
+    if e.CustomName ~= nil then
+        return e.CustomName.Name
+    elseif e.DisplayName ~= nil then
+        return Ext.Loca.GetTranslatedString(e.DisplayName.NameKey.Handle.Handle)
+    elseif e:HasRawComponent("ls::TerrainObject") then
+        return "Terrain"
+    elseif e.GameObjectVisual ~= nil then
+        return Ext.Template.GetTemplate(e.GameObjectVisual.RootTemplateId).Name
+    elseif e.TLPreviewDummy ~= nil then
+        return ("TLPreviewDummy:%s"):format(e.TLPreviewDummy.Name == "DUM_" and e.Uuid and e.TLPreviewDummy.Name..e.Uuid.EntityUuid or e.TLPreviewDummy.Name)
+    elseif e.Visual ~= nil and e.Visual.Visual ~= nil and e.Visual.Visual.VisualResource ~= nil then
+        local name = ""
+        if e:HasRawComponent("ecl::Scenery") then
+            name = name .. "(Scenery)"
+        end
+        local visName = "Unknown"
+        -- Jank to get last part
+        for part in string.gmatch(e.Visual.Visual.VisualResource.Template, "[a-zA-Z0-9_.]+") do
+            visName = part
+        end
+        return name..visName
+    elseif e.SpellCastState ~= nil then
+        return "Spell Cast " .. e.SpellCastState.SpellId.Prototype
+    elseif e.ProgressionMeta ~= nil then
+        --- @type ResourceProgression
+        local progression = Ext.StaticData.Get(e.ProgressionMeta.Progression, "Progression")
+        return "Progression " .. progression.Name
+    elseif e.BoostInfo ~= nil then
+        return "Boost " .. e.BoostInfo.Params.Boost
+    elseif e.StatusID ~= nil then
+        return "Status " .. e.StatusID.ID
+    elseif e.Passive ~= nil then
+        return "Passive " .. e.Passive.PassiveId
+    elseif e.InterruptData ~= nil then
+        return "Interrupt " .. e.InterruptData.Interrupt
+    elseif e.InventoryIsOwned ~= nil then
+        return "Inventory of " .. GetEntityName(e.InventoryIsOwned.Owner)
+    elseif e.Uuid ~= nil then
+        return e.Uuid.EntityUuid
+    else
+        return NameGen:GenerateOrGet(e)
+    end
+end
+
 
 function Helper.ResetWhitelistToDefault()
 end

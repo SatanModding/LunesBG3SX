@@ -61,16 +61,16 @@ end)
 UIEvents.SendGenitals:SetHandler(function (payload)
     -- Debug.Print("SendGenitals recieved on client, updating Genital tab for")
     local genitals = payload.Data
-
+    local whitelisted = payload.Whitelisted
 
    -- Ext.Timer.WaitFor(2000, function()
 
     local tab = UIInstance.AppearanceTab
     tab.Genitals = genitals
-    tab:UpdateGenitalGroup()
+
+    tab:UpdateGenitalGroup(whitelisted)
 
     --end)
-
 end)
 
 UIEvents.SendUserTags:SetHandler(function (payload)

@@ -97,4 +97,34 @@ Ext.Events.NetMessage:Subscribe(function(e)
 end)
 
 
+Ext.Osiris.RegisterListener("ObjectTransformed", 2, "after", function(object, toTemplate)
+    Debug.Print("ObjectTransformed -> SendGenitals for character ".. object)
+    local conts = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
+    if conts ~= nil then
+        for k, v in pairs(conts) do
+            UIEvents.SendGenitals:SendToClient({ID = nil, Data = Data.CreateUIGenitalPayload(object)}, v.UserReservedFor.UserID)
+        end
+    end
+end)
 
+Ext.Osiris.RegisterListener("ShapeshiftChanged", 4, "after", function(character, race, gender, shapeshiftStatus)
+    Debug.Print("ShapeshiftChanged -> SendGenitals for character ".. character)
+    local conts = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
+    if conts ~= nil then
+        for k, v in pairs(conts) do
+            UIEvents.SendGenitals:SendToClient({ID = nil, Data = Data.CreateUIGenitalPayload(character)}, v.UserReservedFor.UserID)
+        end
+    end
+end)
+
+Ext.Osiris.RegisterListener("TemplateUseFinished", 4, "before", function(character, itemTemplate, _, _)
+    if (itemTemplate == "UNI_MagicMirror_72ae7a39-d0ce-4cb6-8d74-ebdf7cdccf91") then
+        Debug.Print("TemplateUseFinished -> SendGenitals for character ".. character)
+        local conts = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
+        if conts ~= nil then
+            for k, v in pairs(conts) do
+                UIEvents.SendGenitals:SendToClient({ID = nil, Data = Data.CreateUIGenitalPayload(character)}, v.UserReservedFor.UserID)
+            end
+        end
+    end
+end)

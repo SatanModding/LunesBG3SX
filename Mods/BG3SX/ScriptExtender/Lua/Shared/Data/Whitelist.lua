@@ -810,7 +810,7 @@ Data.WhitelistedEntities = {
     --#region NPC's
     -- "0133f2ad-e121-4590-b5f0-a79413919805", -- Bone Daddy - Broken Model, no fitting Genital, Rig doesn't accept the animations
     "bc4b5efc-cbd3-4f8f-a31e-d37f801a038c", -- Ketheric
-    "bf24e0ec-a3a6-4905-bd2d-45dc8edf8101", -- Orin
+    "bf24e0ec-a3a6-4905-bd2d-45dc8edf8101", -- Orin -- No fitting Genital IIRC (miscolored)
     "491a7686-3081-405b-983c-289ec8781e0a", -- Mizora
     "6c55edb0-901b-4ba4-b9e8-3475a8392d9b", -- Dame Aylin
     "2f1880e6-1297-4ca3-a79c-9fabc7f179d3", -- Cazador
@@ -1082,6 +1082,60 @@ function Entity:HasTags(uuid)
     end
 end
 
+function Entity.CheckVisualAndTemplate(uuid)
+    local entity = Ext.Entity.Get(uuid)
+    if entity then
+        if entity.Visual and entity.Visual.Visual and entity.Visual.Visual.VisualResource and entity.Visual.Visual.VisualResource.Guid then
+            local visualID = entity.Visual.Visual.VisualResource.Guid
+            local resource = Ext.Resource.Get(visualID, "Visual")
+            if Helper.StringContains(resource.Name, "_CHD_") then
+                return true
+            else
+                return false
+            end
+        else
+            local function recursiveVisualResourceFind(templateID)
+                local template = Ext.Template.GetTemplate(templateID)
+                if template and template.Name then
+                    if Helper.StringContains(template.Name, "Child") then
+                        -- _P("Found Child")
+                        return true
+                    elseif template.Name == "BASE_Biped" then
+                        _P("Found BASE_Biped")
+                        return false
+                    else
+                        if template and template.ParentTemplateId then
+                            if recursiveVisualResourceFind(template.ParentTemplateId) then
+                                return true
+                            else
+                                return false
+                            end
+                        end
+                    end
+                    if template and template.ParentTemplateId then
+                        if recursiveVisualResourceFind(template.ParentTemplateId) then
+                            return true
+                        else
+                            return false
+                        end
+                    end
+                end
+            end
+            local rootTemplateID
+            if entity.GameObjectVisual and entity.GameObjectVisual.RootTemplateId then
+                if recursiveVisualResourceFind(entity.GameObjectVisual.RootTemplateId) then
+                    return true
+                else
+                    return false
+                end
+            end
+            return false
+        end
+    else
+        return false
+    end
+end
+
 function Entity.GetClassTags(uuid)
     local entity = Ext.Entity.Get(uuid)
     local combinedTags = {}
@@ -1125,6 +1179,9 @@ end
 --- @param uuid any - The UUID of the entity to check.
 --- @return boolean - Returns true if the entity is allowed, false otherwise.
 function Entity:IsWhitelisted(uuid, debug)
+    if Entity.CheckVisualAndTemplate(uuid) then
+        return false -- If true, return false as "Is not Whitelisted"
+    end
     local classTags = Entity.GetClassTags(uuid)
     whitelistTags(Data.ClassTags, classTags) -- To fill the Data.ClassTags table with custom classes automatically
 

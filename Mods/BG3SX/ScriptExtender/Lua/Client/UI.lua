@@ -236,7 +236,7 @@ end
 function UI:InputRecieved(inputPayload)
     local reason = self.Await.Reason
     if reason == "NewScene" then
-        _P("Ask for sex received. Caster: ", _C().Uuid.EntityUuid, " target = ", inputPayload)
+        _P("Ask for sex request. Caster: ", _C().Uuid.EntityUuid, " target = ", inputPayload)
         UIEvents.AskForSex:SendToServer({ID = USERID, Caster = UIInstance.GetSelectedCharacter(), Target = inputPayload})
     elseif reason == "RotateScene" then
         UIEvents.RotateScene:SendToServer({ID = USERID, Scene = self.Await.Payload, Position = inputPayload})

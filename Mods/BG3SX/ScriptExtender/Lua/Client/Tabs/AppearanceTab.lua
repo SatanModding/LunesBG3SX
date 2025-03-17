@@ -145,47 +145,68 @@ function AppearanceTab:FetchGenitals()
     UIEvents.FetchGenitals:SendToServer({ID = USERID, Character = UIInstance.GetSelectedCharacter() or _C().Uuid.EntityUuid})
 end
 
-function AppearanceTab:UpdateGenitalGroup()
+function AppearanceTab:UpdateGenitalGroup(whitelisted)
     UI.DestroyChildren(self.GenitalArea)
     local buttonID = 0
-    for Category,Genitals in pairs(self.Genitals) do
-        local categoryHeader = self.GenitalArea:AddCollapsingHeader(Category)
+    if whitelisted then
+        for Category,Genitals in pairs(self.Genitals) do
+            local categoryHeader = self.GenitalArea:AddCollapsingHeader(Category)
 
-        if Category == "BG3SX_VanillaVulva" then
-            categoryHeader.Label = "Vanilla Vulvas"
-        elseif Category == "BG3SX_VanillaFlaccid" then
-            categoryHeader.Label = "Vanilla Penises"
-        elseif Category == "BG3SX_SimpleErections" then
-            categoryHeader.Label = "MrFunsize's Erections"
-        elseif Category == "BG3SX_OtherGenitals" then
-            categoryHeader.Label = "Modded Genitals"
-        end
-
-        for i,Genital in ipairs(Genitals) do
-            local inactiveGenitalButton = categoryHeader:AddButton("Out of Sex")
-            local activeGenitalButton = categoryHeader:AddButton("During Sex")
-            local genitalChoice = categoryHeader:AddText(Genital.name)
-            genitalChoice.SameLine = true
-            activeGenitalButton.SameLine = true
-
-            if Genital.name == "" then
-                genitalChoice.Label = "No Name"
+            if Category == "BG3SX_VanillaVulva" then
+                categoryHeader.Label = "Vanilla Vulvas"
+            elseif Category == "BG3SX_VanillaFlaccid" then
+                categoryHeader.Label = "Vanilla Penises"
+            elseif Category == "BG3SX_SimpleErections" then
+                categoryHeader.Label = "MrFunsize's Erections"
+            elseif Category == "BG3SX_OtherGenitals" then
+                categoryHeader.Label = "Modded Genitals"
             end
 
-            buttonID = buttonID + 1
-            activeGenitalButton.IDContext = buttonID
-            buttonID = buttonID + 1
-            inactiveGenitalButton.IDContext = buttonID
+            local genitalTable = categoryHeader:AddTable("",3)
+            local currentRow = genitalTable:AddRow()
+            for i,Genital in ipairs(Genitals) do
+                if i % 3 == 0 then
+                    currentRow = genitalTable:AddRow()
+                end
+                local cell = currentRow:AddCell()
+                local popup = cell:AddPopup("GenitalChoice")
+                local genitalSelectable = cell:AddSelectable(Genital.name)
+                -- local genitalButton = categoryHeader:AddButton(Genital.name)
+                genitalSelectable.OnClick = function()
+                    genitalSelectable.Selected = false
+                    popup:Open()
+                end
+                local inactiveGenital = popup:AddSelectable("Out of Sex")
+                local activeGenital = popup:AddSelectable("During Sex")
 
-            activeGenitalButton.OnClick = function()
-                local uuid = UIInstance.GetSelectedCharacter()
-                print("current character accordin to the label is ", uuid)
-                UIEvents.SetActiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance.GetSelectedCharacter()})
-            end
-            inactiveGenitalButton.OnClick = function()
-                local uuid = UIInstance.GetSelectedCharacter()
-                print("current character accordin to the label is ", uuid)
-                UIEvents.SetInactiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance.GetSelectedCharacter()})
+                -- local inactiveGenitalButton = categoryHeader:AddButton("Out of Sex")
+                -- local activeGenitalButton = categoryHeader:AddButton("During Sex")
+                -- local genitalChoice = categoryHeader:AddText(Genital.name)
+                -- genitalChoice.SameLine = true
+                -- activeGenitalButton.SameLine = true
+
+                if Genital.name == "" then
+                    genitalSelectable.Label = "No Name"
+                    -- genitalChoice.Label = "No Name"
+                end
+
+                buttonID = buttonID + 1
+                activeGenital.IDContext = buttonID
+                buttonID = buttonID + 1
+                inactiveGenital.IDContext = buttonID
+
+                activeGenital.OnClick = function()
+                    activeGenital.Selected = false
+                    local uuid = UIInstance.GetSelectedCharacter()
+                    print("current character accordin to the label is ", uuid)
+                    UIEvents.SetActiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance.GetSelectedCharacter()})
+                end
+                inactiveGenital.OnClick = function()
+                    activeGenital.Selected = false
+                    local uuid = UIInstance.GetSelectedCharacter()
+                    print("current character accordin to the label is ", uuid)
+                    UIEvents.SetInactiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance.GetSelectedCharacter()})
+                end
             end
         end
     end

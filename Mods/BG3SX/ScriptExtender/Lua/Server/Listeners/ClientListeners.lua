@@ -92,7 +92,7 @@ UIEvents.FetchGenitals:SetHandler(function (payload)
     if conts ~= nil then
         for k, v in pairs(conts) do
             --print("sending payload to ", v.UserReservedFor.UserID)
-            UIEvents.SendGenitals:SendToClient({ID = payload.ID, Data = Data.CreateUIGenitalPayload(payload.Character)}, v.UserReservedFor.UserID)
+            UIEvents.SendGenitals:SendToClient({ID = payload.ID, Data = Data.CreateUIGenitalPayload(payload.Character), Whitelisted = Entity:IsWhitelisted(payload.Character)}, v.UserReservedFor.UserID)
         end
     end
 end)
