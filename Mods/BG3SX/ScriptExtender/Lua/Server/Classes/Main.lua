@@ -44,6 +44,7 @@ function OnSessionLoaded()
 	Ext.Osiris.RegisterListener("DB_PartOfTheTeam", 1, "afterDelete", function (character)
         initializeParty()
         local party = Osi.DB_PartyMembers:Get(nil)
+        Debug.Print("DB_PartOfTheTeam send")
         UIEvents.SendParty:Broadcast(party)
     end)
 
@@ -55,6 +56,7 @@ function OnSessionLoaded()
         end
 
         local party = Osi.DB_PartyMembers:Get(nil)
+        Debug.Print("CharacterJoinedParty send")
         UIEvents.SendParty:Broadcast(party) -- Update PartyInterface
     end)
 
@@ -62,6 +64,7 @@ function OnSessionLoaded()
     Ext.Osiris.RegisterListener("CharacterLeftParty", 1, "after", function(character)
     
         local party = Osi.DB_PartyMembers:Get(nil)
+        Debug.Print("CharacterLeftParty send")
         UIEvents.SendParty:Broadcast(party) -- Update PartyInterface
     end)
 
@@ -72,6 +75,17 @@ end
 
 -- Subscribes to the SessionLoaded event and executes our OnSessionLoaded function
 Ext.Events.SessionLoaded:Subscribe(OnSessionLoaded)
+
+local function afterResetPartySync()
+    initializeParty()
+    local party = Osi.DB_PartyMembers:Get(nil)
+    Debug.Print("afterResetPartySync send")
+    UIEvents.SendParty:Broadcast(party) -- Update PartyInterface
+end
+
+-- Ext.Events.ResetCompleted:Subscribe(function(e)
+--     afterResetPartySync()
+-- end)
 
 -- Makes it so the game never saves with an active scene to avoid errors/crashes
 Ext.Events.GameStateChanged:Subscribe(function(e)

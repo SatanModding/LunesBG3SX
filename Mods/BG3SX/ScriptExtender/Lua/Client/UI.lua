@@ -46,6 +46,10 @@ end
 
 
 function UI:Initialize()
+    local idtestbutton = self.Window:AddButton("ID Test")
+    idtestbutton.OnClick = function()
+        _P(USERID)
+    end
     self.PartyInterface = self:NewPartyInterface()
     self.PartyInterface:Initialize()
     -- PartyTable on top of Tabs so we can make everything Character specific depending on which one is selected

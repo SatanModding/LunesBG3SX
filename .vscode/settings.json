@@ -3,6 +3,7 @@
     "bg3ModHelper.packingPriority": 0,
     "bg3ModHelper.modName": "BG3SX",
     "Lua.diagnostics.globals": [
-        "Ext"
+        "Ext",
+        "Osi"
     ]
 }

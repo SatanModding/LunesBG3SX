@@ -28,7 +28,7 @@ UIEvents.GenitalsLoaded:SetHandler(function (payload)
 end)
 
 UIEvents.SendParty:SetHandler(function (payload)
-    -- print("client received SendParty message for id ", _C().UserReservedFor.UserID)
+    print("client received SendParty message for id ", _C().UserReservedFor.UserID)
     
     local party = payload
     UIInstance.PartyInterface.Party = party
