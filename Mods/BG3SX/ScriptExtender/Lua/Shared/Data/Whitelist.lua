@@ -898,17 +898,19 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
         tags = Entity:TryGetEntityValue(uuid, nil, {"Tag", "Tags",})
     end
     local quickTagCheck = Entity:TryGetEntityValue(uuid, nil, {"Tag", "Tags"})
-    for _,quickTag in pairs(quickTagCheck) do
-        if quickTag == Data.AllowedTagsAndRaces["KID"].TAG or quickTag == Data.AllowedTagsAndRaces["GOBLIN_KID"].TAG then
-            -- sometimes Whitelisted check is used internally to filter lists. We dont want to show messages in that case
-            if debug then
-                local msg = "[BG3SX][Whitelist.lua]\nCheck failed on:\n" .. uuid .. "\nFound disallowed tag with UUID:\n" .. quickTag .. "\nReason: 69"
-                _P(msg)
-                Ext.Loca.UpdateTranslatedString(popuphandle, msg)
-                --print("Opening messagebox")
-                Osi.OpenMessageBox(Osi.GetHostCharacter(), popupkey)
+    if quickTagCheck and #quickTagCheck > 0 then
+        for _,quickTag in pairs(quickTagCheck) do
+            if quickTag == Data.AllowedTagsAndRaces["KID"].TAG or quickTag == Data.AllowedTagsAndRaces["GOBLIN_KID"].TAG then
+                -- sometimes Whitelisted check is used internally to filter lists. We dont want to show messages in that case
+                if debug then
+                    local msg = "[BG3SX][Whitelist.lua]\nCheck failed on:\n" .. uuid .. "\nFound disallowed tag with UUID:\n" .. quickTag .. "\nReason: 69"
+                    _P(msg)
+                    Ext.Loca.UpdateTranslatedString(popuphandle, msg)
+                    --print("Opening messagebox")
+                    Osi.OpenMessageBox(Osi.GetHostCharacter(), popupkey)
+                end
+                return false
             end
-            return false
         end
     end
 

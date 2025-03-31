@@ -1,85 +1,91 @@
---Event Creation
-function UIEvents:Initialize()
-    -- Party
-    -- Client -> Server
-    self.SetSelectedCharacter = Ext.Net.CreateChannel(ModuleUUID, "SetSelectedCharacter")
-    self.FetchParty = Ext.Net.CreateChannel(ModuleUUID, "FetchParty")
-    -- Server -> Client
-    self.SendParty = Ext.Net.CreateChannel(ModuleUUID, "SendParty")
-
-    -- General
-    -- Client -> Server
-    self.ChangeCharacter = Ext.Net.CreateChannel(ModuleUUID, "ChangeCharacter")
-    self.FetchScenes = Ext.Net.CreateChannel(ModuleUUID, "FetchScenes")
-    -- Server -> Client
-    self.SendScenes = Ext.Net.CreateChannel(ModuleUUID, "SendScenes")
-    self.UpdateScenes = Ext.Net.CreateChannel(ModuleUUID, "UpdateScenes")
-
-    -- Scene specific
-    -- Client -> Server
-    self.AskForSex = Ext.Net.CreateChannel(ModuleUUID, "AskForSex")
-    self.ChangeAnimation = Ext.Net.CreateChannel(ModuleUUID, "ChangeAnimation")
-    self.SwapPosition = Ext.Net.CreateChannel(ModuleUUID, "SwapPosition")
-    self.RotateScene = Ext.Net.CreateChannel(ModuleUUID, "RotateScene")
-    self.ChangeCameraHeight = Ext.Net.CreateChannel(ModuleUUID, "ChangeCameraHeight")
-    self.MoveScene = Ext.Net.CreateChannel(ModuleUUID, "MoveScene")
-    self.StopSex = Ext.Net.CreateChannel(ModuleUUID, "StopSex")
-    self.RequestTeleport = Ext.Net.CreateChannel(ModuleUUID, "RequestTeleport")
-    self.RequestRotation = Ext.Net.CreateChannel(ModuleUUID, "RequestRotation")
-    self.TogglePause = Ext.Net.CreateChannel(ModuleUUID, "TogglePause")
-    -- Server -> Client
-    self.NewScene = Ext.Net.CreateChannel(ModuleUUID, "NewScene")
-    self.DestroyAllSceneControls = Ext.Net.CreateChannel(ModuleUUID, "DestroyAllSceneControls")
-
-
-    -- Genitals
-    -- Client -> Server
-    self.FetchGenitals = Ext.Net.CreateChannel(ModuleUUID, "FetchGenitals")
-    self.SetActiveGenital = Ext.Net.CreateChannel(ModuleUUID, "SetActiveGenital")
-    self.SetInactiveGenital = Ext.Net.CreateChannel(ModuleUUID, "SetInactiveGenital")
-    self.SetupInvisUserVars = Ext.Net.CreateChannel(ModuleUUID, "SetupInvisUserVars")
-    self.ToggleInvisibility = Ext.Net.CreateChannel(ModuleUUID, "ToggleInvisibility")
-    self.SetInvisible = Ext.Net.CreateChannel(ModuleUUID, "SetInvisible")
-        -- Server -> Client
-    self.SendGenitals = Ext.Net.CreateChannel(ModuleUUID, "SendGenitals")
-
-    -- Settings
-    -- Client -> Server
-    self.FetchAnimations = Ext.Net.CreateChannel(ModuleUUID, "FetchAnimations")
-    self.FetchAllAnimations = Ext.Net.CreateChannel(ModuleUUID, "FetchAllAnimations")
-    self.FetchFilteredAnimations = Ext.Net.CreateChannel(ModuleUUID, "FetchFilteredAnimations")
-    --self.AutoErectionsOn = Ext.Net.CreateChannel(ModuleUUID, "AutoErectionsOn")
-    --self.AutoErectionsOff = Ext.Net.CreateChannel(ModuleUUID, "AutoErectionsOff")
-    -- Server -> Client
-    self.SendAllAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendAllAnimations")
-    self.SendFilteredAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendFilteredAnimations")
-
-    --self.SendAnimations = Ext.Net.CreateChannel(ModuleUUID, "SendAnimations")
-
-    -- Whitelist Tab
-    -- Client -> Server
-    self.FetchUserTags = Ext.Net.CreateChannel(ModuleUUID, "FetchUserTags")
-    self.FetchWhitelist = Ext.Net.CreateChannel(ModuleUUID, "FetchWhitelist")
-    -- Server -> Client
-    self.SendUserTags = Ext.Net.CreateChannel(ModuleUUID, "SendUserTags")
-    self.SendWhitelist = Ext.Net.CreateChannel(ModuleUUID, "SendWhitelist")
-    
-    -- Whitelist Tab
-    -- Client -> Server
-    self.RequestStripNPC = Ext.Net.CreateChannel(ModuleUUID, "RequestStripNPC")
-    self.RequestDressNPC = Ext.Net.CreateChannel(ModuleUUID, "RequestDressNPC")
-    self.RequestGiveGenitalsNPC = Ext.Net.CreateChannel(ModuleUUID, "RequestGiveGenitalsNPC")
-    self.RequestRemoveGenitalsNPC = Ext.Net.CreateChannel(ModuleUUID, "RequestRemoveGenitalsNPC")
-    self.FetchWhitelistedNPCs = Ext.Net.CreateChannel(ModuleUUID,"FetchWhitelistedNPCs")
-    --  Server -> Client
-    self.SendWhitelistedNPCs = Ext.Net.CreateChannel(ModuleUUID, "SendWhitelistedNPCs")
-
-    self.CustomEvent = Ext.Net.CreateChannel(ModuleUUID, "CustomEvent")
-
-    self.GenitalsLoaded = Ext.Net.CreateChannel(ModuleUUID, "GenitalsLoaded")
+---Event Creation
+---@param name string
+function UIEvents:New(name)
+    self[name] = Ext.Net.CreateChannel(ModuleUUID, name)
 end
 
-UIEvents:Initialize()
+UIEvents:New("CustomEvent")
+
+--- Party
+-- Client -> Server
+UIEvents:New("SetSelectedCharacter")
+UIEvents:New("FetchParty")
+-- Server -> Client
+UIEvents:New("SendParty")
+
+--- General
+-- Client -> Server
+UIEvents:New("ChangeCharacter")
+UIEvents:New("FetchScenes")
+UIEvents:New("SendScenes")
+-- Server -> Client
+UIEvents:New("UpdateScenes")
+UIEvents:New("SetSelectedCharacter")
+
+--- Scene specific
+-- Client -> Server
+UIEvents:New("AskForSex")
+UIEvents:New("ChangeAnimation")
+UIEvents:New("SwapPosition")
+UIEvents:New("RotateScene")
+UIEvents:New("ChangeCameraHeight")
+UIEvents:New("MoveScene")
+UIEvents:New("StopSex")
+UIEvents:New("RequestTeleport")
+UIEvents:New("RequestRotation")
+UIEvents:New("TogglePause")
+-- Server -> Client
+UIEvents:New("NewScene")
+UIEvents:New("DestroyAllSceneControls")
+
+--- Genitals
+UIEvents:New("GenitalsLoaded")
+-- Client -> Server
+UIEvents:New("FetchGenitals")
+UIEvents:New("SetActiveGenital")
+UIEvents:New("SetInactiveGenital")
+UIEvents:New("SetupInvisUserVars")
+UIEvents:New("ToggleInvisibility")
+UIEvents:New("SetInvisible")
+-- Server -> Client
+UIEvents:New("SendGenitals")
+
+--- Settings
+-- Client -> Server
+UIEvents:New("FetchAnimations")
+UIEvents:New("FetchAllAnimations")
+UIEvents:New("FetchFilteredAnimations")
+-- UIEvents:New("AutoErectionsOn")
+-- UIEvents:New("AutoErectionsOff")
+-- Server -> Client
+UIEvents:New("SendAllAnimations")
+UIEvents:New("SendFilteredAnimations")
+
+-- UIEvents:New("SendAnimations")
+
+--- Whitelist Tab
+-- Client -> Server
+UIEvents:New("FetchUserTags")
+UIEvents:New("FetchWhitelist")
+-- Server -> Client
+UIEvents:New("SendUserTags")
+UIEvents:New("SendWhitelist")
+
+--- Whitelist Tab
+-- Client -> Server
+UIEvents:New("RequestStripNPC")
+UIEvents:New("RequestDressNPC")
+UIEvents:New("RequestGiveGenitalsNPC")
+UIEvents:New("RequestRemoveGenitalsNPC")
+UIEvents:New("FetchWhitelistedNPCs")
+--  Server -> Client
+UIEvents:New("SendWhitelistedNPCs")
+UIEvents:New("SendNPCStrip")
+UIEvents:New("SendNPCDress")
+
+--- NPCSync
+
+-- Server -> Client
 
 
 -- example usaCge
