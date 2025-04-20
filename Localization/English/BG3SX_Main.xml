@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<contentList>
+<!-- Genital Visual Names -->
+	<content contentuid="h1e7bdab3f693cf4afafb4fcfabddbd240ee2" version="1">Erect</content>
+	<content contentuid="hd4f04d1df9c2ef4a70f8536f9013cd3ac073" version="1">Hairy Erect</content>
+
+<!-- UI Translation Handles -->
+    <content contentuid="h053ec08807c449e5873fbad66bb709c2ead8" version="1">Tab Visibility</content>
+    <content contentuid="hadd9c724632b4e41ae4dbd58686b8db1c17f" version="1">Tab Settings</content>
+    <content contentuid="ha5a309de2e9542b2999d70313cf9455ab451" version="1">Show all animations regardless of scene type</content>
+    <content contentuid="hc266ca8031ad49239c1cc596692c5102c9ba" version="1">Create Scene</content>
+    <content contentuid="hd050a087bef04ed4b4b8c775b458b6c2d786" version="1">Allow Stripping</content>
+    <content contentuid="h2080108a2c8d4e509be9b53c2421a1c4eb95" version="1">Toggle Invisibility</content>
+    <content contentuid="h5217dc9e84404c68a890c1b21fb1b22dca33" version="1">Strip NPC</content>
+    <content contentuid="h95893257756e4bacba737e735eb75c6ba1d0" version="1">Dress NPC</content>
+    <content contentuid="hfe5bebe645244c108b0fd82dcf10dcc22177" version="1">Genitals</content>
+    <content contentuid="h12336834b5e64857bed909e165f752393cfb" version="1">Vanilla Vulvas</content>
+    <content contentuid="hd0e090c89d924fa8ba6bfa2000ff8f479d8a" version="1">Vanilla Penises</content>
+    <content contentuid="ha0ba5dd9dcc94acca77258ba6254decb3784" version="1">MrFunsize Erections</content>
+    <content contentuid="h7d29c52c0c6a4e7d8e2d284f0267b139f1ec" version="1">Modded Genitals</content>
+	<!-- UI Tab Names Handles -->
+    <content contentuid="hc21d333db09549dbbd1fcfaa6fdecb2a2b09" version="1">Scenes</content>
+    <content contentuid="h36809485096e467682a34b1a780bb4a4a816" version="1">Appearance</content>
+    <content contentuid="hd3dd6bc5609a4d65a7f71567e596dc84b81d" version="1">Whitelist</content>
+    <content contentuid="h3d507f295c0b468ea6429b9b00c3c4ed2534" version="1">NPCs</content>
+</contentList>

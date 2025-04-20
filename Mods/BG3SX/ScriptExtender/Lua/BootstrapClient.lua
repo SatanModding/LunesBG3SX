@@ -1,16 +1,11 @@
 NULL = "NULL_00000000-0000-0000-0000-000000000000"
 
-
-
-
-
 ------------------------------------
         -- Init Classes --
 ------------------------------------
 
 Ext.Require("Client/Camera.lua")
 
-Ext.Require("Client/NPCSync.lua") -- NPC changes have to be synced on the client
 -- Ext.Require("Shared/Data/AnimationSets.lua") -- To replicate our sets on the client
 
 
@@ -25,9 +20,9 @@ Ext.Require("Client/PartyInterface.lua")
 Ext.Require("Client/Tabs/SceneTab.lua")
 Ext.Require("Client/SceneControl.lua")
 Ext.Require("Client/Tabs/AppearanceTab.lua")
-Ext.Require("Client/Tabs/SettingsTab.lua")
 Ext.Require("Client/Tabs/WhitelistTab.lua")
 Ext.Require("Client/Tabs/NPCTab.lua")
+Ext.Require("Client/Tabs/SettingsTab.lua")
 Ext.Require("Client/Tabs/DebugTab.lua")
 
 Ext.Require("Client/UIEventHandler.lua")
@@ -35,14 +30,27 @@ Ext.Require("Client/UIEventHandler.lua")
 
 Ext.Require("Shared/Data/Origins.lua")
 Ext.Require("Client/GenitalMessages.lua")
+Ext.Require("Server/Classes/Sex/NPC.lua")
+Ext.Require("Client/NPCSync.lua") -- NPC changes have to be synced on the client
 
 
+local settings = {
+    Server = true, 
+    Client = true, 
+    SyncToClient = true, 
+    SyncToServer = true,
+    SyncOnWrite = true,
+    WriteableOnClient = true,
+    WriteableOnServer = true
+}
 
+Ext.Vars.RegisterModVariable(ModuleUUID, "BG3SX_AddedNPCs", settings)
 
 
 Ext.Vars.RegisterModVariable(ModuleUUID, "BG3SX_ShowAllAnimations", {
         Server = true, Client = true, SyncToClient = true
     })
+
 
 
 
@@ -74,18 +82,15 @@ end
 
 
 -- https://discord.com/channels/1211056047784198186/1211069350157488209/1324459469891047525
-function _C()
-        -- 4294901760 is the null user ID 
-        local controlled = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
+-- function _C()
+--         -- 4294901760 is the null user ID 
+--         local controlled = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
         
-        for _,entity in pairs(controlled) do
+--         for _,entity in pairs(controlled) do
+--                 if entity.ClientCharacter and entity.ClientCharacter.OwnerUserID == 1 then
+--                         return entity
+--                 end
+--         end
 
-                if entity.ClientCharacter and entity.ClientCharacter.OwnerUserID == 1 then
-                return entity
-                end
-
-        end
-
-        return nil
-end
-
+--         return nil
+-- end

@@ -35,29 +35,31 @@ function UIHelper.GetCurrentParty()
     return partyMembers
 end
 
-local sceneTypes = {
-    ["SoloV"] = {InvolvedEntities = 1, Penises = 0},
-    ["SoloP"] = {InvolvedEntities = 1, Penises = 1},
-    ["Lesbian"] = {InvolvedEntities = 2, Penises = 0},
-    ["Straight"] = {InvolvedEntities = 2, Penises = 1},
-    ["Gay"] = {InvolvedEntities = 2, Penises = 2}
-}
 
-function Helper.DetermineSceneType(scene)
-    local InvolvedEntities = 0
-    local Penises = 0
-    for _,entity in pairs(scene.entities) do
-        InvolvedEntities = InvolvedEntities+1
-        if Entity:HasPenis(entity) then
-            Penises = Penises+1
-        end
-    end
-    for _,entry in pairs(sceneTypes) do
-        if InvolvedEntities == entry.InvolvedEntities and Penises == entry.Penises then
-            return entry.sceneType
-        end
-    end
-end
+-- Now in Helper.lua
+-- local sceneTypes = {
+--     ["SoloV"] = {InvolvedEntities = 1, Penises = 0},
+--     ["SoloP"] = {InvolvedEntities = 1, Penises = 1},
+--     ["Lesbian"] = {InvolvedEntities = 2, Penises = 0},
+--     ["Straight"] = {InvolvedEntities = 2, Penises = 1},
+--     ["Gay"] = {InvolvedEntities = 2, Penises = 2}
+-- }
+
+-- function Helper.DetermineSceneType(scene)
+--     local InvolvedEntities = 0
+--     local Penises = 0
+--     for _,entity in pairs(scene.entities) do
+--         InvolvedEntities = InvolvedEntities+1
+--         if Entity:HasPenis(entity) then
+--             Penises = Penises+1
+--         end
+--     end
+--     for _,entry in pairs(sceneTypes) do
+--         if InvolvedEntities == entry.InvolvedEntities and Penises == entry.Penises then
+--             return entry.sceneType
+--         end
+--     end
+-- end
 
 function Helper.IsNSFW(scene)
     return not Table.Contains(scene.Categories, "SFW") or Table.Contains(scene.Categories, "NSFW")

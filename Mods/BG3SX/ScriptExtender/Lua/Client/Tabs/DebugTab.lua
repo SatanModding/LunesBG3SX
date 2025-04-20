@@ -14,7 +14,7 @@ end
 function DebugTab:Initialize()
     local customEventButton = self.Tab:AddButton("Custom Event")
     customEventButton.OnClick = function()
-        UIEvents.CustomEvent:SendToServer("")
+        Event.CustomEvent:SendToServer("")
     end
     --self.Animations = {} 
     --self.AnimationPickers = {}
@@ -54,7 +54,7 @@ local function updateCombo(combo, val)
     combo.OnChange()
 end
 
-function DebugTab:AddAnimationPicker()
+function DebugTab:UpdateAnimationPicker()
     local debugbefore = Debug.USEPREFIX
     Debug.USEPREFIX = false
     table.sort(self.Animations)
@@ -75,9 +75,9 @@ function DebugTab:AddAnimationPicker()
         animationPicker = buttonCell:AddCombo("")
         animationPicker.Options = allAnimAnims
         animationPicker.OnChange = function ()
-            Debug.Print("Combo OnChange")
+            -- Debug.Print("Combo OnChange")
             if animationPicker.SelectedIndex ~= 0 then
-                UIEvents.ChangeAnimation:SendToServer({
+                Event.ChangeAnimation:SendToServer({
                     ID = USERID,
                     Caster = UIInstance.GetSelectedCharacter(),
                     Animation = animationPicker.Options[animationPicker.SelectedIndex + 1]

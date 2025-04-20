@@ -15,13 +15,21 @@ local function initializeParty()
             if not entity then
                 Debug.Print("is not a entity " .. party[i][1])
             else
-                print("adding genital for ", party[i][1])
+                -- print("adding genital for ", party[i][1])
                 Genital.AddGenitalIfHasNone(entity)
                 Genital.AssignDefaultIfHasNotYet(entity)
             end
 
-            
+
         end
+
+        -- We are not using spells anymore
+        -- Remove them
+        --Debug.Print("Removing spells for ".. party[i][1])
+        Osi.RemoveSpell(party[i][1],"BG3SX_MainContainer", 1)
+        Osi.RemoveSpell(party[i][1],"BG3SX_ChangeGenitals", 1)
+        Osi.RemoveSpell(party[i][1],"BG3SX_Options", 1)
+
     end
 end
 
@@ -34,7 +42,7 @@ function OnSessionLoaded()
     Genital.Initialize() -- Initializes genitals, check Genitals.lua
 
     -- strips NPCs that have been stripped before the game was ended
-    
+
 
     Ext.Osiris.RegisterListener("LevelGameplayStarted", 2, "after", function(_, _)
         initializeParty()
@@ -44,8 +52,8 @@ function OnSessionLoaded()
 	Ext.Osiris.RegisterListener("DB_PartOfTheTeam", 1, "afterDelete", function (character)
         initializeParty()
         local party = Osi.DB_PartyMembers:Get(nil)
-        Debug.Print("DB_PartOfTheTeam send")
-        UIEvents.SendParty:Broadcast(party)
+        -- Debug.Print("DB_PartOfTheTeam send")
+        Event.SendParty:Broadcast(party)
     end)
 
     -- TODO: Check if CharacterCreationDummy might cause issues with "Make NPC into Partymember" mods
@@ -56,16 +64,16 @@ function OnSessionLoaded()
         end
 
         local party = Osi.DB_PartyMembers:Get(nil)
-        Debug.Print("CharacterJoinedParty send")
-        UIEvents.SendParty:Broadcast(party) -- Update PartyInterface
+        -- Debug.Print("CharacterJoinedParty send")
+        Event.SendParty:Broadcast(party) -- Update PartyInterface
     end)
 
 
     Ext.Osiris.RegisterListener("CharacterLeftParty", 1, "after", function(character)
-    
+
         local party = Osi.DB_PartyMembers:Get(nil)
-        Debug.Print("CharacterLeftParty send")
-        UIEvents.SendParty:Broadcast(party) -- Update PartyInterface
+        -- Debug.Print("CharacterLeftParty send")
+        Event.SendParty:Broadcast(party) -- Update PartyInterface
     end)
 
 
@@ -79,8 +87,8 @@ Ext.Events.SessionLoaded:Subscribe(OnSessionLoaded)
 local function afterResetPartySync()
     initializeParty()
     local party = Osi.DB_PartyMembers:Get(nil)
-    Debug.Print("afterResetPartySync send")
-    UIEvents.SendParty:Broadcast(party) -- Update PartyInterface
+    -- Debug.Print("afterResetPartySync send")
+    Event.SendParty:Broadcast(party) -- Update PartyInterface
 end
 
 -- Ext.Events.ResetCompleted:Subscribe(function(e)

@@ -13,6 +13,8 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
 
     local AnimationData = {}
     AnimationData.__index = AnimationData
+    ---@class AnimationData
+    ---@field Heightmatching Heightmatching
     function AnimationData.New(moduleUUID, name, animTop, animBtm, categories, props)
         local instance
         if moduleUUID then
@@ -50,14 +52,15 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
             animData.SoundBtm = Data.Sounds.Moaning
         end
 
-        if animData then
+        -- if animData then
 
-            Ext.Timer.WaitFor(100, function() -- To wait for mods editing their animation entry or adding their ModuleUUID before throwing the event
-                Ext.ModEvents.BG3SX.AddAnimation:Throw({animData})
-            end)
+        --     Ext.Timer.WaitFor(100, function() -- To wait for mods editing their animation entry or adding their ModuleUUID before throwing the event
+        --         Ext.ModEvents.BG3SX.AddAnimation:Throw({animData})
+        --     end)
 
-            return animData
-        end
+        --     return animData
+        -- end
+        return animData
     end
 
     -- These 2 local functions need to be recreated by every modauthor wanting to add animations to our system
@@ -74,11 +77,13 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         if not intros[ModuleUUID][name] then
             local anim = CreateAnimationData(ModuleUUID, name, animTop, animBtm, categories, props)
             intros[ModuleUUID][name] = anim
+            return anim
         else
             Debug.Print("An animation with the name (" .. name .. ") already exists for this mod, please choose a different name or add an unique identifier")
+            return
         end
-        return anim
     end
+
     local function addMainAnim(name, animTop, animBtm, categories, props)
         animBtm = animBtm or nil
         categories = categories or nil
@@ -93,6 +98,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
             return anim
         else
             Debug.Print("An animation with the name (" .. name .. ") already exists for this mod, please choose a different name or add an unique identifier")
+            return
         end
     end
 
@@ -128,7 +134,6 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     
     -- Seperated from Data.Animations because these 2 are the start spells which are handled differently and will create a scene
     local startMasturbating = addIntroAnim("Start Masturbating", anim["MasturbateWank"].MapKey, anim["MasturbateStanding_V"].MapKey, {"NSFW", "Solo"})
-    
     local askForSex = addIntroAnim("Ask for Sex", anim["EmbraceTop"].MapKey, anim["EmbraceBtm"].MapKey, {"SFW", "NSFW"})
         
     -- Setting up heightmatching matchups
@@ -139,10 +144,11 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         hmi:SetAnimation("_V",  nil, anim["MasturbateStanding_V"].MapKey)
         hmi:SetAnimation("Tall_V",  nil, anim["MasturbateStanding_Tall_V"].MapKey) -- TallF specific animation - Tall is what we call the "Strong" bodytype identifier
     end
+
     local hmi = askForSex.Heightmatching
     if hmi then -- Instead of a specific bodytype/gender combo, just the bodytype matchup also works
         hmi:SetAnimation("Tall", "Med", anim["CarryingTop_Tall"].MapKey, anim["CarryingBtm_Med"].MapKey)
-        -- hmi:SetAnimation("Med", "Tall", "392073ca-c6e0-4f7d-848b-ffb0b510500b", "04922882-0a2d-4945-8790-cef50276373d")
+        hmi:SetAnimation("Med", "Tall", anim["EmbraceBtm"].MapKey, anim["EmbraceTop"].MapKey)
         -- If we'd reverse the entry with the commented out line, the same animation would play even if we use SwitchPlaces
         -- Like this, if we initiate with Tall + Med, the carrying animation plays, if we use SwitchPlaces, the regular fallback plays
     end

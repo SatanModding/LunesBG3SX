@@ -41,5 +41,5 @@ UserSettings.__index = UserSettings
 Visual = {}
 Visual.__index = Visual
 
-UIEvents = {}
-UIEvents.__index = UIEvents
+Event = {}
+Event.__index = Event

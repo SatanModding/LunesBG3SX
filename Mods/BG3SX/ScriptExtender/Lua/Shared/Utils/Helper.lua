@@ -106,7 +106,7 @@ function Helper.StringContains(str, sub)
     return (string.find(str, sub, 1, true) ~= nil)
 end
 
-function Helper.StringsContainOne(str1, str2)
+function Helper.StringContainsOne(str1, str2)
     return Helper.StringContains(str1, str2) or Helper.StringContains(str2, str1)
 end
 
@@ -237,8 +237,10 @@ end
 
 ---@return EntityHandle|nil
 function Helper.GetLocalControlledEntity()
+    _DS(Ext.Entity.GetAllEntitiesWithComponent("ClientControl"))
     for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
-        if entity.UserReservedFor.UserID == 1 then
+        _P(entity.UserReservedFor.UserID)
+        if entity.UserReservedFor.UserID == 1 or entity.UserReservedFor.UserID == "1" then
             return entity
         end
     end
@@ -263,14 +265,10 @@ function Helper.UserToPeerID(u)
     return (u & 0xffff0000)
 end
 
-
 -- local function blacklist()
 --     Entity:IsBlacklistedEntity(Osi.GetHostCharacter())
 -- end
 -- Ext.RegisterConsoleCommand("racewhitelist", racewhitelist);
-
-
-
 
 function pairsByKeys (t, f)
     local a = {}
@@ -286,6 +284,63 @@ function pairsByKeys (t, f)
         end
     end
     return iter
+end
+
+--- Iterates over the keys of a table in sorted (ascending) order.
+--- This function sorts the table keys and returns them in the order specified by the `table.sort` function.
+--- @param t table The table to iterate over.
+--- @return fun():string|number, any A function that returns the next key-value pair in sorted order.
+function sortedPairs(t)
+    local keys = {}
+    for key in pairs(t) do
+        table.insert(keys, key)
+    end
+    table.sort(keys)  -- Sort the keys in ascending order
+    local i = 0
+    return function()
+        i = i + 1
+        local key = keys[i]
+        if key then
+            return key, t[key]
+        end
+    end
+end
+
+function callWithSortedKeys(tbl, callback, moveToBack)
+    local keys, keysToBack = {}, {}
+    local moveToBackSet = {}
+
+    -- Convert moveToBack to a set for fast lookups
+    if type(moveToBack) == "string" then
+        moveToBackSet[moveToBack] = true
+    elseif type(moveToBack) == "table" then
+        for _, key in ipairs(moveToBack) do
+            moveToBackSet[key] = true
+        end
+    end
+
+    -- Separate keys into two lists: normal and to-be-moved keys
+    for key in pairs(tbl) do
+        if moveToBackSet[key] then
+            table.insert(keysToBack, key)
+        else
+            table.insert(keys, key)
+        end
+    end
+
+    -- Sort both lists
+    table.sort(keys)
+    table.sort(keysToBack)
+
+    -- Iterate sorted normal keys first
+    for _, key in ipairs(keys) do
+        callback(key, tbl[key])
+    end
+
+    -- Iterate sorted keys that should be at the back
+    for _, key in ipairs(keysToBack) do
+        callback(key, tbl[key])
+    end
 end
 
 
@@ -450,7 +505,29 @@ function Helper.GetModAuthor(moduleUUID)
     return Ext.Mod.GetMod(moduleUUID).Info.Author
 end
 
+local sceneTypes = {
+    ["SoloV"] = {InvolvedEntities = 1, Penises = 0},
+    ["SoloP"] = {InvolvedEntities = 1, Penises = 1},
+    ["Lesbian"] = {InvolvedEntities = 2, Penises = 0},
+    ["Straight"] = {InvolvedEntities = 2, Penises = 1},
+    ["Gay"] = {InvolvedEntities = 2, Penises = 2}
+}
 
+function Helper.DetermineSceneType(scene)
+    local InvolvedEntities = 0
+    local Penises = 0
+    for _,entity in pairs(scene.entities) do
+        InvolvedEntities = InvolvedEntities+1
+        if Entity:HasPenis(entity) then
+            Penises = Penises+1
+        end
+    end
+    for scenetype,entry in pairs(sceneTypes) do
+        if InvolvedEntities == entry.InvolvedEntities and Penises == entry.Penises then
+            return scenetype
+        end
+    end
+end
 
 function getControlledCharacter()
 
@@ -473,4 +550,10 @@ function getControlledCharacter()
     return nil
 end
 
+function round(n)
+    return math.floor(n + 0.5)
+end
 
+function clamp(n, minVal, maxVal)
+    return math.max(minVal, math.min(n, maxVal))
+end

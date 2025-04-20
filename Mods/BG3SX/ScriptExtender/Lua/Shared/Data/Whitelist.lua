@@ -808,7 +808,7 @@ Data.WhitelistedEntities = {
     "0de603c5-42e2-4811-9dad-f652de080eba", -- Minsc
     --#endregion
     --#region NPC's
-    -- "0133f2ad-e121-4590-b5f0-a79413919805", -- Bone Daddy - Broken Model, no fitting Genital, Rig doesn't accept the animations
+    -- "0133f2ad-e121-4590-b5f0-a79413919805", -- Bone Daddy - Download this mod for him to work: https://www.nexusmods.com/baldursgate3/mods/13995 (broken otherwise)
     "bc4b5efc-cbd3-4f8f-a31e-d37f801a038c", -- Ketheric
     "bf24e0ec-a3a6-4905-bd2d-45dc8edf8101", -- Orin -- No fitting Genital IIRC (miscolored)
     "491a7686-3081-405b-983c-289ec8781e0a", -- Mizora
@@ -898,19 +898,17 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
         tags = Entity:TryGetEntityValue(uuid, nil, {"Tag", "Tags",})
     end
     local quickTagCheck = Entity:TryGetEntityValue(uuid, nil, {"Tag", "Tags"})
-    if quickTagCheck and #quickTagCheck > 0 then
-        for _,quickTag in pairs(quickTagCheck) do
-            if quickTag == Data.AllowedTagsAndRaces["KID"].TAG or quickTag == Data.AllowedTagsAndRaces["GOBLIN_KID"].TAG then
-                -- sometimes Whitelisted check is used internally to filter lists. We dont want to show messages in that case
-                if debug then
-                    local msg = "[BG3SX][Whitelist.lua]\nCheck failed on:\n" .. uuid .. "\nFound disallowed tag with UUID:\n" .. quickTag .. "\nReason: 69"
-                    _P(msg)
-                    Ext.Loca.UpdateTranslatedString(popuphandle, msg)
-                    --print("Opening messagebox")
-                    Osi.OpenMessageBox(Osi.GetHostCharacter(), popupkey)
-                end
-                return false
+    for _,quickTag in pairs(quickTagCheck) do
+        if quickTag == Data.AllowedTagsAndRaces["KID"].TAG or quickTag == Data.AllowedTagsAndRaces["GOBLIN_KID"].TAG then
+            -- sometimes Whitelisted check is used internally to filter lists. We dont want to show messages in that case
+            if debug then
+                local msg = "[BG3SX][Whitelist.lua]\nCheck failed on:\n" .. uuid .. "\nFound disallowed tag with UUID:\n" .. quickTag .. "\nReason: 69"
+                _P(msg)
+                Ext.Loca.UpdateTranslatedString(popuphandle, msg)
+                --print("Opening messagebox")
+                Osi.OpenMessageBox(Osi.GetHostCharacter(), popupkey)
             end
+            return false
         end
     end
 
@@ -1103,7 +1101,7 @@ function Entity.CheckVisualAndTemplate(uuid)
                         -- _P("Found Child")
                         return true
                     elseif template.Name == "BASE_Biped" then
-                        _P("Found BASE_Biped")
+                        -- _P("Found BASE_Biped")
                         return false
                     else
                         if template and template.ParentTemplateId then

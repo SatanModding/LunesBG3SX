@@ -37,6 +37,36 @@ end)
 ---@param  scene Scene       - The scene to check
 ---@return sceneType string
 function Sex:DetermineSceneType(scene)
+
+
+    --  print("PeePee Server Test")
+
+    -- local function GetConfig()
+    --     local modVars = Ext.Vars.GetModVariables(ModuleUUID)
+    --     local config = {}
+    --     if modVars and modVars.PeePee then
+    --         config = modVars.PeePee
+    --     end
+    --     return config
+    -- end
+
+    -- local function UpdateConfig(config)
+    --     Ext.Vars.GetModVariables(ModuleUUID).PeePee = config
+    --     print('PeePee Configuration updated!')
+    --     _D(GetConfig())
+    -- end
+
+    -- local function DoSomething()
+
+    --     print("current")
+    --     _D(GetConfig()) -- prints "[]" after a save and reload
+    --     UpdateConfig("PooPoo") -- is only "PooPoo" until save is saved and loaded
+    -- end
+
+    -- DoSomething()
+
+
+
     local involvedEntities = 0
     local penises = 0
     for _,entity in pairs(scene.entities) do
@@ -50,6 +80,7 @@ function Sex:DetermineSceneType(scene)
             return entry.sceneType
         end
     end
+
 end
 
 
@@ -144,7 +175,7 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
         -- TODO - check NPC
         local sexHavers = {caster}
         for _,target in pairs(targets) do
-            if target ~= caster then -- To not add caster twice if it might also be the target
+            if not Helper.StringContainsOne(caster,target) then -- To not add caster twice if it might also be the target
                 table.insert(sexHavers, target)
             end
         end
@@ -169,7 +200,6 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
                  -- stripping
                 local stripping = SexUserVars.GetAllowStripping(entity)
                 if not (stripping == false) then 
-    
                     armorset, equipment, slot = Sex:Strip(character)
                     armorsets[character] = armorset
                     equipments[character] = equipment
@@ -205,7 +235,8 @@ function Sex:Strip(character)
 
     if Entity:IsNPC(character) then
     -- NPCs only have slots in their CharacterVisualResourceID
-        slot = NPC.StripNPC(entity)
+        slot = NPC.StripNPC(entity) -- Call on Server
+        Event.SyncNPCStrip:Broadcast(entity.Uuid.EntityUuid) -- Call on Client
         
     else
         equipment = Entity:UnequipAll(character)

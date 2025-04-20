@@ -564,10 +564,15 @@ end
 
 
  -- get VisualResourceID from uuid
- ---@param  entity EntityHandle          - uuid of the NPC
+ ---@param  entity EntityHandle          - the NPC
  ---@return string                       - VisualResourceID
 function Visual.getVisualResourceID(entity)
-    local vrID = entity.ServerCharacter.Template.CharacterVisualResourceID
+    local vrID
+    if Ext.IsServer() then
+        vrID = entity.ServerCharacter.Template.CharacterVisualResourceID
+    elseif Ext.IsClient() then
+        vrID = entity.ClientCharacter.Template.CharacterVisualResourceID
+    end
     return vrID
  end
 
@@ -575,8 +580,13 @@ function Visual.getVisualResourceID(entity)
 -- returns the VisualSet.Slots
 ---@param  entity EntityHandle - uuid of the entity possibly wearing a visual
 function Visual.getSlots(entity)
-    local resource = entity.ServerCharacter.Template.CharacterVisualResourceID
-    local slots = Ext.Resource.Get(resource, "CharacterVisual").VisualSet.Slots
+    local vrID
+    if Ext.IsServer() then
+        vrID = entity.ServerCharacter.Template.CharacterVisualResourceID
+    elseif Ext.IsClient() then
+        vrID = entity.ClientCharacter.Template.CharacterVisualResourceID
+    end
+    local slots = Ext.Resource.Get(vrID, "CharacterVisual").VisualSet.Slots
     return slots
 end
 

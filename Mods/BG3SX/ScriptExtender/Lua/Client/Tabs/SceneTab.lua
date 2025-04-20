@@ -6,7 +6,7 @@ function UI:NewSceneTab()
     
     local instance = setmetatable({
         --UI = self.ID,
-        Tab = self.TabBar:AddTabItem("Scenes"),
+        Tab = self.TabBar:AddTabItem(Ext.Loca.GetTranslatedString("hc21d333db09549dbbd1fcfaa6fdecb2a2b09", "Scenes")),
         Scenes = {},
     }, SceneTab)
     return instance
@@ -25,17 +25,42 @@ end
 
 function SceneTab:GetScenes()
     self.AwaitingScenes = true
-    UIEvents.FetchScenes:SendToServer("")
+    Event.FetchScenes:SendToServer("")
 end
 
-function SceneTab:RefreshAvailableAnimations(targetSceneControl, animationTable)
+function SceneTab:RefreshAvailableAnimations(animationTable, scene)
+    local scene = scene or nil
     for _,SceneControl in pairs(self.ActiveSceneControls) do
-        SceneControl.UpdatingAnimationPicker = true
-        SceneControl.AnimationPicker.Options = {}
-        for i,Animation in ipairs(animationTable) do
-            SceneControl.AnimationPicker.Options[i] = Animation
+        if scene then
+            if SceneControl.Scene == scene then
+                SceneControl.UpdatingAnimationPicker = true
+                SceneControl.AnimationPicker.Options = {}
+                for i,Animation in ipairs(animationTable) do
+                    SceneControl.AnimationPicker.Options[i] = Animation
+                end
+                SceneControl.UpdatingAnimationPicker = false
+            end
+        else
+            SceneControl.UpdatingAnimationPicker = true
+            SceneControl.AnimationPicker.Options = {}
+            for i,Animation in ipairs(animationTable) do
+                SceneControl.AnimationPicker.Options[i] = Animation
+            end
+            SceneControl.UpdatingAnimationPicker = false
         end
-        SceneControl.UpdatingAnimationPicker = false
+    end
+end
+
+-- Goes through every currently running scene until it finds the entityToSearch
+---@param entityToSearch string
+function SceneTab:FindSceneControlByEntity(entityToSearch)
+    for _,SceneControl in pairs(self.ActiveSceneControls) do
+        for _, entity in pairs(SceneControl.Scene.entities) do
+            if Helper.StringContainsOne(entityToSearch, entity) then
+                _P("Found scene control for entity: ", entityToSearch)
+                return SceneControl
+            end
+        end
     end
 end
 
@@ -49,8 +74,8 @@ function SceneTab:CreateNewSceneArea()
     end
     self.SFWSceneButton.Visible = false
 
-    self.NSFWSceneButton = self.Tab:AddImageButton("Create Scene", "BG3SX_ICON_MAIN", {100,100})
-    self.NSFWSceneButton:Tooltip():AddText("Create Scene")
+    self.NSFWSceneButton = self.Tab:AddImageButton(Ext.Loca.GetTranslatedString("hc266ca8031ad49239c1cc596692c5102c9ba", "Create Scene"), "BG3SX_ICON_MAIN", {100,100})
+    self.NSFWSceneButton:Tooltip():AddText(Ext.Loca.GetTranslatedString("hc266ca8031ad49239c1cc596692c5102c9ba", "Create Scene"))
     self.NSFWSceneButton.OnClick = function()
         self:AwaitNewScene()
     end
@@ -86,3 +111,34 @@ function SceneTab:UpdateNoSceneText()
         self.NoSceneText.Visible = true -- Show it again
     end
 end
+
+-- Check all current scenes against all current SceneControls
+-- Checks all current scenes entities against all current SceneControl entities
+-- When a scene is found thats 
+Event.SyncActiveScenes:SetHandler(function(SavedScenes)
+    if SavedScenes and #SavedScenes > 0 then
+        local isStillActive = {}
+        for _,scene in pairs(SavedScenes) do
+            for _,entity in pairs(scene.entities) do
+                table.insert(isStillActive, entity)
+            end
+        end
+        local destroyedScene = {}
+        for _,activeSceneControl in pairs(UIInstance.SceneTab.ActiveSceneControls) do
+            local found
+            for _,activeSceneControlEntity in pairs(activeSceneControl.Scene.entities) do
+                for _,entity in pairs(isStillActive) do
+                    if activeSceneControl == entity then
+                        found = true
+                    end
+                end
+            end
+            if not found then
+                activeSceneControl:Destroy()
+            end
+        end
+    else
+        -- No active scenes, destroy all scene controls
+        UIInstance.SceneTab.ActiveSceneControls = {}
+    end
+end)

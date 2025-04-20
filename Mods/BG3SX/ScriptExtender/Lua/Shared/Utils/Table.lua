@@ -165,7 +165,6 @@ function Table.SortData(data)
 end
 
 
-
 --https://en.wikipedia.org/wiki/Intersection_(set_theory)
 function Table.GetIntersection(tbl1, tbl2)
     local result = {}
@@ -194,4 +193,13 @@ function Table.GetNextFreeIndex(tbl)
         end
     end
     return #tbl + 1  -- If no gaps, return the next index
+end
+
+function Table.SortByKey(tbl)
+    local sorted = {}
+    for k, v in pairs(tbl) do
+        table.insert(sorted, {key = k, value = v})
+    end
+    table.sort(sorted, function(a, b) return a.key < b.key end)
+    return sorted
 end

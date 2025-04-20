@@ -5,81 +5,82 @@
 --------------------------------------------------------------------------------
 
 
-UIEvents.ChangeCharacter:SetHandler(function (payload)
-
-
+-- Updates the USERID based on which character is currently selected per client
+Event.ChangeCharacter:SetHandler(function (changedControlledEntity)
+    Debug.Print("Changed character to " .. changedControlledEntity)
     Ext.Timer.WaitFor(200, function () -- CharacterChanged event needs to delay what it wants to execute because Osiris is slow AF - ClientEntity ID's don't update quickly enough after its triggered
         local entity = Helper.GetLocalControlledEntity()
-        if entity then
-            -- print("target of change control: ", payload)
-            -- print("current client host ", entity.Uuid.EntityUuid)
+        local entityUuid = entity.Uuid.EntityUuid
 
-            -- Debug.Print("ChangeCharacter EventHandler")
+        if Helper.StringContainsOne(entityUuid, changedControlledEntity) or (changedControlledEntity == "") then
+            USERID = entityUuid
+            -- swap the character in the UI
+            UIInstance.PartyInterface:SetSelectedCharacter(entityUuid)
             UIInstance.AppearanceTab:FetchGenitals()
         else
             Debug.Print("No entity")
         end
     end)
 end)
-UIEvents.GenitalsLoaded:SetHandler(function (payload)
+
+Event.GenitalsLoaded:SetHandler(function (payload)
     -- Debug.Print("GenitalsLoaded recieved on client, sending FetchGenitals event with currently selected Client character" .. _C().Uuid.EntityUuid)
     -- _D(_C().Uuid.EntityUuid)
-    -- UIEvents.FetchGenitals:SendToServer({ID = USERID, Character = _C().Uuid.EntityUuid})
+    -- Event.FetchGenitals:SendToServer({ID = USERID, Character = _C().Uuid.EntityUuid})
 end)
 
-UIEvents.SendParty:SetHandler(function (payload)
-    print("client received SendParty message for id ", _C().UserReservedFor.UserID)
-    
+Event.SendParty:SetHandler(function (payload)    
     local party = payload
     UIInstance.PartyInterface.Party = party
     UIInstance.PartyInterface:UpdateParty()
 end)
 
 
-UIEvents.SendScenes:SetHandler(function (payload)
-    local scenes = payload
+Event.SendScenes:SetHandler(function (payload)
+    -- local scenes = payload
     -- local tab = UIInstance.SceneTab
     -- if tab.AwaitingScenes == true then
-    --     tab.Scenes = scenes
-    --     if tab.Scenes and #tab.Scenes > 0 then
-    --         for _,Scene in pairs(tab.Scenes) do
-    --             if not Scene.SceneControl then
-    --                 tab.SceneControl:New(UIInstance.ID, Scene, tab.Tab)
-    --             end
-    --         end
-    --     end
-    --     UIInstance.SceneTab.AwaitingScenes = false
+        -- tab.Scenes = scenes
+        -- if tab.Scenes and #tab.Scenes > 0 then
+        --     for _,Scene in pairs(tab.Scenes) do
+        --         if not Scene.SceneControl then
+        --             tab.SceneControl:New(UIInstance.ID, Scene, tab.Tab)
+        --         end
+        --     end
+        -- end
+        -- UIInstance.SceneTab.AwaitingScenes = false
     -- end
 
 end)
-UIEvents.NewScene:SetHandler(function (payload)
+Event.NewScene:SetHandler(function (payload)
     local scene = payload
     UIInstance.SceneTab:NewSceneControl(scene)
     UIInstance.SceneTab.NoSceneText.Visible = false
 end)
 
-UIEvents.SendGenitals:SetHandler(function (payload)
-    -- Debug.Print("SendGenitals recieved on client, updating Genital tab for")
-    local genitals = payload.Data
-    local whitelisted = payload.Whitelisted
+Event.SendGenitals:SetHandler(function (payload)
+    --Debug.Print("SendGenitals recieved on client, updating Genital tab for")
 
-   -- Ext.Timer.WaitFor(2000, function()
+    if UIInstance then
+        local genitals = payload.Data
+        local whitelisted = payload.Whitelisted
 
-    local tab = UIInstance.AppearanceTab
-    tab.Genitals = genitals
+        -- Ext.Timer.WaitFor(2000, function()
 
-    tab:UpdateGenitalGroup(whitelisted)
+        local tab = UIInstance.AppearanceTab
+        tab.Genitals = genitals
 
-    --end)
+        tab:UpdateGenitalGroup(whitelisted)
+    end
 end)
 
-UIEvents.SendUserTags:SetHandler(function (payload)
+Event.SendUserTags:SetHandler(function (payload)
     --_P("1")
     --_D(payload)
     UIInstance.WhitelistTab.UserTags.Tags = payload
     UIInstance.WhitelistTab:UpdateUserTags(payload)
 end)
-UIEvents.SendWhitelist:SetHandler(function (payload)
+Event.SendWhitelist:SetHandler(function (payload)
     UIInstance.WhitelistTab.Whitelists = payload
     UIInstance.WhitelistTab:GenerateWhitelistArea()
     --_D(UIInstance.WhitelistTab.UserTags.Tags)
@@ -90,66 +91,84 @@ end)
 --- Animations
 ---------------------------------------------------------------------
 
-UIEvents.SendFilteredAnimations:SetHandler(function (payload)
+Event.SendFilteredAnimations:SetHandler(function (payload)
     local animations = payload.Data
+    local scene = payload.Scene or nil
     local sceneTab = UIInstance.SceneTab
-    if sceneTab then
+    if scene then
+        local sceneControl = sceneTab:FindSceneControlByEntity(scene.entities[1])
+        if sceneControl then
+            sceneTab:RefreshAvailableAnimations(animations, scene)
+            sceneControl:UpdateAnimationPicker()
+        end
+    elseif sceneTab then
         sceneTab:RefreshAvailableAnimations(animations)
         for _,sceneControl in pairs(sceneTab.ActiveSceneControls) do
-            sceneControl:AddAnimationPicker()
+            sceneControl:UpdateAnimationPicker()
         end
     end
 end)
-UIEvents.SendAllAnimations:SetHandler(function (payload)
-    -- Debug.Print("---------------CLAPPI--------------------")
-    --Debug.DumpS(payload)
+Event.SendAllAnimations:SetHandler(function (payload)
+    --Debug.Print("---------------CLAPPI--------------------")
+    --Debug.Dump(payload)
     local animData = payload.Animations
     local sceneID = payload.SceneControl
     local sceneTab = UIInstance.SceneTab
+    --Debug.Print("SendAllAnimations")
+    --_P(Table.TableSize(animData))
     for _,sceneControl in pairs(sceneTab.ActiveSceneControls) do
-        if sceneControl.Instance.ID == sceneID then
+        if sceneControl.ID == sceneID then
             -- Debug.Print("FOUND SCENECONTROL")
-            sceneControl.Instance:UpdateAnimationData(animData)
+            sceneControl:UpdateAnimationData(animData)
         end
     end
 end)
-
+Event.UpdateSceneControlPicker:SetHandler(function (payload)
+    local sceneControl = UIInstance.SceneTab:FindSceneControlByEntity(payload.Character)
+    sceneControl.Scene.SceneType = payload.SceneType
+    if sceneControl then
+        print("sceneControl exists- updating")
+        sceneControl:UpdateAnimationPicker()
+    else
+        print("SceneControl doesnt exist")
+    end
+end)
 
 
 -- Here is the code it is supposed to execute
 -- Hello Skiz. Please add a toggleable button in Settings for "BG3SX_ShowAllAnimations" 
 
-function UIEvents:somethingsomethingBG3SX_ShowAllAnimations()
+-- function Event:somethingsomethingBG3SX_ShowAllAnimations()
 
--- Please initialize the value of that button according to the ModVars
+-- -- Please initialize the value of that button according to the ModVars
 
-    local vars = Ext.Vars.GetModVariables(ModuleUUID)
-    local BG3SX_ShowAllAnimations = vars.BG3SX_ShowAllAnimations
+--     local vars = Ext.Vars.GetModVariables(ModuleUUID)
+--     local BG3SX_ShowAllAnimations = vars.BG3SX_ShowAllAnimations
 
-    if BG3SX_ShowAllAnimations == "true" then
-        -- initialize button to activated
-    else
-        -- initialize button to not activates
-    end
+--     if BG3SX_ShowAllAnimations == "true" then
+--         -- initialize button to activated
+--     else
+--         -- initialize button to not activates
+--     end
 
--- Then please listen to the user who clicks on the button
--- and change the variable accordingly    
+-- -- Then please listen to the user who clicks on the button
+-- -- and change the variable accordingly    
 
--- If Button true then:
-    -- vars.BG3SX_ShowAllAnimations = "true"
+-- -- If Button true then:
+--     -- vars.BG3SX_ShowAllAnimations = "true"
 
--- If Button false then:
-    -- vars.BG3SX_ShowAllAnimations = "false"
-
-
--- ModVars are not writeable on client, so send an event over to 
--- server.
-
--- I initialize and set the default on server, as it is not writable on client
--- so let me know if this causes issues
+-- -- If Button false then:
+--     -- vars.BG3SX_ShowAllAnimations = "false"
 
 
-end
+-- -- ModVars are not writeable on client, so send an event over to 
+-- -- server.
+
+-- -- I initialize and set the default on server, as it is not writable on client
+-- -- so let me know if this causes issues
+
+
+-- end
 
 
 

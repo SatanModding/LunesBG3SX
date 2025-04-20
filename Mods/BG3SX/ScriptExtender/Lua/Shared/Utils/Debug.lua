@@ -50,23 +50,23 @@ function Debug.DumpS(tbl)
         _DS(tbl)
     end
 end
-function Debug.PrintWarn(message)
-    if Debug.Active then
+-- function Debug.PrintWarn(message)
+--     if Debug.Active then
 
-        local pre = getDebugPrefix()
+--         local pre = getDebugPrefix()
 
-        _PW(pre .. "\n" .. message)
-    end
-end
-function Debug.PrintError(message)
-        if Debug.Active then
+--         _PW(pre .. "\n" .. message)
+--     end
+-- end
+-- function Debug.PrintError(message)
+--         if Debug.Active then
 
-        local pre = getDebugPrefix()
+--         local pre = getDebugPrefix()
 
-        _PE(pre .. "\n" .. message)
-    end
-end
-Debug.PW = Debug.PrintWarn
-Debug.PE = Debug.PrintError
+--         _PE(pre .. "\n" .. message)
+--     end
+-- end
+-- Debug.PW = Debug.PrintWarn
+-- Debug.PE = Debug.PrintError
 -- Debug.PW("Test Warning")
 -- Debug.PE("Test Error")

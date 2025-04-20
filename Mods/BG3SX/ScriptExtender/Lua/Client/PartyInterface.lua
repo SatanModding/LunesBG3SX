@@ -10,7 +10,7 @@ function UI:NewPartyInterface()
         Party = {},
         NPCs = {},
     }, PartyInterface)
-    self.Settings["PartyButtonSize"] = {100,100}
+    self.Settings["PartyButtonSize"] = {100*ViewPortScale,100*ViewPortScale}
     return instance
 end
 
@@ -22,11 +22,11 @@ function PartyInterface:Initialize()
     self.NPCArea = self.Wrapper:AddCollapsingHeader("NPCs")
     self.NPCArea.Visible = false
 
-    UIEvents.FetchParty:SendToServer({ID = USERID})
+    Event.FetchParty:SendToServer({ID = USERID})
 end
 
 function PartyInterface:UpdateParty()
-
+    -- _D(self.Party)
     self.Characters = nil
     UI.DestroyChildren(self.PartyArea)
 
@@ -53,15 +53,16 @@ function PartyInterface:UpdateParty()
 end
 
 function PartyInterface:UpdateNPCs()
+    self.CurrentNPCs = nil
+    UI.DestroyChildren(self.NPCArea)
     if self.NPCs and #self.NPCs > 0 then
         self.NPCArea.Visible = true
     else
         self.NPCArea.Visible = false
+        self:SetSelectedCharacter(self.Party[1][1])
+        return
     end
     
-    self.CurrentNPCs = nil
-    UI.DestroyChildren(self.NPCArea)
-
     local maxTableWidth = 4
     local tableWidth = math.min(#self.NPCs, maxTableWidth)  -- Take lower
 
@@ -95,7 +96,7 @@ function UI:SelectedCharacterUpdates(character)
         -- self.AppearanceTab:UpdateToggleVisibilityGroup(character.Uuid)
         self.AppearanceTab:UpdateEquipmentAreaGroup(character.Uuid)
         self.AppearanceTab:FetchGenitals()
-        UIEvents.FetchUserTags:SendToServer({ID = USERID, Character = character.Uuid})
+        Event.FetchUserTags:SendToServer({ID = USERID, Character = character.Uuid})
         Camera:SnapCameraTo(entity)
     end
 end
@@ -170,11 +171,13 @@ function PartyInterface:AddNPC(parent, uuid)
         UIInstance:SelectedCharacterUpdates(instance)
     end
     instance.DeleteButton = cell:AddButton("x")
+    instance.DeleteButton.IDContext = math.random(1000,100000)
     instance.DeleteButton.SameLine = true
     instance.DeleteButton.OnClick = function()
-        for i,uuid in pairs(self.NPCs) do
-            if uuid == uuid then
+        for i,npcUuid in pairs(self.NPCs) do
+            if npcUuid == uuid then
                 table.remove(self.NPCs, i)
+                Event.RemovedNPCFromTab:SendToServer({ID=USERID, npc = uuid})
             end
         end
         -- self.CurrentNPCs = nil -- Will be rebuild with Update call
@@ -212,7 +215,7 @@ function PartyInterface:SetSelectedCharacter(characterUuid)
             charOrNPC.CharacterButton.Tint = {1.0, 0.8, 0.3, 1.0} -- Neutral Selected Color -- Beige
             charOrNPC.Selected = true
             self.SelectedCharacter = charOrNPC
-            UIEvents.SetSelectedCharacter:SendToServer({ID = USERID, Uuid = charOrNPC.Uuid})
+            Event.SetSelectedCharacter:SendToServer({ID = USERID, Uuid = charOrNPC.Uuid})
         else
             charOrNPC.CharacterButton.Tint = {1.0, 1.0, 1.0, 1.0} -- Reset to regular
             charOrNPC.Selected = false

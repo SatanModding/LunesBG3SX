@@ -12,7 +12,7 @@ NOsi.__index = NOsi
 ---@param character2 string -- uuid of an entity to "teleport to"
 function NOsi.TeleportTo(character, character2)
 
-        print("Calling NOsi.TeleportTo")
+        -- print("Calling NOsi.TeleportTo")
 
     if Ext.IsServer() then
         Debug.Print("NOsi.TeleportTo is not available on the Server")
@@ -27,7 +27,7 @@ function NOsi.TeleportTo(character, character2)
                 Debug.Print("Character" .. character2 .. " is not an entity")
                 return
         else
-                print("Ttransforming")
+                -- print("Ttransforming")
                 local targetposition = entity2.Transform.Transform.Translate
                 entity.Transform.Transform.Translate = targetposition
                 entity.Visual.Visual:SetWorldTranslate(targetposition)
@@ -40,8 +40,8 @@ end
 ---@param position table   -- table of {x,y,z} 
 function NOsi.TeleportToPosition(character, position)
 
-        print("teleporting ", character ," to position ")
-        _D(position)
+        -- print("teleporting ", character ," to position ")
+        -- _D(position)
 
     if Ext.IsServer() then
         Debug.Print("NOsi.TeleportToPosition is not available on the Server")
@@ -256,7 +256,7 @@ end
 
 
 if Ext.IsClient() then
-        UIEvents.RequestTeleport:SetHandler(function (payload)
+        Event.RequestTeleport:SetHandler(function (payload)
 
                 local character = payload.character
                 local targetPosition = payload.target
@@ -273,7 +273,7 @@ if Ext.IsClient() then
         end)
 
 
-        UIEvents.RequestRotation:SetHandler(function (payload)
+        Event.RequestRotation:SetHandler(function (payload)
 
                 -- print("received rotation request")
                 -- _D(payload)

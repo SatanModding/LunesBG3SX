@@ -1,6 +1,17 @@
 NPCTab = {}
 NPCTab.__index = NPCTab
 
+
+
+
+----------------------------------------------------------------------------------------------------
+-- 
+-- 								    	Other
+-- 
+----------------------------------------------------------------------------------------------------
+
+
+
 local function IsNPC(entity)
     local E = Helper.GetPropertyOrDefault(entity,"CharacterCreationStats", nil)
     if E then
@@ -16,17 +27,17 @@ function NPCTab:RequestStripNPC()
         local uuid = UIInstance.GetSelectedCharacter()
         --print("dumping options")
         --_D(self.InRange.Choice.Options)
-        print("got ", uuid)
+        -- print("got ", uuid)
 
         if not uuid then
-            
+
             local text = "            No NPC selected. Please select one first before clicking \"Strip\""
             UIHelper.AddTemporaryTooltip(self.StripButton, 2000, text)
             return
         end
 
-        UIEvents.RequestStripNPC:SendToServer({uuid = uuid})
-        UIEvents.RequestGiveGenitalsNPC:SendToServer({uuid = uuid})
+        Event.RequestStripNPC:SendToServer({uuid = uuid})
+        Event.RequestGiveGenitalsNPC:SendToServer({uuid = uuid})
 
 end
 
@@ -41,8 +52,8 @@ function NPCTab:RequestDressNPC()
             return
         end
 
-        UIEvents.RequestDressNPC:SendToServer({uuid = uuid})
-        UIEvents.RequestRemoveGenitalsNPC:SendToServer({uuid = uuid})
+        Event.RequestDressNPC:SendToServer({uuid = uuid})
+        Event.RequestRemoveGenitalsNPC:SendToServer({uuid = uuid})
 end
 
 
@@ -56,12 +67,12 @@ function NPCTab:ScanForNPCs()
         table.insert(allCharacters, entity.Uuid.EntityUuid)
     end
 
-    UIEvents.FetchWhitelistedNPCs:SendToServer({tbl = allCharacters, client = USERID}) 
+    Event.FetchWhitelistedNPCs:SendToServer({tbl = allCharacters, client = USERID})
 end
 
 
 
-UIEvents.SendWhitelistedNPCs:SetHandler(function (payload)
+Event.SendWhitelistedNPCs:SetHandler(function (payload)
     local whitelisted = payload
 
     local inRange = {}
@@ -73,7 +84,7 @@ UIEvents.SendWhitelistedNPCs:SetHandler(function (payload)
     for _, character in pairs(whitelisted) do
 
         local entity = Ext.Entity.Get(character)
-        local NPCLocation = entity.Transform.Transform.Translate 
+        local NPCLocation = entity.Transform.Transform.Translate
 
         -- to also consider y coordinates ()
         -- maybe someone is hidden in the floor idk
@@ -108,12 +119,12 @@ UIEvents.SendWhitelistedNPCs:SetHandler(function (payload)
         -- local uuid = npc:match(" %- (.+)")
         -- UIInstance.PartyInterface:SetSelectedCharacter(uuid)
         -- UIInstance.PartyInterface:UpdateNPCs()
-        
+
         -- text.Label = "Current Character: " .. npc
         -- text.Visible = true
         -- clear.Visible = true
     end
-end) 
+end)
 
 
 function UI:NewNPCTab()
@@ -121,7 +132,7 @@ function UI:NewNPCTab()
 
     local instance = setmetatable({
         --UI = self.ID,
-        Tab = self.TabBar:AddTabItem("NPCs"),
+        Tab = self.TabBar:AddTabItem(Ext.Loca.GetTranslatedString("h3d507f295c0b468ea6429b9b00c3c4ed2534", "NPCs")),
     }, NPCTab)
     return instance
 end
@@ -136,13 +147,13 @@ function NPCTab:Initialize()
     self.InRange = {}
     local r = self.InRange
     r.Range = self.Tab:AddSliderInt("", 5,1,10)
-    
+
     r.NPCs = {}
     r.Select = nil
     r.Choice = self.Tab:AddCombo("")
     r.Choice.Options = r.NPCs
     r.Choice.SelectedIndex = 1
-        
+
     r.Range.OnChange = function()
         if r.Choice.SelectedIndex ~= 0 then
             self:ScanForNPCs()
@@ -150,18 +161,25 @@ function NPCTab:Initialize()
     end
 
     self.AddButton = self.Tab:AddButton("Add")
-    self.AddButton.OnClick = function()
-        print("Add NPC button clicked")
+    self.AddButton.IDContext = math.random(1000,100000)
+    self.AddButton.OnClick = function(button,npc)
+        print("Add NPC button clicked for ", npc)
 
-        local npc = self.InRange.Choice.Options[self.InRange.Choice.SelectedIndex + 1]
+        if not npc then
+            print("no npc added in function, choosing selected from list")
+            npc = self.InRange.Choice.Options[self.InRange.Choice.SelectedIndex + 1]
+            print(npc)
+        end
 
         if npc then
             local uuid = npc:match(" %- (.+)")
+            print("uuid is ", uuid)
             local PI = UIInstance.PartyInterface
             if PI then
                 if not Table.Contains(PI.NPCs, uuid) then
                     table.insert(PI.NPCs, uuid)
                     PI:UpdateNPCs()
+                    Event.AddedNPCToTab:SendToServer({ID=USERID, npc = npc})
                 else
                     Debug.Print("This NPC has already been added!")
                     -- UIHelper.AddTemporaryTooltip(self.AddButton, 2000, "This NPC has already been added!")
@@ -174,3 +192,15 @@ end
 function NPCTab:UpdateRangeFinder()
 
 end
+
+-- for client to add NPCs to UI
+ Event.RestoreNPCTab:SetHandler(function(payload)
+    --print("Client received Event: RestoreNPCTab. Dumping npcs")
+    -- local npcs = payload.npcs 
+    local previouslySelected = UIInstance.GetSelectedCharacter()
+    for _,npc in pairs (payload.npcs) do
+        UIInstance.NPCTab.AddButton:OnClick(npc)
+    end
+    UIInstance.PartyInterface:SetSelectedCharacter(previouslySelected)
+    UIInstance.AppearanceTab:FetchGenitals()
+ end)

@@ -1,15 +1,21 @@
 ----------------------------------------------------------------------------------------------
 --------------- New v22 Events
-UIEvents.FetchScenes:SetHandler(function (payload)
+Event.FetchScenes:SetHandler(function (payload)
     if Data.SavedScenes and #Data.SavedScenes > 0 then
         _P("SavedScenes exists")
-        UIEvents.SendScenes:SendToClient(Data.SavedScenes, payload.ID)
-        UIEvents.UpdateScenes:Broadcast(Data.SavedScenes)
+        Event.SendScenes:SendToClient(Data.SavedScenes, payload.ID)
+        Event.UpdateScenes:Broadcast(Data.SavedScenes)
     else
-        UIEvents.SendScenes:SendToClient("Empty", payload.ID)
+        Event.SendScenes:SendToClient("Empty", payload.ID)
     end
 end)
-UIEvents.AskForSex:SetHandler(function (payload)
+
+Event.RequestSyncActiveScenes:SetHandler(function ()
+    Event.SyncActiveScenes:Broadcast(Data.SavedScenes)
+end)
+
+
+Event.AskForSex:SetHandler(function (payload)
     -- Debug.Print("ASK FOR SEX RECEIVED")
     -- Debug.Dump(payload)
     local caster = payload.Caster
@@ -57,21 +63,21 @@ UIEvents.AskForSex:SetHandler(function (payload)
 end)
 
 
-UIEvents.TogglePause:SetHandler(function (payload)
+Event.TogglePause:SetHandler(function (payload)
     local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
     scene:TogglePause()
     -- If we add transitioning animations - our own loop system we need to also pause potential scene timers
 end)
 
-UIEvents.SwapPosition:SetHandler(function (payload)
+Event.SwapPosition:SetHandler(function (payload)
     local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
     scene:SwapPosition()
 end)
 
-UIEvents.ChangeCameraHeight:SetHandler(function (payload)
+Event.ChangeCameraHeight:SetHandler(function (payload)
     Debug.Print("Currently not Implemented - Needs access to Camera Control")
 end)
-UIEvents.MoveScene:SetHandler(function (payload)
+Event.MoveScene:SetHandler(function (payload)
     local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
     local position = payload.Position -- vec3 WorldPosition table {x,y,z}
 
@@ -79,32 +85,33 @@ UIEvents.MoveScene:SetHandler(function (payload)
 end)
 
         
-UIEvents.StopSex:SetHandler(function (payload)
+Event.StopSex:SetHandler(function (payload)
     local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
     scene:Destroy()
 end)
-UIEvents.FetchGenitals:SetHandler(function (payload)
+Event.FetchGenitals:SetHandler(function (payload)
 
-    Debug.Print("Recevied FetchGenitals for character ".. payload.Character)
+    -- Debug.Print("Recevied FetchGenitals for character ".. payload.Character)
 
 
-    local conts = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
-    if conts ~= nil then
-        for k, v in pairs(conts) do
-            --print("sending payload to ", v.UserReservedFor.UserID)
-            UIEvents.SendGenitals:SendToClient({ID = payload.ID, Data = Data.CreateUIGenitalPayload(payload.Character), Whitelisted = Entity:IsWhitelisted(payload.Character)}, v.UserReservedFor.UserID)
-        end
-    end
+    -- local conts = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
+    -- if conts ~= nil then
+    --     for k, v in pairs(conts) do
+    --         --print("sending payload to ", v.UserReservedFor.UserID)
+    --         -- Event.SendGenitals:SendToClient({ID = payload.ID, Data = Data.CreateUIGenitalPayload(payload.Character), Whitelisted = Entity:IsWhitelisted(payload.Character)}, v.UserReservedFor.UserID)
+    --     end
+    -- end
+    Event.SendGenitals:SendToClient({ID = payload.ID, Data = Data.CreateUIGenitalPayload(payload.Character), Whitelisted = Entity:IsWhitelisted(payload.Character)}, payload.ID)
 end)
     
     
-UIEvents.RotateScene:SetHandler(function (payload)
+Event.RotateScene:SetHandler(function (payload)
     local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
     local position = payload.Position
     scene:RotateScene(position)
 end)
    
-UIEvents.FetchAnimations:SetHandler(function (payload)
+Event.FetchAnimations:SetHandler(function (payload)
     local sceneType = Scene:FindSceneByEntity(payload.Caster)
     local container = nil
     for _,type in pairs(Data.SceneTypes) do
@@ -120,10 +127,10 @@ UIEvents.FetchAnimations:SetHandler(function (payload)
             table.insert(availableAnimations, Data.Animation[spell])
         end
     end
-    --UIEvents.SendAnimations:SendToClient({ID = payload.ID, Data = availableAnimations}, payload.ID)
+    --Event.SendAnimations:SendToClient({ID = payload.ID, Data = availableAnimations}, payload.ID)
 end)
 
--- UIEvents.FetchAllAnimations:SetHandler(function (payload)
+-- Event.FetchAllAnimations:SetHandler(function (payload)
 
 --     print("-----------------------------------------------------")
 --     print("YAPYAPYAPYAP")
@@ -132,61 +139,64 @@ end)
 
 
 
-UIEvents.FetchAllAnimations:SetHandler(function (payload)
-    local anims = {}
-    for anim,animData in pairs(Data.Animations) do
-        if anim ~= "New" then
-            anims[anim] = animData
-            anims[anim].Heightmatching = anims[anim].Heightmatching.matchingTable
-        end
-    end
-    --Debug.DumpS(anims)
-    UIEvents.SendAllAnimations:Broadcast(anims)
-end)
+-- Event.FetchAllAnimations:SetHandler(function (payload)
+--     local anims = {}
+--     for anim,animData in pairs(Data.Animations) do
+--         if anim ~= "New" then
+--             anims[anim] = animData
+--             anims[anim].Heightmatching = anims[anim].Heightmatching.matchingTable
+--         end
+--     end
+--     --Debug.DumpS(anims)
+--     Event.SendAllAnimations:Broadcast(anims)
+-- end)
 
 
-UIEvents.FetchAllAnimations:SetHandler(function (payload)
-    Debug.Print("Received message FetchAllAnimations with payload")
+Event.FetchAllAnimations:SetHandler(function (payload)
     local animations = Data.Animations
     local client = payload.ID
-    UIEvents.SendAllAnimations:SendToClient({Animations = animations, SceneControl = payload.SceneControl}, client)
+    Event.SendAllAnimations:SendToClient({Animations = animations, SceneControl = payload.SceneControl}, client)
 end)
 
-UIEvents.FetchParty:SetHandler(function (payload)
+Event.FetchParty:SetHandler(function (payload)
     local party = Osi.DB_PartyMembers:Get(nil)
-    UIEvents.SendParty:SendToClient(party, payload.ID)
+    Event.SendParty:SendToClient(party, payload.ID)
 end)
 
-UIEvents.FetchWhitelist:SetHandler(function (payload)
+Event.FetchWhitelist:SetHandler(function (payload)
     local newPayload = {Whitelist = Data.AllowedTagsAndRaces, ModdedTags = Data.ModdedTags, Whitelisted = Data.WhitelistedEntities, Blacklisted = Data.BlacklistedEntities}
-    UIEvents.SendWhitelist:SendToClient(newPayload, payload.ID)
+    Event.SendWhitelist:SendToClient(newPayload, payload.ID)
 end)
 
 
 
 
-UIEvents.CustomEvent:SetHandler(function (payload)
+Event.CustomEvent:SetHandler(function (payload)
     CreateAnimationFilter()
 end)
 
-Ext.Osiris.RegisterListener("GainedControl", 1, "after", function(target)  
-    UIEvents.ChangeCharacter:Broadcast(target)
+Ext.Osiris.RegisterListener("GainedControl", 1, "after", function(target)
+    Event.ChangeCharacter:Broadcast(target)
 end)
 
 
+Ext.Osiris.RegisterListener("LevelGameplayStarted", 2, "after", function(_, _)
+    Event.ChangeCharacter:Broadcast("")
+end)
 
--- UIEvents.FetchFilteredAnimations:SetHandler(function (payload)
+
+-- Event.FetchFilteredAnimations:SetHandler(function (payload)
 --     Debug.Print("Received message FetchFilteredAnimations with payload")
 --     _D(payload)
 --     local filter = payload.filter
 --     local animations = Animation.GetFilteredAnimations(filter)
 --     local client = payload.USERID
---     UIEvents.SendFiltered:SendToClient({Animations = animations, SceneControl = payload.SceneControl}, client)
+--     Event.SendFiltered:SendToClient({Animations = animations, SceneControl = payload.SceneControl}, client)
 -- end)
 
 
 
-UIEvents.ChangeAnimation:SetHandler(function (payload)
+Event.ChangeAnimation:SetHandler(function (payload)
     --print("Received Change Animation event with payload")
     --_D(payload)
     
@@ -201,7 +211,7 @@ end)
 
 
 
-UIEvents.FetchWhitelistedNPCs:SetHandler(function(payload)
+Event.FetchWhitelistedNPCs:SetHandler(function(payload)
     local tbl = payload.tbl
     local filtered = {}
 
@@ -212,17 +222,17 @@ UIEvents.FetchWhitelistedNPCs:SetHandler(function(payload)
             table.insert(filtered, character)
         end
     end
-    UIEvents.SendWhitelistedNPCs:SendToClient(filtered, payload.client) 
+    Event.SendWhitelistedNPCs:SendToClient(filtered, payload.client) 
 
 end)
 
-UIEvents.FetchUserTags:SetHandler(function(payload)
+Event.FetchUserTags:SetHandler(function(payload)
     local tags = Entity:TryGetEntityValue(payload.Character, nil, {"ServerRaceTag", "Tags"})
     
-     -- Can't send array over as event payloads so we add every entry to a table and send that one instead
+    -- Can't send array over as event payloads so we add every entry to a table and send that one instead
     local nonArrayTags = {}
     for _,tagUUID in pairs(tags) do
         table.insert(nonArrayTags,tagUUID)
     end
-    UIEvents.SendUserTags:SendToClient(nonArrayTags, payload.ID)
+    Event.SendUserTags:SendToClient(nonArrayTags, payload.ID)
 end)

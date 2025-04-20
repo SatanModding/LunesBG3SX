@@ -82,7 +82,7 @@ function Entity:HasPenis(uuid)
     -- current gential to get the correct animation
     local sexGenital = SexUserVars.GetGenital("BG3SX_SexGenital", entity)
     if sexGenital then
-        print(uuid, " has sex genital. Determining genital type")
+        -- print(uuid, " has sex genital. Determining genital type")
         local genitalTags =  Ext.StaticData.Get(sexGenital, "CharacterCreationAppearanceVisual").Tags
         if Table.Contains(genitalTags, vulva) then
             return false
@@ -106,8 +106,10 @@ function Entity:HasPenis(uuid)
     -- NPCs never get the tags. "Future" companions don't have them too.
     -- E.g., Halsin in Act 1 has no GENITAL_PENIS, he gets it only when his story allows him to join the active party in Act 2.
     if Entity:IsPlayable(uuid) then
-        print(uuid, " is playable. Determining genital type")
+        -- print(uuid, " is playable. Determining genital type")
         if Osi.IsTagged(uuid, "GENITAL_PENIS_d27831df-2891-42e4-b615-ae555404918b") == 1 then
+            _P("-------------------")
+            _P(uuid .. "ISPLAYABLE")
             return true
         end
         if Osi.IsTagged(uuid, "GENITAL_VULVA_a0738fdf-ca0c-446f-a11d-6211ecac3291") == 1 then
@@ -371,7 +373,8 @@ function Entity:Redress(entity, oldArmourSet, oldEquipment, slots)
             print("is not an entity ", entity)
         end
 
-        NPC.Redress(actualEntity, slots) 
+        NPC.Redress(actualEntity, slots)
+        Event.SyncNPCDress:Broadcast({Uuid = actualEntity.Uuid.EntityUuid, Visuals = slots})
     end
 
 

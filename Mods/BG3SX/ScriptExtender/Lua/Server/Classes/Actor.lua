@@ -42,7 +42,7 @@ function Actor:new(parent)
     instance.position = scene.rootPosition
     instance.uuid = Osi.CreateAt(Osi.GetTemplate(parent), instance.position.x, instance.position.y, instance.position.z, 1, 0, "")
 
-    Debug.Print("actor uuid ".. instance.uuid)
+    -- Debug.Print("actor uuid ".. instance.uuid)
 
     initialize(instance)
     return instance

@@ -171,7 +171,7 @@ function Genital.Initialize()
 	--Ext.Timer.WaitFor(200, function()
 	
 	-- Debug.Print("Sending GenitalsLoaded Event")
-	UIEvents.GenitalsLoaded:Broadcast("Hewwwo I have fetched all genitaws uwu")
+	Event.GenitalsLoaded:Broadcast("Hewwwo I have fetched all genitaws uwu")
 	--end)
 
 	
@@ -262,16 +262,16 @@ function Genital.GetFirstBestGenital(entity)
 	local allPermittedGenitals = Genital.getPermittedGenitals(entity)
 	local permittedVanilla = Table.ConcatenateTables(permittedVulvas, permittedPenises)
 
-	print("Has Penis ", hasPenis)
+	-- print("Has Penis ", hasPenis)
 
 	if permittedVanilla then
-		print("Vanilla genitals exist")
+		-- print("Vanilla genitals exist")
 		genitalsToSearch = permittedVanilla
 	elseif allPermittedGenitals then
-		print("No Vanilla genitals exist, but modded ones")
+		-- print("No Vanilla genitals exist, but modded ones")
 		genitalsToSearch = permittedVanilla
 	else
-		Debug.Print("[BG3SX] No genitals available after filtering for this entity. Adding default human genitals")
+		-- Debug.Print("[BG3SX] No genitals available after filtering for this entity. Adding default human genitals")
 		if hasPenis then
 			return "2fe9e574-035b-44e7-b177-9eccdf83914e"
 		else
@@ -284,7 +284,7 @@ function Genital.GetFirstBestGenital(entity)
 	for _, genital in pairs(genitalsToSearch) do
 		-- alternatively if hasPenis == false and IsPenis == false, also reuturn (both are/have vulva)
 		if hasPenis == Genital.IsPenis(genital) then
-			print("hasPenis ", hasPenis, " and ", genital, " ispenis ", Genital.IsPenis(genital))
+			-- print("hasPenis ", hasPenis, " and ", genital, " ispenis ", Genital.IsPenis(genital))
 			return genital
 		end
 	end
@@ -354,7 +354,7 @@ function Genital.OverrideGenital(newGenital, entity)
 		Debug.Print(entity.Uuid.EntityUuid.. " is not whitelisted to receive genitals")
 	end
 
-	print("overriding genitals with " , newGenital)
+	print("overriding genitals with " , newGenital, " for ", Helper.GetName(entity.Uuid.EntityUuid))
 
 	Visual.Replicate(entity)
 end
@@ -368,19 +368,19 @@ function Genital.AddGenitalIfHasNone(entity)
 	local toBeAdded
 	local currentGenital = Genital.GetCurrentGenital(entity)
 
-	print("curretGenital for ", entity.Uuid.EntityUuid, " " ,currentGenital)
+	-- print("curretGenital for ", entity.Uuid.EntityUuid, " " ,currentGenital)
 
 	if (allowedToHaveGenitals(entity.Uuid.EntityUuid)) and (not currentGenital) then
 
 		local favorite = SexUserVars.GetGenital("BG3SX_OutOfSexGenital", entity)
 
 		if favorite then
-			print("a facorited genital exists. Adding ", favorite)
+			-- print("a favorited genital exists. Adding ", favorite)
 			toBeAdded = favorite
 		else
 			print("no genital exists. Getting a random one")
 			toBeAdded = Genital.GetFirstBestGenital(entity)
-			print("fetched ", toBeAdded)
+			-- print("fetched ", toBeAdded)
 		end
 
 
@@ -440,7 +440,7 @@ function Genital.GiveSexGenital(entity)
 	end
 
 
-	print("giving genitals")
+	-- print("giving genitals")
 	if not sexGenital then
 		print("NO SEX GENITAL HAS BEEN SET")
 		if not hasPenis then

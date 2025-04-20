@@ -336,7 +336,7 @@ initialize = function(scene)
   
 
 
-    print("initializing scene")
+    -- print("initializing scene")
 
     setStartLocations(scene) -- Save start location of each entity to later teleport them back
     saveCampFlags(scene) -- Saves which entities had campflags applied before
@@ -363,10 +363,10 @@ initialize = function(scene)
 
         -- TODO - why do we wait?
         Ext.Timer.WaitFor(200, function ()
-            print("requesting teleport")
+            -- print("requesting teleport")
             for _, character in pairs(scene.entities) do
-                UIEvents.RequestTeleport:Broadcast({character= character, target = scene.entities[1]})
-                UIEvents.RequestRotation:Broadcast({character = character, target = scene.entities[1]})
+                Event.RequestTeleport:Broadcast({character= character, target = scene.entities[1]})
+                Event.RequestRotation:Broadcast({character = character, target = scene.entities[1]})
             end
         end)
         
@@ -395,7 +395,7 @@ initialize = function(scene)
         end
     end
 
-    UIEvents.NewScene:Broadcast(scene)
+    Event.NewScene:Broadcast(scene)
     Ext.ModEvents.BG3SX.SceneCreated:Throw({scene})
 end
 
@@ -428,12 +428,12 @@ function Scene:MoveSceneToLocation(newLocation)
         -- end
         ---------------------------------------------------------------------------------------
 
-        UIEvents.RequestTeleport:Broadcast({character = character, target = newLocation})
+        Event.RequestTeleport:Broadcast({character = character, target = newLocation})
     end
 
         if #self.props > 0 then
             for _, prop in pairs(self.props) do
-                UIEvents.RequestTeleport:Broadcast({character = prop, target = newLocation})
+                Event.RequestTeleport:Broadcast({character = prop, target = newLocation})
             end
         end
     
@@ -449,15 +449,12 @@ end
 ---@param caster any
 ---@param location any
 function Scene:RotateScene(location)
-
-    print("called rotate scene")
+    -- print("called rotate scene")
     
-
     for _, character in pairs(self.entities) do
-        UIEvents.RequestRotation:Broadcast({character = character, target = location})
+        Event.RequestRotation:Broadcast({character = character, target = location})
     end
 
-   
     -- TODO - probably not required whenb using Nosi 
     --self:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
     --Sex:PlayAnimation(character, self.currentAnimation) -- Play prior animation again
@@ -521,10 +518,10 @@ local function sceneEntityReset(character)
 
     local entity = Ext.Entity.Get(character)
     if not entity then
-        Debug.Print("is not a valid entity ".. character)
+        -- Debug.Print("is not a valid entity ".. character)
     end
 
-    Debug.Print("Scene reset for character " .. character)
+    -- Debug.Print("Scene reset for character " .. character)
     local outOfSexGenital = SexUserVars.GetGenital("BG3SX_OutOfSexGenital", entity)
     local scene = Scene:FindSceneByEntity(character)
     local startLocation
@@ -548,10 +545,10 @@ local function sceneEntityReset(character)
     end
 
 
-    print("teleporting ", character , " to the startposition ", startLocation.position[1], startLocation.position[2],startLocation.position[3] )
+    -- print("teleporting ", character , " to the startposition ", startLocation.position[1], startLocation.position[2],startLocation.position[3] )
 
-    UIEvents.RequestTeleport:Broadcast({character = character, target = {startLocation.position[1], startLocation.position[2], startLocation.position[3]}})
-    UIEvents.RequestRotation:Broadcast({character = character, target = startLocation.rotation})
+    Event.RequestTeleport:Broadcast({character = character, target = {startLocation.position[1], startLocation.position[2], startLocation.position[3]}})
+    Event.RequestRotation:Broadcast({character = character, target = startLocation.rotation})
 
     Osi.RemoveBoosts(character, "ActionResourceBlock(Movement)", 0, "", "") -- Unlocks movement
 
@@ -564,35 +561,25 @@ end
 
 -- Destroys a scene instance
 function Scene:Destroy()
-    
-
-    
     self:CancelAllSoundTimers()
     self:DestroyProps()
     self:ToggleSummonVisibility()
     
-    
-    
     -- self:StopAnimation() -- maybe use this new function instead of playing a "nothing" animation
     for _, entity in pairs(self.entities) do
-        
-        
+    
         sceneEntityReset(entity)
-        
         
         local nothing = "88f5df46-921d-4a28-93b6-202df636966c" -- Random UUID - This is nothing, NULL or "" doesn't work, crashes the game.
         Osi.PlayAnimation(entity, nothing) -- To cancel out of any ongoing animations
         Osi.PlaySound(entity, Data.Sounds.Orgasm[math.random(1, #Data.Sounds.Orgasm)]) -- TODO - change this to a generic sound for when we use this for non-sex instead
 
-
-
         if Entity:IsNPC(entity) then
             NPC.RemoveGenitals(entity)
         end
-
-
     end
     
+    Event.SyncActiveScenes:Broadcast(self)
     Ext.ModEvents.BG3SX.SceneDestroyed:Throw({self})
 
     for i,scene in ipairs(Data.SavedScenes) do
@@ -610,14 +597,15 @@ function Scene.DestroyAllScenes()
             scene:Destroy()
         end
     end
-    UIEvents.DestroyAllSceneControls:Broadcast()
+    Event.DestroyAllSceneControls:Broadcast()
 end
 --ConsoleCommand.New(Scene.DestroyAllScenes, "Terminates all Scenes")
 ConsoleCommand.New("DestroyAllScenes", Scene.DestroyAllScenes, "Destroys all ongoing scenes") -- Killswitch
 
 
 function Scene:SwapPosition()
-    if self.UnlockedSwaps then
+    if self.UnlockedSwaps or (Entity:HasPenis(self.entities[1]) == Entity:HasPenis(self.entities[2])) then
+        _P("SWAPPI")
         local savedActor = self.entities[1]
 
         Ext.ModEvents.BG3SX.SceneSwitchPlacesBefore:Throw({self.entities})
@@ -630,6 +618,7 @@ function Scene:SwapPosition()
 
         self:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
 
+        
         self:PlayAnimation(self.currentAnimation)
         -- Sex:PlayAnimation(savedActor, self.currentAnimation)
     end

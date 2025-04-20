@@ -1,5 +1,5 @@
 Ext.Require("Shared/Utils/ConsoleCommands.lua")
-Ext.Require("Shared/Utils/UIEvents.lua")
+Ext.Require("Shared/Utils/Event.lua")
 Ext.Require("Shared/SexUserVars.lua")
 
 
@@ -20,3 +20,4 @@ Ext.Require("Shared/Utils/Helper.lua")
 
 -- Initialize Usersettings
 Ext.Require("Shared/Utils/UserSettings.lua")
+Ext.Require("Shared/Utils/LocalSettings.lua")

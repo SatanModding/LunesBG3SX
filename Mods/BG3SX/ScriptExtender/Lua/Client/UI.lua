@@ -2,6 +2,8 @@ USERID = nil
 UI = {}
 UI.__index = UI
 UIInstance = nil
+ViewPort = Ext.IMGUI.GetViewportSize()
+ViewPortScale = Ext.Require("Client/IMGUI.lua").ScaleFactor()
 
 ---------------------------------------------------------------------------------------------------
 --                                       Load MCM Tab
@@ -15,29 +17,24 @@ end)
 --------------------------------------------------
 
 function UI.New(mcm)
-    local workingArea
+    local window
     local mcm = mcm or nil
     if mcm then
-        workingArea = mcm:AddChildWindow("")
+        MCMActive = true
+        window = mcm:AddChildWindow("")
     else
-        workingArea = Ext.IMGUI.NewWindow("")
+        window = Ext.IMGUI.NewWindow("BG3SX")
+        window:SetSize({500*ViewPortScale, 500*ViewPortScale}, "FirstUseEver")
     end
 
     --local u = _C().UserReservedFor.UserID
     --local id = Helper.UserToPeerID(u)
     local instance = setmetatable({
         ID = id,
-        Window = workingArea,
+        Window = window,
         Settings = {},
         HotKeys = {},
     }, UI)
-    if not mcm then
-        instance.Window:SetSize({500, 500}, "FirstUseEver")
-        -- instance.Window.Closeable = true
-        -- instance.Window.OnClose = function (e) -- Re-enable if opening function has been added
-        --     instance.Window:Destroy()
-        -- end
-    end
     USERID = _C().Uuid.EntityUuid
     UIInstance = instance
     instance:Initialize()
@@ -46,10 +43,10 @@ end
 
 
 function UI:Initialize()
-    local idtestbutton = self.Window:AddButton("ID Test")
-    idtestbutton.OnClick = function()
-        _P(USERID)
-    end
+    -- local idtestbutton = self.Window:AddButton("ID Test 5")
+    -- idtestbutton.OnClick = function()
+    --     _P(USERID)
+    -- end
     self.PartyInterface = self:NewPartyInterface()
     self.PartyInterface:Initialize()
     -- PartyTable on top of Tabs so we can make everything Character specific depending on which one is selected
@@ -58,20 +55,22 @@ function UI:Initialize()
     self.SceneTab = self:NewSceneTab()
     self.AppearanceTab = self:NewAppearanceTab()
     self.WhitelistTab = self:NewWhitelistTab()
+    self.WhitelistTab.Visible = false
     self.NPCTab = self:NewNPCTab()
-    -- self.SettingsTab = self:NewSettingsTab()
+    self.SettingsTab = self:NewSettingsTab()
     --self.DebugTab = self:NewDebugTab()
 
     self.SceneTab:Initialize()
     self.AppearanceTab:Initialize()
     self.WhitelistTab:Initialize()
     self.NPCTab:Initialize()
+    self.SettingsTab:Initialize()
+    print("calling restore NPCs")
+    Event.FinishedBuildingNPCUI:SendToServer({ID=USERID})  -- Restores stored NPCs from last session
+
     -- self.SettingsTab:Initialize()
-    --self.DebugTab:Initialize()
+    -- self.DebugTab:Initialize()
 end
-
-
-
 
 function UI:AwaitInput(reason, payload)
 
@@ -82,12 +81,6 @@ function UI:AwaitInput(reason, payload)
     self.Await = {Reason = reason, Payload = payload}
     self.KeyInputHandler, self.MouseInputHandler, self.ControllerInputHandler, self.ControllerAxisHandler = self:CreateEventHandler()
 end
-
--- function LuaEventBase:PreventListenerAction(bool)
---     if self.CanPreventAction then
---         self.ActionPrevented = bool
---     end
--- end
 
 -- Maybe move into its own class
 function UI:CreateEventHandler()
@@ -125,7 +118,7 @@ function UI:CreateEventHandler()
                 end
                 if getMouseover().Inner.Inner[1] then
                     if getMouseover().Inner.Inner[1].Character then
-                        Debug.Print("--------------------------------------------------")
+                        Debug.Print("------------------------New BG3SX Scene------------------------")
                         mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid
                         if reason == "NewScene" then
                             self:InputRecieved(mouseoverTarget)
@@ -136,8 +129,8 @@ function UI:CreateEventHandler()
                     end
                 end
             end
-        elseif e.Button == 3 and e.Pressed == true then -- Button 3 is right click
-            _D(getMouseover())
+        elseif e.Button == 3 and e.Pressed == true then -- Button 3 is right click | 2 is middle mouse click
+            -- _D(getMouseover())
             self:CancelAwaitInput("Canceled") -- Cancel
         end
     end)
@@ -155,7 +148,7 @@ function UI:CreateEventHandler()
 
         if e.Button == "LeftStick" and e.Pressed == true then
             enteredTargeting = true
-            -- collapsed = self:ToggleCollapseWindow(true)
+            self:HideWindows()
         elseif e.Button == "A" and e.Pressed == true then -- Only check this if
             if getMouseover() and getMouseover().UIEntity then -- In case a UI entity has been found
                 mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid
@@ -184,14 +177,14 @@ function UI:CreateEventHandler()
                             end
                         else
                             self:CancelAwaitInput("No entity found")
-                            -- self:ToggleCollapseWindow(false)
+                            self:ShowWindows()
                         end
                     end
                 end
             end
         elseif e.Button == "B" and e.Pressed == true then -- Cancel out of targeting
             self:CancelAwaitInput("Canceled")
-            -- self:ToggleCollapseWindow(false) -- In case it was set to collapse
+            self:ShowWindows() -- In case it was set to collapse
         end
     end)
 
@@ -241,33 +234,42 @@ function UI:InputRecieved(inputPayload)
     local reason = self.Await.Reason
     if reason == "NewScene" then
         _P("Ask for sex request. Caster: ", _C().Uuid.EntityUuid, " target = ", inputPayload)
-        UIEvents.AskForSex:SendToServer({ID = USERID, Caster = UIInstance.GetSelectedCharacter(), Target = inputPayload})
+        Event.AskForSex:SendToServer({ID = USERID, Caster = UIInstance.GetSelectedCharacter(), Target = inputPayload})
     elseif reason == "RotateScene" then
-        UIEvents.RotateScene:SendToServer({ID = USERID, Scene = self.Await.Payload, Position = inputPayload})
+        Event.RotateScene:SendToServer({ID = USERID, Scene = self.Await.Payload, Position = inputPayload})
     elseif reason == "MoveScene" then
-        UIEvents.MoveScene:SendToServer({ID = USERID, Scene = self.Await.Payload, Position = inputPayload})
+        Event.MoveScene:SendToServer({ID = USERID, Scene = self.Await.Payload, Position = inputPayload})
     end
     self:CancelAwaitInput()
 end
 
-function UI:ToggleCollapseWindow(toggle)
-    local mcm
-    if self.Window.ParentElement then
-        mcm = true
+function UI:HideWindows()
+    if MCMActive then
+        Mods.MCM.IMGUIAPI:CloseMCMWindow()
     else
-        mcm = false
+        if self.Window then
+            self.Window.Open = false
+        end
+        for _,sceneControl in pairs(self.SceneTab.ActiveSceneControls) do
+            sceneControl.TempClosed = true
+            sceneControl.Window.Open = false
+        end
     end
-
-    if toggle then
-        if not mcm then
-            self.Window:SetCollapsed(toggle)
-        else
-            if Mods.BG3MCM and Mods.BG3MCM.MCM_WINDOW then
-                Mods.BG3MCM.MCM_WINDOW:SetCollapsed(toggle)
+end
+function UI:ShowWindows()
+    if MCMActive then
+        Mods.MCM.IMGUIAPI:OpenMCMWindow()
+    else
+        if self.Window then
+            self.Window.Open = true
+        end
+        for _,sceneControl in pairs(self.SceneTab.ActiveSceneControls) do
+            if sceneControl.TempClosed == true then
+                sceneControl.Window.Open = true
+                sceneControl.TempClosed = false
             end
         end
     end
-    return toggle
 end
 
 function UI.DestroyChildren(obj)
@@ -279,7 +281,7 @@ function UI.DestroyChildren(obj)
 end
 
 function UI.GetAnimations()
-    UIEvents.FetchAllAnimations:SendToServer({ID = USERID})
+    Event.FetchAllAnimations:SendToServer({ID = USERID})
 end
 
 --function UI.GetUIByID(id)

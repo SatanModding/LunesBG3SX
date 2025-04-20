@@ -15,7 +15,7 @@ function UI:NewAppearanceTab()
     
     local instance = setmetatable({
         --UI = self.ID,
-        Tab = self.TabBar:AddTabItem("Appearance"),
+        Tab = self.TabBar:AddTabItem(Ext.Loca.GetTranslatedString("h36809485096e467682a34b1a780bb4a4a816", "Appearance")),
         GenitalsLoaded = nil,
         Genitals = {},
     }, AppearanceTab)
@@ -30,7 +30,7 @@ function AppearanceTab:UpdateStrippingGroup(uuid)
     local entity = Ext.Entity.Get(uuid)
     local stripping = SexUserVars.GetAllowStripping(entity)
 
-    local allowStripBox = self.StrippingArea:AddCheckbox("Allow Stripping")
+    local allowStripBox = self.StrippingArea:AddCheckbox(Ext.Loca.GetTranslatedString("hd050a087bef04ed4b4b8c775b458b6c2d786", "Allow Stripping"))
     
     if (stripping == false) then
 
@@ -54,7 +54,7 @@ function AppearanceTab:UpdateToggleVisibilityGroup(uuid)
     local entity = Ext.Entity.Get(uuid)
     local isInvis = SexUserVars.IsInvisible(entity)
 
-    self.IsInvisBox = self.ToggleVisibilityArea:AddCheckbox("Toggle Invisibility")
+    self.IsInvisBox = self.ToggleVisibilityArea:AddCheckbox(Ext.Loca.GetTranslatedString("h2080108a2c8d4e509be9b53c2421a1c4eb95", "Toggle Invisibility"))
     
     if (self.IsInvisBox == false) then
 
@@ -66,15 +66,15 @@ function AppearanceTab:UpdateToggleVisibilityGroup(uuid)
     self.IsInvisBox.OnChange = function()
         if self.IsInvisBox.Checked == true then
             self.IsInvisBox.Checked = false
-            UIEvents.ToggleInvisibility:SendToServer({Uuid = uuid, Value = true})
+            Event.ToggleInvisibility:SendToServer({Uuid = uuid, Value = true})
         else
             self.IsInvisBox.Checked = true
-            UIEvents.ToggleInvisibility:SendToServer({Uuid = uuid, Value = false})
+            Event.ToggleInvisibility:SendToServer({Uuid = uuid, Value = false})
         end
     end
 end
 
-UIEvents.SetInvisible:SetHandler(function (payload)
+Event.SetInvisible:SetHandler(function (payload)
     if UIInstance:GetSelectedCharacter() == payload.Uuid then
         UIInstance.AppearanceTab.IsInvisBox.Checked = payload.Value
     end
@@ -95,7 +95,7 @@ function AppearanceTab:UpdateEquipmentAreaGroup(uuid)
 
     if IsNPC(entity) then
         local npcTab = UIInstance.NPCTab
-        self.StripButton = self.EquipmentArea:AddButton("Strip NPC")
+        self.StripButton = self.EquipmentArea:AddButton(Ext.Loca.GetTranslatedString("h5217dc9e84404c68a890c1b21fb1b22dca33", "Strip NPC"))
 
         self.StripButton.OnClick = function()
             -- print("Strip NPC button clicked")
@@ -103,7 +103,7 @@ function AppearanceTab:UpdateEquipmentAreaGroup(uuid)
         end
 
 
-        self.DressButton = self.EquipmentArea:AddButton("Dress NPC")
+        self.DressButton = self.EquipmentArea:AddButton(Ext.Loca.GetTranslatedString("h95893257756e4bacba737e735eb75c6ba1d0", "Dress NPC"))
         self.DressButton.SameLine = true
 
         self.DressButton.OnClick = function()
@@ -131,9 +131,8 @@ function AppearanceTab:Initialize()
         self.EquipmentArea = self.Tab:AddGroup("")
     end
 
-   
-
-    self.Tab:AddSeparatorText("Genitals:")
+    local sep = self.Tab:AddSeparatorText(Ext.Loca.GetTranslatedString("hfe5bebe645244c108b0fd82dcf10dcc22177", "Genitals"))
+    sep:SetStyle("SeparatorTextPadding", 5)
     if not self.GenitalArea then
         self.GenitalArea = self.Tab:AddGroup("")
     end
@@ -142,24 +141,25 @@ end
 
 function AppearanceTab:FetchGenitals()
     -- self.AwaitingGenitals = true
-    UIEvents.FetchGenitals:SendToServer({ID = USERID, Character = UIInstance.GetSelectedCharacter() or _C().Uuid.EntityUuid})
+    Event.FetchGenitals:SendToServer({ID = USERID, Character = UIInstance.GetSelectedCharacter() or _C().Uuid.EntityUuid})
 end
 
 function AppearanceTab:UpdateGenitalGroup(whitelisted)
     UI.DestroyChildren(self.GenitalArea)
     local buttonID = 0
     if whitelisted then
-        for Category,Genitals in pairs(self.Genitals) do
+        for Category,Genitals in pairsByKeys(self.Genitals) do
             local categoryHeader = self.GenitalArea:AddCollapsingHeader(Category)
 
+            -- Rename payload to regular names - TODO: Fix Payload
             if Category == "BG3SX_VanillaVulva" then
-                categoryHeader.Label = "Vanilla Vulvas"
+                categoryHeader.Label = Ext.Loca.GetTranslatedString("h12336834b5e64857bed909e165f752393cfb", "Vanilla Vulvas")
             elseif Category == "BG3SX_VanillaFlaccid" then
-                categoryHeader.Label = "Vanilla Penises"
+                categoryHeader.Label = Ext.Loca.GetTranslatedString("hd0e090c89d924fa8ba6bfa2000ff8f479d8a", "Vanilla Penises")
             elseif Category == "BG3SX_SimpleErections" then
-                categoryHeader.Label = "MrFunsize's Erections"
+                categoryHeader.Label = Ext.Loca.GetTranslatedString("ha0ba5dd9dcc94acca77258ba6254decb3784", "MrFunsize Erections")
             elseif Category == "BG3SX_OtherGenitals" then
-                categoryHeader.Label = "Modded Genitals"
+                categoryHeader.Label = Ext.Loca.GetTranslatedString("h7d29c52c0c6a4e7d8e2d284f0267b139f1ec", "Modded Genitals")
             end
 
             local genitalTable = categoryHeader:AddTable("",3)
@@ -198,14 +198,14 @@ function AppearanceTab:UpdateGenitalGroup(whitelisted)
                 activeGenital.OnClick = function()
                     activeGenital.Selected = false
                     local uuid = UIInstance.GetSelectedCharacter()
-                    print("current character accordin to the label is ", uuid)
-                    UIEvents.SetActiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance.GetSelectedCharacter()})
+                    -- print("current character accordin to the label is ", uuid)
+                    Event.SetActiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance.GetSelectedCharacter()})
                 end
                 inactiveGenital.OnClick = function()
                     activeGenital.Selected = false
                     local uuid = UIInstance.GetSelectedCharacter()
-                    print("current character accordin to the label is ", uuid)
-                    UIEvents.SetInactiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance.GetSelectedCharacter()})
+                    -- print("current character accordin to the label is ", uuid)
+                    Event.SetInactiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance.GetSelectedCharacter()})
                 end
             end
         end

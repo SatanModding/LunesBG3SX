@@ -7,23 +7,20 @@
 
 
 
-UIEvents.SetInactiveGenital:SetHandler(function (payload)
-
-    print("Event set INactive gential")
+Event.SetInactiveGenital:SetHandler(function (payload)
+    --print("Event set Inactive gential")
 
     local uuid = payload.uuid
     local genital = payload.Genital
     local entity = Ext.Entity.Get(uuid)
 
     if not entity then
-        print(uuid, " is not a valid entity")
+        Debug.Print(tostring(uuid) .. " is not a valid entity")
     end
 
-
     SexUserVars.AssignGenital("BG3SX_OutOfSexGenital", genital, entity)
-
-     -- If inactive is changed, update USerVars of entity and change genital
-     -- only if no scene is currently active
+    -- If inactive is changed, update USerVars of entity and change genital
+    -- only if no scene is currently active
 
     for _, scene in pairs(Data.SavedScenes) do
         
@@ -33,14 +30,12 @@ UIEvents.SetInactiveGenital:SetHandler(function (payload)
             end
         end
     end
-
     Genital.OverrideGenital(genital, entity)
-
 end)
 
 
 
-UIEvents.SetActiveGenital:SetHandler(function (payload)
+Event.SetActiveGenital:SetHandler(function (payload)
 
     print("Event set active gential")
 
@@ -53,16 +48,30 @@ UIEvents.SetActiveGenital:SetHandler(function (payload)
 
     -- If active is changed, update UserVars, search for active actors, and change their genitals as well
 
-    for _, scene in pairs(Data.SavedScenes) do
-        
-        for _, character in pairs(scene.entities) do
-            if Helper.StringContains(character, uuid) then
-                Genital.OverrideGenital(genital, Ext.Entity.Get(character))
+        local scene = Scene:FindSceneByEntity(uuid)
+
+        -- character is currently in a sex scene (currently only works for scenes of 1 or 2 characters)
+        if scene then
+            -- immediately swap genitals
+            Genital.OverrideGenital(genital, entity)
+
+            scene.SceneType = Helper.DetermineSceneType(scene)
+            -- if it is apaired animation, then swap the "top" and "bottom" based on genitals
+            if #scene.entities == 2 then
+                if Entity:HasPenis(scene.entities[1]) ~= Entity:HasPenis(scene.entities[2]) then
+                    if not Entity:HasPenis(scene.entities[1]) then
+                        local savedActor = scene.entities[1]
+                        scene.entities[1] = scene.entities[2]
+                        scene.entities[2] = savedActor
+                    end
+                end
+            end
+
+            for _, character in pairs(scene.entities) do    
+                Event.UpdateSceneControlPicker:SendToClient({SceneType = scene.SceneType, Character = character}, character)
                 Animation.ResetAnimation(uuid)
-                return
             end
         end
-    end
 end)
 
 
@@ -102,7 +111,8 @@ Ext.Osiris.RegisterListener("ObjectTransformed", 2, "after", function(object, to
     local conts = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
     if conts ~= nil then
         for k, v in pairs(conts) do
-            UIEvents.SendGenitals:SendToClient({ID = nil, Data = Data.CreateUIGenitalPayload(object)}, v.UserReservedFor.UserID)
+            print("sending genital update event for " , Helper.GetName(v.Uuid.EntityUuid))
+            Event.SendGenitals:SendToClient({ID = nil, Data = Data.CreateUIGenitalPayload(v.Uuid.EntityUuid)}, v.UserReservedFor.UserID)
         end
     end
 end)
@@ -112,7 +122,7 @@ Ext.Osiris.RegisterListener("ShapeshiftChanged", 4, "after", function(character,
     local conts = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
     if conts ~= nil then
         for k, v in pairs(conts) do
-            UIEvents.SendGenitals:SendToClient({ID = nil, Data = Data.CreateUIGenitalPayload(character)}, v.UserReservedFor.UserID)
+            Event.SendGenitals:SendToClient({ID = nil, Data = Data.CreateUIGenitalPayload(v.Uuid.EntityUuid)}, v.UserReservedFor.UserID)
         end
     end
 end)
@@ -123,7 +133,7 @@ Ext.Osiris.RegisterListener("TemplateUseFinished", 4, "before", function(charact
         local conts = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
         if conts ~= nil then
             for k, v in pairs(conts) do
-                UIEvents.SendGenitals:SendToClient({ID = nil, Data = Data.CreateUIGenitalPayload(character)}, v.UserReservedFor.UserID)
+                Event.SendGenitals:SendToClient({ID = nil, Data = Data.CreateUIGenitalPayload(v.Uuid.EntityUuid)}, v.UserReservedFor.UserID)
             end
         end
     end

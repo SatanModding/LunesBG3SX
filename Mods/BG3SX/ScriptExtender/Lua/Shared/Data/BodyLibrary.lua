@@ -1866,10 +1866,7 @@ end
 
 -- TODO - should probably be moved to genitals 
 function Data.CreateUIGenitalPayload(uuid)
-
-
-
-
+    --Debug.Print("Creating UI Payload for " .. uuid)
     local entity = Ext.Entity.Get(uuid)
     if not entity then
         Debug.Print("Not a valid entity uuid " .. uuid)
@@ -1884,15 +1881,12 @@ function Data.CreateUIGenitalPayload(uuid)
     "BG3SX_OtherGenitals"
     }
   
-
     local permittedGenitals = Genital.getPermittedGenitals(entity)
-
     for _, mod in pairs(hardCodedGenitalTypesChangeThis) do
         -- _P(mod)
         payload[mod] = {}
         local genitalContent = {}
         local genitals = Genital.getFilteredGenitals(mod, permittedGenitals)
-
 
         for _, genital in pairs(genitals) do
             local name = Visual.GetName(genital)

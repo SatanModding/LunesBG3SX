@@ -36,14 +36,14 @@ function Animation:New(actor, animData)
             instance.animation = hmInstance:NewGetAnimation(actor, unlocked)
         else
             hmAnim, hmAnim2 = hmInstance:NewGetAnimation(scene.entities[1], scene.entities[2], unlocked)
-            if scene.entities[1] == instance.actor then
+            if Helper.StringContainsOne(scene.entities[1],instance.actor) then
             -- print("entity is the first character (top)")
                 instance.animation = hmAnim
-            elseif scene.entities[2] == instance.actor then
+            elseif Helper.StringContainsOne(scene.entities[2],instance.actor) then
             --  print("entity is the second character bottom")
                 instance.animation = hmAnim2
             else
-                Debug.Print("Something went wrong! Contact mod author! [Error 1]")
+                Debug.Print(string.format("Error [1]: Unexpected actor state. \nActor: %s, \nScene Entities: %s", tostring(instance.actor), Ext.DumpExport(scene.entities)))
             end
         end
 
@@ -79,7 +79,7 @@ end
 playAnimation = function(self)
   --  Osi.PlayAnimation(self.actor.uuid, "") -- First, stop current animation on actor
     if self.animationData.Loop == true then
-        -- _P("Playing ", self.animation, " for ", self.actor.parent)
+        _P("Playing ", self.animation, " for ", self.actor)
         Osi.PlayLoopingAnimation(self.actor, "", self.animation, "", "", "", "", "")
     else
         Osi.PlayAnimation(self.actor, self.animation)
@@ -118,5 +118,19 @@ Ext.Osiris.RegisterListener("GainedControl", 1, "after", function(target)
 
 end)
 
+function Animation.SortTableOfAnimations(animations)
+    local sortedTable = {}
+    for animationName,animationLinks in pairs(animations) do
+        local newAnimLinks = {}
+        for mapkey,animID in pairs(animationLinks) do
 
-
+            if Ext.Resource.Get(mapkey, "Animation") then -- If the mapkey is an animID, we need to swap it with the animID
+                newAnimLinks[animID] = mapkey
+            elseif Ext.Resource.Get(animID, "Animation") then 
+                newAnimLinks[mapkey] = animID
+            end
+        end
+        sortedTable[animationName] = newAnimLinks
+    end
+    return sortedTable
+end

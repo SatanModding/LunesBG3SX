@@ -5,7 +5,6 @@ ModuleUUID = "df8b9877-5662-4411-9d08-9ee2ec4d8d9e"
         -- Init Classes --
 ------------------------------------
 
-
 -- Pre-Construct our classes
 Ext.Require("Shared/_constructor.lua")
 
@@ -58,9 +57,23 @@ Ext.RegisterModEvent("BG3SX", "GenitalChange")              --{uuid, newGenital}
 -- to the "lesbian" animations like "grinding", or "eating pussy" 
 
 
+local settings = {
+    Server = true, 
+    Client = true, 
+    SyncToClient = true, 
+    SyncToServer = true,
+    SyncOnWrite = true,
+    WriteableOnClient = true,
+    WriteableOnServer = true
+}
+
+
+Ext.Vars.RegisterModVariable(ModuleUUID, "BG3SX_AddedNPCs", settings)
+
 Ext.Vars.RegisterModVariable(ModuleUUID, "BG3SX_ShowAllAnimations", {
     Server = true, Client = true, SyncToClient = true
 })
+
 
 
 
