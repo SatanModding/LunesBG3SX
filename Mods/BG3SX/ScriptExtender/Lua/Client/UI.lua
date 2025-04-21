@@ -115,22 +115,20 @@ function UI:CreateEventHandler()
                     self:InputRecieved(mouseoverPosition)
                 elseif reason == "RotateScene" then
                     self:InputRecieved(mouseoverPosition)
-                end
-                if getMouseover().Inner.Inner[1] then
-                    if getMouseover().Inner.Inner[1].Character then
-                        Debug.Print("------------------------New BG3SX Scene------------------------")
-                        mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid
-                        if reason == "NewScene" then
+                elseif reason == "NewScene" then
+                    if getMouseover().Inner.Inner[1] then
+                        if getMouseover().Inner.Inner[1].Character then
+                            Debug.Print("------------------------New BG3SX Scene------------------------")
+                            mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid
                             self:InputRecieved(mouseoverTarget)
+                        else
+                            -- No Character Found
+                            self:CancelAwaitInput("No entity found")
                         end
-                    else
-                        -- No Character Found
-                        self:CancelAwaitInput("No entity found")
                     end
                 end
             end
         elseif e.Button == 3 and e.Pressed == true then -- Button 3 is right click | 2 is middle mouse click
-            -- _D(getMouseover())
             self:CancelAwaitInput("Canceled") -- Cancel
         end
     end)
@@ -168,16 +166,15 @@ function UI:CreateEventHandler()
                     elseif reason == "RotateScene" then
                         self:InputRecieved(mouseoverPosition)
                         self:CancelAwaitInput()
-                    end
-                    if getMouseover().Inner.Inner[1] then
-                        if getMouseover().Inner.Inner[1].Character then
-                            mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid
-                            if reason == "NewScene" then
+                    elseif reason == "NewScene" then
+                        if getMouseover().Inner.Inner[1] then
+                            if getMouseover().Inner.Inner[1].Character then
+                                mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovere
                                 self:InputRecieved(mouseoverTarget)
+                            else
+                                self:CancelAwaitInput("No entity found")
+                                self:ShowWindows()
                             end
-                        else
-                            self:CancelAwaitInput("No entity found")
-                            self:ShowWindows()
                         end
                     end
                 end
@@ -224,7 +221,7 @@ function UI:CancelAwaitInput(reason)
         self.ControllerInputHandler = nil
     end
     if self.ControllerAxisHandler then
-        Ext.Events.ControllerButtonInput:Unsubscribe(self.ControllerAxisHandler)
+        Ext.Events.ControllerAxisInput:Unsubscribe(self.ControllerAxisHandler)
         self.ControllerAxisHandler = nil
     end
     self.Await = nil

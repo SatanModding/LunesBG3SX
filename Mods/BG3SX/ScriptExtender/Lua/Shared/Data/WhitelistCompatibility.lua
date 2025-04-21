@@ -61,6 +61,6 @@ if Ext.Mod.GetMod("128025b9-5168-f4a0-fa19-676f0c244d24") then -- Fantastical Co
     wList["KOBOLD"] = {TAG = "f68151f2-58ee-42e6-98ad-7d858c4a0f13", Allowed = false,                   Reason = "BG3SX - No fitting genitals"}
     wList["WATERGENASI"] = {TAG = "fc1d1c60-796a-4e66-98b2-8d12a2b18462", Allowed = true}               -- Checked
     wList["FIRBOLG"] = {TAG = "45759dc2-4d7a-4853-af73-50cfd412409b", Allowed = false,                  Reason = "BG3SX - No fitting genitals"} -- Maybe fix with BodyTypeOverride
-    wList["CELESTIAL"] = {TAG = "7cba0bd7-b955-4ac9-95ba-79e75978d9ac", Allowed = "true"}               -- Checked
+    wList["CELESTIAL"] = {TAG = "7cba0bd7-b955-4ac9-95ba-79e75978d9ac", Allowed = true}               -- Checked
     _P("[BG3SX][Fantastical Compendium should now be compatible]")
 end

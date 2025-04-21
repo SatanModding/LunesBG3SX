@@ -94,8 +94,8 @@ function WhitelistTab:UpdateUserTags(tags)
     end
 end
 
-function WhitelistTab:GenerateWhitelist()
 -- Whitelist - Every entry also may have entry.racesUsingTag with multiple entries
+function WhitelistTab:GenerateWhitelist()
     if not self.WhitelistHeader then
         self.WhitelistHeader = self.Tab:AddCollapsingHeader("Whitelist")
     end
@@ -124,7 +124,6 @@ function WhitelistTab:GenerateWhitelist()
                     end
                 end
                 if Content.TAG then
-                    -- local tagText = tagTree:AddText("UUID:")
                     local uuid = tagTree:AddInputText("")
                     uuid.Text = Content.TAG
                     uuid.SameLine = true
@@ -134,36 +133,50 @@ function WhitelistTab:GenerateWhitelist()
     end
 end
 
+-- ModdedTags - Overrides entries of the whitelist
 function WhitelistTab:GenerateModdedWhitelist()
--- ModdedTags - Overrides entries of the whitelist ----- Maybe show before whitelist
     if not self.ModdedTagsHeader then
         self.ModdedTagsHeader = self.Tab:AddCollapsingHeader("Modded Entries")
     end
 
-    for TagName,Content in sortedPairs(self.Whitelists.ModdedTags) do
-        if Helper.IsUpperCase(TagName) then
-            if TagName ~= "KID" and TagName ~= "GOBLIN_KID" then
-                local tagTree = self.ModdedTagsHeader:AddTree(TagName)
-                if Content.TAG then
-                    local uuid = tagTree:AddInputText("Tag:")
-                    uuid.Text = Content.TAG
-                end
-            if Content.Allowed ~= nil then
-                    local allowedStatus = tagTree:AddCheckbox("Allowed")
-                    allowedStatus.SameLine = true
-                    if Content.Allowed == true then
-                        allowedStatus.Checked = true
-                        allowedStatus.OnChange = function()
-                            allowedStatus.Checked = true
+    local modsByName = {}
+    for uuid,mod in pairs(self.Whitelists.ModdedTags) do
+        local name = Ext.Mod.GetMod(uuid).Info.Name
+        if not modsByName[name] then
+            modsByName[name] = {}
+        end
+        table.insert(modsByName[name], mod)
+    end
+    table.sort(modsByName)
+    for modName,mod in pairsByKeys(modsByName) do
+        local modTree = self.ModdedTagsHeader:AddTree(modName)
+        for _,tags in pairs(mod) do
+            for TagName,Content in sortedPairs(tags) do
+                if Helper.IsUpperCase(TagName) then
+                    if TagName ~= "KID" and TagName ~= "GOBLIN_KID" then
+                        local tagTree = modTree:AddTree(TagName)
+                        if Content.TAG then
+                            local uuid = tagTree:AddInputText("Tag:")
+                            uuid.Text = Content.TAG
                         end
-                    else
-                        allowedStatus.Checked = false
-                        allowedStatus.OnChange = function()
-                            allowedStatus.Checked = false
-                        end
-                        if Content.Reason then
-                            local tooltip = allowedStatus:Tooltip()
-                            local tooltipText = tooltip:AddText(Content.Reason)
+                    if Content.Allowed ~= nil then
+                            local allowedStatus = tagTree:AddCheckbox("Allowed")
+                            allowedStatus.SameLine = true
+                            if Content.Allowed == true then
+                                allowedStatus.Checked = true
+                                allowedStatus.OnChange = function()
+                                    allowedStatus.Checked = true
+                                end
+                            else
+                                allowedStatus.Checked = false
+                                allowedStatus.OnChange = function()
+                                    allowedStatus.Checked = false
+                                end
+                                if Content.Reason then
+                                    local tooltip = allowedStatus:Tooltip()
+                                    local tooltipText = tooltip:AddText(Content.Reason)
+                                end
+                            end
                         end
                     end
                 end
@@ -172,8 +185,8 @@ function WhitelistTab:GenerateModdedWhitelist()
     end
 end
 
-function WhitelistTab:GenerateWhitelistedEntities()
 -- Whitelisted Entities
+function WhitelistTab:GenerateWhitelistedEntities()
     if not self.WhitelistedEntitiesHeader then
         self.WhitelistedEntitiesHeader = self.Tab:AddCollapsingHeader("Whitelisted Entities")
     end
@@ -190,13 +203,9 @@ function WhitelistTab:GenerateWhitelistedEntities()
             table.insert(entryByName[name], entry)
         end
     end
-    _D(entryByName)
     table.sort(entryByName)
-    _D(entryByName)
     for name,entry in pairsByKeys(entryByName) do
         local row = whitelistedEntitiesTable:AddRow()
-        Debug.Print("Whitelist entry:")
-        Debug.Dump(entry)
         local uuid = entry[1]
         local nameText = row:AddCell():AddText(name)
         local uuidText = row:AddCell():AddInputText("")
@@ -204,8 +213,8 @@ function WhitelistTab:GenerateWhitelistedEntities()
     end
 end
 
-function WhitelistTab:GenerateBlacklistedEntities()
 -- Blacklisted Entities
+function WhitelistTab:GenerateBlacklistedEntities()
     if not self.BlacklistedEntitiesHeader then
         self.BlacklistedEntitiesHeader = self.Tab:AddCollapsingHeader("Blacklisted Entities")
     end
@@ -226,8 +235,6 @@ function WhitelistTab:GenerateBlacklistedEntities()
     
     for name,entry in pairsByKeys(entryByName) do
         local row = blacklistedEntitiesTable:AddRow()
-        Debug.Print("Blacklist entry:")
-        Debug.Dump(entry)
         local uuid = entry[1]
         local nameText = row:AddCell():AddText(name)
         local uuidText = row:AddCell():AddInputText("")

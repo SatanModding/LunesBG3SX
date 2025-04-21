@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
-<!-- Genital Visual Names -->
+    <!-- Genital Visual Names -->
 	<content contentuid="h1e7bdab3f693cf4afafb4fcfabddbd240ee2" version="1">Erect</content>
 	<content contentuid="hd4f04d1df9c2ef4a70f8536f9013cd3ac073" version="1">Hairy Erect</content>
 
-<!-- UI Translation Handles -->
+    <!-- UI Translation Handles -->
     <content contentuid="h053ec08807c449e5873fbad66bb709c2ead8" version="1">Tab Visibility</content>
     <content contentuid="hadd9c724632b4e41ae4dbd58686b8db1c17f" version="1">Tab Settings</content>
     <content contentuid="ha5a309de2e9542b2999d70313cf9455ab451" version="1">Show all animations regardless of scene type</content>
