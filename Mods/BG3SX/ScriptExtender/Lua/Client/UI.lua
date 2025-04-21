@@ -118,13 +118,19 @@ function UI:CreateEventHandler()
                 elseif reason == "NewScene" then
                     if getMouseover().Inner.Inner[1] then
                         if getMouseover().Inner.Inner[1].Character then
-                            Debug.Print("------------------------New BG3SX Scene------------------------")
-                            mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid
-                            self:InputRecieved(mouseoverTarget)
+                            -- _D(getMouseover())
+                            mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid or nil -- Sometimes UIEntity isn't found??
+                            if mouseoverTarget ~= nil then
+                                Debug.Print("------------------------New BG3SX Scene------------------------")
+                                self:InputRecieved(mouseoverTarget)
+                            else
+                                self:CancelAwaitInput("No entity found")
+                            end
                         else
-                            -- No Character Found
                             self:CancelAwaitInput("No entity found")
                         end
+                    else
+                        self:CancelAwaitInput("No entity found")
                     end
                 end
             end
@@ -137,6 +143,12 @@ function UI:CreateEventHandler()
     --- CONTROLLER Buttons
     ---------------------------------------------------------
     
+    local function controllerCancelAwaitInput(reason)
+        local reason = reason or nil
+        self:CancelAwaitInput(reason)
+        self:ShowWindows()
+    end
+
     local controllerHandler = Ext.Events.ControllerButtonInput:Subscribe(function (e)
         local enteredTargeting
         local collapsed
@@ -144,14 +156,23 @@ function UI:CreateEventHandler()
             e:PreventAction()
         end
 
+        -- self.Settings["AutomaticControllerTargetingMode"]
+        -- Add LeftStick press injection
+
         if e.Button == "LeftStick" and e.Pressed == true then
             enteredTargeting = true
             self:HideWindows()
         elseif e.Button == "A" and e.Pressed == true then -- Only check this if
-            if getMouseover() and getMouseover().UIEntity then -- In case a UI entity has been found
-                mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid
-                if reason == "NewScene" then
-                    self:InputRecieved(mouseoverTarget)
+            if reason == "NewScene" then
+                if getMouseover() and getMouseover().UIEntity then -- In case a UI entity has been found
+                    mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid or nil
+                    if mouseoverTarget ~= nil then
+                        self:InputRecieved(mouseoverTarget)
+                    else
+                        self:CancelAwaitInput("No entity found")
+                    end
+                else
+                    self:CancelAwaitInput("No entity found")
                 end
             end
         end
@@ -162,26 +183,36 @@ function UI:CreateEventHandler()
                     mouseoverPosition = getMouseover().Inner.Position
                     if reason == "MoveScene" then
                         self:InputRecieved(mouseoverPosition)
-                        self:CancelAwaitInput()
+                        self:ShowWindows()
                     elseif reason == "RotateScene" then
                         self:InputRecieved(mouseoverPosition)
-                        self:CancelAwaitInput()
+                        self:ShowWindows()
                     elseif reason == "NewScene" then
                         if getMouseover().Inner.Inner[1] then
                             if getMouseover().Inner.Inner[1].Character then
-                                mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovere
-                                self:InputRecieved(mouseoverTarget)
+                                mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid or nil
+                                if mouseoverTarget ~= nil then
+                                    Debug.Print("------------------------New BG3SX Scene------------------------")
+                                    self:InputRecieved(mouseoverTarget)
+                                else
+                                    controllerCancelAwaitInput("No entity found")
+                                end
                             else
-                                self:CancelAwaitInput("No entity found")
-                                self:ShowWindows()
+                                controllerCancelAwaitInput("No entity found")
                             end
+                        else
+                            controllerCancelAwaitInput("No entity found")
                         end
                     end
                 end
+            elseif e.Button == "LeftStick" and e.Pressed == true then
+                enteredTargeting = false
+                if self.Window.Open == false then
+                    self:ShowWindows()
+                end
             end
         elseif e.Button == "B" and e.Pressed == true then -- Cancel out of targeting
-            self:CancelAwaitInput("Canceled")
-            self:ShowWindows() -- In case it was set to collapse
+            controllerCancelAwaitInput("Canceled")
         end
     end)
 
@@ -230,7 +261,7 @@ end
 function UI:InputRecieved(inputPayload)
     local reason = self.Await.Reason
     if reason == "NewScene" then
-        _P("Ask for sex request. Caster: ", _C().Uuid.EntityUuid, " target = ", inputPayload)
+        -- _P("Ask for sex request. Caster: ", _C().Uuid.EntityUuid, " target = ", inputPayload)
         Event.AskForSex:SendToServer({ID = USERID, Caster = UIInstance.GetSelectedCharacter(), Target = inputPayload})
     elseif reason == "RotateScene" then
         Event.RotateScene:SendToServer({ID = USERID, Scene = self.Await.Payload, Position = inputPayload})
