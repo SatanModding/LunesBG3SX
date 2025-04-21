@@ -63,14 +63,13 @@ function TimelineManager:AddTimeline(timeline)
 end
 
 function TimelineManager:LoadTimeline(uuid, node)
+    local node = node or 0
     assert(uuid ~= nil, "[BG3SX] TimelineManager:LoadTimeline - No UUID provided")
     assert(type(uuid) == "string", "[BG3SX] TimelineManager:LoadTimeline - UUID is not a string")
     if node then
         assert(type(node) == "number", "[BG3SX] TimelineManager:LoadTimeline - Node is not a number")
     end
-    local node = node or 0
     
-
     self.CurrentDialog = self.Timelines[uuid]
     self:GoTo(node)
     -- self.CurrentDialog.Timer

@@ -108,7 +108,7 @@ end
 ---@param fallbackBottom string|nil The default animation identifier for the bottom part. If `nil`, no default is set.
 ---@return Heightmatching The newly created `Heightmatching` instance.
 function Heightmatching:New(moduleUUID, animName, fallbackTop, fallbackBottom) -- TODO: Add possibility of inserting a table of possible additional fallbacks as 4th parameter which may get chosen randomly
-    print("AnimationName ", animName)
+    -- print("AnimationName ", animName)
     local instance = setmetatable({}, self)
     instance.fallbackTop = fallbackTop
     instance.fallbackBottom = fallbackBottom or nil

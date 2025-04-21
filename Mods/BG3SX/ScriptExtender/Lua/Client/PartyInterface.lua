@@ -166,27 +166,38 @@ function PartyInterface:AddNPC(parent, uuid)
     if not foundOrigin then
         instance.CharacterButton = cell:AddImageButton("","EC_Portrait_Generic", UIInstance.Settings["PartyButtonSize"])
     end
-
+    
+    instance.Popup = cell:AddPopup("NPCPopup")
+    instance.Popup.IDContext = math.random(1000,100000)
     instance.CharacterButton.OnClick = function()
+        if not UIInstance.Await then
+            instance.Popup:Open()
+        else
+            UIInstance:SelectedCharacterUpdates(instance)
+        end
+    end
+
+    local selectNPC = instance.Popup:AddSelectable(Ext.Loca.GetTranslatedString("h2a86e31d7ec34b7490ead80f174354da5726", "Select"))
+    selectNPC.OnClick = function()
+        selectNPC.Selected = false
         UIInstance:SelectedCharacterUpdates(instance)
     end
-    instance.DeleteButton = cell:AddButton("x")
-    instance.DeleteButton.IDContext = math.random(1000,100000)
-    instance.DeleteButton.SameLine = true
-    instance.DeleteButton.OnClick = function()
+
+    local removeNPC = instance.Popup:AddSelectable(Ext.Loca.GetTranslatedString("hbf2bfd2e408c493d9580e1fa08b7782d502g", "Remove"))
+    removeNPC.OnClick = function()
+        removeNPC.Selected = false
+        -- instance.Popup:Close()
         for i,npcUuid in pairs(self.NPCs) do
             if npcUuid == uuid then
                 table.remove(self.NPCs, i)
                 Event.RemovedNPCFromTab:SendToServer({ID=USERID, npc = uuid})
             end
         end
-        -- self.CurrentNPCs = nil -- Will be rebuild with Update call
         self:UpdateNPCs()
     end
 
     instance.NameText = cell:AddText("")
     instance.NameText.Label = instance.Name
-
 
     table.insert(self.CurrentNPCs, instance)
     return instance
@@ -222,6 +233,11 @@ function PartyInterface:SetSelectedCharacter(characterUuid)
         end
     end
 end
+
+Event.SetSelectedCharacter:SetHandler(function (payload)
+    -- Empty Handler currently to avoid console prints
+    -- Todo: Do something with it
+end)
 
 -- Only one can be hovered at a time
 function PartyInterface:GetHovered()

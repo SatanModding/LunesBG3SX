@@ -6,7 +6,8 @@
 
 <!-- UI Specific -->
     <!-- Party/NPC Interface -->
-    <content contentuid="hbf2bfd2e408c493d9580e1fa08b7782d502g" version="1">Remove NPC</content>
+    <content contentuid="h2a86e31d7ec34b7490ead80f174354da5726" version="1">Select</content>
+    <content contentuid="hbf2bfd2e408c493d9580e1fa08b7782d502g" version="1">Remove</content>
 
     <!-- Scene -->
     <content contentuid="hc21d333db09549dbbd1fcfaa6fdecb2a2b09" version="1">Scenes</content>
@@ -126,4 +127,5 @@
 	<content contentuid="h87ee4bfdg8b1bg494cg93a1g11b347703922" version="1">Tribbing</content>
 	<content contentuid="h2ca5ef2dg7f68g40dbg8c8dg05fd895a39b1" version="1">Finger</content>
 	<content contentuid="hb32715942ed4499b9ef6a288a729b0483578" version="1">Astarion Thrusting</content>
+
 </contentList>
