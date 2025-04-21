@@ -99,6 +99,7 @@ function UI:CreateEventHandler()
     local keyHandler = Ext.Events.KeyInput:Subscribe(function (e)
         if e.Key == "ESCAPE" and e.Pressed == true then -- .Pressed checks if it was the first input registered or a held down event - Check .Repeat for this
             self:CancelAwaitInput("Canceled")
+            self:ShowWindows()
         end
     end)
 
@@ -123,6 +124,7 @@ function UI:CreateEventHandler()
                             if mouseoverTarget ~= nil then
                                 Debug.Print("------------------------New BG3SX Scene------------------------")
                                 self:InputRecieved(mouseoverTarget)
+                                self:ShowWindows()
                             else
                                 self:CancelAwaitInput("No entity found")
                             end
@@ -162,7 +164,7 @@ function UI:CreateEventHandler()
         if e.Button == "LeftStick" and e.Pressed == true then
             enteredTargeting = true
             self:HideWindows()
-        elseif e.Button == "A" and e.Pressed == true then -- Only check this if
+        elseif e.Button == "A" and e.Pressed == true and not enteredTargeting then-- UI target selection handling, when not in targeting mode
             if reason == "NewScene" then
                 if getMouseover() and getMouseover().UIEntity then -- In case a UI entity has been found
                     mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid or nil
@@ -194,6 +196,7 @@ function UI:CreateEventHandler()
                                 if mouseoverTarget ~= nil then
                                     Debug.Print("------------------------New BG3SX Scene------------------------")
                                     self:InputRecieved(mouseoverTarget)
+                                    self:ShowWindows()
                                 else
                                     controllerCancelAwaitInput("No entity found")
                                 end
