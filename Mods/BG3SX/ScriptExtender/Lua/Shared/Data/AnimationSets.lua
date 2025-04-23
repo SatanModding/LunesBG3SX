@@ -66,6 +66,8 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         "49d78660-5175-4ed2-9853-840bb58cf34a"
     }
 
+    -- AF TESTING
+    local body = as.Get("bfa9dad2-2a5b-45cc-b770-9537badf9152") -- bfa9dad2- is bg3sx specific animset, check Public/BG3SX/Content/Assets/[PAK]_AnimationSets
     for entry,content in pairs(links) do
         body:AddLink(content.MapKey, content.AnimationID)
         face:AddLink(content.MapKey, faceAnim)
@@ -74,6 +76,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     for _,idle in pairs(idles) do
         face:AddLink(idle, faceIdle)
     end
+
 end
 
 -- function Data.AnimationSets.AddSetToEntity(uuid, animationSet)

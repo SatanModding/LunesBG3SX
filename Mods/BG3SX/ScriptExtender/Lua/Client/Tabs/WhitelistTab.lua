@@ -42,13 +42,16 @@ function WhitelistTab:GenerateWhitelistArea()
         self:GenerateBlacklistedEntities()
         self:GenerateWhitelist()
     end
+
 end
 
 function WhitelistTab:IsAllowed(tag)
     return self.Whitelists.Whitelist[tag].Allowed
 end
 function WhitelistTab:GetReason(tag)
-    return self.Whitelists.Whitelist[tag].Reason
+    if self.Whitelists and self.Whitelists.Whitelist and self.Whitelists.Whitelist[tag] and self.Whitelists.Whitelist[tag].Reason then
+        return self.Whitelists.Whitelist[tag].Reason
+    end
 end
 
 function WhitelistTab:UpdateUserTags(tags)
@@ -85,9 +88,12 @@ function WhitelistTab:UpdateUserTags(tags)
                 allowedStatus.OnChange = function()
                     allowedStatus.Checked = false
                 end
-                if self:GetReason(tag) then
+                if self:GetReason(name) then
                     local tooltip = allowedStatus:Tooltip()
-                    local tooltipText = tooltip:AddText(self:GetReason(tag))
+                    local tooltipText = tooltip:AddText(self:GetReason(name))
+                else
+                    local tooltip = allowedStatus:Tooltip()
+                    local tooltipText = tooltip:AddText("No reason provided")
                 end
             end
         end

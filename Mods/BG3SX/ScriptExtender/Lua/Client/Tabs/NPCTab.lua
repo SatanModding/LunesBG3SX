@@ -24,7 +24,7 @@ end
 
 function NPCTab:RequestStripNPC()
 
-        local uuid = UIInstance.GetSelectedCharacter()
+        local uuid = UIInstance:GetSelectedCharacter()
         --print("dumping options")
         --_D(self.InRange.Choice.Options)
         -- print("got ", uuid)
@@ -44,7 +44,7 @@ end
 
 function NPCTab:RequestDressNPC()
 
-        local uuid = UIInstance.GetSelectedCharacter()
+        local uuid = UIInstance:GetSelectedCharacter()
 
         if not uuid then
             local text = "            No NPC selected. Please select one first before clicking \"Dress\""
@@ -197,7 +197,7 @@ end
  Event.RestoreNPCTab:SetHandler(function(payload)
     --print("Client received Event: RestoreNPCTab. Dumping npcs")
     -- local npcs = payload.npcs 
-    local previouslySelected = UIInstance.GetSelectedCharacter()
+    local previouslySelected = UIInstance:GetSelectedCharacter()
     for _,npc in pairs (payload.npcs) do
         UIInstance.NPCTab.AddButton:OnClick(npc)
     end

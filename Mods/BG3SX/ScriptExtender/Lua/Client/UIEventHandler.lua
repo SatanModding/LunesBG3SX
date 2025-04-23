@@ -7,20 +7,55 @@
 
 -- Updates the USERID based on which character is currently selected per client
 Event.ChangeCharacter:SetHandler(function (changedControlledEntity)
-    Debug.Print("Changed character to " .. changedControlledEntity)
-    Ext.Timer.WaitFor(200, function () -- CharacterChanged event needs to delay what it wants to execute because Osiris is slow AF - ClientEntity ID's don't update quickly enough after its triggered
-        local entity = Helper.GetLocalControlledEntity()
-        local entityUuid = entity.Uuid.EntityUuid
+    -- Debug.Print("Changed character to " .. changedControlledEntity)
 
-        if Helper.StringContainsOne(entityUuid, changedControlledEntity) or (changedControlledEntity == "") then
-            USERID = entityUuid
-            -- swap the character in the UI
-            UIInstance.PartyInterface:SetSelectedCharacter(entityUuid)
-            UIInstance.AppearanceTab:FetchGenitals()
-        else
-            Debug.Print("No entity")
-        end
-    end)
+    -- local iteration = 0
+    -- local function uiStateCheck(fn)
+    --     iteration = iteration + 1
+    --     -- _P("UIStateCheck: Checking UI state: Iteration", iteration)
+    --     if iteration > 999 then
+    --         -- _P("UIStateCheck: Max iterations reached, stopping check")
+    --         iteration = 0
+    --         return
+    --     end
+    --     if UIInstance and UIInstance.PartyInterface and UIInstance.AppearanceTab then
+    --         -- _P("UIStateCheck: Condition met, executing function")
+    --         iteration =  0
+    --         -- Ext.Timer.WaitFor(200, function ()
+    --             fn()
+    --         -- end)
+    --     else
+    --         -- _P("UIStateCheck: Condition not met, executing function")
+    --         Ext.Timer.WaitFor(200, function ()
+    --             uiStateCheck(fn)
+    --         end)
+    --     end
+    -- end
+
+    if UIInstance and UIInstance.Ready then
+        Ext.Timer.WaitFor(200, function () -- CharacterChanged event needs to delay what it wants to execute because Osiris is slow AF - ClientEntity ID's don't update quickly enough after its triggered
+            local entity = Helper.GetLocalControlledEntity()
+            local entityUuid = entity.Uuid.EntityUuid
+
+            if Helper.StringContainsOne(entityUuid, changedControlledEntity) or (changedControlledEntity == "") then
+                USERID = entityUuid
+                -- swap the character in the UI
+
+                -- uiStateCheck(
+                --     function ()
+                        UIInstance.PartyInterface:SetSelectedCharacter(entityUuid)
+                        UIInstance.AppearanceTab:FetchGenitals()
+                --     end
+                -- )
+            else
+                Debug.Print("No entity")
+            end
+        end)
+    end
+end)
+
+Event.UIInitialized:SetHandler(function (payload)
+
 end)
 
 Event.GenitalsLoaded:SetHandler(function (payload)
@@ -33,6 +68,16 @@ Event.SendParty:SetHandler(function (payload)
     local party = payload
     UIInstance.PartyInterface.Party = party
     UIInstance.PartyInterface:UpdateParty()
+end)
+
+Event.SendWhitelistStatus:SetHandler(function (payload)
+    local status = payload.Status
+    _P("Whitelist status: " .. tostring(status))
+    if status == true then
+        UIInstance.SceneTab:EnableSceneButtons()
+    else
+        UIInstance.SceneTab:DisableSceneButtons()
+    end
 end)
 
 
@@ -127,10 +172,10 @@ Event.UpdateSceneControlPicker:SetHandler(function (payload)
     local sceneControl = UIInstance.SceneTab:FindSceneControlByEntity(payload.Character)
     sceneControl.Scene.SceneType = payload.SceneType
     if sceneControl then
-        print("sceneControl exists- updating")
+        -- print("sceneControl exists- updating")
         sceneControl:UpdateAnimationPicker()
     else
-        print("SceneControl doesnt exist")
+        -- print("SceneControl doesnt exist")
     end
 end)
 

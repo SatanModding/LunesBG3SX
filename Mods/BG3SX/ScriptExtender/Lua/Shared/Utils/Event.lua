@@ -6,13 +6,11 @@ end
 
 Event:New("CustomEvent")
 
---- Party
--- Client -> Server
-Event:New("FetchParty")
--- Server -> Client
-Event:New("SendParty")
 
 --- General
+Event:New("UIInitialized")
+Event:New("RequestUILoadedState")
+Event:New("SendUILoadedState")
 -- Client -> Server
 Event:New("ChangeCharacter")
 Event:New("FetchScenes")
@@ -20,6 +18,14 @@ Event:New("SendScenes")
 -- Server -> Client
 Event:New("UpdateScenes")
 Event:New("SetSelectedCharacter")
+
+--- Party
+-- Client -> Server
+Event:New("FetchParty")
+Event:New("RequestWhitelistStatus")
+-- Server -> Client
+Event:New("SendParty")
+Event:New("SendWhitelistStatus")
 
 --- Scene specific
 -- Client -> Server

@@ -79,7 +79,7 @@ function DebugTab:UpdateAnimationPicker()
             if animationPicker.SelectedIndex ~= 0 then
                 Event.ChangeAnimation:SendToServer({
                     ID = USERID,
-                    Caster = UIInstance.GetSelectedCharacter(),
+                    Caster = UIInstance:GetSelectedCharacter(),
                     Animation = animationPicker.Options[animationPicker.SelectedIndex + 1]
                 })
             end

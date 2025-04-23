@@ -164,7 +164,7 @@
 
 -- function UI.DoSexButtonStuff(button)
 --     if button.Label == "Masturbate" then
---         local selectedCharacter = UI.GetSelectedCharacter()
+--         local selectedCharacter = UI:GetSelectedCharacter()
 --         if selectedCharacter ~= nil then
 --             Ext.Net.PostMessageToServer("BG3SX_Client_Masturbate", Ext.Json.Stringify({selectedCharacter}))
 --             -- for genitals
@@ -213,7 +213,7 @@
 
 
 -- local characterTables = {}
--- function UI.GetSelectedCharacter()
+-- function UI:GetSelectedCharacter()
 --     for _,entry in pairs(characterTables) do
 --         if entry.selected == true then
 --             return entry.uuid
@@ -336,7 +336,7 @@
 -- --    if e.Event == "KeyDown" and e.Repeat == false then
 -- --        if e.Key == "F" then
 -- --            if UI.SelectingTarget == true then
--- --                local caster = UI.GetSelectedCharacter()
+-- --                local caster = UI:GetSelectedCharacter()
 -- --                local target = getUUIDFromUserdata(getMouseover())
 -- --                Ext.Net.PostMessageToServer("BG3SX_Client_AskForSex", Ext.Json.Stringify({caster = caster, target = target}))
 -- --                -- genitals

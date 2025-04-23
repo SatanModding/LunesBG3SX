@@ -11,6 +11,7 @@ ViewPortScale = Ext.Require("Client/IMGUI.lua").ScaleFactor()
 
 Mods.BG3MCM.IMGUIAPI:InsertModMenuTab(ModuleUUID, "BG3SX", function(mcm)
     UI.New(mcm)
+    _P("--------------------------------------[BG3SX] MCM Tab Loaded---------------------------------------")
 end)
 
 --------------------------------------------------
@@ -70,6 +71,9 @@ function UI:Initialize()
 
     -- self.SettingsTab:Initialize()
     -- self.DebugTab:Initialize()
+
+    self.Ready = true
+    Event.UIInitialized:SendToServer({ID = USERID})
 end
 
 function UI:AwaitInput(reason, payload)
@@ -231,15 +235,26 @@ function UI:CreateEventHandler()
     return keyHandler, mouseHandler, controllerHandler, controllerAxisHandler
 end
 
+function UI:DisplayInfoText(reason, duration)
+    local duration = duration or nil
+    local info = self.SceneTab.InfoText
+    info.Label = reason
+    info.Visible = true
+    if duration then 
+        Ext.Timer.WaitFor(duration, function()
+            info.Visible = false
+        end)
+    end
+end
+function UI:HideInfoText()
+    local info = self.SceneTab.InfoText
+    info.Visible = false
+end
+
 function UI:CancelAwaitInput(reason)
     local reason = reason or nil
     if reason then
-        local info = self.SceneTab.InfoText
-        info.Label = reason
-        info.Visible = true
-        Ext.Timer.WaitFor(3000, function()
-            info.Visible = false
-        end)
+        self.DisplayInfoText(reason, 3000)
     end
 
     if self.KeyInputHandler then
@@ -265,7 +280,7 @@ function UI:InputRecieved(inputPayload)
     local reason = self.Await.Reason
     if reason == "NewScene" then
         -- _P("Ask for sex request. Caster: ", _C().Uuid.EntityUuid, " target = ", inputPayload)
-        Event.AskForSex:SendToServer({ID = USERID, Caster = UIInstance.GetSelectedCharacter(), Target = inputPayload})
+        Event.AskForSex:SendToServer({ID = USERID, Caster = UIInstance:GetSelectedCharacter(), Target = inputPayload})
     elseif reason == "RotateScene" then
         Event.RotateScene:SendToServer({ID = USERID, Scene = self.Await.Payload, Position = inputPayload})
     elseif reason == "MoveScene" then
@@ -276,7 +291,7 @@ end
 
 function UI:HideWindows()
     if MCMActive then
-        Mods.MCM.IMGUIAPI:CloseMCMWindow()
+        Mods.BG3MCM.IMGUIAPI:CloseMCMWindow()
     else
         if self.Window then
             self.Window.Open = false
@@ -289,7 +304,7 @@ function UI:HideWindows()
 end
 function UI:ShowWindows()
     if MCMActive then
-        Mods.MCM.IMGUIAPI:OpenMCMWindow()
+        Mods.BG3MCM.IMGUIAPI:OpenMCMWindow()
     else
         if self.Window then
             self.Window.Open = true
@@ -313,6 +328,47 @@ end
 
 function UI.GetAnimations()
     Event.FetchAllAnimations:SendToServer({ID = USERID})
+end
+
+function UI:GetSelectedCharacter()
+    -- Debug.Print("Selected Characer Is:")
+    -- _D(self.PartyInterface.SelectedCharacter)
+
+
+    -- local iteration = 0
+    -- local function uiStateCheck(fn)
+    --     iteration = iteration + 1
+    --     -- _P("UIStateCheck: Checking UI state: Iteration", iteration)
+    --     if iteration > 999 then
+    --         -- _P("UIStateCheck: Max iterations reached, stopping check")
+    --         iteration = 0
+    --         return
+    --     end
+    --     if UIInstance and UIInstance.PartyInterface and UIInstance.PartyInterface.SelectedCharacter then
+    --         -- _P("UIStateCheck: Condition met, executing function")
+    --         iteration =  0
+    --         -- Ext.Timer.WaitFor(200, function ()
+    --             return fn()
+    --         -- end)
+    --     else
+    --         -- _P("UIStateCheck: Condition not met, executing function")
+    --         Ext.Timer.WaitFor(200, function ()
+    --             uiStateCheck(fn)
+    --         end)
+    --     end
+    -- end
+
+    -- uiStateCheck(
+    --     function ()
+    --         if UIInstance then
+                return self.PartyInterface.SelectedCharacter.Uuid or _C().Uuid.EntityUuid
+    --         else
+    --             -- print("ERROR: UIINSTANCE DOESNT EXIST")
+    --         end
+    --     end
+    -- )
+
+    -- return self.PartyInterface.SelectedCharacter.Uuid or _C().Uuid.EntityUuid
 end
 
 --function UI.GetUIByID(id)

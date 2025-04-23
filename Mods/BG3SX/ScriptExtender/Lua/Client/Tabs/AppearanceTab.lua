@@ -141,7 +141,12 @@ end
 
 function AppearanceTab:FetchGenitals()
     -- self.AwaitingGenitals = true
-    Event.FetchGenitals:SendToServer({ID = USERID, Character = UIInstance.GetSelectedCharacter() or _C().Uuid.EntityUuid})
+    print("UIInstance:GetSelectedCharacter() ", UIInstance:GetSelectedCharacter())
+    local selected = UIInstance:GetSelectedCharacter()
+    local helperselected = Helper.GetLocalControlledEntity().Uuid.EntityUuid
+    local c = _C().Uuid.EntityUuid
+    print("fetching genitals for ", selected , " or ", helperselected , " or ", c)
+    Event.FetchGenitals:SendToServer({ID = USERID, Character = UIInstance:GetSelectedCharacter() or Helper.GetLocalControlledEntity().Uuid.EntityUuid or _C().Uuid.EntityUuid})
 end
 
 function AppearanceTab:UpdateGenitalGroup(whitelisted)
@@ -197,15 +202,15 @@ function AppearanceTab:UpdateGenitalGroup(whitelisted)
 
                 activeGenital.OnClick = function()
                     activeGenital.Selected = false
-                    local uuid = UIInstance.GetSelectedCharacter()
+                    local uuid = UIInstance:GetSelectedCharacter()
                     -- print("current character accordin to the label is ", uuid)
-                    Event.SetActiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance.GetSelectedCharacter()})
+                    Event.SetActiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance:GetSelectedCharacter()})
                 end
                 inactiveGenital.OnClick = function()
                     activeGenital.Selected = false
-                    local uuid = UIInstance.GetSelectedCharacter()
+                    local uuid = UIInstance:GetSelectedCharacter()
                     -- print("current character accordin to the label is ", uuid)
-                    Event.SetInactiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance.GetSelectedCharacter()})
+                    Event.SetInactiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance:GetSelectedCharacter()})
                 end
             end
         end

@@ -70,17 +70,22 @@ function SceneTab:CreateNewSceneArea()
     self.SFWSceneButton = self.Tab:AddImageButton("Create SFW Scene", "Action_Song_BardDance", {100,100})
     self.SFWSceneButton:Tooltip():AddText("Create SFW Scene")
     self.SFWSceneButton.OnClick = function()
-        self:AwaitNewScene() -- Currently does the same as regular new scene button
+        if self.NewSceneEligible == true then
+            self:AwaitNewScene() -- Currently does the same as regular new scene button
+        end
     end
     self.SFWSceneButton.Visible = false
 
     self.NSFWSceneButton = self.Tab:AddImageButton(Ext.Loca.GetTranslatedString("hc266ca8031ad49239c1cc596692c5102c9ba", "Create Scene"), "BG3SX_ICON_MAIN", {100,100})
     self.NSFWSceneButton:Tooltip():AddText(Ext.Loca.GetTranslatedString("hc266ca8031ad49239c1cc596692c5102c9ba", "Create Scene"))
     self.NSFWSceneButton.OnClick = function()
-        self:AwaitNewScene()
+        if self.NewSceneEligible == true then
+            self:AwaitNewScene()
+        end
     end
     -- self.NSFWSceneButton.SameLine = true
 
+    self.NewSceneEligible = true
     self.ControlsText = self.Tab:AddText("Mouse:\nLeft click | Right click to cancel\nController:\nLeft stick to start targeting + A | B to cancel")
     self.ControlsText.SameLine = true
 
@@ -110,6 +115,22 @@ function SceneTab:UpdateNoSceneText()
     else
         self.NoSceneText.Visible = true -- Show it again
     end
+end
+
+function SceneTab:DisableSceneButtons()
+    self.NewSceneEligible = false
+    self.SFWSceneButton.Tint = {0.69, 0.69, 0.69, 1.0} -- Greyed out
+    self.NSFWSceneButton.Tint = {0.69, 0.69, 0.69, 1.0} -- Greyed out
+    self.ControlsText.Visible = false
+    UIInstance:DisplayInfoText("Character is not whitelisted, please select a different character.")
+end
+
+function SceneTab:EnableSceneButtons()
+    self.NewSceneEligible = true
+    self.SFWSceneButton.Tint = {1.0, 1.0, 1.0, 1.0} -- Regular color
+    self.NSFWSceneButton.Tint = {1.0, 1.0, 1.0, 1.0} -- Regular color
+    self.ControlsText.Visible = false
+    UIInstance:HideInfoText()
 end
 
 -- Check all current scenes against all current SceneControls

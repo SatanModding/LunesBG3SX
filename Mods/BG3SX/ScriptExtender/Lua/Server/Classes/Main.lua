@@ -3,7 +3,7 @@
 --                      For handling the main functionalities
 --
 ----------------------------------------------------------------------------------------
-
+local aw = Mods.BG3AF.AnimationWaterfall
 
 local function initializeParty()
     local party = Osi.DB_PartyMembers:Get(nil)
@@ -12,6 +12,9 @@ local function initializeParty()
         if Entity:IsWhitelisted(party[i][1]) then
 
             local entity = Ext.Entity.Get(party[i][1])
+
+            aw:Get(party[i][1]):AddWaterfall("bfa9dad2-2a5b-45cc-b770-9537badf9152")
+
             if not entity then
                 Debug.Print("is not a entity " .. party[i][1])
             else

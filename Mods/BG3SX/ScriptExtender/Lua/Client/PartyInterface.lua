@@ -203,13 +203,8 @@ function PartyInterface:AddNPC(parent, uuid)
     return instance
 end
 
-function UI.GetSelectedCharacter()
-    -- Debug.Print("Selected Characer Is:")
-    -- _D(self.PartyInterface.SelectedCharacter)
-    return UIInstance.PartyInterface.SelectedCharacter.Uuid or _C().Uuid.EntityUuid
-end
-
 function PartyInterface:SetSelectedCharacter(characterUuid)
+    -- _P("SetSelectedCharacter called with uuid: " .. characterUuid)
     local characterAndNPCs = {}
     if self.Characters and #self.Characters > 0 then
         for _,character in pairs(self.Characters) do
@@ -226,27 +221,33 @@ function PartyInterface:SetSelectedCharacter(characterUuid)
             charOrNPC.CharacterButton.Tint = {1.0, 0.8, 0.3, 1.0} -- Neutral Selected Color -- Beige
             charOrNPC.Selected = true
             self.SelectedCharacter = charOrNPC
-            Event.SetSelectedCharacter:SendToServer({ID = USERID, Uuid = charOrNPC.Uuid})
+            _P("Selected character: " .. charOrNPC.Uuid)
+            -- Event.SetSelectedCharacter:SendToServer({ID = USERID, Uuid = charOrNPC.Uuid})
         else
             charOrNPC.CharacterButton.Tint = {1.0, 1.0, 1.0, 1.0} -- Reset to regular
+            -- _P("Resetting tint to regular for character: " .. charOrNPC.Uuid)
             charOrNPC.Selected = false
         end
     end
+
+    Event.RequestWhitelistStatus:SendToServer({ID = USERID, Uuid = characterUuid})
+    print("Selected character persistance check ", self.SelectedCharacter.Uuid)
 end
 
-Event.SetSelectedCharacter:SetHandler(function (payload)
+-- Event.SetSelectedCharacter:SetHandler(function (payload)
     -- Empty Handler currently to avoid console prints
     -- Todo: Do something with it
-end)
+    -- local x = payload
+-- end)
 
 -- Only one can be hovered at a time
 function PartyInterface:GetHovered()
     if UIInstance.PartyInterface.Characters then 
-        _P("1")
+        -- _P("1")
         for _,character in pairs(UIInstance.PartyInterface.Characters) do
-            _P("2")
+            -- _P("2")
             if character.CharacterButton.Statusflags["HoveredRect"] then
-                _P("3")
+                -- _P("3")
                 return character
             end
         end
@@ -266,108 +267,5 @@ end
 
 
 -- TODO:
--- Add Character Selection
----- For Genitals
----- For Scenes
----- For Whitelist
--- Add Party Update when characters join
 -- Add Consent when targeting other players - withold scene creation until consent is given
 -- Check Multiplayer
-
-
-
-
--- function UI.FindCharacterTable(uuid)
---     for _,entry in pairs(characterTables) do
---         if entry.uuid == uuid then
---             return entry.table
---         end
---     end
--- end
-
--- function UI.CharacterButton(table)
---     UI.HighlightOnlyOne(table, characterTables)
---     --DoSomethingElse
---     --Refresh Info in Tabs
--- end
-
--- function UI.AddCharacter(parent, uuid)
---     local character = Ext.Entity.Get(uuid)
---     local charTable = parent:AddCell():AddTable("", 1)
---     charTable.SizingStretchProp = true
---     --charTable.Borders = true
---     local row = charTable.AddRow()
---     local size = {100,100}
---     local tName = Ext.Loca.GetTranslatedString(character.DisplayName.NameKey.Handle.Handle)
---     local characterButton
---     local foundOrigin = false
---     for uuid,origin in pairs(Data.Origins) do
---         if Helper.StringContains(uuid, character.Uuid.EntityUuid) then
---             foundOrigin = true
---             characterButton = row:AddCell():AddImageButton("","EC_Portrait_"..origin, size)
---         end
---     end
---     if foundOrigin == false then
---         characterButton = row:AddCell():AddImageButton("","EC_Portrait_Generic", size)
---     end
-
---     characterButton.OnClick = function()
---         UI.CharacterButton(charTable)
---     end
---     --local infoArea = row:AddCell():AddTable("", 1)
---     local characterName = charTable.AddRow():AddCell():AddText("")
---     characterName.Label = tName
---     --local additionalInfo = infoArea:AddRow():AddCell():AddText("AdditionalInfoArea")
---     table.insert(characterTables, {uuid = uuid, table = charTable, button = characterButton})
---     return charTable
--- end
-
-
--- --TODO - Osi.DB_Partymembers not available on client
--- function UI.CreateCharacterTable(parent)
---     local charTable = parent:AddTable("characterTable", 4)
---     charTable.SizingStretchProp = true
---     --charTable.Borders = true
---     charTable.ScrollY = false
---     --charTable.ScrollX = true
---     local row = charTable.AddRow()
---     --row:AddCell():AddText("Test")
---     local characterCount = 0
---     local party = UIHelper.GetCurrentParty()
---     for _, uuid in pairs(party) do
---         if characterCount > 0 and characterCount % 4 == 0 then
---             row = charTable.AddRow()
---         end
---         --if Entity:IsWhitelisted(uuid, false) then
---             local companion = UI.AddCharacter(row, uuid)
---             characterCount = characterCount + 1
---         --end
---     end
---     return charTable
--- end
-
-
--- function UI.HighlightConnected(tableToHighlight, listOfTables)
---     for _,entry in pairs(listOfTables) do
---         if entry.table == tableToHighlight then
---             entry.table.Borders = true
---             -- Color it in a different color
---         end
---     end
--- end
-
--- function UI.HighlightOnlyOne(tableToHighlight, listOfTables)
---     --FailColor = {1.0, 0.0, 0.0, 1.0},
---     --SuccessColor = {0.0, 1.0, 0.0, 1.0},
---     --NeutralColor = {0.7, 0.7, 0.7, 1.0},
---     for _,entry in pairs(listOfTables) do
---         if entry.table == tableToHighlight then
---             entry.button.Tint = {1.0, 0.8, 0.3, 1.0} -- Neutral Selected Color -- Beige
---             entry.selected = true
---         else
---             entry.button.Tint = {1.0, 1.0, 1.0, 1.0} -- Reset to regular
---             entry.selected = false
---         end
---     end
--- end
-

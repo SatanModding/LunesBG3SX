@@ -168,7 +168,11 @@ Event.FetchWhitelist:SetHandler(function (payload)
     Event.SendWhitelist:SendToClient(newPayload, payload.ID)
 end)
 
-
+Event.RequestWhitelistStatus:SetHandler(function (payload)
+    local uuid = payload.Uuid
+    local status = Entity:IsWhitelisted(uuid)
+    Event.SendWhitelistStatus:SendToClient({Status = status}, payload.ID)
+end)
 
 
 Event.CustomEvent:SetHandler(function (payload)
