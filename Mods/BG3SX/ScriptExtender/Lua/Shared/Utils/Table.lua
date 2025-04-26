@@ -203,3 +203,11 @@ function Table.SortByKey(tbl)
     table.sort(sorted, function(a, b) return a.key < b.key end)
     return sorted
 end
+
+function Table.RemoveByValue(tbl, value)
+    for i = #tbl, 1, -1 do
+        if tbl[i] == value then
+            table.remove(tbl, i)
+        end
+    end
+end
