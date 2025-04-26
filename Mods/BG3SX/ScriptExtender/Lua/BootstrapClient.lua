@@ -1,13 +1,11 @@
 NULL = "NULL_00000000-0000-0000-0000-000000000000"
+BG3AFActive = Mods and Mods.BG3AF
 
 ------------------------------------
         -- Init Classes --
 ------------------------------------
 
 Ext.Require("Client/Camera.lua")
-
--- Ext.Require("Shared/Data/AnimationSets.lua") -- To replicate our sets on the client
-
 
 Ext.Require("Shared/_constructor.lua")
 
@@ -16,17 +14,7 @@ Ext.Require("Shared/_initUtils.lua")
 
 Ext.Require("Client/UIHelper.lua")
 Ext.Require("Client/UI.lua")
-Ext.Require("Client/PartyInterface.lua")
-Ext.Require("Client/Tabs/SceneTab.lua")
-Ext.Require("Client/SceneControl.lua")
-Ext.Require("Client/Tabs/AppearanceTab.lua")
-Ext.Require("Client/Tabs/WhitelistTab.lua")
-Ext.Require("Client/Tabs/NPCTab.lua")
-Ext.Require("Client/Tabs/SettingsTab.lua")
-Ext.Require("Client/Tabs/DebugTab.lua")
-
 Ext.Require("Client/UIEventHandler.lua")
-
 
 Ext.Require("Shared/Data/Origins.lua")
 Ext.Require("Client/GenitalMessages.lua")

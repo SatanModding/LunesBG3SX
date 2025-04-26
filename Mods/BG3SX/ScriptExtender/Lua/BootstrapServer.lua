@@ -1,6 +1,8 @@
 -- If I don't define this, the console yells at me
 ModuleUUID = "df8b9877-5662-4411-9d08-9ee2ec4d8d9e"
 
+BG3AFActive = Mods and Mods.BG3AF
+
 ------------------------------------
         -- Init Classes --
 ------------------------------------
@@ -58,9 +60,9 @@ Ext.RegisterModEvent("BG3SX", "GenitalChange")              --{uuid, newGenital}
 
 
 local settings = {
-    Server = true, 
-    Client = true, 
-    SyncToClient = true, 
+    Server = true,
+    Client = true,
+    SyncToClient = true,
     SyncToServer = true,
     SyncOnWrite = true,
     WriteableOnClient = true,
@@ -78,6 +80,8 @@ Ext.Vars.RegisterModVariable(ModuleUUID, "BG3SX_ShowAllAnimations", {
 
 
 local function OnSessionLoaded()
+
+
 
 
         local vars = Ext.Vars.GetModVariables(ModuleUUID)
@@ -100,7 +104,7 @@ local function OnSessionLoaded()
 
         Ext.Vars.SyncModVariables(ModuleUUID)
 
-        
+
 end
 
 
@@ -128,12 +132,12 @@ Ext.Events.SessionLoaded:Subscribe(OnSessionLoaded)
 
 
 local modifierLists = {
-        "Armor", 
-        "Character", 
-        "CriticalHitTypeData", 
-        "InterruptData", 
-        "Object", 
-        "PassiveData", 
+        "Armor",
+        "Character",
+        "CriticalHitTypeData",
+        "InterruptData",
+        "Object",
+        "PassiveData",
         "SpellData",
         "Weapon",
         "StatusData"
@@ -153,7 +157,7 @@ local functors = {
         "Failure",
         "Properties",
         "Success",
-        "OriginSpellFail", 
+        "OriginSpellFail",
         "OriginSpellProperties",
         "OriginSpellSuccess",
         "SpellFail",
@@ -189,7 +193,7 @@ local function purgeStat(object)
 
          -- sets most properties to a default value (None, "", {}, etc.)
          object:CopyFrom(object.ModifierList)
-                       
+
          -- properties of a stats cannot be gracefully accessed.
          -- collect all of them first
          local allProperties = {}
@@ -200,10 +204,10 @@ local function purgeStat(object)
           -- functors don't inherit from the CopyFrom and have to be set manually
           for _, functor in pairs(functors) do
                  if allProperties[functor] then
-                        object:SetRawAttribute(functor, "") 
+                        object:SetRawAttribute(functor, "")
                  end
          end
-       
+
 end
 
 
@@ -213,7 +217,7 @@ local function LoadStatsFile(path, debug)
 	local file = Ext.IO.LoadFile(path, "data")
 	local object = nil
 	local entry = nil
-	
+
 
 	for line in string.gmatch(file, "([^\r\n]+)\r*\n") do
 		if line:sub(1, 1) == "/" then
@@ -268,7 +272,7 @@ end
 
 local filenames = {
         "Passives"
-    }
+}
 
 local function OnReset()
 
@@ -282,5 +286,5 @@ local function OnReset()
 end
 
 
-Ext.Events.ResetCompleted:Subscribe(OnReset)    
+Ext.Events.ResetCompleted:Subscribe(OnReset)
 
