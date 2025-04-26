@@ -24,14 +24,9 @@ SLOTS_TO_BE_REMOVED_FOR_SEX = {
 -- 
 ----------------------------------------------------------------------------------------------------
 
-
-
-
 -- make NPCs added to the UI persistent (add them again whenever a save is loaded(UI built))
 
-
 -- Yoinked from Muffin https://www.nexusmods.com/baldursgate3/mods/11437
-
 
 function NPC:GetSavedNPCs()
 
@@ -67,7 +62,6 @@ function NPC:UpdateNPCs(npcs)
 end
 
 
-
 function NPC:SaveAddedNPC(npc, clientID)
     --print("saving NPC", npc, " for client ", clientID)
 
@@ -89,7 +83,6 @@ function NPC:SaveAddedNPC(npc, clientID)
 
     NPC:UpdateNPCs(npcs)
 end
-
 
 function NPC:RemoveRemovedNPC(npc, clientID)
     --print("removing NPC", npc, "for user", clientID)
@@ -123,8 +116,6 @@ function NPC:RemoveRemovedNPC(npc, clientID)
     end
 end
 
-
-
 -- call this when UI is built
 function NPC:RestoreNPCs()
 
@@ -136,18 +127,17 @@ function NPC:RestoreNPCs()
     -- _D(allNPCs)
 
     for clientID,npcs in pairs(allNPCs) do
-        Event.RestoreNPCTab:SendToClient({npcs = npcs}, clientID)
+        if Ext.Entity.Get(clientID).ClientControl then
+            Event.RestoreNPCTab:SendToClient({npcs = npcs}, clientID)
+        end
     end
 end
-
-
 
 Event.AddedNPCToTab:SetHandler(function(payload)
     local id = payload.ID
     local npc = payload.npc
     NPC:SaveAddedNPC(npc, id)
 end)
-
 
 Event.RemovedNPCFromTab:SetHandler(function(payload)
     local id = payload.ID
@@ -160,19 +150,11 @@ Event.FinishedBuildingNPCUI:SetHandler(function(payload)
     NPC:RestoreNPCs()
 end)
 
-
-                
-
-
-
-
-
 ----------------------------------------------------------------------------------------------------
 -- 
 -- 								    	Stripping
 -- 
 ----------------------------------------------------------------------------------------------------
-
 
 ---@param entity EntityHandle
 ---@return table
@@ -206,7 +188,6 @@ function NPC.Redress(entity, toBeRestored)
 
 end
 
-
 ----------------------------------------------------------------------------------------------------
 --  
 -- 								    	Genitals
@@ -223,7 +204,6 @@ function NPC.GiveGenitals(entity)
 
 end
 
-
 -- Remove the genital
 ---@param  entity EntityHandle 
 function NPC.RemoveGenitals(entity)
@@ -234,18 +214,15 @@ function NPC.RemoveGenitals(entity)
     end
 end
 
-
 -- TODO: function giveHair for helmet havers
 -- When removing helmer slots, NPCs don't have hair anymore
 -- @param           - uuid of the NPC
 local function addHairIfNecessary(uuid)
 end
 
-
 -- on closing the game, template changes are yeeted.
 -- To restore them, grab the uservars and strip all stripped NPCs
 function NPC.RestoreNudity()
-
     local allNPCs = {}
     local allEntities = Ext.Entity.GetAllEntitiesWithComponent("ServerCharacter")
     for _,entity in pairs(allEntities) do
@@ -292,7 +269,6 @@ Event.RequestStripNPC:SetHandler(function (payload)
 end)
 
 
-
 Event.RequestDressNPC:SetHandler(function (payload)
     local entity = Ext.Entity.Get(payload.uuid)
     if not entity then
@@ -311,7 +287,6 @@ Event.RequestDressNPC:SetHandler(function (payload)
 
     SexUserVars.SetNPCClothes(nil, entity)
 end)
-
 
 Event.RequestGiveGenitalsNPC:SetHandler(function(payload)
     local uuid = payload.uuid

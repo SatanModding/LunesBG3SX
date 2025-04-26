@@ -3,18 +3,14 @@
 --                      For handling the main functionalities
 --
 ----------------------------------------------------------------------------------------
-local aw = Mods.BG3AF.AnimationWaterfall
+local aW = Mods.BG3AF.AnimationWaterfall
 
 local function initializeParty()
     local party = Osi.DB_PartyMembers:Get(nil)
     -- _P("---------------------OnSessionLoaded Whitelist Check---------------------")
     for i = #party, 1, -1 do
         if Entity:IsWhitelisted(party[i][1]) then
-
             local entity = Ext.Entity.Get(party[i][1])
-
-            aw:Get(party[i][1]):AddWaterfall("bfa9dad2-2a5b-45cc-b770-9537badf9152")
-
             if not entity then
                 Debug.Print("is not a entity " .. party[i][1])
             else
@@ -22,8 +18,6 @@ local function initializeParty()
                 Genital.AddGenitalIfHasNone(entity)
                 Genital.AssignDefaultIfHasNotYet(entity)
             end
-
-
         end
 
         -- We are not using spells anymore
@@ -32,7 +26,6 @@ local function initializeParty()
         Osi.RemoveSpell(party[i][1],"BG3SX_MainContainer", 1)
         Osi.RemoveSpell(party[i][1],"BG3SX_ChangeGenitals", 1)
         Osi.RemoveSpell(party[i][1],"BG3SX_Options", 1)
-
     end
 end
 
@@ -45,18 +38,39 @@ function OnSessionLoaded()
     Genital.Initialize() -- Initializes genitals, check Genitals.lua
 
     -- strips NPCs that have been stripped before the game was ended
-
-
     Ext.Osiris.RegisterListener("LevelGameplayStarted", 2, "after", function(_, _)
+        print("ATTENTION ATTENTION ATTTENTION")
+        print("Sending Event session loaded to all clients")
+        Event.SessionLoaded:Broadcast("") -- fetches NPCs once
         initializeParty()
         NPC.RestoreNudity()
+    end)
+
+    local oldparty
+
+    Ext.Osiris.RegisterListener("DB_PartOfTheTeam", 1, "beforeDelete", function (character)
+        oldparty = Osi.DB_PartyMembers:Get(nil)
+    end)
+    Ext.Osiris.RegisterListener("CharacterJoinedParty", 1, "before", function (character)
+        oldparty = Osi.DB_PartyMembers:Get(nil)
+    end)
+    Ext.Osiris.RegisterListener("CharacterLeftParty", 1, "before", function (character)
+        oldparty = Osi.DB_PartyMembers:Get(nil)
     end)
 
 	Ext.Osiris.RegisterListener("DB_PartOfTheTeam", 1, "afterDelete", function (character)
         initializeParty()
         local party = Osi.DB_PartyMembers:Get(nil)
         -- Debug.Print("DB_PartOfTheTeam send")
-        Event.SendParty:Broadcast(party)
+        for _,member in pairs(party) do
+            if Table.Containes(oldparty, member) then
+                local entity = Ext.Entity.Get(member)
+                if entity.ClientControl then
+                    Event.SendParty:SendToClient(party, member)
+                end
+            end
+        end
+        oldparty = party
     end)
 
     -- TODO: Check if CharacterCreationDummy might cause issues with "Make NPC into Partymember" mods
@@ -68,31 +82,64 @@ function OnSessionLoaded()
 
         local party = Osi.DB_PartyMembers:Get(nil)
         -- Debug.Print("CharacterJoinedParty send")
-        Event.SendParty:Broadcast(party) -- Update PartyInterface
+        for _,member in pairs(party) do
+            if Table.Containes(oldparty, member) then
+                local entity = Ext.Entity.Get(member)
+                if entity.ClientControl then
+                    Event.SendParty:SendToClient(party, member)
+                end
+            end
+        end
+        oldparty = party
     end)
-
 
     Ext.Osiris.RegisterListener("CharacterLeftParty", 1, "after", function(character)
-
         local party = Osi.DB_PartyMembers:Get(nil)
         -- Debug.Print("CharacterLeftParty send")
-        Event.SendParty:Broadcast(party) -- Update PartyInterface
+        for _,member in pairs(party) do
+            if Table.Containes(oldparty, member) then
+                local entity = Ext.Entity.Get(member)
+                if entity.ClientControl then
+                    Event.SendParty:SendToClient(party, member)
+                end
+            end
+        end
+        oldparty = party
     end)
 
-
+    Ext.Events.ResetCompleted:Subscribe(function(e)
+        local party = Osi.DB_PartyMembers:Get(nil)
+        local host = Osi.GetHostCharacter()
+        for _,member in pairs(party) do
+            if not member == host then
+                local entity = Ext.Entity.Get(member)
+                if entity.ClientControl then
+                    Event.InitUIAfterReset:SendToClient("", member)
+                end
+            end
+        end
+    end)
 end
-
-
 
 -- Subscribes to the SessionLoaded event and executes our OnSessionLoaded function
 Ext.Events.SessionLoaded:Subscribe(OnSessionLoaded)
 
-local function afterResetPartySync()
-    initializeParty()
-    local party = Osi.DB_PartyMembers:Get(nil)
-    -- Debug.Print("afterResetPartySync send")
-    Event.SendParty:Broadcast(party) -- Update PartyInterface
-end
+
+-- local oldparty = Osi.DB_PartyMembers:Get(nil)
+-- local function afterResetPartySync()
+--     initializeParty()
+--     local party = Osi.DB_PartyMembers:Get(nil)
+--     -- Debug.Print("afterResetPartySync send")
+--     for _,member in pairs(party) do
+--         if Table.Containes(oldparty, member) then
+--             local entity = Ext.Entity.Get(member)
+--             if entity.ClientControl then
+--                 Event.SendParty:SendToClient(party, member)
+--             end
+--         end
+--     end
+--     oldparty = party
+-- end
 
 -- Ext.Events.ResetCompleted:Subscribe(function(e)
 --     afterResetPartySync()

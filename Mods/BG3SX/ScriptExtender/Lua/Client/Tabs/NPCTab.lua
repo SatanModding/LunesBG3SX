@@ -1,8 +1,14 @@
+---@class NPCTab
+---@field Tab ExtuiTabItem
+---@field InRange table
+---@field AddButton ExtuiButton
+---@field StripButton ExtuiButton
+---@field DressButton ExtuiButton
 NPCTab = {}
 NPCTab.__index = NPCTab
 
-
-
+local allNPCs = {}
+local allWhiteListedNPCs = {}
 
 ----------------------------------------------------------------------------------------------------
 -- 
@@ -10,41 +16,25 @@ NPCTab.__index = NPCTab
 -- 
 ----------------------------------------------------------------------------------------------------
 
-
-
-local function IsNPC(entity)
-    local E = Helper.GetPropertyOrDefault(entity,"CharacterCreationStats", nil)
-    if E then
-        return false
-    else
-        return true
-    end
-end
-
-
 function NPCTab:RequestStripNPC()
+    local uuid = UI:GetSelectedCharacter()
+    --print("dumping options")
+    --_D(self.InRange.Choice.Options)
+    -- print("got ", uuid)
 
-        local uuid = UIInstance:GetSelectedCharacter()
-        --print("dumping options")
-        --_D(self.InRange.Choice.Options)
-        -- print("got ", uuid)
+    if not uuid then
+        local text = "            No NPC selected. Please select one first before clicking \"Strip\""
+        UIHelper.AddTemporaryTooltip(self.StripButton, 2000, text)
+        return
+    end
 
-        if not uuid then
-
-            local text = "            No NPC selected. Please select one first before clicking \"Strip\""
-            UIHelper.AddTemporaryTooltip(self.StripButton, 2000, text)
-            return
-        end
-
-        Event.RequestStripNPC:SendToServer({uuid = uuid})
-        Event.RequestGiveGenitalsNPC:SendToServer({uuid = uuid})
-
+    Event.RequestStripNPC:SendToServer({uuid = uuid})
+    Event.RequestGiveGenitalsNPC:SendToServer({uuid = uuid})
 end
-
 
 function NPCTab:RequestDressNPC()
 
-        local uuid = UIInstance:GetSelectedCharacter()
+        local uuid = UI:GetSelectedCharacter()
 
         if not uuid then
             local text = "            No NPC selected. Please select one first before clicking \"Dress\""
@@ -56,93 +46,96 @@ function NPCTab:RequestDressNPC()
         Event.RequestRemoveGenitalsNPC:SendToServer({uuid = uuid})
 end
 
-
-
-
-function NPCTab:ScanForNPCs()
-    local allCharacters = {}
+function NPCTab.FetchAllNPCs()
+    print("Fethcing all NPCs")
     local allEntities = Ext.Entity.GetAllEntitiesWithComponent("ClientCharacter")
 
     for _,entity in pairs(allEntities) do
-        table.insert(allCharacters, entity.Uuid.EntityUuid)
+        table.insert(allNPCs, entity.Uuid.EntityUuid)
     end
 
-    Event.FetchWhitelistedNPCs:SendToServer({tbl = allCharacters, client = USERID})
+    print("fetched all NPCs")
+
+    print("sending event: FetchWhitelistedNPCs:SendToServer")
+    print("with userid ", USERID)
+    Event.FetchWhitelistedNPCs:SendToServer({tbl = allNPCs, client = USERID})
 end
 
-
-
 Event.SendWhitelistedNPCs:SetHandler(function (payload)
-    local whitelisted = payload
-
-    local inRange = {}
-    local hostPos = _C().Transform.Transform.Translate
-    local distance = UIInstance.NPCTab.InRange.Range.Value[1]
-    -- print("scanning distance")
-    -- _P(distance)
-
-    for _, character in pairs(whitelisted) do
-
-        local entity = Ext.Entity.Get(character)
-        local NPCLocation = entity.Transform.Transform.Translate
-
-        -- to also consider y coordinates ()
-        -- maybe someone is hidden in the floor idk
-        if  Math.is_within_distance_x_y(_C(), entity, distance)then
-            if IsNPC(entity) then
-                table.insert(inRange, Helper.GetName(entity.Uuid.EntityUuid) .. " - " .. entity.Uuid.EntityUuid)
-            end
-        end
-    end
-
-    --_D(inRange)
-
-    local choice = UIInstance.NPCTab.InRange.Choice
-    choice.Options = inRange
-
-    if choice.SelectedIndex == 0 then
-        choice.SelectedIndex = choice.SelectedIndex +1
-    end
-
-
-    choice.OnChange = function()
-        -- Debug.Print("OnChange")
-        -- _DS(UIInstance.AppearanceTab)
-
-        -- Debug.Print("Chose an NPC")
-        -- Debug.Print("Remeber to change the text in genitals tab")
-
-        -- local npc = choice.Options[choice.SelectedIndex + 1]
-        -- local text = UIInstance.AppearanceTab.CurrentCharacter
-        -- local clear = UIInstance.AppearanceTab.ClearChoiceButton
-
-        -- local uuid = npc:match(" %- (.+)")
-        -- UIInstance.PartyInterface:SetSelectedCharacter(uuid)
-        -- UIInstance.PartyInterface:UpdateNPCs()
-
-        -- text.Label = "Current Character: " .. npc
-        -- text.Visible = true
-        -- clear.Visible = true
-    end
+    print("assinged whitelistedNPCs")
+    allWhiteListedNPCs = payload
 end)
 
+function NPCTab:ScanForNPCs()
+    if UI.Ready then
+        --print("Scanning for NPCs")
+        local inRange = {}
+        -- local hostPos = _C().Transform.Transform.Translate
+        local distance = UI.NPCTab.InRange.Range.Value[1]
+        --print("In distance ", distance)
 
-function UI:NewNPCTab()
-    if self.NPCTab then return end -- Fix for infinite UI repopulation
+        for _, character in pairs(allWhiteListedNPCs) do
+            local entity = Ext.Entity.Get(character)
+            if entity and Math.IsWithinDistanceBetweenEntities(_C(), entity, distance) then
+                if IsNPC(entity) then
+                    table.insert(inRange, Helper.GetName(entity.Uuid.EntityUuid) .. " - " .. entity.Uuid.EntityUuid)
+                end
+            end
+        end
+
+        --_D(inRange)
+
+        -- local choice = UI.NPCTab.InRange.Choice
+        -- choice.Options = inRange
+
+        -- if choice.SelectedIndex == 0 then
+        --     choice.SelectedIndex = choice.SelectedIndex +1
+        -- end
+
+        local choice = UI.NPCTab.InRange.Choice
+        choice.Options = inRange
+
+        if choice.Options and #choice.Options > 0 then
+            choice.SelectedIndex = 0
+        end
+        choice.OnChange = function()
+            Debug.Print("OnChange")
+            -- _DS(UI.AppearanceTab)
+
+            -- Debug.Print("Chose an NPC")
+            -- Debug.Print("Remeber to change the text in genitals tab")
+
+            -- local npc = choice.Options[choice.SelectedIndex + 1]
+            -- local text = UI.AppearanceTab.CurrentCharacter
+            -- local clear = UI.AppearanceTab.ClearChoiceButton
+
+            -- local uuid = npc:match(" %- (.+)")
+            -- UI.PartyInterface:SetSelectedCharacter(uuid)
+            -- UI.PartyInterface:UpdateNPCs()
+
+            -- text.Label = "Current Character: " .. npc
+            -- text.Visible = true
+            -- clear.Visible = true
+        end
+    end
+end
+
+---@param holder ExtuiTabBar
+function NPCTab:New(holder)
+    if UI.NPCTab then return end -- Fix for infinite UI repopulation
 
     local instance = setmetatable({
-        --UI = self.ID,
-        Tab = self.TabBar:AddTabItem(Ext.Loca.GetTranslatedString("h3d507f295c0b468ea6429b9b00c3c4ed2534", "NPCs")),
+        Tab = holder:AddTabItem(Ext.Loca.GetTranslatedString("h3d507f295c0b468ea6429b9b00c3c4ed2534", "NPCs")),
     }, NPCTab)
     return instance
 end
 
-function NPCTab:Initialize()
+function NPCTab:Init()
 
     self.Tab:AddText("Select a range to scan for NPCs")
+    self.Tab:AddText("You can also start a scene by selecting the NPC in the game world")
 
-    -- scan once on initializing
-    self:ScanForNPCs()
+    print("initializing InRange")
 
     self.InRange = {}
     local r = self.InRange
@@ -161,7 +154,7 @@ function NPCTab:Initialize()
     end
 
     self.AddButton = self.Tab:AddButton("Add")
-    self.AddButton.IDContext = math.random(1000,100000)
+    self.AddButton.IDContext = tostring(math.random(1000,100000))
     self.AddButton.OnClick = function(button,npc)
         print("Add NPC button clicked for ", npc)
 
@@ -170,11 +163,10 @@ function NPCTab:Initialize()
             npc = self.InRange.Choice.Options[self.InRange.Choice.SelectedIndex + 1]
             print(npc)
         end
-
         if npc then
             local uuid = npc:match(" %- (.+)")
             print("uuid is ", uuid)
-            local PI = UIInstance.PartyInterface
+            local PI = UI.PartyInterface
             if PI then
                 if not Table.Contains(PI.NPCs, uuid) then
                     table.insert(PI.NPCs, uuid)
@@ -187,6 +179,10 @@ function NPCTab:Initialize()
             end
         end
     end
+    -- scan once after initializing
+    print("SETTING UIEXIST TO TRUE")
+
+    self:ScanForNPCs()
 end
 
 function NPCTab:UpdateRangeFinder()
@@ -194,13 +190,48 @@ function NPCTab:UpdateRangeFinder()
 end
 
 -- for client to add NPCs to UI
- Event.RestoreNPCTab:SetHandler(function(payload)
-    --print("Client received Event: RestoreNPCTab. Dumping npcs")
-    -- local npcs = payload.npcs 
-    local previouslySelected = UIInstance:GetSelectedCharacter()
-    for _,npc in pairs (payload.npcs) do
-        UIInstance.NPCTab.AddButton:OnClick(npc)
+Event.RestoreNPCTab:SetHandler(function(payload)
+    local function condition()
+        return UI.Ready == true and UI.PartyInterface.SelectedCharacter ~= nil
     end
-    UIInstance.PartyInterface:SetSelectedCharacter(previouslySelected)
-    UIInstance.AppearanceTab:FetchGenitals()
- end)
+
+    local function restoreNPCTab()
+        --print("Client received Event: RestoreNPCTab. Dumping npcs")
+        -- local npcs = payload.npcs 
+        local previouslySelected = UI:GetSelectedCharacter()
+        for _,npc in pairs (payload.npcs) do
+            UI.NPCTab.AddButton:OnClick(npc)
+        end
+        UI.PartyInterface:SetSelectedCharacter(previouslySelected)
+        UI.AppearanceTab:FetchGenitals()
+    end
+
+    Helper.DelayUntilTrue(restoreNPCTab, condition, 100)
+end)
+
+ -- payload is irrelevant. I just added it in case it throws an error otherwise
+-- Event.SessionLoaded:SetHandler(function (payload)
+--     print("Session Loaded Event Received on Client")
+--     local x = payload
+--     NPCTab.FetchAllNPCs()
+-- end)
+
+local tick = 0
+-- TODO - create settings 
+local continuousUpdaesEnabled = true
+
+local function OnTick()
+    tick = tick +1
+    -- all 2 seconds assuming 60 ticks / second
+    local TASK_CHECK_FREQUENCY = 120
+
+    if (tick % TASK_CHECK_FREQUENCY == 0) then
+        if UI.Ready and continuousUpdaesEnabled then
+            NPCTab:ScanForNPCs()
+        end
+    end
+end
+
+Ext.Events.Tick:Subscribe(OnTick)
+
+return NPCTab

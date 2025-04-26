@@ -1,31 +1,24 @@
-local function IsNPC(entity)
-    local E = Helper.GetPropertyOrDefault(entity,"CharacterCreationStats", nil)
-    if E then
-        return false
-    else
-        return true
-    end
-end
-
-
+---@class AppearanceTab
+---@field Tab ExtuiTabItem
 AppearanceTab = {}
 AppearanceTab.__index = AppearanceTab
-function UI:NewAppearanceTab()
-    if self.AppearanceTab then return end -- Fix for infinite UI repopulation
+
+---@param holder ExtuiTabBar
+function AppearanceTab:New(holder)
+    if UI.AppearanceTab then return end -- Fix for infinite UI repopulation
     
     local instance = setmetatable({
-        --UI = self.ID,
-        Tab = self.TabBar:AddTabItem(Ext.Loca.GetTranslatedString("h36809485096e467682a34b1a780bb4a4a816", "Appearance")),
+        Tab = holder:AddTabItem(Ext.Loca.GetTranslatedString("h36809485096e467682a34b1a780bb4a4a816", "Appearance")),
         GenitalsLoaded = nil,
         Genitals = {},
     }, AppearanceTab)
     return instance
 end
 
-
 function AppearanceTab:UpdateStrippingGroup(uuid)
-
-    UI.DestroyChildren(self.StrippingArea)
+    if self.StrippingArea then
+        UI.DestroyChildren(self.StrippingArea)
+    end
 
     local entity = Ext.Entity.Get(uuid)
     local stripping = SexUserVars.GetAllowStripping(entity)
@@ -75,8 +68,8 @@ function AppearanceTab:UpdateToggleVisibilityGroup(uuid)
 end
 
 Event.SetInvisible:SetHandler(function (payload)
-    if UIInstance:GetSelectedCharacter() == payload.Uuid then
-        UIInstance.AppearanceTab.IsInvisBox.Checked = payload.Value
+    if UI:GetSelectedCharacter() == payload.Uuid then
+        UI.AppearanceTab.IsInvisBox.Checked = payload.Value
     end
 end)
 
@@ -94,7 +87,7 @@ function AppearanceTab:UpdateEquipmentAreaGroup(uuid)
     end
 
     if IsNPC(entity) then
-        local npcTab = UIInstance.NPCTab
+        local npcTab = UI.NPCTab
         self.StripButton = self.EquipmentArea:AddButton(Ext.Loca.GetTranslatedString("h5217dc9e84404c68a890c1b21fb1b22dca33", "Strip NPC"))
 
         self.StripButton.OnClick = function()
@@ -115,7 +108,10 @@ function AppearanceTab:UpdateEquipmentAreaGroup(uuid)
     
 end
 
-function AppearanceTab:Initialize()
+function AppearanceTab:Init()
+    if self.Tab then
+        UI.DestroyChildren(self.Wrapper)
+    end
     -- self.Tab:AddSeparatorText("Stripping:") -- Seems to take up too much space with stripping being just a single checkbox
     if not self.StrippingArea then
         self.StrippingArea = self.Tab:AddGroup("")
@@ -141,12 +137,12 @@ end
 
 function AppearanceTab:FetchGenitals()
     -- self.AwaitingGenitals = true
-    print("UIInstance:GetSelectedCharacter() ", UIInstance:GetSelectedCharacter())
-    local selected = UIInstance:GetSelectedCharacter()
+    print("UI:GetSelectedCharacter() ", UI:GetSelectedCharacter())
+    local selected = UI:GetSelectedCharacter()
     local helperselected = Helper.GetLocalControlledEntity().Uuid.EntityUuid
     local c = _C().Uuid.EntityUuid
     print("fetching genitals for ", selected , " or ", helperselected , " or ", c)
-    Event.FetchGenitals:SendToServer({ID = USERID, Character = UIInstance:GetSelectedCharacter() or Helper.GetLocalControlledEntity().Uuid.EntityUuid or _C().Uuid.EntityUuid})
+    Event.FetchGenitals:SendToServer({ID = USERID, Character = UI:GetSelectedCharacter() or Helper.GetLocalControlledEntity().Uuid.EntityUuid or _C().Uuid.EntityUuid})
 end
 
 function AppearanceTab:UpdateGenitalGroup(whitelisted)
@@ -202,15 +198,15 @@ function AppearanceTab:UpdateGenitalGroup(whitelisted)
 
                 activeGenital.OnClick = function()
                     activeGenital.Selected = false
-                    local uuid = UIInstance:GetSelectedCharacter()
+                    local uuid = UI:GetSelectedCharacter()
                     -- print("current character accordin to the label is ", uuid)
-                    Event.SetActiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance:GetSelectedCharacter()})
+                    Event.SetActiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UI:GetSelectedCharacter()})
                 end
                 inactiveGenital.OnClick = function()
                     activeGenital.Selected = false
-                    local uuid = UIInstance:GetSelectedCharacter()
+                    local uuid = UI:GetSelectedCharacter()
                     -- print("current character accordin to the label is ", uuid)
-                    Event.SetInactiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UIInstance:GetSelectedCharacter()})
+                    Event.SetInactiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UI:GetSelectedCharacter()})
                 end
             end
         end
@@ -222,10 +218,10 @@ end
 -- Check for NULL REFERENCEs because of too early destroyed IMGUI elements
 -- for i = 1000, 5000 do
 --     Ext.Timer.WaitFor(i, function()
---         if UIInstance.AppearanceTab then
---             if UIInstance.AppearanceTab.Tab then
+--         if UI.AppearanceTab then
+--             if UI.AppearanceTab.Tab then
 --                 print("Dumping AppearanceTab state...")
---                 for k, v in pairs(UIInstance.AppearanceTab) do
+--                 for k, v in pairs(UI.AppearanceTab) do
 --                     print(k, v)
 --                 end
 --             else
@@ -236,3 +232,5 @@ end
 --         end
 --     end)
 -- end
+
+return AppearanceTab

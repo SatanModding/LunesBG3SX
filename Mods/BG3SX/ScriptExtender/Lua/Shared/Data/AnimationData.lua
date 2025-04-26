@@ -39,6 +39,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         end
     end
 
+    ---@return AnimationData|nil
     function CreateAnimationData(moduleUUID, name, animTop, animBtm, categories, props)
         animBtm = animBtm or nil
         categories = categories or nil
@@ -49,7 +50,11 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         if categories and Table.Contains(categories, "NSFW") then -- If its an NSFW animation enable/add sound by default
             animData.Sound = true
             animData.SoundTop = Data.Sounds.Moaning
-            animData.SoundBtm = Data.Sounds.Moaning
+            if Table.Contains(categories, "Lesbian") then
+                animData.SoundBottom = Data.Sounds.Kissing
+            else
+                animData.SoundBtm = Data.Sounds.Moaning
+            end
         end
 
         -- if animData then
@@ -66,6 +71,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     -- These 2 local functions need to be recreated by every modauthor wanting to add animations to our system
     -- So new animation entries are actually added to a subtable named after their modUUID
     
+    ---@return AnimationData|nil
     local function addIntroAnim(name, animTop, animBtm, categories, props)
         animBtm = animBtm or nil
         categories = categories or nil
@@ -84,6 +90,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         end
     end
 
+    ---@return AnimationData|nil
     local function addMainAnim(name, animTop, animBtm, categories, props)
         animBtm = animBtm or nil
         categories = categories or nil
@@ -137,7 +144,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     local askForSex = addIntroAnim("Ask for Sex", anim["EmbraceTop"].MapKey, anim["EmbraceBtm"].MapKey, {"SFW", "NSFW"})
         
     -- Setting up heightmatching matchups
-    local hmi = startMasturbating.Heightmatching
+    local hmi = startMasturbating.Heightmatching or nil
     if hmi then -- Solo animation only needs to specify one bodyIdentifier and one animation UUID, the second body has to be set to nil
         hmi:SetAnimation("_P",  nil, anim["MasturbateWank"].MapKey)
         --hmi:SetAnimation("Tall_P",  nil, anim["MasturbateWank"].MapKey) -- Animation doesn't exist - Anyone with a penis would play this regardless because of the previous entry
@@ -168,7 +175,6 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     -- TallM_P, Tall_P, Tall, _P, M, Med_V, MedF_P, TallF
     -- etc.
     -- But always write BodyType -> BodyShape -> Genital, from left to right, when you combine them!
-
 
     local grinding = addMainAnim("Grinding", anim["ScissorTop"].MapKey, anim["ScissorBtm"].MapKey, {"Lesbian"})
 

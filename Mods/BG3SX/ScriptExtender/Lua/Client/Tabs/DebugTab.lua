@@ -1,17 +1,17 @@
-
+---@class DebugTab
+---@field Tab ExtuiTabItem
 DebugTab = {}
 DebugTab.__index = DebugTab
-function UI:NewDebugTab()
-    if self.DebugTab then return end -- Fix for infinite UI repopulation
+function DebugTab:New(holder)
+    if UI.DebugTab then return end -- Fix for infinite UI repopulation
 
     local instance = setmetatable({
-        Tab = self.TabBar:AddTabItem("Debug")
+        Tab = holder:AddTabItem("Debug")
     }, DebugTab)
     return instance
 end
 
-
-function DebugTab:Initialize()
+function DebugTab:Init()
     local customEventButton = self.Tab:AddButton("Custom Event")
     customEventButton.OnClick = function()
         Event.CustomEvent:SendToServer("")
@@ -79,7 +79,7 @@ function DebugTab:UpdateAnimationPicker()
             if animationPicker.SelectedIndex ~= 0 then
                 Event.ChangeAnimation:SendToServer({
                     ID = USERID,
-                    Caster = UIInstance:GetSelectedCharacter(),
+                    Caster = UI:GetSelectedCharacter(),
                     Animation = animationPicker.Options[animationPicker.SelectedIndex + 1]
                 })
             end

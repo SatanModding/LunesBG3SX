@@ -1,18 +1,19 @@
-
+---@class SceneTab
+---@field Tab ExtuiTabItem
 SceneTab = {}
 SceneTab.__index = SceneTab
-function UI:NewSceneTab()
-    if self.SceneTab then return end -- Fix for infinite UI repopulation
+
+function SceneTab:New(holder)
+    if UI.SceneTab then return end -- Fix for infinite UI repopulation
     
     local instance = setmetatable({
-        --UI = self.ID,
-        Tab = self.TabBar:AddTabItem(Ext.Loca.GetTranslatedString("hc21d333db09549dbbd1fcfaa6fdecb2a2b09", "Scenes")),
+        Tab = holder:AddTabItem(Ext.Loca.GetTranslatedString("hc21d333db09549dbbd1fcfaa6fdecb2a2b09", "Scenes")),
         Scenes = {},
     }, SceneTab)
     return instance
 end
 
-function SceneTab:Initialize()
+function SceneTab:Init()
     --self:GetScenes()
     self:CreateNewSceneArea()
     self.ActiveSceneControls = {}
@@ -51,19 +52,6 @@ function SceneTab:RefreshAvailableAnimations(animationTable, scene)
     end
 end
 
--- Goes through every currently running scene until it finds the entityToSearch
----@param entityToSearch string
-function SceneTab:FindSceneControlByEntity(entityToSearch)
-    for _,SceneControl in pairs(self.ActiveSceneControls) do
-        for _, entity in pairs(SceneControl.Scene.entities) do
-            if Helper.StringContainsOne(entityToSearch, entity) then
-                _P("Found scene control for entity: ", entityToSearch)
-                return SceneControl
-            end
-        end
-    end
-end
-
 function SceneTab:CreateNewSceneArea()
     self.NoSceneText = self.Tab:AddText("No active scenes, create one by:\n1. Select a character in the UI.\n2. Click the BG3SX button.\n3. Select a character of your choice to start a scene with\n(In open world or UI)")
 
@@ -94,7 +82,7 @@ function SceneTab:CreateNewSceneArea()
 end
 
 function SceneTab:AwaitNewScene()
-    UIInstance:AwaitInput("NewScene")
+    UI:AwaitInput("NewScene")
 end
 
 function SceneTab:UpdateNoSceneText()
@@ -122,7 +110,7 @@ function SceneTab:DisableSceneButtons()
     self.SFWSceneButton.Tint = {0.69, 0.69, 0.69, 1.0} -- Greyed out
     self.NSFWSceneButton.Tint = {0.69, 0.69, 0.69, 1.0} -- Greyed out
     self.ControlsText.Visible = false
-    UIInstance:DisplayInfoText("Character is not whitelisted, please select a different character.")
+    UI:DisplayInfoText("Character is not whitelisted, please select a different character.")
 end
 
 function SceneTab:EnableSceneButtons()
@@ -130,7 +118,7 @@ function SceneTab:EnableSceneButtons()
     self.SFWSceneButton.Tint = {1.0, 1.0, 1.0, 1.0} -- Regular color
     self.NSFWSceneButton.Tint = {1.0, 1.0, 1.0, 1.0} -- Regular color
     self.ControlsText.Visible = false
-    UIInstance:HideInfoText()
+    UI:HideInfoText()
 end
 
 -- Check all current scenes against all current SceneControls
@@ -145,7 +133,7 @@ Event.SyncActiveScenes:SetHandler(function(SavedScenes)
             end
         end
         local destroyedScene = {}
-        for _,activeSceneControl in pairs(UIInstance.SceneTab.ActiveSceneControls) do
+        for _,activeSceneControl in pairs(UI.SceneControl.ActiveSceneControls) do
             local found
             for _,activeSceneControlEntity in pairs(activeSceneControl.Scene.entities) do
                 for _,entity in pairs(isStillActive) do
@@ -160,6 +148,8 @@ Event.SyncActiveScenes:SetHandler(function(SavedScenes)
         end
     else
         -- No active scenes, destroy all scene controls
-        UIInstance.SceneTab.ActiveSceneControls = {}
+        UI.SceneControl.ActiveSceneControls = {}
     end
 end)
+
+return SceneTab

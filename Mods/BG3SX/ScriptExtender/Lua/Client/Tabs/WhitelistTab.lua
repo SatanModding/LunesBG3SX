@@ -1,17 +1,19 @@
+---@class WhitelistTab
+---@field Tab ExtuiTabItem
 WhitelistTab = {}
 WhitelistTab.__index = WhitelistTab
 
-function UI:NewWhitelistTab()
-    if self.WhiteListTab then return end -- Fix for infinite UI repopulation
+---@param holder ExtuiTabBar
+function WhitelistTab:New(holder)
+    if UI.WhitelistTab then return end -- Fix for infinite UI repopulation
 
     local instance = setmetatable({
-        --UI = self.ID,
-        Tab = self.TabBar:AddTabItem("Whitelist"),
+        Tab = holder:AddTabItem("Whitelist"),
     }, WhitelistTab)
     return instance
 end
 
-function WhitelistTab:Initialize()
+function WhitelistTab:Init()
     local sep = self.Tab:AddSeparatorText("(Read-only) Tags of selected character:")
     sep:SetStyle("SeparatorTextPadding", 5)
     self.UserTags = {Header = self.Tab:AddCollapsingHeader("Character Tags")}
@@ -160,7 +162,7 @@ function WhitelistTab:GenerateModdedWhitelist()
             for TagName,Content in sortedPairs(tags) do
                 if Helper.IsUpperCase(TagName) then
                     if TagName ~= "KID" and TagName ~= "GOBLIN_KID" then
-                        local tagTree = modTree:AddTree(TagName)
+                        local tagTree = modTree:AddTree(tostring(TagName))
                         if Content.TAG then
                             local uuid = tagTree:AddInputText("Tag:")
                             uuid.Text = Content.TAG
@@ -247,3 +249,5 @@ function WhitelistTab:GenerateBlacklistedEntities()
         uuidText.Text = uuid
     end
 end
+
+return WhitelistTab

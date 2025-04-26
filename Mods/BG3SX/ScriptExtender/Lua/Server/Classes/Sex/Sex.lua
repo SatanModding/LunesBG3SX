@@ -237,7 +237,7 @@ function Sex:Strip(character)
     -- NPCs only have slots in their CharacterVisualResourceID
         slot = NPC.StripNPC(entity) -- Call on Server
         Event.SyncNPCStrip:Broadcast(entity.Uuid.EntityUuid) -- Call on Client
-        
+        equipment = Entity:UnequipAll(character)
     else
         equipment = Entity:UnequipAll(character)
         armorset = Osi.GetArmourSet(character)

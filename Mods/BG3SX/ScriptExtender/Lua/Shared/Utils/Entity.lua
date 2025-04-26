@@ -318,6 +318,8 @@ end
 ---@return table   - Collection of every previously equipped item
 function Entity:UnequipAll(uuid)
     --Osi.SetArmourSet(uuid, 0)
+
+    print("called Unequip All for entity ", uuid)
     
     local oldEquipment = {}
     for _, slotName in ipairs(Data.Equipment.Slots) do
@@ -328,6 +330,46 @@ function Entity:UnequipAll(uuid)
             oldEquipment[#oldEquipment+1] = gearPiece
         end
     end
+
+
+    -- for some reason weapons are not accessible via slots
+    local function removeAllEquippedWeapons(uuid)
+
+        if Osi.HasMeleeWeaponEquipped(uuid, "Any") == 1 then
+        
+            local melee = Osi.GetEquippedWeapon(uuid)
+
+            Osi.LockUnequip(melee, 0)
+            Osi.Unequip(uuid, melee)
+            oldEquipment[#oldEquipment+1] = melee
+
+            -- causes infinite loop fif no timer
+            Ext.Timer.WaitFor(200, function()
+                removeAllEquippedWeapons(uuid)
+            end)
+
+    
+        end
+    
+        if Osi.HasRangedWeaponEquipped(uuid, "Any")  == 1 then
+
+            local ranged = Osi.GetEquippedWeapon(uuid)
+
+            Osi.LockUnequip(ranged, 0)
+            Osi.Unequip(uuid, ranged)
+            oldEquipment[#oldEquipment+1] = ranged
+            -- causes infinite loop fif no timer
+            Ext.Timer.WaitFor(200, function()
+                removeAllEquippedWeapons(uuid)
+            end)
+    
+        end
+
+    end
+
+    removeAllEquippedWeapons(uuid)
+
+
     return oldEquipment
 end
 

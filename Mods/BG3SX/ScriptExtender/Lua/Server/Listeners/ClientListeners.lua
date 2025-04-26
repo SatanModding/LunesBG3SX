@@ -23,6 +23,7 @@ Event.AskForSex:SetHandler(function (payload)
     --Debug.Print("CASTER ".. caster)
     --Debug.Print("TARGET ".. target)
 
+
     local allow = true
     for _,scene in pairs(Data.SavedScenes) do
         for _,involved in pairs(scene.entities) do
@@ -35,10 +36,22 @@ Event.AskForSex:SetHandler(function (payload)
     end
 
     if allow then
+        -- Add BG3SX AnimationSets
+        if BG3AFActive then
+            local aW = Mods.BG3AF.AnimationWaterfall
+            local animWaterfall = aW.Get(caster)
+            local waterfall = animWaterfall:AddWaterfall({Resource = Data.AnimationSets["BG3SX_Body"].Uuid})
+            _D(waterfall)
+            _DS(animWaterfall[1].Waterfall)
+            if not Helper.StringContainsOne(caster, target) then
+                aW.Get(target):AddWaterfall({Resource = Data.AnimationSets["BG3SX_Body"].Uuid})
+            end
+        else
+            Debug.Print("BG3AF not found")
+        end
+        
         -- masturbation 
-       
-
-        if (Helper.StringContains(target,caster)) or (Helper.StringContains(caster, target)) then
+        if Helper.StringContainsOne(caster, target) then
             if Entity:IsWhitelisted(caster, true) then
                 Entity:ClearActionQueue(caster)
                 Ext.Timer.WaitFor(200, function() -- Wait for erections
@@ -84,9 +97,10 @@ Event.MoveScene:SetHandler(function (payload)
     scene:MoveSceneToLocation(position)
 end)
 
-        
+
 Event.StopSex:SetHandler(function (payload)
-    local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
+    local scene = Scene:FindSceneByEntity(payload.Scene.entities[1]) -- Re-get scene because scene send as payload lost metatable status
+    Event.SceneControlInstanceDestroyed:Broadcast(payload.Scene.entities)
     scene:Destroy()
 end)
 Event.FetchGenitals:SetHandler(function (payload)
@@ -103,14 +117,14 @@ Event.FetchGenitals:SetHandler(function (payload)
     -- end
     Event.SendGenitals:SendToClient({ID = payload.ID, Data = Data.CreateUIGenitalPayload(payload.Character), Whitelisted = Entity:IsWhitelisted(payload.Character)}, payload.ID)
 end)
-    
-    
+
+
 Event.RotateScene:SetHandler(function (payload)
     local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
     local position = payload.Position
     scene:RotateScene(position)
 end)
-   
+
 Event.FetchAnimations:SetHandler(function (payload)
     local sceneType = Scene:FindSceneByEntity(payload.Caster)
     local container = nil
@@ -160,6 +174,7 @@ end)
 
 Event.FetchParty:SetHandler(function (payload)
     local party = Osi.DB_PartyMembers:Get(nil)
+    _P("SEND PARTY ----------------------TO CLIENT WITH ID", payload.ID, "--------------------------")
     Event.SendParty:SendToClient(party, payload.ID)
 end)
 
@@ -203,7 +218,7 @@ end)
 Event.ChangeAnimation:SetHandler(function (payload)
     --print("Received Change Animation event with payload")
     --_D(payload)
-    
+
     local caster = payload.Caster
     local moduleUUID = payload.moduleUUID
     local animationData = payload.AnimationData
@@ -216,23 +231,33 @@ end)
 
 
 Event.FetchWhitelistedNPCs:SetHandler(function(payload)
+    print("reveived FetchWhitelistedNPCs")
     local tbl = payload.tbl
     local filtered = {}
 
-    --_D(tbl)
+    print("dumping payload")
+    _D(payload.client)
+
+    if not payload.client then
+        print("ERROR, CLIENT NOT FOUND")
+        return
+    end
+
+  
 
     for _, character in pairs(tbl) do
         if Entity:IsWhitelisted(character) then
             table.insert(filtered, character)
         end
     end
-    Event.SendWhitelistedNPCs:SendToClient(filtered, payload.client) 
 
+    print("sending event  Event.SendWhitelistedNPCs:SendToClient")
+    Event.SendWhitelistedNPCs:SendToClient(filtered, payload.client)
 end)
 
 Event.FetchUserTags:SetHandler(function(payload)
     local tags = Entity:TryGetEntityValue(payload.Character, nil, {"ServerRaceTag", "Tags"})
-    
+
     -- Can't send array over as event payloads so we add every entry to a table and send that one instead
     local nonArrayTags = {}
     for _,tagUUID in pairs(tags) do

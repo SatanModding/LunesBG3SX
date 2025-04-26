@@ -12,6 +12,7 @@ local initialize
 --------------------------------------------------------------
 
 -- Todo: Check if it requires cleanup of unused parameters
+---@class Scene
 ---@param entities          table   - Table with entity uuids to use for a scene
 ---@param rootPosition      table   - Table of x,y,z coordinates
 ---@param rotation          table   - Table with x,y,z,w 

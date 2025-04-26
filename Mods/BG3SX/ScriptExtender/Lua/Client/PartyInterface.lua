@@ -1,27 +1,35 @@
 -- TODO - fetch party on client by checking Entitities with component PartyMember (check if it includes summons)
 
-
+---@class PartyInterface
+---@field Wrapper ExtuiGroup
+---@field PartyArea ExtuiCollapsingHeader
+---@field Party table
+---@field NPCArea ExtuiCollapsingHeader
+---@field NPCs table
+---@field Characters table
+---@field CurrentNPCs table
+---@field SelectedCharacter string
 PartyInterface = {}
 PartyInterface.__index = PartyInterface
-function UI:NewPartyInterface()
+
+function PartyInterface:New(holder)
     local instance = setmetatable({
-        --UI = self.ID,
-        Wrapper = {},
+        Wrapper = holder:AddGroup("PartyInterfaceWrapper"),
         Party = {},
         NPCs = {},
     }, PartyInterface)
-    self.Settings["PartyButtonSize"] = {100*ViewPortScale,100*ViewPortScale}
     return instance
 end
 
 
-function PartyInterface:Initialize()
-    self.Wrapper = UIInstance.Window:AddGroup("")
+function PartyInterface:Init()
+    UI:RegisterSetting("PartyButtonSize",{100*ViewPortScale,100*ViewPortScale})
 
     self.PartyArea = self.Wrapper:AddCollapsingHeader("Party")
     self.NPCArea = self.Wrapper:AddCollapsingHeader("NPCs")
     self.NPCArea.Visible = false
 
+    Debug.Print("REQUESTING FETCHPARTY TO CLIENT WITH ID " .. USERID)
     Event.FetchParty:SendToServer({ID = USERID})
 end
 
@@ -121,15 +129,15 @@ function PartyInterface:AddCharacter(parent, uuid)
     for uuid,origin in pairs(Data.Origins) do
         if Helper.StringContains(uuid, instance.Uuid) then
             foundOrigin = true
-            instance.CharacterButton = cell:AddImageButton("","EC_Portrait_"..origin, UIInstance.Settings["PartyButtonSize"])
+            instance.CharacterButton = cell:AddImageButton("","EC_Portrait_"..origin, UI.Settings["PartyButtonSize"])
         end
     end
     if not foundOrigin then
-        instance.CharacterButton = cell:AddImageButton("","EC_Portrait_Generic", UIInstance.Settings["PartyButtonSize"])
+        instance.CharacterButton = cell:AddImageButton("","EC_Portrait_Generic", UI.Settings["PartyButtonSize"])
     end
 
     instance.CharacterButton.OnClick = function()
-        UIInstance:SelectedCharacterUpdates(instance)
+        UI:SelectedCharacterUpdates(instance)
     end
 
     instance.NameText = cell:AddText("")
@@ -160,27 +168,27 @@ function PartyInterface:AddNPC(parent, uuid)
     for uuid,origin in pairs(Data.Origins) do
         if Helper.StringContains(uuid, instance.Uuid) then
             foundOrigin = true
-            instance.CharacterButton = cell:AddImageButton("","EC_Portrait_"..origin, UIInstance.Settings["PartyButtonSize"])
+            instance.CharacterButton = cell:AddImageButton("","EC_Portrait_"..origin, UI.Settings["PartyButtonSize"])
         end
     end
     if not foundOrigin then
-        instance.CharacterButton = cell:AddImageButton("","EC_Portrait_Generic", UIInstance.Settings["PartyButtonSize"])
+        instance.CharacterButton = cell:AddImageButton("","EC_Portrait_Generic", UI.Settings["PartyButtonSize"])
     end
     
     instance.Popup = cell:AddPopup("NPCPopup")
     instance.Popup.IDContext = math.random(1000,100000)
     instance.CharacterButton.OnClick = function()
-        if not UIInstance.Await then
+        if not UI.Await then
             instance.Popup:Open()
         else
-            UIInstance:SelectedCharacterUpdates(instance)
+            UI:SelectedCharacterUpdates(instance)
         end
     end
 
     local selectNPC = instance.Popup:AddSelectable(Ext.Loca.GetTranslatedString("h2a86e31d7ec34b7490ead80f174354da5726", "Select"))
     selectNPC.OnClick = function()
         selectNPC.Selected = false
-        UIInstance:SelectedCharacterUpdates(instance)
+        UI:SelectedCharacterUpdates(instance)
     end
 
     local removeNPC = instance.Popup:AddSelectable(Ext.Loca.GetTranslatedString("hbf2bfd2e408c493d9580e1fa08b7782d502g", "Remove"))
@@ -242,9 +250,9 @@ end
 
 -- Only one can be hovered at a time
 function PartyInterface:GetHovered()
-    if UIInstance.PartyInterface.Characters then 
+    if UI.PartyInterface.Characters then 
         -- _P("1")
-        for _,character in pairs(UIInstance.PartyInterface.Characters) do
+        for _,character in pairs(UI.PartyInterface.Characters) do
             -- _P("2")
             if character.CharacterButton.Statusflags["HoveredRect"] then
                 -- _P("3")
@@ -252,8 +260,8 @@ function PartyInterface:GetHovered()
             end
         end
     end
-        if UIInstance.PartyInterface.CurrenNPCs then 
-        for _,npc in pairs(UIInstance.PartyInterface.CurrentNPCs) do
+        if UI.PartyInterface.CurrenNPCs then 
+        for _,npc in pairs(UI.PartyInterface.CurrentNPCs) do
             if npc.CharacterButton.Statusflags["HoveredRect"] then
                 return npc
             end
@@ -269,3 +277,5 @@ end
 -- TODO:
 -- Add Consent when targeting other players - withold scene creation until consent is given
 -- Check Multiplayer
+
+return PartyInterface

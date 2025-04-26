@@ -1,19 +1,64 @@
 SceneControl = {}
 SceneControl.__index = SceneControl
-function SceneTab:NewSceneControl(Scene)
-    local id = Table.GetNextFreeIndex(self.ActiveSceneControls)  -- this seems wonky. It always increases
+SceneControl.ActiveSceneControls = {}
+function SceneControl:Init()
+    if UI.SceneTab then
+        local instance = setmetatable({
+            ActiveSceneControls = {},
+            }, SceneControl)
+        return instance
+    end
+end
+
+function SceneControl:CreateInstance(Scene)
+    if UI.SceneTab then
+        local instance = SceneControlInstance:New(Scene)
+        table.insert(self.ActiveSceneControls, instance)
+        return instance
+    end
+end
+
+-- Goes through every currently running scene until it finds the entityToSearch
+---@param entityToSearch string
+function SceneControl:FindInstanceByEntity(entityToSearch)
+    for _,instance in pairs(self.ActiveSceneControls) do
+        for _, entity in pairs(instance.Scene.entities) do
+            if Helper.StringContainsOne(entityToSearch, entity) then
+                _P("Found scene control for entity: ", entityToSearch)
+                return instance
+            end
+        end
+    end
+end
+
+---@class SceneControlInstance
+---@field ID number
+---@field Scene Scene
+---@field Window ExtuiWindow
+---@field Reference ExtuiGroup
+---@field private OriginalSize vec2
+---@field private OriginalPosition vec2
+---@field LastSelected boolean
+---@field Animations table
+---@field AnimationPicker table
+---@field ControlButtons table
+
+SceneControlInstance = {}
+SceneControlInstance.__index = SceneControlInstance
+function SceneControlInstance:New(Scene)
+    local id = Table.GetNextFreeIndex(SceneControl.ActiveSceneControls)  -- this seems wonky. It always increases
     local instance = setmetatable({
         ID = id,
         Scene = Scene, --check if it needs to be updated when scene changes or if this points to the original one
         Window = Ext.IMGUI.NewWindow(id),
-        }, SceneControl)
+        }, SceneControlInstance)
     instance:UpdateWindowName()
-    table.insert(self.ActiveSceneControls, instance)
+    table.insert(SceneControl.ActiveSceneControls, instance)
     instance:Initialize()
     return instance
 end
 
-function SceneControl:UpdateWindowName()
+function SceneControlInstance:UpdateWindowName()
     local involved = self.Scene.entities
     if involved[1] and type(involved[1]) == "string" then
         -- self.Window.Label = "Window " .. self.ID .. " - Scene: " .. Helper.GetName(involved[1])
@@ -29,44 +74,26 @@ function SceneControl:UpdateWindowName()
     end
 end
 
-function UI.DestroyAllSceneControls(backToServer)
-    if UIInstance.SceneTab then
-        local tab = UIInstance.SceneTab
-        if tab.ActiveSceneControls and #tab.ActiveSceneControls > 0 then
-            for _,sceneControl in pairs(tab.ActiveSceneControls) do
-                sceneControl:Destroy(backToServer)
-            end
-        end
-    end
-end
-Event.DestroyAllSceneControls:SetHandler(function ()
-    UI.DestroyAllSceneControls(false)
-end)
-
-function UI.FetchScenes()
-    Event.FetchScenes:SendToServer("")
-end
-
 -- Resets the SceneControl instance
 -- Only the window and SceneControl ID remains
 -- Windows currently can't be destroyed so its closed instead
 -- On new SceneControl creation, pick up on if there are any empty ones and use these first before creating a new one
-function SceneControl:Destroy(backToServer)
+function SceneControlInstance:Destroy(backToServer)
     if backToServer then
-        Event.StopSex:SendToServer({ID = self.ID, Scene = self.Scene})
+        Event.StopSex:SendToServer({Scene = self.Scene})
     end
-    -- for _,SceneControl in pairs(UIInstance.SceneTab.ActiveSceneControls) do
+    -- for _,SceneControl in pairs(UI.SceneControl.ActiveSceneControls) do
     --     if SceneControl.Instance == self then
     --         SceneControl.Reference:Destroy() -- Delete SceneTab Reference Imgui Element
     --         SceneControl.Reference = nil -- Set to nil for NoSceneText update
-    --         UIInstance.SceneTab:UpdateNoSceneText()
+    --         UI.SceneTab:UpdateNoSceneText()
     --         Event.RequestSyncActiveScenes:SendToServer()
     --     end
     -- end
 
     self.Reference:Destroy() -- Delete SceneTab Reference Imgui Element
     self.Reference = nil -- Set to nil for NoSceneText update
-    UIInstance.SceneTab:UpdateNoSceneText()
+    UI.SceneTab:UpdateNoSceneText()
     Event.RequestSyncActiveScenes:SendToServer()
 
     for componentName,component in pairs(self) do
@@ -79,10 +106,11 @@ function SceneControl:Destroy(backToServer)
         end
     end
     -- self.Unused = true
+    Table.RemoveByValue(UI.SceneControl.ActiveSceneControls, self)
     self = nil
 end
 
-function SceneControl:Initialize()
+function SceneControlInstance:Initialize()
     -- self.Window.OnClick = function()
     --     self:SetLastSelected()
     -- end
@@ -104,7 +132,7 @@ function SceneControl:Initialize()
 end
 
 -- Adjusts the position of the SceneControl window on spawn based on amount of SceneControls already spawned
-function SceneControl:AdjustPositionOnSpawn()
+function SceneControlInstance:AdjustPositionOnSpawn()
 
     -- Reuse when OnClick works for windows
     -- local baseX = round(ViewPort[1] * 0.5723)
@@ -113,7 +141,7 @@ function SceneControl:AdjustPositionOnSpawn()
     -- baseY = clamp(baseY, 0, ViewPort[2] - self.OriginalSize[2])
     -- self.OriginalPosition = {baseX, baseY}
     
-    -- local activeSC = UIInstance.SceneTab.ActiveSceneControls
+    -- local activeSC = UI.SceneControl.ActiveSceneControls
     -- if #activeSC == 0 then
     --     self.Window:SetPos(self.OriginalPosition)
     -- else
@@ -132,15 +160,15 @@ function SceneControl:AdjustPositionOnSpawn()
     baseY = clamp(baseY, 0, ViewPort[2] - self.OriginalSize[2])
     self.OriginalPosition = {baseX, baseY}
     
-    local activeSC = UIInstance.SceneTab.ActiveSceneControls
+    local activeSC = UI.SceneControl.ActiveSceneControls
     local scCount = #activeSC
     local posX = clamp(baseX - 15 + (15 * scCount), 0, ViewPort[1] - self.OriginalSize[1])
     local posY = clamp(baseY - 15 + (15 * scCount), 0, ViewPort[2] - self.OriginalSize[2])
     self.Window:SetPos({posX, posY})
 end
 
-function SceneControl:SetLastSelected()
-    for _,sceneControl in pairs(UIInstance.SceneTab.ActiveSceneControls) do
+function SceneControlInstance:SetLastSelected()
+    for _,sceneControl in pairs(UI.SceneControl.ActiveSceneControls) do
         if sceneControl ~= self then
             sceneControl.LastSelected = false
         end
@@ -148,12 +176,12 @@ function SceneControl:SetLastSelected()
     self.LastSelected = true
 end
 
-function SceneControl:ResetPosition()
+function SceneControlInstance:ResetPosition()
     self.Window:SetPos(self.OriginalPosition)
 end
 
-function SceneControl:CreateSceneTabReference()
-    local refGroup = UIInstance.SceneTab.Tab:AddGroup("")
+function SceneControlInstance:CreateSceneTabReference()
+    local refGroup = UI.SceneTab.Tab:AddGroup("")
     local popup = refGroup:AddPopup(self.Window.Label)
     local ref = refGroup:AddSelectable(self.Window.Label)
     local openButton = popup:AddSelectable("Open Scene Control")
@@ -173,7 +201,7 @@ function SceneControl:CreateSceneTabReference()
         openButton.Selected = false
         self:Destroy(true)
     end
-    -- for _,SceneControl in pairs(UIInstance.SceneTab.ActiveSceneControls) do
+    -- for _,SceneControl in pairs(UI.SceneControl.ActiveSceneControls) do
     --     if SceneControl.Instance == self then
     --         SceneControl.Reference = refGroup
     --     end
@@ -181,7 +209,7 @@ function SceneControl:CreateSceneTabReference()
     self.Reference = refGroup
 end
 
-function SceneControl:AddControlButtons()
+function SceneControlInstance:AddControlButtons()
     self.ControlButtons = {}
     local buttons = {
         {Name = "Pause/Unpause", Icon = "Spell_Abjuration_ArcaneLock"},
@@ -197,24 +225,24 @@ function SceneControl:AddControlButtons()
         table.insert(self.ControlButtons, iconButton)
         iconButton.SameLine = true
         iconButton.OnClick = function()
-            self:UseSceneControlButton(iconButton.Label)
+            self:AddButtonFunctionality(iconButton.Label)
         end
         iconButton:Tooltip():AddText(iconButton.Label)
     end
 end
 
-function SceneControl:UseSceneControlButton(buttonLabel)
+function SceneControlInstance:AddButtonFunctionality(buttonLabel)
     --local UI = UI.GetUIByID(self.UI)
     if buttonLabel == "Pause/Unpause" then
         Event.TogglePause:SendToServer({ID = USERID, Scene = self.Scene})
     elseif buttonLabel == "Swap Position" then
         Event.SwapPosition:SendToServer({ID = USERID, Scene = self.Scene})
     elseif buttonLabel == "Rotate Scene" then
-        UIInstance:AwaitInput("RotateScene", self.Scene)
+        UI:AwaitInput("RotateScene", self.Scene)
     elseif buttonLabel == "Change Camera Height" then
         Event.ChangeCameraHeight:SendToServer({ID = USERID})
     elseif buttonLabel == "Move Scene" then
-        UIInstance:AwaitInput("MoveScene", self.Scene)
+        UI:AwaitInput("MoveScene", self.Scene)
     elseif buttonLabel == "Stop Sex" then
         self:Destroy(true)
     end
@@ -222,12 +250,12 @@ end
 
 -- Creates some initial buttons with their own events
 -- Sends an Event to Server, requesting Animations 
-function SceneControl:CreateAnimationControlArea()
+function SceneControlInstance:CreateAnimationControlArea()
     self:AddControlButtons()
     Event.FetchAllAnimations:SendToServer({ID = USERID, SceneControl = self.ID})
 end
 
-function SceneControl:UpdateAnimationData(animationData)
+function SceneControlInstance:UpdateAnimationData(animationData)
     self.Animations = animationData
     self:UpdateAnimationPicker()
 end
@@ -281,7 +309,7 @@ local function getAllCategories(allAnims)
     return allCategories
 end
 
-function SceneControl:FilterAnimationsByCategory(filter)
+function SceneControlInstance:FilterAnimationsByCategory(filter)
     filter = filter or nil
 
     local validAnimations = {}
@@ -316,7 +344,7 @@ end
     return validAnimations
 end
 
-function SceneControl:FilterAnimationsByMod(filter)
+function SceneControlInstance:FilterAnimationsByMod(filter)
     filter = filter or nil
 
     local validAnimations = {}
@@ -341,14 +369,14 @@ function SceneControl:FilterAnimationsByMod(filter)
 end
 
 
-function SceneControl:GetFilteredAnimations(modFilter, animationFilter)
+function SceneControlInstance:GetFilteredAnimations(modFilter, animationFilter)
     local tbl1 = self:FilterAnimationsByMod(modFilter)
     local tbl2 = self:FilterAnimationsByCategory(animationFilter)
 
     return Table.GetIntersection(tbl1, tbl2)
 end
 
-function SceneControl:CreateFilters()
+function SceneControlInstance:CreateFilters()
     if self.Filter and #self.Filter >0 and self.Filter.Group then
         UI.DestroyChildren(self.Filter.Group)
         self.Filter = nil
@@ -446,7 +474,7 @@ local function updateCombo(combo, val)
     combo.OnChange()
 end
 
-function SceneControl:GetAnimationsBySceneType()
+function SceneControlInstance:GetAnimationsBySceneType()
     local type = self.Scene.SceneType
     local animsByType = {}
     for moduleUUID,Anims in pairs(self.Animations) do
@@ -472,7 +500,7 @@ function SceneControl:GetAnimationsBySceneType()
                         if Table.Contains(AnimationData.Categories, type) then
                             animsByType[moduleUUID][AnimationName] = AnimationData
                         else
-                            if UIInstance.SettingsTab.UnlockedAnimations.Checked == true then
+                            if UI.Settings["UnlockedAnimations"] then
                                 animsByType[moduleUUID][AnimationName] = AnimationData
                             end
                         end
@@ -484,15 +512,15 @@ function SceneControl:GetAnimationsBySceneType()
     return animsByType
 end
 
-function SceneControl:ConvertAnimationsForPicker(animsByType)
+function SceneControlInstance:ConvertAnimationsForPicker(animsByType)
     local pickerEntries = {}
     for moduleUUID,Anims in pairs(animsByType) do
         local sameNameCounter = 1
         for AnimationName,AnimationData in pairs(Anims) do
             if pickerEntries[AnimationName] then
-                _P(AnimationName .. " already exists, adding a number to the name")
-                _P("By mod " .. moduleUUID)
                 sameNameCounter = sameNameCounter + 1
+                _P(AnimationName .. " already exists, it will be called " .. AnimationName .. " " .. sameNameCounter)
+                _P("By mod " .. Ext.Mod.GetMod(moduleUUID).Info.Name)
                 pickerEntries[AnimationName .. " " .. sameNameCounter] = {moduleUUID = moduleUUID, AnimationData = AnimationData}
             else
                 pickerEntries[AnimationName] = {moduleUUID = moduleUUID, AnimationData = AnimationData}
@@ -503,34 +531,35 @@ function SceneControl:ConvertAnimationsForPicker(animsByType)
     return pickerEntries
 end
 
-function SceneControl:UpdateAuthor(holder, animData)
+function SceneControlInstance:UpdateAuthor(holder, animData)
     if not animData then
         holder.Label = "Select an Animation"
+    else
+        local actualAuthor = Helper.GetModAuthor(animData.Mod)
+        if actualAuthor == "Lune, Skiz, Satan" then
+            actualAuthor = "Lune"
+        end
+        holder.Label = "By: " .. actualAuthor
     end
-    local actualAuthor = Helper.GetModAuthor(animData.Mod)
-    if actualAuthor == "Lune, Skiz, Satan" then
-        actualAuthor = "Lune"
-    end
-    holder.Label = "By: " .. actualAuthor
     holder.Visible = true
 end
 
 
-function SceneControl:HidePicker()
+function SceneControlInstance:HidePicker()
     self.AnimationPicker.Group.Visible = false
 end
 
-function SceneControl:ShowPicker()
+function SceneControlInstance:ShowPicker()
     self.AnimationPicker.Group.Visible = true
 end
 
-function SceneControl:GetUpdatedPickerAnims()
+function SceneControlInstance:GetUpdatedPickerAnims()
     local animsByType = self:GetAnimationsBySceneType()
     local animPickerAnims = self:ConvertAnimationsForPicker(animsByType)
     return animPickerAnims
 end
 
-function SceneControl:UpdateAnimationPicker()
+function SceneControlInstance:UpdateAnimationPicker()
     local debugbefore = Debug.USEPREFIX
     Debug.USEPREFIX = false
 
@@ -679,3 +708,5 @@ end
 --     end
 
 -- end
+
+return SceneControl, SceneControlInstance

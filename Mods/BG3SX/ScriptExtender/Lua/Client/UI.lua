@@ -1,79 +1,96 @@
 USERID = nil
-UI = {}
-UI.__index = UI
-UIInstance = nil
 ViewPort = Ext.IMGUI.GetViewportSize()
 ViewPortScale = Ext.Require("Client/IMGUI.lua").ScaleFactor()
+MCMActive = Mods and Mods.BG3MCM -- true or false depending on if MCM is active without storing it in a global variable
 
----------------------------------------------------------------------------------------------------
---                                       Load MCM Tab
----------------------------------------------------------------------------------------------------
+---@class UI
+---@field Ready boolean
+---@field Window ExtuiWindow|ExtuiChildWindow
+---@field Settings table<string, any>
+---@field HotKeys table<string, any>
+---@field Await table<string, any>
+---@field KeyInputHandler LuaEventBase|nil
+---@field MouseInputHandler LuaEventBase|nil
+---@field ControllerInputHandler LuaEventBase|nil
+---@field ControllerAxisHandler LuaEventBase|nil
+---@field TabBar ExtuiTabBar
+---@field PartyInterface PartyInterface
+---@field SceneTab SceneTab
+---@field AppearanceTab AppearanceTab
+---@field WhitelistTab WhitelistTab
+---@field NPCTab NPCTab
+---@field SettingsTab SettingsTab
+---@field DebugTab DebugTab|nil
+UI = {
+    Ready = false,
+}
+UI.__index = UI
 
-Mods.BG3MCM.IMGUIAPI:InsertModMenuTab(ModuleUUID, "BG3SX", function(mcm)
-    UI.New(mcm)
-    _P("--------------------------------------[BG3SX] MCM Tab Loaded---------------------------------------")
-end)
+local PartyInterface = Ext.Require("Client/PartyInterface.lua")
+local SceneTab = Ext.Require("Client/Tabs/SceneTab.lua")
+local AppearanceTab = Ext.Require("Client/Tabs/AppearanceTab.lua")
+local WhitelistTab = Ext.Require("Client/Tabs/WhitelistTab.lua")
+local NPCTab = Ext.Require("Client/Tabs/NPCTab.lua")
+local SettingsTab = Ext.Require("Client/Tabs/SettingsTab.lua")
+local SceneControl, SceneControlInstance = Ext.Require("Client/SceneControl.lua")
+local DebugTab = Ext.Require("Client/Tabs/DebugTab.lua")
 
 --------------------------------------------------
 --------------------------------------------------
 
-function UI.New(mcm)
+function UI:New(mcm)
     local window
-    local mcm = mcm or nil
     if mcm then
-        MCMActive = true
-        window = mcm:AddChildWindow("")
+        window = mcm:AddChildWindow("BG3SX")
     else
         window = Ext.IMGUI.NewWindow("BG3SX")
         window:SetSize({500*ViewPortScale, 500*ViewPortScale}, "FirstUseEver")
     end
 
-    --local u = _C().UserReservedFor.UserID
-    --local id = Helper.UserToPeerID(u)
-    local instance = setmetatable({
-        ID = id,
-        Window = window,
-        Settings = {},
-        HotKeys = {},
-    }, UI)
+    self.Window = window
+    self.Settings = {}
+    self.HotKeys = {}
+
     USERID = _C().Uuid.EntityUuid
-    UIInstance = instance
-    instance:Initialize()
-    return instance
-end 
+    return self
+end
 
-
-function UI:Initialize()
-    -- local idtestbutton = self.Window:AddButton("ID Test 5")
-    -- idtestbutton.OnClick = function()
-    --     _P(USERID)
-    -- end
-    self.PartyInterface = self:NewPartyInterface()
-    self.PartyInterface:Initialize()
+function UI:Init()
     -- PartyTable on top of Tabs so we can make everything Character specific depending on which one is selected
-    
-    self.TabBar = self.Window:AddTabBar("")
-    self.SceneTab = self:NewSceneTab()
-    self.AppearanceTab = self:NewAppearanceTab()
-    self.WhitelistTab = self:NewWhitelistTab()
-    self.WhitelistTab.Visible = false
-    self.NPCTab = self:NewNPCTab()
-    self.SettingsTab = self:NewSettingsTab()
-    --self.DebugTab = self:NewDebugTab()
+    self.PartyInterface = PartyInterface:New(self.Window)
+    self.PartyInterface:Init()
 
-    self.SceneTab:Initialize()
-    self.AppearanceTab:Initialize()
-    self.WhitelistTab:Initialize()
-    self.NPCTab:Initialize()
-    self.SettingsTab:Initialize()
+    self.TabBar = self.Window:AddTabBar("")
+    self.SceneTab = SceneTab:New(self.TabBar)
+    self.AppearanceTab = AppearanceTab:New(self.TabBar)
+    self.WhitelistTab = WhitelistTab:New(self.TabBar)
+    self.WhitelistTab.Tab.Visible = false
+    self.NPCTab = NPCTab:New(self.TabBar)
+    self.SettingsTab = SettingsTab:New(self.TabBar)
+    --self.DebugTab = DebugTab:New(self.TabBar)
+
+    self.NPCTab:FetchAllNPCs()
+
+    self.SceneTab:Init()
+    self.AppearanceTab:Init()
+    self.WhitelistTab:Init()
+    self.NPCTab:Init()
+    self.SettingsTab:Init()
+    -- self.DebugTab:Init()
+
+    self.SceneControl = SceneControl.Init()
+
     print("calling restore NPCs")
     Event.FinishedBuildingNPCUI:SendToServer({ID=USERID})  -- Restores stored NPCs from last session
 
-    -- self.SettingsTab:Initialize()
-    -- self.DebugTab:Initialize()
-
     self.Ready = true
-    Event.UIInitialized:SendToServer({ID = USERID})
+    -- Event.UIInitialized:SendToServer({ID = USERID})
+end
+
+---@param settingName string
+---@param value any
+function UI:RegisterSetting(settingName,value)
+    self.Settings[settingName] = value
 end
 
 function UI:AwaitInput(reason, payload)
@@ -86,7 +103,6 @@ function UI:AwaitInput(reason, payload)
     self.KeyInputHandler, self.MouseInputHandler, self.ControllerInputHandler, self.ControllerAxisHandler = self:CreateEventHandler()
 end
 
--- Maybe move into its own class
 function UI:CreateEventHandler()
     if not self.Await then -- Sanity Check
         return nil,nil,nil
@@ -113,9 +129,13 @@ function UI:CreateEventHandler()
 
     local mouseHandler = Ext.Events.MouseButtonInput:Subscribe(function (e)
         e:PreventAction() --jjdoorframe()
+        -- _DS(getMouseover())
         if e.Button == 1 and e.Pressed == true then
             if getMouseover() and getMouseover().Inner then
                 mouseoverPosition = getMouseover().Inner.Position
+                _P("Mouseover Position:")
+                _D(mouseoverPosition)
+                _P("Reason :", reason)
                 if reason == "MoveScene" then
                     self:InputRecieved(mouseoverPosition)
                 elseif reason == "RotateScene" then
@@ -123,15 +143,13 @@ function UI:CreateEventHandler()
                 elseif reason == "NewScene" then
                     if getMouseover().Inner.Inner[1] then
                         if getMouseover().Inner.Inner[1].Character then
-                            -- _D(getMouseover())
-                            mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid or nil -- Sometimes UIEntity isn't found??
+                            mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInterface:GetHovered().Uuid or nil
                             if mouseoverTarget ~= nil then
-                                Debug.Print("------------------------New BG3SX Scene------------------------")
                                 self:InputRecieved(mouseoverTarget)
-                                self:ShowWindows()
                             else
                                 self:CancelAwaitInput("No entity found")
                             end
+                            self:InputRecieved(mouseoverTarget)
                         else
                             self:CancelAwaitInput("No entity found")
                         end
@@ -148,7 +166,7 @@ function UI:CreateEventHandler()
     ---------------------------------------------------------
     --- CONTROLLER Buttons
     ---------------------------------------------------------
-    
+
     local function controllerCancelAwaitInput(reason)
         local reason = reason or nil
         self:CancelAwaitInput(reason)
@@ -171,7 +189,7 @@ function UI:CreateEventHandler()
         elseif e.Button == "A" and e.Pressed == true and not enteredTargeting then-- UI target selection handling, when not in targeting mode
             if reason == "NewScene" then
                 if getMouseover() and getMouseover().UIEntity then -- In case a UI entity has been found
-                    mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid or nil
+                    mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInterface:GetHovered().Uuid or nil
                     if mouseoverTarget ~= nil then
                         self:InputRecieved(mouseoverTarget)
                     else
@@ -182,7 +200,7 @@ function UI:CreateEventHandler()
                 end
             end
         end
-        
+
         if enteredTargeting then
             if e.Button == "A" and e.Pressed == true then
                 if getMouseover() and getMouseover().Inner then
@@ -196,13 +214,11 @@ function UI:CreateEventHandler()
                     elseif reason == "NewScene" then
                         if getMouseover().Inner.Inner[1] then
                             if getMouseover().Inner.Inner[1].Character then
-                                mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInteface.GetHovered().Uuid or nil
+                                mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInterface:GetHovered().Uuid or nil
                                 if mouseoverTarget ~= nil then
-                                    Debug.Print("------------------------New BG3SX Scene------------------------")
                                     self:InputRecieved(mouseoverTarget)
-                                    self:ShowWindows()
                                 else
-                                    controllerCancelAwaitInput("No entity found")
+                                    self:CancelAwaitInput("No entity found")
                                 end
                             else
                                 controllerCancelAwaitInput("No entity found")
@@ -236,11 +252,14 @@ function UI:CreateEventHandler()
 end
 
 function UI:DisplayInfoText(reason, duration)
-    local duration = duration or nil
+    -- When floor is clicked, error is thrown
+    -- if not self.SceneTab then
+    --     return
+    -- end
     local info = self.SceneTab.InfoText
     info.Label = reason
     info.Visible = true
-    if duration then 
+    if duration then
         Ext.Timer.WaitFor(duration, function()
             info.Visible = false
         end)
@@ -254,7 +273,7 @@ end
 function UI:CancelAwaitInput(reason)
     local reason = reason or nil
     if reason then
-        self.DisplayInfoText(reason, 3000)
+        self:DisplayInfoText(reason, 3000)
     end
 
     if self.KeyInputHandler then
@@ -277,10 +296,11 @@ function UI:CancelAwaitInput(reason)
 end
 
 function UI:InputRecieved(inputPayload)
+    if not self.Await then return end
     local reason = self.Await.Reason
     if reason == "NewScene" then
         -- _P("Ask for sex request. Caster: ", _C().Uuid.EntityUuid, " target = ", inputPayload)
-        Event.AskForSex:SendToServer({ID = USERID, Caster = UIInstance:GetSelectedCharacter(), Target = inputPayload})
+        Event.AskForSex:SendToServer({ID = USERID, Caster = UI:GetSelectedCharacter(), Target = inputPayload})
     elseif reason == "RotateScene" then
         Event.RotateScene:SendToServer({ID = USERID, Scene = self.Await.Payload, Position = inputPayload})
     elseif reason == "MoveScene" then
@@ -296,7 +316,9 @@ function UI:HideWindows()
         if self.Window then
             self.Window.Open = false
         end
-        for _,sceneControl in pairs(self.SceneTab.ActiveSceneControls) do
+    end
+    if self.SceneControl and self.SceneControl.ActiveSceneControls then
+        for _,sceneControl in pairs(self.SceneControl.ActiveSceneControls) do
             sceneControl.TempClosed = true
             sceneControl.Window.Open = false
         end
@@ -309,7 +331,7 @@ function UI:ShowWindows()
         if self.Window then
             self.Window.Open = true
         end
-        for _,sceneControl in pairs(self.SceneTab.ActiveSceneControls) do
+        for _,sceneControl in pairs(self.SceneControl.ActiveSceneControls) do
             if sceneControl.TempClosed == true then
                 sceneControl.Window.Open = true
                 sceneControl.TempClosed = false
@@ -319,11 +341,33 @@ function UI:ShowWindows()
 end
 
 function UI.DestroyChildren(obj)
+    if obj == nil then
+        return
+    end
     if obj.Children and #obj.Children > 0 then
         for _,child in pairs(obj.Children) do
             child:Destroy()
         end
     end
+end
+
+function UI.DestroyAllSceneControls(backToServer)
+    if UI.SceneControl then
+        local sc = UI.SceneControl
+        if sc.ActiveSceneControls and #sc.ActiveSceneControls > 0 then
+            for _,sceneControl in pairs(sc.ActiveSceneControls) do
+                sceneControl:Destroy(backToServer)
+            end
+        end
+    end
+end
+Event.DestroyAllSceneControls:SetHandler(function ()
+    UI.DestroyAllSceneControls(false)
+end)
+
+
+function UI.FetchScenes()
+    Event.FetchScenes:SendToServer("")
 end
 
 function UI.GetAnimations()
@@ -344,7 +388,7 @@ function UI:GetSelectedCharacter()
     --         iteration = 0
     --         return
     --     end
-    --     if UIInstance and UIInstance.PartyInterface and UIInstance.PartyInterface.SelectedCharacter then
+    --     if UI and UI.PartyInterface and UI.PartyInterface.SelectedCharacter then
     --         -- _P("UIStateCheck: Condition met, executing function")
     --         iteration =  0
     --         -- Ext.Timer.WaitFor(200, function ()
@@ -360,7 +404,7 @@ function UI:GetSelectedCharacter()
 
     -- uiStateCheck(
     --     function ()
-    --         if UIInstance then
+    --         if UI then
                 return self.PartyInterface.SelectedCharacter.Uuid or _C().Uuid.EntityUuid
     --         else
     --             -- print("ERROR: UIINSTANCE DOESNT EXIST")
@@ -371,10 +415,18 @@ function UI:GetSelectedCharacter()
     -- return self.PartyInterface.SelectedCharacter.Uuid or _C().Uuid.EntityUuid
 end
 
---function UI.GetUIByID(id)
---    for _,UI in pairs(UIInstances) do
---        if UI.ID == id then
---            return UI
---        end
---    end
---end
+---------------------------------------------------------------------------------------------------
+--                                       Load MCM Tab
+---------------------------------------------------------------------------------------------------
+
+if MCMActive then
+    Mods.BG3MCM.IMGUIAPI:InsertModMenuTab(ModuleUUID, "BG3SX", function(mcm)
+        UI:New(mcm):Init()
+        _P("-------------------------------------- [BG3SX] MCM Tab Loaded --------------------------------------")
+    end)
+else
+    UI:New():Init()
+    _P("-------------------------- [BG3SX] No MCM Loaded - Standalone Window Created -----------------------")
+end
+
+return UI

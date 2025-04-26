@@ -7,7 +7,13 @@ end
 Event:New("CustomEvent")
 
 
+
+Event:New("SessionLoaded")
+
+
+
 --- General
+Event:New("InitUIAfterReset")
 Event:New("UIInitialized")
 Event:New("RequestUILoadedState")
 Event:New("SendUILoadedState")
@@ -45,6 +51,7 @@ Event:New("NewScene")
 Event:New("UpdateSceneControlPicker")
 Event:New("DestroyAllSceneControls")
 Event:New("SyncActiveScenes")
+Event:New("SceneControlInstanceDestroyed")
 
 
 --- Genitals
@@ -117,3 +124,13 @@ Event:New("RemovedNPCFromTab")
 Event:New("FinishedBuildingNPCUI")
 
 Event:New("RestoreNPCTab")
+
+function Event.GetAll()
+    local allEvents = {}
+    for name, event in pairs(Event) do
+        if not (name == "New" or name == "GetAll") then
+            allEvents[name] = event
+        end
+    end
+    return allEvents
+end

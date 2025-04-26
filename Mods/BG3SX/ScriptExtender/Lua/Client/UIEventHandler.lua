@@ -4,58 +4,48 @@
 
 --------------------------------------------------------------------------------
 
+Event.InitUIAfterReset:SetHandler(function()
+    if MCMActive then
+        Mods.BG3MCM.IMGUIAPI:InsertModMenuTab(ModuleUUID, "BG3SX", function(mcm)
+            UI:New(mcm):Init()
+            _P("-------------------------------------- [BG3SX] MCM Tab Loaded --------------------------------------")
+        end)
+    else
+        UI:New():Init()
+        _P("-------------------------- [BG3SX] No MCM Loaded - Standalone Window Created -----------------------")
+    end
+end)
 
 -- Updates the USERID based on which character is currently selected per client
 Event.ChangeCharacter:SetHandler(function (changedControlledEntity)
-    -- Debug.Print("Changed character to " .. changedControlledEntity)
+    local function condition()
+        return UI and UI.Ready == true and UI.PartyInterface.SelectedCharacter ~= nil
+    end
 
-    -- local iteration = 0
-    -- local function uiStateCheck(fn)
-    --     iteration = iteration + 1
-    --     -- _P("UIStateCheck: Checking UI state: Iteration", iteration)
-    --     if iteration > 999 then
-    --         -- _P("UIStateCheck: Max iterations reached, stopping check")
-    --         iteration = 0
-    --         return
-    --     end
-    --     if UIInstance and UIInstance.PartyInterface and UIInstance.AppearanceTab then
-    --         -- _P("UIStateCheck: Condition met, executing function")
-    --         iteration =  0
-    --         -- Ext.Timer.WaitFor(200, function ()
-    --             fn()
-    --         -- end)
-    --     else
-    --         -- _P("UIStateCheck: Condition not met, executing function")
-    --         Ext.Timer.WaitFor(200, function ()
-    --             uiStateCheck(fn)
-    --         end)
-    --     end
-    -- end
-
-    if UIInstance and UIInstance.Ready then
-        Ext.Timer.WaitFor(200, function () -- CharacterChanged event needs to delay what it wants to execute because Osiris is slow AF - ClientEntity ID's don't update quickly enough after its triggered
-            local entity = Helper.GetLocalControlledEntity()
+    local function changeCharacter()
+        local entity = Helper.GetLocalControlledEntity()
+        if entity then
             local entityUuid = entity.Uuid.EntityUuid
 
             if Helper.StringContainsOne(entityUuid, changedControlledEntity) or (changedControlledEntity == "") then
                 USERID = entityUuid
-                -- swap the character in the UI
-
-                -- uiStateCheck(
-                --     function ()
-                        UIInstance.PartyInterface:SetSelectedCharacter(entityUuid)
-                        UIInstance.AppearanceTab:FetchGenitals()
-                --     end
-                -- )
+                UI.PartyInterface:SetSelectedCharacter(entityUuid)
+                UI.AppearanceTab:FetchGenitals()
             else
                 Debug.Print("No entity")
             end
-        end)
+        else
+            Debug.Print("No entity")
+        end
     end
+
+    -- CharacterChanged event needs to delay what it wants to execute because Osiris is slow AF - ClientEntity ID's don't update quickly enough after its triggered
+    Helper.DelayUntilTrue(changeCharacter, condition, 200)
 end)
 
-Event.UIInitialized:SetHandler(function (payload)
 
+Event.UIInitialized:SetHandler(function (payload)
+    local something = nil -- This Event can be used by other modders
 end)
 
 Event.GenitalsLoaded:SetHandler(function (payload)
@@ -64,55 +54,64 @@ Event.GenitalsLoaded:SetHandler(function (payload)
     -- Event.FetchGenitals:SendToServer({ID = USERID, Character = _C().Uuid.EntityUuid})
 end)
 
-Event.SendParty:SetHandler(function (payload)    
-    local party = payload
-    UIInstance.PartyInterface.Party = party
-    UIInstance.PartyInterface:UpdateParty()
+Event.SendParty:SetHandler(function (payload)
+    local function optionalDelay()
+        local party = payload
+        UI.PartyInterface.Party = party
+        UI.PartyInterface:UpdateParty()
+    end
+    if not UI.PartyInterface then
+        Ext.Timer.WaitFor(200, function ()
+            optionalDelay()
+        end)
+    else
+        optionalDelay()
+    end
 end)
 
 Event.SendWhitelistStatus:SetHandler(function (payload)
     local status = payload.Status
     _P("Whitelist status: " .. tostring(status))
     if status == true then
-        UIInstance.SceneTab:EnableSceneButtons()
+        UI.SceneTab:EnableSceneButtons()
     else
-        UIInstance.SceneTab:DisableSceneButtons()
+        UI.SceneTab:DisableSceneButtons()
     end
 end)
 
 
 Event.SendScenes:SetHandler(function (payload)
     -- local scenes = payload
-    -- local tab = UIInstance.SceneTab
+    -- local tab = UI.SceneTab
     -- if tab.AwaitingScenes == true then
         -- tab.Scenes = scenes
         -- if tab.Scenes and #tab.Scenes > 0 then
         --     for _,Scene in pairs(tab.Scenes) do
         --         if not Scene.SceneControl then
-        --             tab.SceneControl:New(UIInstance.ID, Scene, tab.Tab)
+        --             tab.SceneControl:New(UI.ID, Scene, tab.Tab)
         --         end
         --     end
         -- end
-        -- UIInstance.SceneTab.AwaitingScenes = false
+        -- UI.SceneTab.AwaitingScenes = false
     -- end
 
 end)
 Event.NewScene:SetHandler(function (payload)
     local scene = payload
-    UIInstance.SceneTab:NewSceneControl(scene)
-    UIInstance.SceneTab.NoSceneText.Visible = false
+    UI.SceneControl:CreateInstance(scene)
+    UI.SceneTab.NoSceneText.Visible = false
 end)
 
 Event.SendGenitals:SetHandler(function (payload)
     --Debug.Print("SendGenitals recieved on client, updating Genital tab for")
 
-    if UIInstance then
+    if UI then
         local genitals = payload.Data
         local whitelisted = payload.Whitelisted
 
         -- Ext.Timer.WaitFor(2000, function()
 
-        local tab = UIInstance.AppearanceTab
+        local tab = UI.AppearanceTab
         tab.Genitals = genitals
 
         tab:UpdateGenitalGroup(whitelisted)
@@ -122,14 +121,14 @@ end)
 Event.SendUserTags:SetHandler(function (payload)
     --_P("1")
     --_D(payload)
-    UIInstance.WhitelistTab.UserTags.Tags = payload
-    UIInstance.WhitelistTab:UpdateUserTags(payload)
+    UI.WhitelistTab.UserTags.Tags = payload
+    UI.WhitelistTab:UpdateUserTags(payload)
 end)
 Event.SendWhitelist:SetHandler(function (payload)
-    UIInstance.WhitelistTab.Whitelists = payload
-    UIInstance.WhitelistTab:GenerateWhitelistArea()
-    --_D(UIInstance.WhitelistTab.UserTags.Tags)
-    UIInstance.WhitelistTab:UpdateUserTags(UIInstance.WhitelistTab.UserTags.Tags)
+    UI.WhitelistTab.Whitelists = payload
+    UI.WhitelistTab:GenerateWhitelistArea()
+    --_D(UI.WhitelistTab.UserTags.Tags)
+    UI.WhitelistTab:UpdateUserTags(UI.WhitelistTab.UserTags.Tags)
 end)
 
 ---------------------------------------------------------------------
@@ -139,7 +138,7 @@ end)
 Event.SendFilteredAnimations:SetHandler(function (payload)
     local animations = payload.Data
     local scene = payload.Scene or nil
-    local sceneTab = UIInstance.SceneTab
+    local sceneTab = UI.SceneTab
     if scene then
         local sceneControl = sceneTab:FindSceneControlByEntity(scene.entities[1])
         if sceneControl then
@@ -148,7 +147,7 @@ Event.SendFilteredAnimations:SetHandler(function (payload)
         end
     elseif sceneTab then
         sceneTab:RefreshAvailableAnimations(animations)
-        for _,sceneControl in pairs(sceneTab.ActiveSceneControls) do
+        for _,sceneControl in pairs(SceneControl.ActiveSceneControls) do
             sceneControl:UpdateAnimationPicker()
         end
     end
@@ -158,10 +157,10 @@ Event.SendAllAnimations:SetHandler(function (payload)
     --Debug.Dump(payload)
     local animData = payload.Animations
     local sceneID = payload.SceneControl
-    local sceneTab = UIInstance.SceneTab
+    local sceneTab = UI.SceneTab
     --Debug.Print("SendAllAnimations")
     --_P(Table.TableSize(animData))
-    for _,sceneControl in pairs(sceneTab.ActiveSceneControls) do
+    for _,sceneControl in pairs(SceneControl.ActiveSceneControls) do
         if sceneControl.ID == sceneID then
             -- Debug.Print("FOUND SCENECONTROL")
             sceneControl:UpdateAnimationData(animData)
@@ -169,13 +168,22 @@ Event.SendAllAnimations:SetHandler(function (payload)
     end
 end)
 Event.UpdateSceneControlPicker:SetHandler(function (payload)
-    local sceneControl = UIInstance.SceneTab:FindSceneControlByEntity(payload.Character)
+    local sceneControl = UI.SceneControl:FindInstanceByEntity(payload.Character)
     sceneControl.Scene.SceneType = payload.SceneType
     if sceneControl then
         -- print("sceneControl exists- updating")
         sceneControl:UpdateAnimationPicker()
     else
         -- print("SceneControl doesnt exist")
+    end
+end)
+
+Event.SceneControlInstanceDestroyed:SetHandler(function (payload)
+    for _,entity in pairs(payload) do
+        local sceneControl = UI.SceneControl:FindInstanceByEntity(entity)
+        if sceneControl then
+            sceneControl:Destroy()
+        end
     end
 end)
 

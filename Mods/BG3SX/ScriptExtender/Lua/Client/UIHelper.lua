@@ -77,3 +77,12 @@ function UIHelper.AddTemporaryTooltip(uiElement, duration, text)
     end) 
 
 end
+
+function IsNPC(entity)
+    local E = Helper.GetPropertyOrDefault(entity,"CharacterCreationStats", nil)
+    if E then
+        return false
+    else
+        return true
+    end
+end
