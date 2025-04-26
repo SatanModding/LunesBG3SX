@@ -1,4 +1,7 @@
 --- @class Dialog
+--- @field private New fun(self:Dialog, timelineUuid: string): Dialog
+--- @field Uuid string
+--- @field TimelineUuid string
 --- @field Window ExtuiWindow
 --- @field OriginalSize number[]
 --- @field OriginalPosition number[]
@@ -11,11 +14,19 @@ Dialog = {}
 Dialog.__index = Dialog
 
 --- @class TimelineManager
---- @field private _CurrentTimelines table<string, Timeline>
+--- @field Timelines table<string, Timeline>
+--- @field Dialogs table<string, Dialog>
 TimelineManager = {}
 TimelineManager.__index = TimelineManager
-TimelineManager._CurrentTimelines = {}
+TimelineManager.Timelines = {}
 
+function Dialog:New(timelineUuid)
+    local instance = setmetatable({
+        Uuid = Helper.GenerateUUID(),
+        TimelineUuid = timelineUuid,
+    }, Dialog)
+    return instance
+end
 function Dialog:Init()
     self.OriginalSize = {500,300}
     self.Window = Imgui.CreateCommonWindow("BG3SX Timeline",{
@@ -39,8 +50,8 @@ function Dialog:Init()
     }
     self.Window:SetPos(self.OriginalPosition)
     self.Window:AddText("Test")
-    return self
 end
+
 function Dialog:ResetWindow()
     self.Window:SetSize(self.OriginalSize)
     self.Window:SetPos(self.OriginalPosition)
@@ -75,15 +86,10 @@ function TimelineManager:LoadTimeline(uuid, node)
     -- self.CurrentDialog.Timer
 end
 
-function TimelineManager:Init(uuid)
-    self.Dialogs = {}
-    self.CurrentDialog = nil
-    self.Selected = false
-    self.Window = Dialog:Init()
-    self.Window.OnClose = function()
-        self:Clear()
-        self.Window.Open = false
-    end
+function TimelineManager:Init(timelineUuid)
+    local newDialog = Dialog:New(timelineUuid)
+    self.Dialogs[newDialog.Uuid] = newDialog
+    newDialog:Init()
 end
 
 function TimelineManager:GoTo(node)
@@ -97,8 +103,9 @@ function TimelineManager:GoTo(node)
     self:UpdateDialogContent()
 end
 
-function TimelineManager:UpdateDialogContent()
-    local dlg = Dialog:Init()
+function TimelineManager:UpdateDialogContent(dialogUuid)
+    local dlg = self.Dialogs[dialogUuid]
+    local t
     local function newTable()
         local t = dlg.Window:AddTable("", 3)
         t.SizingStretchSame = true
@@ -113,7 +120,7 @@ function TimelineManager:UpdateDialogContent()
 
     local function callTimelineNode(timelineNode)
         dlg:Clear()
-        local t = newTable()
+        t = newTable()
         local row
         for i,node in ipairs(timelineNode) do
             if node.Flags then
@@ -144,13 +151,13 @@ function TimelineManager:UpdateDialogContent()
     callTimelineNode(self.CurrentDialog.Nodes[self.CurrentDialog.Node])
 end
 
-function TimelineManager:Pause()
-    if self.Timer then
-        for _,timer in ipairs(self.Timer) do
-            timer:Stop()
-        end
-    end
-end
+-- function TimelineManager:Pause()
+--     if self.Timer then
+--         for _,timer in ipairs(self.Timer) do
+--             timer:Stop()
+--         end
+--     end
+-- end
 
 --- @class DialogNode
 --- @field Flags DialogNodeFlags
@@ -162,7 +169,6 @@ end
 --- @alias DialogNodeCallbackType string
 --- @alias DialogNodeCallbackData table<DialogNodeCallbackDataType, any>
 --- @alias DialogNodeCallbackDataType string
---- @alias DialogNodeFlags table<string, boolean>
 
 --- @class Timeline
 --- @field Name string
@@ -196,12 +202,12 @@ local testTimeline = {
     ["Node"] = 0,
     ["Nodes"] = {
         [0] = {
-            ["Flags"] = {"IsRootNode", "ShowOnlyOnce"},
+            ["Flags"] = "IsRootNode", "ShowOnlyOnce",
             ["Data"] = {
                 {Type = "Text", Text = "Hello World"},
                 {Type = "Wait", Time = 1,
                     {Type = "Text", Text = "Bye World"},
-                    {Type = "Animation", Target = self.Speaker[1], Animation = "SomeUuid"},
+                    {Type = "Animation", Target = "", Animation = "SomeUuid"},
                     {Type = "Wait", Time = 2,
                         {Type = "GoTo", Node = 1},
                     },
@@ -209,7 +215,7 @@ local testTimeline = {
             },
         },
         [1] = {
-            ["Flags"] = {},
+            ["Flags"] = "",
             ["Data"] = {
                 {Type = "Text", Text = Ext.Loca.GetTranslatedString("","Greetings!")},
                 {Type = "Wait", Time = 1,
@@ -221,7 +227,7 @@ local testTimeline = {
             },
         },
         [2] = {
-            ["Flags"] = {},
+            ["Flags"] = "",
             ["Data"] = {
                 {Type = "Text", Text = "Hello World"},
                 {Type = "Wait", Time = 1,
@@ -233,7 +239,7 @@ local testTimeline = {
             },
         },
         [3] = {
-            ["Flags"] = {},
+            ["Flags"] = "",
             ["Data"] = {
                 {Type = "Text", Text = "Hello World"},
                 {Type = "Wait", Time = 1,
@@ -245,7 +251,7 @@ local testTimeline = {
             },
         },
         [4] = {
-            ["Flags"] = {},
+            ["Flags"] = "",
             ["Data"] = {
                 {Type = "Text", Text = "Hello World"},
                 {Type = "Wait", Time = 1,
