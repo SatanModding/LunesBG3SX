@@ -462,6 +462,43 @@ function Helper.OptionalDelay(func, delay)
     end
 end
 
+
+---@param func function
+---@param getcondition function
+---@param checkInterval integer
+---@param maxIterations? integer Optional. Defaults to 999.
+---@param currentIteration? integer Optional. Defaults to 0.
+function Helper.DelayUntilTrue(func, getcondition, checkInterval, maxIterations, currentIteration)
+
+
+    local condition = getcondition()
+
+    local maxIterations = maxIterations or 999
+    local currentIteration = currentIteration or 0
+
+    Debug.Print("DelayUntilTrue")
+
+    currentIteration = currentIteration + 1
+    _P("UIStateCheck: Checking condition: Iteration", checkInterval)
+    if currentIteration > maxIterations then
+            _P(" Max iterations reached, stopping check")
+        return
+    end
+
+    if condition then
+        _P("Condition met, executing function")
+            func()
+    else
+        _P("Condition not met, sleeping")
+        Ext.Timer.WaitFor(checkInterval, function ()
+            Helper.DelayUntilTrue(func, getcondition, checkInterval, maxIterations, currentIteration)
+        end)
+    end
+    
+end
+
+
+
 function Helper.SortWithPrio(tableToSort, prioTable)
     local keys = {}
     for key in pairs(tableToSort) do
