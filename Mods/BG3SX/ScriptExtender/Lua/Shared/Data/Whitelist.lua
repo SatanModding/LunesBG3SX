@@ -808,7 +808,7 @@ Data.WhitelistedEntities = {
     "0de603c5-42e2-4811-9dad-f652de080eba", -- Minsc
     --#endregion
     --#region NPC's
-    -- "0133f2ad-e121-4590-b5f0-a79413919805", -- Bone Daddy - Download this mod for him to work: https://www.nexusmods.com/baldursgate3/mods/13995 (broken otherwise)
+    -- "0133f2ad-e121-4590-b5f0-a79413919805", -- Withers - Download this mod for him to work: https://www.nexusmods.com/baldursgate3/mods/13995 (broken otherwise)
     "bc4b5efc-cbd3-4f8f-a31e-d37f801a038c", -- Ketheric
     "bf24e0ec-a3a6-4905-bd2d-45dc8edf8101", -- Orin -- No fitting Genital IIRC (miscolored)
     "491a7686-3081-405b-983c-289ec8781e0a", -- Mizora
@@ -824,6 +824,7 @@ Data.WhitelistedEntities = {
 -- Anyone can add specific entities to it via:
 -- table.insert(Mods.BG3SX.Data.BlacklistedEntities, "An Entity UUID")
 Data.BlacklistedEntities = {
+    "f854ffc7-a16a-4431-8e5d-77d514580bff", -- Magron, Headless Hag Victim
 }
 
 -- WHITE-/BLACKLIST CHECK
@@ -1140,6 +1141,7 @@ function Entity.GetClassTags(uuid)
     local entity = Ext.Entity.Get(uuid)
     local combinedTags = {}
     local classes = Entity:TryGetEntityValue(uuid, nil, {"Classes", "Classes"})
+    if classes then
         for _,Classes in pairs(classes) do
             local class = Classes.ClassUUID
             local subclass = Classes.SubClassUUID
@@ -1158,7 +1160,10 @@ function Entity.GetClassTags(uuid)
                 end
             end
         end
-    return combinedTags
+        return combinedTags
+    else
+        return nil
+    end
 end
 
 local function whitelistTags(targetTable, tags)
@@ -1183,7 +1188,9 @@ function Entity:IsWhitelisted(uuid, debug)
         return false -- If true, return false as "Is not Whitelisted"
     end
     local classTags = Entity.GetClassTags(uuid)
-    whitelistTags(Data.ClassTags, classTags) -- To fill the Data.ClassTags table with custom classes automatically
+    if classTags then
+        whitelistTags(Data.ClassTags, classTags) -- To fill the Data.ClassTags table with custom classes automatically
+    end
 
     -- TODO: Get all Items and possible Item Tags and whitelist them
 
