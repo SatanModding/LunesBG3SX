@@ -12,7 +12,7 @@ local function getFunctionName()
 end
 
 function ConsoleCommand.New(name, fn, info)
-    if not fn then
+    if not fn and type(fn) == "function" then
         Debug.PrintWarn("Not a valid function to setup ConsoleCommands")
         return
     end
