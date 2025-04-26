@@ -125,3 +125,47 @@ function Math.is_within_tolerance_x_y(entityA, entityB, max_distance, y_toleranc
 
     return distance_sq_x <= max_distance_sq and is_y_within_tolerance
 end
+
+
+-- Norb functions 
+local function GetDistanceFC(object, position2, ignoreHeight)
+    local object_loc = {}
+    object_loc.x, object_loc.y, object_loc.z = Osi.GetPosition(object)
+    ignoreHeight = ignoreHeight == nil or ignoreHeight
+    return math.sqrt((object_loc.x - position2.x)^2
+                  + ((ignoreHeight and 0) or (object_loc.y - position2.y)^2)
+                  + (object_loc.z - position2.z)^2)
+end
+
+local function GetDistanceFCS(object, position2)
+    local x, y, z = Osi.GetPosition(object)
+    return math.sqrt((x - position2.x)^2 + (z - position2.z)^2)
+end
+
+local function GetDistanceENT(entity, position2)
+    local pos = entity.Transform.Transform.Translate
+    return math.sqrt((pos[1] - position2.x)^2 + (pos[3] - position2.z)^2)
+end
+
+
+
+local function GetDistanceENTENT(entityA, entityB)
+    local posA = entityA.Transform.Transform.Translate
+    local posB = entityB.Transform.Transform.Translate
+    local dx = posA[1] - posB[1]
+    local dz = posA[3] - posB[3]
+    return dx * dx + dz * dz
+end
+
+
+
+function Math.IsWithinDistanceBetweenEntities(entityA, entityB, maxDistance)
+    local posA = entityA.Transform.Transform.Translate
+    local posB = entityB.Transform.Transform.Translate
+
+    local dx = posA[1] - posB[1]  -- x
+    local dz = posA[3] - posB[3]  -- z
+    local distanceSquared = dx * dx + dz * dz
+
+    return distanceSquared <= (maxDistance * maxDistance)
+end
