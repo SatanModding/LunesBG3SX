@@ -92,17 +92,17 @@ local function OnSessionLoaded()
 
 
         if not vars.BG3SX_ShowAllAnimations then
-        -- print("BG3SX_ShowAllAnimations mod variable not initialized yet")
-        -- print("setting it to default value = false")
-        vars.BG3SX_ShowAllAnimations = false
+                -- print("BG3SX_ShowAllAnimations mod variable not initialized yet")
+                -- print("setting it to default value = false")
+                vars.BG3SX_ShowAllAnimations = false
         end
 
         -- Ext.Log.Print("BG3SX_ShowAllAnimations")
         -- Ext.Log.Print(vars.BG3SX_ShowAllAnimations)
         -- Ext.Log.Print("End BG3SX_ShowAllAnimations")
 
-
-        Ext.Vars.SyncModVariables(ModuleUUID)
+        -- Ext.Vars.SyncModVariables(ModuleUUID)
+        Ext.Vars.SyncModVariables() -- SyncModVariables is called without parameters
 
 
 end

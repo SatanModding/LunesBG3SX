@@ -37,8 +37,8 @@ Ext.Vars.RegisterUserVariable("BG3SX_SexVisuals",  settings)
 
 -- _P("[BG3SX - SEXUSERVARS] Registered AutoErection")
 
----@param type string - either "BG3SX_OutOfSexGenital" or "BG3SX_SexGenital"
----@param genital string - uuid
+---@param type string|nil - either "BG3SX_OutOfSexGenital" or "BG3SX_SexGenital"
+---@param genital string|nil - uuid
 ---@param entity EntityHandle - uuid
 function SexUserVars.AssignGenital(type, genital, entity)
       if type == "BG3SX_OutOfSexGenital" then

@@ -47,6 +47,8 @@ function Scene:new(entities, equipment, armorset, slots)
         armorset        = armorset,
         slots           = slots,
         UnlockedSwaps   = false,
+        CouldJoinCombat = {},
+        WasOnStage      = {},
     }, Scene)
 
 
@@ -347,7 +349,16 @@ initialize = function(scene)
     -- We do this before in a seperate loop to already apply this to all entities before actors are spawned one by one
     for _, character in pairs(scene.entities) do
         Osi.AddBoosts(character, "ActionResourceBlock(Movement)", "", "") -- Blocks movement
-        Osi.SetDetached(character, 1)              -- Make entity untargetable
+        Osi.ApplyStatus(character, "BG3SX_DisableAI", -1, 1, "")
+        -- Osi.SetDetached(character, 1) -- Make entity untargetable
+        if Osi.CanJoinCombat(character) == 1 then
+            table.insert(scene.CouldJoinCombat, character) -- Save if entity was allowed to join combat before
+        end
+        if Osi.IsOnStage(character) == 1 then
+            -- table.insert(scene.WasOnStage, character) -- Save if entity was on stage before
+        end
+        -- Osi.SetOnStage(character, 0) -- to disable AI
+        Osi.SetCanJoinCombat(character, 0) -- Disable combat
         Osi.DetachFromPartyGroup(character)        -- Detach from party to stop party members from following
         --self:DetachSummons(entity) -- TODO: Add something to handle summon/follower movement here
         -- Osi.SetVisible(entity, 0)               -- 0 = Invisible
@@ -356,10 +367,6 @@ initialize = function(scene)
     
         --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Body"])
         --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Face"])
-
-
-     
-
     end
 
         -- TODO - why do we wait?
@@ -371,15 +378,12 @@ initialize = function(scene)
             end
         end)
         
-        
         --Osi.TeleportToPosition(entity, self.rootPosition.x, self.rootPosition.y, self.rootPosition.z) -- now handled correctly in actor initialization
-        
         
         --local startLocation = self.startLocations[1]
         --Entity:RotateEntity(entity, startLocation.rotationHelper)
        
 
-     
     -- for _, entity in pairs(self.entities) do
     --     table.insert(self.actors, Actor:new(entity))
     --     self:ScaleEntity(entity) -- After creating the actor to not create one with a smaller scale
@@ -399,6 +403,17 @@ initialize = function(scene)
     Event.NewScene:Broadcast(scene)
     Ext.ModEvents.BG3SX.SceneCreated:Throw({scene})
 end
+
+---@param object GUIDSTRING
+---@param status string
+---@param causee GUIDSTRING
+---@param storyActionID integer
+function OnStatusApplied(object, status, causee, storyActionID)
+    if status == "BG3SX_DisableAI" then
+        _P("Applied status " .. status .. " to " .. object)
+    end
+end
+Ext.Osiris.RegisterListener("StatusApplied", 4, "after", OnStatusApplied)
 
 
 ----------------------------------------------------------------------------------------------------
@@ -513,10 +528,8 @@ end
 
 -- Handles the generic stuff to reset on an entity on Scene:Destroy()
 local function sceneEntityReset(character)
-
     -- dress them
     -- give out of scene genitals back
-
     local entity = Ext.Entity.Get(character)
     if not entity then
         -- Debug.Print("is not a valid entity ".. character)
@@ -552,11 +565,18 @@ local function sceneEntityReset(character)
     Event.RequestRotation:Broadcast({character = character, target = startLocation.rotation})
 
     Osi.RemoveBoosts(character, "ActionResourceBlock(Movement)", 0, "", "") -- Unlocks movement
+    Osi.RemoveStatus(character, "BG3SX_DisableAI", "") -- Unlocks AI
 
     scene:ToggleCampFlags(character) -- Toggles camp flags so companions return to tents IF they had them before
     
     -- Re-attach entity to make it selectable again
     Osi.SetDetached(character, 0)
+    if Table.Contains(scene.CouldJoinCombat, character) then -- Check if entity was allowed combat before
+        Osi.SetCanJoinCombat(character, 1) -- Re-enable combat
+    end
+    if Table.Contains(scene.WasOnStage, character) then -- Check if entity was on stage before
+        -- Osi.SetOnStage(character, 1) -- Re-enable AI
+    end
 end
 
 
@@ -605,22 +625,27 @@ ConsoleCommand.New("DestroyAllScenes", Scene.DestroyAllScenes, "Destroys all ong
 
 
 function Scene:SwapPosition()
-    if self.UnlockedSwaps or (Entity:HasPenis(self.entities[1]) == Entity:HasPenis(self.entities[2])) then
-        _P("SWAPPI")
-        local savedActor = self.entities[1]
-
-        Ext.ModEvents.BG3SX.SceneSwitchPlacesBefore:Throw({self.entities})
-
-        
-        self.entities[1] = self.entities[2]
-        self.entities[2] = savedActor
-
-        Ext.ModEvents.BG3SX.SceneSwitchPlacesAfter:Throw({self.entities})
-
-        self:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
-
-        
-        self:PlayAnimation(self.currentAnimation)
-        -- Sex:PlayAnimation(savedActor, self.currentAnimation)
+    if Helper.StringContainsOne(self.entities[1], self.entities[2]) then
+        Debug.Print("Swapping positiong during Solo-Scene is not possible.")
+        return
+    else
+        if self.UnlockedSwaps or (Entity:HasPenis(self.entities[1]) == Entity:HasPenis(self.entities[2])) then
+            _P("SWAPPI")
+            local savedActor = self.entities[1]
+            
+            Ext.ModEvents.BG3SX.SceneSwitchPlacesBefore:Throw({self.entities})
+            
+            
+            self.entities[1] = self.entities[2]
+            self.entities[2] = savedActor
+            
+            Ext.ModEvents.BG3SX.SceneSwitchPlacesAfter:Throw({self.entities})
+            
+            self:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
+            
+            
+            self:PlayAnimation(self.currentAnimation)
+            -- Sex:PlayAnimation(savedActor, self.currentAnimation)
+        end
     end
 end

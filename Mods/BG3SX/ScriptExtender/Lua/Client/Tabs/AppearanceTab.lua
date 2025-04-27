@@ -1,5 +1,11 @@
 ---@class AppearanceTab
 ---@field Tab ExtuiTabItem
+---@field GenitalsLoaded boolean
+---@field Genitals table
+---@field ToggleVisibilityArea ExtuiGroup
+---@field StrippingArea ExtuiGroup
+---@field EquipmentArea ExtuiGroup
+---@field GenitalArea ExtuiGroup
 AppearanceTab = {}
 AppearanceTab.__index = AppearanceTab
 
@@ -109,9 +115,9 @@ function AppearanceTab:UpdateEquipmentAreaGroup(uuid)
 end
 
 function AppearanceTab:Init()
-    if self.Tab then
-        UI.DestroyChildren(self.Wrapper)
-    end
+    -- if self.Tab then
+    --     UI.DestroyChildren(self.Wrapper)
+    -- end
     -- self.Tab:AddSeparatorText("Stripping:") -- Seems to take up too much space with stripping being just a single checkbox
     if not self.StrippingArea then
         self.StrippingArea = self.Tab:AddGroup("")
@@ -192,9 +198,9 @@ function AppearanceTab:UpdateGenitalGroup(whitelisted)
                 end
 
                 buttonID = buttonID + 1
-                activeGenital.IDContext = buttonID
+                activeGenital.IDContext = tostring(buttonID)
                 buttonID = buttonID + 1
-                inactiveGenital.IDContext = buttonID
+                inactiveGenital.IDContext = tostring(buttonID)
 
                 activeGenital.OnClick = function()
                     activeGenital.Selected = false

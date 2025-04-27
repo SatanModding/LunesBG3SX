@@ -38,13 +38,23 @@ Event.AskForSex:SetHandler(function (payload)
     if allow then
         -- Add BG3SX AnimationSets
         if BG3AFActive then
-            local aW = Mods.BG3AF.AnimationWaterfall
-            local animWaterfall = aW.Get(caster)
-            local waterfall = animWaterfall:AddWaterfall({Resource = Data.AnimationSets["BG3SX_Body"].Uuid})
-            _D(waterfall)
-            _DS(animWaterfall[1].Waterfall)
+            -- local aW = Mods.BG3AF.AnimationWaterfall
+            -- local animWaterfall = aW.Get(caster)
+            -- local waterfall = animWaterfall:AddWaterfall({Resource = Data.AnimationSets["BG3SX_Body"].Uuid, Slot = 0})
+
+            local tbl = {
+                Resource = Data.AnimationSets["BG3SX_Body"].Uuid,
+                DynamicAnimationTag = "9bfa73ed-2573-4f48-adc3-e7e254a3aadb",
+                Slot = 0, -- 0 = Body, 1 = Attachment
+                OverrideType = 0, -- 0 = Replace, 1 = Additive
+            }
+            Mods.BG3AF.AddWaterfall(caster, tbl)
+
+            -- _D(waterfall)
+            -- _DS(animWaterfall[1].Waterfall)
             if not Helper.StringContainsOne(caster, target) then
-                aW.Get(target):AddWaterfall({Resource = Data.AnimationSets["BG3SX_Body"].Uuid})
+                -- aW.Get(target):AddWaterfall({Resource = Data.AnimationSets["BG3SX_Body"].Uuid, Slot = 0})
+                Mods.BG3AF.AddWaterfall(target, tbl)
             end
         else
             Debug.Print("BG3AF not found")

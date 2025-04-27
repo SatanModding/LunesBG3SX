@@ -1,0 +1,5 @@
+new entry "BG3SX_DisableAI"
+type "StatusData"
+data "StatusType" "BOOST"
+data "StatusPropertyFlags" "AllowLeaveDisallowJoinCombat;DisableOverhead;DisableCombatlog;DisablePortraitIndicator;DisableInteractions"
+data "Boosts" "Tag(AI_IGNORED_TARGET);ActionResourceBlock(ActionPoint);ActionResourceBlock(BonusActionPoint);ActionResourceBlock(ReactionActionPoint);DetectDisturbancesBlock(true);DialogueBlock();BlockSpellCast();VoicebarkBlock();BlockTravel()"   

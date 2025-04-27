@@ -3,7 +3,10 @@
 --                      For handling the main functionalities
 --
 ----------------------------------------------------------------------------------------
-local aW = Mods.BG3AF.AnimationWaterfall
+-- local aW
+-- if BG3AFActive then
+--     aW = Mods.BG3AF.AnimationWaterfall
+-- end
 
 local function initializeParty()
     local party = Osi.DB_PartyMembers:Get(nil)

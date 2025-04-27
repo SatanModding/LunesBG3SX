@@ -56,7 +56,6 @@ function UI:New(mcm)
 end
 
 function UI:Init()
-    -- PartyTable on top of Tabs so we can make everything Character specific depending on which one is selected
     self.PartyInterface = PartyInterface:New(self.Window)
     self.PartyInterface:Init()
 
@@ -78,13 +77,12 @@ function UI:Init()
     self.SettingsTab:Init()
     -- self.DebugTab:Init()
 
-    self.SceneControl = SceneControl.Init()
+    self.SceneControl = SceneControl:Init()
 
-    print("calling restore NPCs")
     Event.FinishedBuildingNPCUI:SendToServer({ID=USERID})  -- Restores stored NPCs from last session
-
     self.Ready = true
     -- Event.UIInitialized:SendToServer({ID = USERID})
+    -- Send ModEvent about UI being ready
 end
 
 ---@param settingName string
@@ -129,13 +127,9 @@ function UI:CreateEventHandler()
 
     local mouseHandler = Ext.Events.MouseButtonInput:Subscribe(function (e)
         e:PreventAction() --jjdoorframe()
-        -- _DS(getMouseover())
         if e.Button == 1 and e.Pressed == true then
             if getMouseover() and getMouseover().Inner then
                 mouseoverPosition = getMouseover().Inner.Position
-                _P("Mouseover Position:")
-                _D(mouseoverPosition)
-                _P("Reason :", reason)
                 if reason == "MoveScene" then
                     self:InputRecieved(mouseoverPosition)
                 elseif reason == "RotateScene" then

@@ -6,7 +6,7 @@ Debug.USEPREFIX = true
 local function getDebugPrefix()
 
     local prefix
-    if USEPREFIX then
+    if Debug.USEPREFIX then
         prefix = "[BG3SX]"
     end
 
