@@ -1,8 +1,6 @@
-----------------------------------------------------------------------------------------------
---------------- New v22 Events
 Event.FetchScenes:SetHandler(function (payload)
     if Data.SavedScenes and #Data.SavedScenes > 0 then
-        _P("SavedScenes exists")
+        -- _P("SavedScenes exists")
         Event.SendScenes:SendToClient(Data.SavedScenes, payload.ID)
         Event.UpdateScenes:Broadcast(Data.SavedScenes)
     else
@@ -38,35 +36,33 @@ Event.AskForSex:SetHandler(function (payload)
     if allow then
         -- Add BG3SX AnimationSets
         if BG3AFActive then
-            -- local aW = Mods.BG3AF.AnimationWaterfall
-            -- local animWaterfall = aW.Get(caster)
-            -- local waterfall = animWaterfall:AddWaterfall({Resource = Data.AnimationSets["BG3SX_Body"].Uuid, Slot = 0})
+            local function addWaterfallToEntity(entity, tbl)
+                local animWaterfall = Mods.BG3AF.AnimationWaterfall.Get(entity)
+                local waterfallEntry = animWaterfall:AddWaterfall(tbl)
+            end
 
             local tbl = {
                 Resource = Data.AnimationSets["BG3SX_Body"].Uuid,
                 DynamicAnimationTag = "9bfa73ed-2573-4f48-adc3-e7e254a3aadb",
-                Slot = 0, -- 0 = Body, 1 = Attachment
+                Slot = "", -- 0 = Body, 1 = Attachment
                 OverrideType = 0, -- 0 = Replace, 1 = Additive
             }
-            Mods.BG3AF.AddWaterfall(caster, tbl)
 
-            -- _D(waterfall)
-            -- _DS(animWaterfall[1].Waterfall)
+            addWaterfallToEntity(caster, tbl)
             if not Helper.StringContainsOne(caster, target) then
-                -- aW.Get(target):AddWaterfall({Resource = Data.AnimationSets["BG3SX_Body"].Uuid, Slot = 0})
-                Mods.BG3AF.AddWaterfall(target, tbl)
+                addWaterfallToEntity(target, tbl)
             end
         else
             Debug.Print("BG3AF not found")
         end
-        
+
         -- masturbation 
         if Helper.StringContainsOne(caster, target) then
             if Entity:IsWhitelisted(caster, true) then
                 Entity:ClearActionQueue(caster)
-                Ext.Timer.WaitFor(200, function() -- Wait for erections
+                -- Ext.Timer.WaitFor(200, function() -- Wait for erections
                     Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Start Masturbating"])
-                end)
+                -- end)
                 Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Start Masturbating"]})
             end
 
@@ -75,9 +71,9 @@ Event.AskForSex:SetHandler(function (payload)
             if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
                 Entity:ClearActionQueue(caster)
                 Entity:ClearActionQueue(target)
-                Ext.Timer.WaitFor(200, function() -- Wait for erections
+                -- Ext.Timer.WaitFor(200, function() -- Wait for erections
                     Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Ask for Sex"])
-                end)
+                -- end)
                 Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Ask for Sex"]})
             end
         end
@@ -184,7 +180,7 @@ end)
 
 Event.FetchParty:SetHandler(function (payload)
     local party = Osi.DB_PartyMembers:Get(nil)
-    _P("SEND PARTY ----------------------TO CLIENT WITH ID", payload.ID, "--------------------------")
+    -- _P("SEND PARTY ----------------------TO CLIENT WITH ID", payload.ID, "--------------------------")
     Event.SendParty:SendToClient(party, payload.ID)
 end)
 
@@ -241,19 +237,19 @@ end)
 
 
 Event.FetchWhitelistedNPCs:SetHandler(function(payload)
-    print("reveived FetchWhitelistedNPCs")
+    -- print("reveived FetchWhitelistedNPCs")
     local tbl = payload.tbl
     local filtered = {}
 
-    print("dumping payload")
-    _D(payload.client)
+    -- print("dumping payload")
+    -- _D(payload.client)
 
     if not payload.client then
-        print("ERROR, CLIENT NOT FOUND")
+        Debug.Print("ERROR, CLIENT NOT FOUND")
         return
     end
 
-  
+
 
     for _, character in pairs(tbl) do
         if Entity:IsWhitelisted(character) then
@@ -261,7 +257,7 @@ Event.FetchWhitelistedNPCs:SetHandler(function(payload)
         end
     end
 
-    print("sending event  Event.SendWhitelistedNPCs:SendToClient")
+    -- Debug.Print("sending event  Event.SendWhitelistedNPCs:SendToClient")
     Event.SendWhitelistedNPCs:SendToClient(filtered, payload.client)
 end)
 
@@ -274,4 +270,15 @@ Event.FetchUserTags:SetHandler(function(payload)
         table.insert(nonArrayTags,tagUUID)
     end
     Event.SendUserTags:SendToClient(nonArrayTags, payload.ID)
+end)
+
+Ext.ModEvents.BG3AF.WaterfallReplicated:Subscribe(function (uuid)
+    if Scene:FindSceneByEntity(uuid) then
+        local scene = Scene:FindSceneByEntity(uuid)
+        if scene and not scene.ReplicatedWaterfalls then
+            scene.ReplicatedWaterfalls = {}
+        end
+        scene.ReplicatedWaterfalls[uuid] = true
+        scene:ReplicationAnimationResetCheck()
+    end
 end)

@@ -476,20 +476,20 @@ function Helper.DelayUntilTrue(func, getcondition, checkInterval, maxIterations,
     local maxIterations = maxIterations or 999
     local currentIteration = currentIteration or 0
 
-    Debug.Print("DelayUntilTrue")
+    -- Debug.Print("DelayUntilTrue")
 
     currentIteration = currentIteration + 1
-    _P("UIStateCheck: Checking condition: Iteration", checkInterval)
+    -- _P("UIStateCheck: Checking condition: Iteration", checkInterval)
     if currentIteration > maxIterations then
-            _P(" Max iterations reached, stopping check")
+            -- _P(" Max iterations reached, stopping check")
         return
     end
 
     if condition then
-        _P("Condition met, executing function")
+        -- _P("Condition met, executing function")
             func()
     else
-        _P("Condition not met, sleeping")
+        -- _P("Condition not met, sleeping")
         Ext.Timer.WaitFor(checkInterval, function ()
             Helper.DelayUntilTrue(func, getcondition, checkInterval, maxIterations, currentIteration)
         end)
@@ -594,3 +594,33 @@ end
 function clamp(n, minVal, maxVal)
     return math.max(minVal, math.min(n, maxVal))
 end
+
+
+
+
+
+-- Sends server changes over to all clients
+-- used in case a component cannot be replicated or for multiplayer
+
+---@param entity EntityHandle
+---@param componentPath table  -- Path to component like ["ServerCharacter", "CharacterCreationAppearance", "Visual"]
+---@param newValue any
+function Helper.SatanSync(entity, componentPath, newValue)
+    local uuid = entity.Uuid.EntityUuid
+
+
+    local newValueButAsTable = {}
+
+    if type(newValue) == "userdata" then
+        for key,value in ipairs(newValue) do
+            newValueButAsTable[key] = value
+        end
+    end
+
+
+    local payload = Ext.Json.Stringify({uuid = uuid, componentPath = componentPath, newValue = newValueButAsTable})
+    Event.SatanSync:Broadcast(payload)
+end
+
+
+

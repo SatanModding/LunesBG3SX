@@ -9,15 +9,17 @@ Data.AnimationSets = { -- Check BG3AF about what Slot and Type means
 }
 local sets = Data.AnimationSets
 
-if Ext.IsServer() then -- because this file is loaded through _initData.lua which is also loaded on the client
+-- if Ext.IsServer() then -- because this file is loaded through _initData.lua which is also loaded on the client
     if BG3AFActive then
         local as = Mods.BG3AF.AnimationSet
-        local body = as.Get() -- Gets an AnimationSet - Check BG3AF for options
-        local face = as.Get("Face")
+        -- local body = as.Get() -- Gets an AnimationSet - Check BG3AF for options
+        -- local face = as.Get("Face")
         --local body = as.Get(Data.AnimationSets["BG3SX_Body"].Uuid) -- Gets an AnimationSet - Check BG3AF for options
         --local face = as.Get(Data.AnimationSets["BG3SX_Face"].Uuid)
 
-        Data.AnimLinks = {}
+        if Ext.IsServer() then
+            Data.AnimLinks = {}
+        end
         -- Create a new link between an animation ID and Mapkey on an AnimationSet
 
         local links = {
@@ -70,18 +72,26 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
 
         -- AF TESTING
         local body = as.Get(sets["BG3SX_Body"].Uuid) -- bfa9dad2- is bg3sx specific animset, check Public/BG3SX/Content/Assets/[PAK]_AnimationSets
+        local face = as.Get(sets["BG3SX_Face"].Uuid)
         for entry,content in pairs(links) do
-            body:AddLink(content.MapKey, content.AnimationID)
-            face:AddLink(content.MapKey, faceAnim)
-            Data.AnimLinks[entry] = content
+            body:AddLink(content.MapKey, content.AnimationID, "")
+            face:AddLink(content.MapKey, faceAnim, "")
+            if Ext.IsServer() then
+                Data.AnimLinks[entry] = content
+            end
         end
         for _,idle in pairs(idles) do
             face:AddLink(idle, faceIdle)
         end
+        -- Ext.Timer.WaitFor(5000, function()
+            -- Debug.Print("Added AnimationSet links to BG3SX AnimationSet")
+            -- local body = as.Get(sets["BG3SX_Body"].Uuid)
+            -- _D(body[1].AnimationBank.AnimationSubSets[""].Animation)
+        -- end)
     else
         Debug.Print("BG3AF not found")
     end
-end
+-- end
 
 -- function Data.AnimationSets.AddSetToEntity(uuid, animationSet)
 --     local character = uuid

@@ -546,9 +546,7 @@ local function sceneEntityReset(character)
     --print("Out of sex genital is ", outOfSexGenital)
     Genital.OverrideGenital(outOfSexGenital, entity)
 
-
     -- Getting old position
-
     -- print("all startLoctions")
     -- _D(scene.startLocations)
 
@@ -557,7 +555,6 @@ local function sceneEntityReset(character)
             startLocation = entry
         end
     end
-
 
     -- print("teleporting ", character , " to the startposition ", startLocation.position[1], startLocation.position[2],startLocation.position[3] )
 
@@ -577,6 +574,9 @@ local function sceneEntityReset(character)
     if Table.Contains(scene.WasOnStage, character) then -- Check if entity was on stage before
         -- Osi.SetOnStage(character, 1) -- Re-enable AI
     end
+
+    -- local animationWaterfall = Mods.BG3AF.AnimationWaterfall.Get(character)
+    -- animationWaterfall:RemoveWaterfallElement(Data.AnimationSets["BG3SX_Body"].Uuid)
 end
 
 
@@ -647,5 +647,22 @@ function Scene:SwapPosition()
             self:PlayAnimation(self.currentAnimation)
             -- Sex:PlayAnimation(savedActor, self.currentAnimation)
         end
+    end
+end
+
+function Scene:ReplicationAnimationResetCheck()
+    local count = 0
+    if self.ReplicatedWaterfalls then
+        for uuid, bool in pairs(self.ReplicatedWaterfalls) do
+            if bool then
+                count = count + 1
+            end
+        end
+    end
+    if count == #self.entities then
+        for _,entity in pairs(self.entities) do
+            Animation.ResetAnimation(entity)
+        end
+        self.ReplicatedWaterfalls = nil
     end
 end

@@ -8,7 +8,7 @@ Ext.Osiris.RegisterListener("UsingSpellOnTarget", 6, "after", function(_, target
     if spell == "BG3SX_ManualErections" then
         Mods.BG3SX.SexUserVars.SetAutoSexGenital(false,target)
     end
-    
+
     if spell == "BG3SX_AutoSexGenital" then
         Mods.BG3SX.SexUserVars.SetAutoSexGenital(true,target)
     end
@@ -103,7 +103,7 @@ local function playAnimationAndSound(scene, animSpell)
         --print("creating new animation class for ", actor, " with animation ", animSpell)
         newAnimation = Animation:New(actor, animSpell)
         Ext.ModEvents.BG3SX.AnimationChange:Throw({newAnimation})
-        
+
         -- Only play sound if is enabled for a given animation entry
         if animSpell.Sound == true then
             newSound = Sound:New(actor, animSpell)
@@ -129,7 +129,7 @@ function Sex:PlayAnimation(character, animData)
 
     if sceneType == "MasturbateMale" or sceneType == "MasturbateFemale" then
     elseif sceneType == "Straight" then -- Handle this in a different way to enable actor swapping even for straight animations
-        
+
         -- In case of actor1 not being male, swap them around to still assign correct animations
         if not Entity:HasPenis(scene.entities[1]) then
             local savedActor = scene.entities[1]
@@ -182,14 +182,14 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
         for _,involved in pairs(sexHavers) do
             Effect:Fade(involved, 666)
         end
-        
+
         -- Delay the rest as well, since scene initilization is delayed for 1 second to avoid user seeing behind the scenes stuff
         local function haveSex()
 
             local armorsets = {}
             local equipments = {}
             local slots = {}
-        
+
             -- erections
             for _, character in pairs(sexHavers) do
 
@@ -197,23 +197,47 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
 
                 Genital.GiveSexGenital(entity)
 
-                 -- stripping
+                -- if BG3AFActive then
+                --     local function addWaterfallToEntity(entity, tbl)
+                --         local animWaterfall = Mods.BG3AF.AnimationWaterfall.Get(entity)
+                --         local waterfallEntry = animWaterfall:AddWaterfall(tbl)
+                --     end
+
+                --     local tbl = {
+                --         Resource = Data.AnimationSets["BG3SX_Body"].Uuid,
+                --         DynamicAnimationTag = "9bfa73ed-2573-4f48-adc3-e7e254a3aadb",
+                --         Slot = "", -- 0 = Body, 1 = Attachment
+                --         OverrideType = 0, -- 0 = Replace, 1 = Additive
+                --     }
+
+                --     addWaterfallToEntity(sexHavers[1], tbl)
+                --     if #sexHavers > 1 then
+                --         addWaterfallToEntity(sexHavers[2], tbl)
+                --     end
+                -- else
+                --     Debug.Print("BG3AF not found")
+                -- end
+
+                -- stripping
                 local stripping = SexUserVars.GetAllowStripping(entity)
-                if not (stripping == false) then 
+                if not (stripping == false) then
                     armorset, equipment, slot = Sex:Strip(character)
                     armorsets[character] = armorset
                     equipments[character] = equipment
                     slots[character] = slot
                 end
-
             end
 
             Scene:new(sexHavers, equipments, armorsets, slots)
-                          
-            Sex:PlayAnimation(caster, animationData)
+
+            --TODO - remove timer
+            --Ext.Timer.WaitFor(2000, function ()
+            https://nitter.net/fremontstudia/search
+            --end)
+
         end
 
-
+        -- Timer to delay scene creation for the fadeout
         Ext.Timer.WaitFor(333, function() haveSex() end)
     end
 end
@@ -223,7 +247,7 @@ end
 -- TODO - implement NPC logic
 function Sex:Strip(character)
 
-    local armorset = {} 
+    local armorset = {}
     local equipment = {}
     local slot = {}
 
@@ -271,6 +295,32 @@ function Sex:ChangeCameraHeight(uuid)
         end
         entity:Replicate("GameObjectVisual")
     end
-    Ext.ModEvents.BG3SX.CameraHeightChange:Throw({uuid}) 
+    Ext.ModEvents.BG3SX.CameraHeightChange:Throw({uuid})
 end
 
+
+local function reapplyWaterfall(cmd, uuid)
+
+    -- add the bfa (BG3SX Waterfall) to the entity again 
+    local sx = "bfa9dad2-2a5b-45cc-b770-9537badf9152"
+    Mods.BG3AF.AnimationWaterfall.Get(uuid):AddWaterfall(sx)
+
+    -- Event.ReapplyWaterfall:Broadcast(uuid)
+
+    
+end
+
+
+
+-- local function testCmd(cmd, a1, a2, ...)
+--     _P("Cmd: " .. cmd .. ", args: ", a1, ", ", a2);
+-- end
+
+
+-- Ext.RegisterConsoleCommand("test", testCmd);
+-- ConsoleCommand.New("Test", testCmd, "Test command to test the console command system")
+
+
+
+
+ConsoleCommand.New("rw", reapplyWaterfall, "Does the thing")

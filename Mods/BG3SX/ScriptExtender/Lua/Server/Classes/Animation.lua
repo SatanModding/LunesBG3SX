@@ -30,6 +30,15 @@ function Animation:New(actor, animData)
 
         -- print("dumping scene")
         -- _D(scene.entities)
+
+        -- local tbl = {
+        --     Resource = Data.AnimationSets["BG3SX_Body"].Uuid,
+        --     DynamicAnimationTag = "9bfa73ed-2573-4f48-adc3-e7e254a3aadb",
+        --     Slot = "", -- 0 = Body, 1 = Attachment
+        --     OverrideType = 0, -- 0 = Replace, 1 = Additive
+        -- }
+        -- local animWaterfall = Mods.BG3AF.AnimationWaterfall.Get(actor)
+        -- local waterfallEntry = animWaterfall:AddWaterfall(tbl)
         
 
         if #scene.entities == 1 then
@@ -77,6 +86,9 @@ end
 ---@param animationData Table   - The chosen animations data table
 ---@param animation     string  - The actual animation to play because there could be multiple ("Top"/"Bottom")
 playAnimation = function(self)
+
+    -- Entity:ClearActionQueue(self.actor) -- Clear the action queue to prevent animation stacking
+
   --  Osi.PlayAnimation(self.actor.uuid, "") -- First, stop current animation on actor
     if self.animationData.Loop == true then
         _P("Playing ", self.animation, " for ", self.actor)

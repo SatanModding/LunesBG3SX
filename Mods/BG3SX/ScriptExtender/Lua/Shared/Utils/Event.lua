@@ -124,13 +124,20 @@ Event:New("RemovedNPCFromTab")
 Event:New("FinishedBuildingNPCUI")
 
 Event:New("RestoreNPCTab")
+Event:New("SatanSync")
+
+
+
+Event:New("ReapplyWaterfall")
 
 function Event.GetAll()
     local allEvents = {}
     for name, event in pairs(Event) do
-        if not (name == "New" or name == "GetAll") then
-            allEvents[name] = event
+        if not (name == "__index" or name == "New" or name == "GetAll") then
+            table.insert(allEvents, name)
         end
     end
+    _D(allEvents)
     return allEvents
 end
+ConsoleCommand.New("Events", Event.GetAll, "Lists every available event")

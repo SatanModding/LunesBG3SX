@@ -47,22 +47,22 @@ function NPCTab:RequestDressNPC()
 end
 
 function NPCTab.FetchAllNPCs()
-    print("Fethcing all NPCs")
+    -- print("Fethcing all NPCs")
     local allEntities = Ext.Entity.GetAllEntitiesWithComponent("ClientCharacter")
 
     for _,entity in pairs(allEntities) do
         table.insert(allNPCs, entity.Uuid.EntityUuid)
     end
 
-    print("fetched all NPCs")
+    -- print("fetched all NPCs")
 
-    print("sending event: FetchWhitelistedNPCs:SendToServer")
-    print("with userid ", USERID)
+    -- print("sending event: FetchWhitelistedNPCs:SendToServer")
+    -- print("with userid ", USERID)
     Event.FetchWhitelistedNPCs:SendToServer({tbl = allNPCs, client = USERID})
 end
 
 Event.SendWhitelistedNPCs:SetHandler(function (payload)
-    print("assinged whitelistedNPCs")
+    -- print("assigned whitelistedNPCs")
     allWhiteListedNPCs = payload
 end)
 
@@ -99,7 +99,7 @@ function NPCTab:ScanForNPCs()
             choice.SelectedIndex = 0
         end
         choice.OnChange = function()
-            Debug.Print("OnChange")
+            -- Debug.Print("OnChange")
             -- _DS(UI.AppearanceTab)
 
             -- Debug.Print("Chose an NPC")
@@ -135,7 +135,7 @@ function NPCTab:Init()
     self.Tab:AddText("Select a range to scan for NPCs")
     self.Tab:AddText("You can also start a scene by selecting the NPC in the game world")
 
-    print("initializing InRange")
+    -- print("initializing InRange")
 
     self.InRange = {}
     local r = self.InRange
@@ -156,16 +156,16 @@ function NPCTab:Init()
     self.AddButton = self.Tab:AddButton("Add")
     self.AddButton.IDContext = tostring(math.random(1000,100000))
     self.AddButton.OnClick = function(button,npc)
-        print("Add NPC button clicked for ", npc)
+        -- print("Add NPC button clicked for ", npc)
 
         if not npc then
-            print("no npc added in function, choosing selected from list")
+            -- print("no npc added in function, choosing selected from list")
             npc = self.InRange.Choice.Options[self.InRange.Choice.SelectedIndex + 1]
             print(npc)
         end
         if npc then
             local uuid = npc:match(" %- (.+)")
-            print("uuid is ", uuid)
+            -- print("uuid is ", uuid)
             local PI = UI.PartyInterface
             if PI then
                 if not Table.Contains(PI.NPCs, uuid) then
@@ -180,7 +180,7 @@ function NPCTab:Init()
         end
     end
     -- scan once after initializing
-    print("SETTING UIEXIST TO TRUE")
+    -- print("SETTING UIEXIST TO TRUE")
 
     self:ScanForNPCs()
 end

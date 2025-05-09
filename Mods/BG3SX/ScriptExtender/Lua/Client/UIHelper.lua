@@ -8,7 +8,7 @@ function getMouseover()
         return mouseover
     else
         _P("[BG3SX] Not a viable mouseover!")
-    end 
+    end
 end
 
 function getUUIDFromUserdata(mouseover)
@@ -74,7 +74,7 @@ function UIHelper.AddTemporaryTooltip(uiElement, duration, text)
 
     Ext.Timer.WaitFor(duration, function()
         tooltip:Destroy()
-    end) 
+    end)
 
 end
 
@@ -86,3 +86,32 @@ function IsNPC(entity)
         return true
     end
 end
+
+
+
+Event.SatanSync:SetHandler(function (payload)
+    local parse = Ext.Json.Parse(payload)
+    local entity = Ext.Entity.Get(parse.uuid)
+    Entity:UpdateEntityComponent(entity, nil, parse.componentPath, parse.newValue)
+end)
+
+
+
+
+-- Event.ReapplyWaterfall:SetHandler(function(payload)
+
+
+--     local uuid = payload
+
+--     local function reapplyWaterfall(uuid)
+
+--         -- add the bfa (BG3SX Waterfall) to the entity again 
+--         local sx = "bfa9dad2-2a5b-45cc-b770-9537badf9152"
+--         -- Mods.BG3AF.AnimationWaterfall.Get(uuid):AddWaterfall(sx)
+
+--     end
+
+--     reapplyWaterfall(uuid)
+
+
+-- end)

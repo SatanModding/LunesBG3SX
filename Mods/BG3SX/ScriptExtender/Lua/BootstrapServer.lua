@@ -112,17 +112,6 @@ Ext.Events.SessionLoaded:Subscribe(OnSessionLoaded)
 
 
 
--- Ext.Timer.WaitFor(1000, function ()
---         print("printing newlines for readability")
---         for i=1, 10 do
---                 print()
---         end
--- end)
-
-
-
-
-
 
 
 -- the original function from Norb wrongly parses commented out lines.

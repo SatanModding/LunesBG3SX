@@ -165,6 +165,7 @@ function NPC.StripNPC(entity)
         table.insert(removed, removedEntry)
     end
     if Ext.IsServer() then
+        -- TODO - should be handled via NPC MP sync 
         Visual.Replicate(entity)
     end
     
@@ -178,6 +179,7 @@ function NPC.Redress(entity, toBeRestored)
         Visual.addVisualSetSlot(entity, entry)
     end
     if Ext.IsServer() then
+           -- TODO - should be handled via NPC MP sync 
         Visual.Replicate(entity)
     end
 
@@ -210,6 +212,7 @@ function NPC.RemoveGenitals(entity)
     local genital = Genital.GetCurrentGenital(entity)
     if genital then
         Visual.BetterRemoveVisualOvirride(entity, genital)
+           -- TODO - should be handled via NPC MP sync 
         Visual.Replicate(entity)
     end
 end

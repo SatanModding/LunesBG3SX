@@ -229,7 +229,7 @@ function PartyInterface:SetSelectedCharacter(characterUuid)
             charOrNPC.CharacterButton.Tint = {1.0, 0.8, 0.3, 1.0} -- Neutral Selected Color -- Beige
             charOrNPC.Selected = true
             self.SelectedCharacter = charOrNPC
-            _P("Selected character: " .. charOrNPC.Uuid)
+            -- _P("Selected character: " .. charOrNPC.Uuid)
             -- Event.SetSelectedCharacter:SendToServer({ID = USERID, Uuid = charOrNPC.Uuid})
         else
             charOrNPC.CharacterButton.Tint = {1.0, 1.0, 1.0, 1.0} -- Reset to regular
@@ -239,7 +239,7 @@ function PartyInterface:SetSelectedCharacter(characterUuid)
     end
 
     Event.RequestWhitelistStatus:SendToServer({ID = USERID, Uuid = characterUuid})
-    print("Selected character persistance check ", self.SelectedCharacter.Uuid)
+    -- print("Selected character persistance check ", self.SelectedCharacter.Uuid)
 end
 
 -- Event.SetSelectedCharacter:SetHandler(function (payload)

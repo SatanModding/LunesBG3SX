@@ -30,4 +30,4 @@ function ConsoleCommand.GetAll()
     Debug.Dump(ConsoleCommands)
     return ConsoleCommands
 end
-ConsoleCommand.New("Help", ConsoleCommand.GetAll, "Dumps every available console command")
+ConsoleCommand.New("Help", ConsoleCommand.GetAll, "Lists every available console command")

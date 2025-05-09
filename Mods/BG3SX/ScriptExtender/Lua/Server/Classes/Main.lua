@@ -20,6 +20,17 @@ local function initializeParty()
                 -- print("adding genital for ", party[i][1])
                 Genital.AddGenitalIfHasNone(entity)
                 Genital.AssignDefaultIfHasNotYet(entity)
+
+                local tbl = {
+                    Resource = Data.AnimationSets["BG3SX_Body"].Uuid,
+                    DynamicAnimationTag = "9bfa73ed-2573-4f48-adc3-e7e254a3aadb",
+                    Slot = 0, -- 0 = Body, 1 = Attachment
+                    -- OverrideType = "0", -- 0 = Replace, 1 = Additive
+                }
+            
+                -- Mods.BG3AF.AnimationWaterfall.Get(party[i][1]):AddWaterfall(tbl)
+                -- _P("Added waterfall entry for " .. party[i][1])
+                -- _D(entity.AnimationWaterfall.Waterfall)
             end
         end
 
@@ -42,8 +53,8 @@ function OnSessionLoaded()
 
     -- strips NPCs that have been stripped before the game was ended
     Ext.Osiris.RegisterListener("LevelGameplayStarted", 2, "after", function(_, _)
-        print("ATTENTION ATTENTION ATTTENTION")
-        print("Sending Event session loaded to all clients")
+        -- print("ATTENTION ATTENTION ATTTENTION")
+        -- print("Sending Event session loaded to all clients")
         Event.SessionLoaded:Broadcast("") -- fetches NPCs once
         initializeParty()
         NPC.RestoreNudity()
@@ -66,7 +77,7 @@ function OnSessionLoaded()
         local party = Osi.DB_PartyMembers:Get(nil)
         -- Debug.Print("DB_PartOfTheTeam send")
         for _,member in pairs(party) do
-            if Table.Containes(oldparty, member) then
+            if Table.Contains(oldparty, member) then
                 local entity = Ext.Entity.Get(member)
                 if entity.ClientControl then
                     Event.SendParty:SendToClient(party, member)
@@ -86,7 +97,7 @@ function OnSessionLoaded()
         local party = Osi.DB_PartyMembers:Get(nil)
         -- Debug.Print("CharacterJoinedParty send")
         for _,member in pairs(party) do
-            if Table.Containes(oldparty, member) then
+            if Table.Contains(oldparty, member) then
                 local entity = Ext.Entity.Get(member)
                 if entity.ClientControl then
                     Event.SendParty:SendToClient(party, member)
@@ -100,7 +111,7 @@ function OnSessionLoaded()
         local party = Osi.DB_PartyMembers:Get(nil)
         -- Debug.Print("CharacterLeftParty send")
         for _,member in pairs(party) do
-            if Table.Containes(oldparty, member) then
+            if Table.Contains(oldparty, member) then
                 local entity = Ext.Entity.Get(member)
                 if entity.ClientControl then
                     Event.SendParty:SendToClient(party, member)
@@ -134,7 +145,7 @@ Ext.Events.SessionLoaded:Subscribe(OnSessionLoaded)
 --     local party = Osi.DB_PartyMembers:Get(nil)
 --     -- Debug.Print("afterResetPartySync send")
 --     for _,member in pairs(party) do
---         if Table.Containes(oldparty, member) then
+--         if Table.Contains(oldparty, member) then
 --             local entity = Ext.Entity.Get(member)
 --             if entity.ClientControl then
 --                 Event.SendParty:SendToClient(party, member)

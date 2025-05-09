@@ -143,11 +143,11 @@ end
 
 function AppearanceTab:FetchGenitals()
     -- self.AwaitingGenitals = true
-    print("UI:GetSelectedCharacter() ", UI:GetSelectedCharacter())
+    -- print("UI:GetSelectedCharacter() ", UI:GetSelectedCharacter())
     local selected = UI:GetSelectedCharacter()
     local helperselected = Helper.GetLocalControlledEntity().Uuid.EntityUuid
     local c = _C().Uuid.EntityUuid
-    print("fetching genitals for ", selected , " or ", helperselected , " or ", c)
+    -- print("fetching genitals for ", selected , " or ", helperselected , " or ", c)
     Event.FetchGenitals:SendToServer({ID = USERID, Character = UI:GetSelectedCharacter() or Helper.GetLocalControlledEntity().Uuid.EntityUuid or _C().Uuid.EntityUuid})
 end
 

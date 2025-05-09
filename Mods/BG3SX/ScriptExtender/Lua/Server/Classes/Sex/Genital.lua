@@ -348,14 +348,20 @@ end
 ---@param entity		EntityHandle	- entity that will receive the genital
 function Genital.OverrideGenital(newGenital, entity)
 
+	local newValue
+
 	if allowedToHaveGenitals(entity.Uuid.EntityUuid) then
-		Visual.overrideVisual(newGenital, entity, "Private Parts")
+		newValue = Visual.overrideVisual(newGenital, entity, "Private Parts")
 	else
 		Debug.Print(entity.Uuid.EntityUuid.. " is not whitelisted to receive genitals")
 	end
 
 	print("overriding genitals with " , newGenital, " for ", Helper.GetName(entity.Uuid.EntityUuid))
 
+
+	local componentPath = {"CharacterCreationAppearance" ,"Visuals"}
+
+	--Visual.ReplicateBySatanSync(entity, componentPath, newValue)
 	Visual.Replicate(entity)
 end
 
@@ -384,8 +390,12 @@ function Genital.AddGenitalIfHasNone(entity)
 		end
 
 
-		Visual.BetterAddVisualOverride(entity, toBeAdded)
+		local newValue = Visual.BetterAddVisualOverride(entity, toBeAdded)
+		local componentPath = {"CharacterCreationAppearance" ,"Visuals"}
+
+		--Visual.ReplicateBySatanSync(entity, componentPath, newValue)
 		Visual.Replicate(entity)
+
 		SexUserVars.AssignGenital("BG3SX_OutOfSexGenital", toBeAdded, entity)
 		
 	end
@@ -467,8 +477,13 @@ function Genital.GiveSexGenital(entity)
 
 	if ((autoerection == nil) or (autoerection == true)) then
 		-- change genitals
-		Visual.overrideVisual(sexGenital, entity, "Private Parts")
+
+		local newValue = Visual.overrideVisual(sexGenital, entity, "Private Parts")
+		local componentPath = {"CharacterCreationAppearance" ,"Visuals"}
+
+		--Visual.ReplicateBySatanSync(entity, componentPath, newValue)
 		Visual.Replicate(entity)
+
 	end
 
 	

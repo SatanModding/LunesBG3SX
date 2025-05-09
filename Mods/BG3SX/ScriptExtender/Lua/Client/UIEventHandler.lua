@@ -71,7 +71,7 @@ end)
 
 Event.SendWhitelistStatus:SetHandler(function (payload)
     local status = payload.Status
-    _P("Whitelist status: " .. tostring(status))
+    -- _P("Whitelist status: " .. tostring(status))
     if status == true then
         UI.SceneTab:EnableSceneButtons()
     else

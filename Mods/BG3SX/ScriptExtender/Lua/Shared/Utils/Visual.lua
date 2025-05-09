@@ -77,6 +77,7 @@ function Visual.Replicate(entity, delay)
 	delay = delay or nil
 
     local function func()
+        
         entity:Replicate("CharacterCreationAppearance")
         entity:Replicate("GameObjectVisual")
     end
@@ -84,6 +85,9 @@ function Visual.Replicate(entity, delay)
     Helper.OptionalDelay(func, delay)
 end
 
+function Visual.ReplicateBySatanSync(entity, componentPath, newValue)
+    Helper.SatanSync(entity, componentPath, newValue)
+end
 
 
 -- I kept the typo for consistency, and because it's funny
@@ -101,8 +105,6 @@ function Visual.BetterRemoveVisualOvirride(entity, visual)
 
     entity.CharacterCreationAppearance.Visuals = visuals
 end
-
-
 
 ---@param entity EntityHandle  - uuid
 ---@param visual string - uuid
@@ -123,6 +125,8 @@ function Visual.BetterAddVisualOverride(entity, visual, delay)
     end
 
     Helper.OptionalDelay(func, delay)
+
+    return entity.CharacterCreationAppearance.Visuals
 
 end
 
@@ -553,6 +557,9 @@ function Visual.overrideVisual(newVisual, entity, type)
         end
         Visual.BetterAddVisualOverride(entity, newVisual)
 	end 
+
+
+    return entity.CharacterCreationAppearance.Visuals
 end
 
 ------------------------------------------------------------------------------------------------------------------------------

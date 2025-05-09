@@ -1,5 +1,6 @@
 Ext.Require("Shared/Utils/ConsoleCommands.lua")
 Ext.Require("Shared/Utils/Event.lua")
+Ext.Require("Shared/Utils/ObjectPath.lua")
 Ext.Require("Shared/SexUserVars.lua")
 
 

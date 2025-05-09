@@ -20,6 +20,7 @@ Ext.Require("Shared/Data/Origins.lua")
 Ext.Require("Client/GenitalMessages.lua")
 Ext.Require("Server/Classes/Sex/NPC.lua")
 Ext.Require("Client/NPCSync.lua") -- NPC changes have to be synced on the client
+Ext.Require("Shared/Data/AnimationSets.lua")
 
 
 local settings = {
@@ -37,7 +38,7 @@ Ext.Vars.RegisterModVariable(ModuleUUID, "BG3SX_AddedNPCs", settings)
 
 Ext.Vars.RegisterModVariable(ModuleUUID, "BG3SX_ShowAllAnimations", {
         Server = true, Client = true, SyncToClient = true
-    })
+})
 
 
 

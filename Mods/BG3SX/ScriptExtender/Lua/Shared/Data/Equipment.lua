@@ -16,5 +16,9 @@ Data.Equipment.Slots = {
     "MeleeMainHand",
     "MeleeOffHand",
     "RangedMainHand",
-    "RangedOffHand"
+    "RangedOffHand",
+    "Melee Main Weapon",
+    "Melee Offhand Weapon",
+    "Ranged Main Weapon",
+    "Ranged Offhand Weapon"
 }
