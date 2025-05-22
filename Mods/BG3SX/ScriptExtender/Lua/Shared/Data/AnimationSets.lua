@@ -12,8 +12,8 @@ local sets = Data.AnimationSets
 -- if Ext.IsServer() then -- because this file is loaded through _initData.lua which is also loaded on the client
     if BG3AFActive then
         local as = Mods.BG3AF.AnimationSet
-        -- local body = as.Get() -- Gets an AnimationSet - Check BG3AF for options
-        -- local face = as.Get("Face")
+        local body = as.Get() -- Gets an AnimationSet - Check BG3AF for options
+        local face = as.Get("Face")
         --local body = as.Get(Data.AnimationSets["BG3SX_Body"].Uuid) -- Gets an AnimationSet - Check BG3AF for options
         --local face = as.Get(Data.AnimationSets["BG3SX_Face"].Uuid)
 
@@ -71,8 +71,8 @@ local sets = Data.AnimationSets
         }
 
         -- AF TESTING
-        local body = as.Get(sets["BG3SX_Body"].Uuid) -- bfa9dad2- is bg3sx specific animset, check Public/BG3SX/Content/Assets/[PAK]_AnimationSets
-        local face = as.Get(sets["BG3SX_Face"].Uuid)
+        -- local body = as.Get(sets["BG3SX_Body"].Uuid) -- bfa9dad2- is bg3sx specific animset, check Public/BG3SX/Content/Assets/[PAK]_AnimationSets
+        -- local face = as.Get(sets["BG3SX_Face"].Uuid)
         for entry,content in pairs(links) do
             body:AddLink(content.MapKey, content.AnimationID, "")
             face:AddLink(content.MapKey, faceAnim, "")

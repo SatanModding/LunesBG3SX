@@ -35,26 +35,26 @@ Event.AskForSex:SetHandler(function (payload)
 
     if allow then
         -- Add BG3SX AnimationSets
-        if BG3AFActive then
-            local function addWaterfallToEntity(entity, tbl)
-                local animWaterfall = Mods.BG3AF.AnimationWaterfall.Get(entity)
-                local waterfallEntry = animWaterfall:AddWaterfall(tbl)
-            end
+        -- if BG3AFActive then
+        --     local function addWaterfallToEntity(entity, tbl)
+        --         local animWaterfall = Mods.BG3AF.AnimationWaterfall.Get(entity)
+        --         local waterfallEntry = animWaterfall:AddWaterfall(tbl)
+        --     end
 
-            local tbl = {
-                Resource = Data.AnimationSets["BG3SX_Body"].Uuid,
-                DynamicAnimationTag = "9bfa73ed-2573-4f48-adc3-e7e254a3aadb",
-                Slot = "", -- 0 = Body, 1 = Attachment
-                OverrideType = 0, -- 0 = Replace, 1 = Additive
-            }
+        --     local tbl = {
+        --         Resource = Data.AnimationSets["BG3SX_Body"].Uuid,
+        --         DynamicAnimationTag = "9bfa73ed-2573-4f48-adc3-e7e254a3aadb",
+        --         Slot = "", -- 0 = Body, 1 = Attachment
+        --         OverrideType = 0, -- 0 = Replace, 1 = Additive
+        --     }
 
-            addWaterfallToEntity(caster, tbl)
-            if not Helper.StringContainsOne(caster, target) then
-                addWaterfallToEntity(target, tbl)
-            end
-        else
-            Debug.Print("BG3AF not found")
-        end
+        --     addWaterfallToEntity(caster, tbl)
+        --     if not Helper.StringContainsOne(caster, target) then
+        --         addWaterfallToEntity(target, tbl)
+        --     end
+        -- else
+        --     Debug.Print("BG3AF not found")
+        -- end
 
         -- masturbation 
         if Helper.StringContainsOne(caster, target) then
@@ -272,13 +272,13 @@ Event.FetchUserTags:SetHandler(function(payload)
     Event.SendUserTags:SendToClient(nonArrayTags, payload.ID)
 end)
 
-Ext.ModEvents.BG3AF.WaterfallReplicated:Subscribe(function (uuid)
-    if Scene:FindSceneByEntity(uuid) then
-        local scene = Scene:FindSceneByEntity(uuid)
-        if scene and not scene.ReplicatedWaterfalls then
-            scene.ReplicatedWaterfalls = {}
-        end
-        scene.ReplicatedWaterfalls[uuid] = true
-        scene:ReplicationAnimationResetCheck()
-    end
-end)
+-- Ext.ModEvents.BG3AF.WaterfallReplicated:Subscribe(function (uuid)
+--     if Scene:FindSceneByEntity(uuid) then
+--         local scene = Scene:FindSceneByEntity(uuid)
+--         if scene and not scene.ReplicatedWaterfalls then
+--             scene.ReplicatedWaterfalls = {}
+--         end
+--         scene.ReplicatedWaterfalls[uuid] = true
+--         scene:ReplicationAnimationResetCheck()
+--     end
+-- end)

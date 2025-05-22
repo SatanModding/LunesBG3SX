@@ -232,7 +232,7 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
 
             --TODO - remove timer
             --Ext.Timer.WaitFor(2000, function ()
-            https://nitter.net/fremontstudia/search
+
             --end)
 
         end
