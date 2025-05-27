@@ -21,6 +21,7 @@ MCMActive = Mods and Mods.BG3MCM -- true or false depending on if MCM is active 
 ---@field NPCTab NPCTab
 ---@field SettingsTab SettingsTab
 ---@field DebugTab DebugTab|nil
+---@field FAQTab FAQTab
 UI = {
     Ready = false,
 }
@@ -34,6 +35,7 @@ local NPCTab = Ext.Require("Client/Tabs/NPCTab.lua")
 local SettingsTab = Ext.Require("Client/Tabs/SettingsTab.lua")
 local SceneControl, SceneControlInstance = Ext.Require("Client/SceneControl.lua")
 local DebugTab = Ext.Require("Client/Tabs/DebugTab.lua")
+local FAQTab = Ext.Require("Client/Tabs/FAQTab.lua")
 
 --------------------------------------------------
 --------------------------------------------------
@@ -66,6 +68,7 @@ function UI:Init()
     self.WhitelistTab.Tab.Visible = false
     self.NPCTab = NPCTab:New(self.TabBar)
     self.SettingsTab = SettingsTab:New(self.TabBar)
+    self.FAQTab = FAQTab:New(self.TabBar)
     --self.DebugTab = DebugTab:New(self.TabBar)
 
     self.NPCTab:FetchAllNPCs()
@@ -75,6 +78,7 @@ function UI:Init()
     self.WhitelistTab:Init()
     self.NPCTab:Init()
     self.SettingsTab:Init()
+    self.FAQTab:Init()
     -- self.DebugTab:Init()
 
     self.SceneControl = SceneControl:Init()
