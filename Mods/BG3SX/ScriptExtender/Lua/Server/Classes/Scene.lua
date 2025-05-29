@@ -31,6 +31,7 @@ local initialize
 ---@param slots             table   - Format: {uuid = entry.VisualResource, index = i} 
 function Scene:new(entities, equipment, armorset, slots)
     local instance      = setmetatable({
+        Uuid            = Helper.GenerateUUID(), -- Unique identifier for the scene
         entities        = entities,
         rootPosition    = {},
         rotation        = {},
