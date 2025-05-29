@@ -100,10 +100,12 @@ function UI:SelectedCharacterUpdates(character)
     else
         local entity = Ext.Entity.Get(character.Uuid)
         self.PartyInterface:SetSelectedCharacter(character.Uuid)
+
         self.AppearanceTab:UpdateStrippingGroup(character.Uuid)
-        -- self.AppearanceTab:UpdateToggleVisibilityGroup(character.Uuid)
+        self.AppearanceTab:UpdateToggleVisibilityGroup(character.Uuid)
         self.AppearanceTab:UpdateEquipmentAreaGroup(character.Uuid)
         self.AppearanceTab:FetchGenitals()
+        
         Event.FetchUserTags:SendToServer({ID = USERID, Character = character.Uuid})
         Camera:SnapCameraTo(entity)
     end

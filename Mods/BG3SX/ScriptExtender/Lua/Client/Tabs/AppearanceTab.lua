@@ -49,36 +49,11 @@ end
 
 function AppearanceTab:UpdateToggleVisibilityGroup(uuid)
     UI.DestroyChildren(self.ToggleVisibilityArea)
-
-    local entity = Ext.Entity.Get(uuid)
-    local isInvis = SexUserVars.IsInvisible(entity)
-
-    self.IsInvisBox = self.ToggleVisibilityArea:AddCheckbox(Ext.Loca.GetTranslatedString("h2080108a2c8d4e509be9b53c2421a1c4eb95", "Toggle Invisibility"))
-    
-    if (self.IsInvisBox == false) then
-
-        self.IsInvisBox.Checked = false
-    else
-        self.IsInvisBox.Checked = true
-    end
-
-    self.IsInvisBox.OnChange = function()
-        if self.IsInvisBox.Checked == true then
-            self.IsInvisBox.Checked = false
-            Event.ToggleInvisibility:SendToServer({Uuid = uuid, Value = true})
-        else
-            self.IsInvisBox.Checked = true
-            Event.ToggleInvisibility:SendToServer({Uuid = uuid, Value = false})
-        end
+    self.ToggleInvisButton = self.ToggleVisibilityArea:AddButton(Ext.Loca.GetTranslatedString("h2080108a2c8d4e509be9b53c2421a1c4eb95", "Toggle Invisibility"))
+    self.ToggleInvisButton.OnClick = function()
+        Event.ToggleInvisibility:SendToServer(uuid)
     end
 end
-
-Event.SetInvisible:SetHandler(function (payload)
-    if UI:GetSelectedCharacter() == payload.Uuid then
-        UI.AppearanceTab.IsInvisBox.Checked = payload.Value
-    end
-end)
-
 
 function AppearanceTab:UpdateEquipmentAreaGroup(uuid)
 
@@ -123,10 +98,10 @@ function AppearanceTab:Init()
         self.StrippingArea = self.Tab:AddGroup("")
     end
 
-    -- if not self.ToggleVisibilityArea then
-    --     self.ToggleVisibilityArea = self.Tab:AddGroup("")
-    --     self.ToggleVisibilityArea.SameLine = true
-    -- end
+    if not self.ToggleVisibilityArea then
+        self.ToggleVisibilityArea = self.Tab:AddGroup("")
+        self.ToggleVisibilityArea.SameLine = true
+    end
 
     -- self.Tab:AddSeparatorText("Equipment:")
     if not self.EquipmentArea then

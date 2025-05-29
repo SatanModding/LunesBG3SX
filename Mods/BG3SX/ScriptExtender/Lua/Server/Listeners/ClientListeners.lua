@@ -284,3 +284,12 @@ end)
 --         scene:ReplicationAnimationResetCheck()
 --     end
 -- end)
+
+Event.ToggleInvisibility:SetHandler(function (uuid)
+    local invisState = Osi.IsInvisible(uuid)
+    if invisState == 1 then
+        Osi.SetVisible(uuid, 1)
+    elseif invisState == 0 then
+        Osi.SetVisible(uuid, 0)
+    end
+end)

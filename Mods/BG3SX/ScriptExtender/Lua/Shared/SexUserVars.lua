@@ -11,9 +11,9 @@
 SexUserVars = {}
 
 local settings = {
-      Server = true, 
-      Client = true, 
-      SyncToClient = true, 
+      Server = true,
+      Client = true,
+      SyncToClient = true,
       SyncToServer = true,
       SyncOnWrite = true,
       WriteableOnClient = true,
@@ -26,7 +26,6 @@ Ext.Vars.RegisterUserVariable("BG3SX_SexGenital", settings)
 Ext.Vars.RegisterUserVariable("BG3SX_AutoSexGenital", settings)
 Ext.Vars.RegisterUserVariable("BG3SX_NPCClothes", settings)
 Ext.Vars.RegisterUserVariable("BG3SX_AllowStripping", settings)
-Ext.Vars.RegisterUserVariable("BG3SX_IsInvisible", settings)
 
 -- To allow modders to choose certain "sex visuals" for their modded
 -- characters (like fresh withers)
@@ -101,58 +100,4 @@ end
 ---@param entity EntityHandle - uuid
 function SexUserVars.GetAllowStripping(entity)
     return entity.Vars.BG3SX_AllowStripping
-end
-
--- Client or Server
-function SexUserVars.IsInvisble(entity) -- Check if invisible
-      local val = entity.Vars.BG3SX_IsInvisible
-      if val then
-            return val -- If Uservars exist return value
-      else
-            Event.SetupInvisUserVars:SendToServer(entity.Uuid.EntityUuid) -- Else, set them up as false
-            return nil
-      end
-end
-
-if Ext.IsServer() then
-      Event.SetupInvisUserVars:SetHandler(function (uuid)
-            local entity = Ext.Entity.Get(uuid)
-            local isInvis = Osi.IsInvisible(entity)
-            SexUserVars.ToggleInvisibility(entity, false)
-      end)
-end
-
--- Server only because of Osi usage
-function SexUserVars.ToggleInvisibility(entity, val)
-      local val = val or nil
-      if val == true then
-            Osi.SetVisible(entity, 0)
-            entity.Vars.BG3SX_IsInvisible = false
-            Event.SetInvisible:Broadcast({Uuid = entity.Uuid.EntityUuid, Value = false})
-      elseif val == false then
-            Osi.SetVisible(entity, 1)
-            entity.Vars.BG3SX_IsInvisible = true
-            Event.SetInvisible:Broadcast({Uuid = entity.Uuid.EntityUuid, Value = true})
-      else
-            local isInvis = SexUserVars.IsVisible(entity) -- If exists, we skip using Osi to get it
-            if isInvis == nil then
-                  isInvis = Osi.IsInvisible(entity)
-            end
-            if isInvis == true then
-                  Osi.SetVisible(entity, 0)
-                  entity.Vars.BG3SX_IsInvisible = false
-                  Event.SetInvisible:Broadcast({Uuid = entity.Uuid.EntityUuid, Value = false})
-            elseif isInvis == false then
-                  Osi.SetVisible(entity, 1)
-                  entity.Vars.BG3SX_IsInvisible = true
-                  Event.SetInvisible:Broadcast({Uuid = entity.Uuid.EntityUuid, Value = true})
-            end
-      end
-end
-
-if Ext.IsServer() then
-      Event.ToggleInvisibility:SetHandler(function (payload)
-            local entity = Ext.Entity.Get(payload.Uuid)
-            SexUserVars.ToggleInvisibility(entity, payload.Value)
-      end)
 end
