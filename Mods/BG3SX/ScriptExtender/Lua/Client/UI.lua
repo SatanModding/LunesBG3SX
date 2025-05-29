@@ -345,19 +345,23 @@ function UI.DestroyChildren(obj)
     end
 end
 
-function UI.DestroyAllSceneControls(backToServer)
-    if UI.SceneControl then
-        local sc = UI.SceneControl
-        if sc.ActiveSceneControls and #sc.ActiveSceneControls > 0 then
-            for _,sceneControl in pairs(sc.ActiveSceneControls) do
-                sceneControl:Destroy(backToServer)
-            end
-        end
-    end
-end
-Event.DestroyAllSceneControls:SetHandler(function ()
-    UI.DestroyAllSceneControls(false)
-end)
+-- function UI:DestroyAllSceneControls(backToServer)
+--     _P("Destroying all Scene Controls")
+--     local sc = self.SceneControl
+--     if sc then
+--         _P("SceneControl Component found")
+--         _D(sc.ActiveSceneControls)
+--         if sc.ActiveSceneControls and #sc.ActiveSceneControls > 0 then
+--             for _,sceneControl in pairs(sc.ActiveSceneControls) do
+--                 _P("Destroying Scene Control")
+--                 sceneControl:Destroy(backToServer)
+--             end
+--         end
+--     end
+-- end
+-- Event.DestroyAllSceneControls:SetHandler(function ()
+--     UI:DestroyAllSceneControls(false)
+-- end)
 
 
 function UI.FetchScenes()

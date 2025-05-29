@@ -148,7 +148,9 @@ Event.SyncActiveScenes:SetHandler(function(SavedScenes)
         end
     else
         -- No active scenes, destroy all scene controls
-        UI.SceneControl.ActiveSceneControls = {}
+        for _,activeSceneControl in pairs(UI.SceneControl.ActiveSceneControls) do
+            activeSceneControl:Destroy()
+        end
     end
 end)
 

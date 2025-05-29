@@ -618,7 +618,7 @@ function Scene.DestroyAllScenes()
             scene:Destroy()
         end
     end
-    Event.DestroyAllSceneControls:Broadcast()
+    -- Event.DestroyAllSceneControls:Broadcast()
 end
 --ConsoleCommand.New(Scene.DestroyAllScenes, "Terminates all Scenes")
 ConsoleCommand.New("DestroyAllScenes", Scene.DestroyAllScenes, "Destroys all ongoing scenes") -- Killswitch

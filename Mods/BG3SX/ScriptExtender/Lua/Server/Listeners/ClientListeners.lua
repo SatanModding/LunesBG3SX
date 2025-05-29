@@ -106,8 +106,10 @@ end)
 
 Event.StopSex:SetHandler(function (payload)
     local scene = Scene:FindSceneByEntity(payload.Scene.entities[1]) -- Re-get scene because scene send as payload lost metatable status
-    Event.SceneControlInstanceDestroyed:Broadcast(payload.Scene.entities)
-    scene:Destroy()
+    if scene then
+        -- Event.SceneControlInstanceDestroyed:Broadcast(payload.Scene.entities)
+        scene:Destroy()
+    end
 end)
 Event.FetchGenitals:SetHandler(function (payload)
 
@@ -197,7 +199,7 @@ end)
 
 
 Event.CustomEvent:SetHandler(function (payload)
-    CreateAnimationFilter()
+    -- CreateAnimationFilter()
 end)
 
 Ext.Osiris.RegisterListener("GainedControl", 1, "after", function(target)
