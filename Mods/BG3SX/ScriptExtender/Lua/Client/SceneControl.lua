@@ -181,6 +181,7 @@ function SceneControlInstance:ResetPosition()
 end
 
 function SceneControlInstance:CreateSceneTabReference()
+    UI.SceneTab.ActiveScenesSeparator.Visible = true
     local refGroup = UI.SceneTab.Tab:AddGroup("")
     local popup = refGroup:AddPopup(self.Window.Label)
     local ref = refGroup:AddSelectable(self.Window.Label)

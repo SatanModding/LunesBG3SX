@@ -77,6 +77,9 @@ function SceneTab:CreateNewSceneArea()
     self.ControlsText = self.Tab:AddText("Mouse:\nLeft click | Right click to cancel\nController:\nLeft stick to start targeting + A | B to cancel")
     self.ControlsText.SameLine = true
 
+    self.ActiveScenesSeparator = self.Tab:AddSeparatorText(Ext.Loca.GetTranslatedString("hb393d16ea9494b2a8adfec48663c7512a69g", "Running Scenes"))
+    self.ActiveScenesSeparator.Visible = false
+
     self.InfoText = self.Tab:AddText("")
     self.InfoText.Visible = false
 end
@@ -100,7 +103,9 @@ function SceneTab:UpdateNoSceneText()
     end
     if stillOneActive then
         self.NoSceneText.Visible = false -- Keep it hidden
+        self.ActiveScenesSeparator.Visible = true
     else
+        self.ActiveScenesSeparator.Visible = false
         self.NoSceneText.Visible = true -- Show it again
     end
 end
