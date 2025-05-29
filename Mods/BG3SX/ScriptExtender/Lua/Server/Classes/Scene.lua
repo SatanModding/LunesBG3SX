@@ -600,15 +600,17 @@ function Scene:Destroy()
             NPC.RemoveGenitals(entity)
         end
     end
-    
-    Event.SyncActiveScenes:Broadcast(self)
-    Ext.ModEvents.BG3SX.SceneDestroyed:Throw({self})
 
     for i,scene in ipairs(Data.SavedScenes) do
         if scene == self then
             table.remove(Data.SavedScenes, i)
         end
     end
+    Event.SyncActiveScenes:Broadcast(Data.SavedScenes)
+
+    local uuid = self.Uuid
+    self = nil
+    Ext.ModEvents.BG3SX.SceneDestroyed:Throw(uuid)
 end
 
 -- Terminates all running scenes

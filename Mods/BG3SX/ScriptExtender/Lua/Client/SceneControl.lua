@@ -94,7 +94,7 @@ function SceneControlInstance:Destroy(backToServer)
     self.Reference:Destroy() -- Delete SceneTab Reference Imgui Element
     self.Reference = nil -- Set to nil for NoSceneText update
     UI.SceneTab:UpdateNoSceneText()
-    Event.RequestSyncActiveScenes:SendToServer()
+    -- Event.RequestSyncActiveScenes:SendToServer()
 
     for componentName,component in pairs(self) do
         if (component ~= self.ID) and (component ~= self.Window) then

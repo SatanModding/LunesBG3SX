@@ -123,9 +123,9 @@ end
 
 -- Check all current scenes against all current SceneControls
 -- Checks all current scenes entities against all current SceneControl entities
--- When a scene is found thats 
+-- When a scene is found thats not active anymore, it will destroy the SceneControl
 Event.SyncActiveScenes:SetHandler(function(SavedScenes)
-    if SavedScenes and #SavedScenes > 0 then
+    if SavedScenes and Table.TableSize(SavedScenes) > 0 then
         local isStillActive = {}
         for _,scene in pairs(SavedScenes) do
             for _,entity in pairs(scene.entities) do
@@ -137,7 +137,7 @@ Event.SyncActiveScenes:SetHandler(function(SavedScenes)
             local found
             for _,activeSceneControlEntity in pairs(activeSceneControl.Scene.entities) do
                 for _,entity in pairs(isStillActive) do
-                    if activeSceneControl == entity then
+                    if activeSceneControlEntity == entity then
                         found = true
                     end
                 end
@@ -147,7 +147,7 @@ Event.SyncActiveScenes:SetHandler(function(SavedScenes)
             end
         end
     else
-        -- No active scenes, destroy all scene controls
+        -- No active scenes, destroy all leftover SceneControls
         for _,activeSceneControl in pairs(UI.SceneControl.ActiveSceneControls) do
             activeSceneControl:Destroy()
         end
