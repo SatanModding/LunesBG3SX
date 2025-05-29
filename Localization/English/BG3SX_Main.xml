@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
-<!-- Visual -->
-	<content contentuid="h1e7bdab3f693cf4afafb4fcfabddbd240ee2" version="1">Erect</content>
-	<content contentuid="hd4f04d1df9c2ef4a70f8536f9013cd3ac073" version="1">Hairy Erect</content>
+
 
 <!-- UI Specific -->
     <!-- Party/NPC Interface -->
@@ -24,6 +22,9 @@
     <content contentuid="ha0ba5dd9dcc94acca77258ba6254decb3784" version="1">MrFunsize Erections</content>
     <content contentuid="h12336834b5e64857bed909e165f752393cfb" version="1">Vanilla Vulvas</content>
     <content contentuid="hd0e090c89d924fa8ba6bfa2000ff8f479d8a" version="1">Vanilla Penises</content>
+        <!-- MrFunSize Genital Names -->
+        <content contentuid="h1e7bdab3f693cf4afafb4fcfabddbd240ee2" version="1">Erect</content>
+        <content contentuid="hd4f04d1df9c2ef4a70f8536f9013cd3ac073" version="1">Hairy Erect</content>
 
     <!-- Whitelist -->
     <content contentuid="hd3dd6bc5609a4d65a7f71567e596dc84b81d" version="1">Whitelist</content>
@@ -36,8 +37,11 @@
     <content contentuid="hadd9c724632b4e41ae4dbd58686b8db1c17f" version="1">Tab Settings</content>
     <content contentuid="ha5a309de2e9542b2999d70313cf9455ab451" version="1">Show all animations regardless of scene type</content>
 
-
-
+    <!-- Debug -->
+    <content contentuid="hb4507f4d6c634f08a5e4080b00b7c2a1fddb" version="1">Debug</content>
+    <content contentuid="h89052b2849e84a10b8c2c9b0c6e431daf53g" version="1">Scene Debug</content>
+    <content contentuid="h2993f96bb07749708dd673c5bb49027dbagc" version="1">Destroy All Scenes</content>
+    <content contentuid="h3ca7538e44cc443d8b5dafc1924842305f17" version="1">DeveloperMode Reset</content>
 
 
 
@@ -127,5 +131,4 @@
 	<content contentuid="h87ee4bfdg8b1bg494cg93a1g11b347703922" version="1">Tribbing</content>
 	<content contentuid="h2ca5ef2dg7f68g40dbg8c8dg05fd895a39b1" version="1">Finger</content>
 	<content contentuid="hb32715942ed4499b9ef6a288a729b0483578" version="1">Astarion Thrusting</content>
-
 </contentList>

@@ -126,7 +126,7 @@ Event:New("FinishedBuildingNPCUI")
 Event:New("RestoreNPCTab")
 Event:New("SatanSync")
 
-
+Event:New("DestroyAllScenes")
 
 Event:New("ReapplyWaterfall")
 

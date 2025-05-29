@@ -66,7 +66,8 @@ function UI:Init()
     self.WhitelistTab.Tab.Visible = false
     self.NPCTab = NPCTab:New(self.TabBar)
     self.SettingsTab = SettingsTab:New(self.TabBar)
-    --self.DebugTab = DebugTab:New(self.TabBar)
+    self.DebugTab = DebugTab:New(self.TabBar)
+    self.DebugTab.Tab.Visible = false
 
     self.NPCTab:FetchAllNPCs()
 
@@ -75,7 +76,7 @@ function UI:Init()
     self.WhitelistTab:Init()
     self.NPCTab:Init()
     self.SettingsTab:Init()
-    -- self.DebugTab:Init()
+    self.DebugTab:Init()
 
     self.SceneControl = SceneControl:Init()
 

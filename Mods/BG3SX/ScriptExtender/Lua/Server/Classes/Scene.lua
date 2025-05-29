@@ -622,6 +622,9 @@ function Scene.DestroyAllScenes()
 end
 --ConsoleCommand.New(Scene.DestroyAllScenes, "Terminates all Scenes")
 ConsoleCommand.New("DestroyAllScenes", Scene.DestroyAllScenes, "Destroys all ongoing scenes") -- Killswitch
+Event.DestroyAllScenes:SetHandler(function ()
+    Scene.DestroyAllScenes()
+end)
 
 
 function Scene:SwapPosition()
