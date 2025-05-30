@@ -34,9 +34,14 @@
     <content contentuid="h3d507f295c0b468ea6429b9b00c3c4ed2534" version="1">NPCs</content>
 
     <!-- Setting -->
+    <content contentuid="hedf73cea14534ece90bc4da1cc5f647d58e8" version="1">Settings</content>
     <content contentuid="h053ec08807c449e5873fbad66bb709c2ead8" version="1">Tab Visibility</content>
     <content contentuid="hadd9c724632b4e41ae4dbd58686b8db1c17f" version="1">Tab Settings</content>
     <content contentuid="ha5a309de2e9542b2999d70313cf9455ab451" version="1">Show all animations regardless of scene type</content>
+        <!-- NPCTab Settings -->
+        <content contentuid="hb21edb40a9044ddcb50f2557b6a00ae27933" version="1">NPCTab Settings</content>
+        <content contentuid="hb2022efb943c40ee8e6a8bb9f354eb308d46" version="1">Automatic NPC Scan</content>
+        <content contentuid="h96863be65f494a9ea56759ea763b38f06520" version="1">Disabling this settings creates a manual 'Scan' button in the NPC Tab.</content>
         <!-- Credits -->
         <content contentuid="hd1aa350cf2bf4942b9be983b18920e88g247" version="1">Credits</content>
         <content contentuid="h554123bc72a54633ad9d1768c065e80d4431" version="1">This mod was created with a lot of help by the amazing BG3 Modding Community,&lt;br&gt;but we would like to thank a few contributors specifically:</content>

@@ -9,7 +9,7 @@ function SettingsTab:New(holder)
     if UI.SettingsTab then return end -- Fix for infinite UI repopulation
     
     local instance = setmetatable({
-        Tab = holder:AddTabItem("Settings"),
+        Tab = holder:AddTabItem(Ext.Loca.GetTranslatedString("hedf73cea14534ece90bc4da1cc5f647d58e8", "Settings")),
     }, SettingsTab)
     return instance
 end
@@ -19,27 +19,34 @@ function SettingsTab:Init()
 
     ---------------------------------
     local showTabGroup = generalSettingsGroup:AddGroup("Tab Visibility")
-    showTabGroup:AddText(Ext.Loca.GetTranslatedString("h053ec08807c449e5873fbad66bb709c2ead8", "Tab Visibility"))
+    showTabGroup:AddSeparatorText(Ext.Loca.GetTranslatedString("h053ec08807c449e5873fbad66bb709c2ead8", "Tab Visibility"))
 
-    self:AddSettingBox(generalSettingsGroup, Ext.Loca.GetTranslatedString("h3d507f295c0b468ea6429b9b00c3c4ed2534", "NPCs"), true, function(check)
-        UI.NPCTab.Tab.Visible = check
+    self:AddSettingBox(generalSettingsGroup, Ext.Loca.GetTranslatedString("h3d507f295c0b468ea6429b9b00c3c4ed2534", "NPCs"), true, function(checked)
+        UI.NPCTab.Tab.Visible = checked
     end)
-    self:AddSettingBox(generalSettingsGroup, Ext.Loca.GetTranslatedString("hd3dd6bc5609a4d65a7f71567e596dc84b81d", "Whitelist"), false, function(check)
-        UI.WhitelistTab.Tab.Visible = check
+
+    local box = self:AddSettingBox(generalSettingsGroup, Ext.Loca.GetTranslatedString("hd3dd6bc5609a4d65a7f71567e596dc84b81d", "Whitelist"), false, function(checked)
+        UI.WhitelistTab.Tab.Visible = checked
     end)
-    self:AddSettingBox(generalSettingsGroup, Ext.Loca.GetTranslatedString("hb4507f4d6c634f08a5e4080b00b7c2a1fddb", "Debug"), false, function(check)
-        UI.DebugTab.Tab.Visible = check
+    box.SameLine = true
+
+    local box = self:AddSettingBox(generalSettingsGroup, Ext.Loca.GetTranslatedString("hb4507f4d6c634f08a5e4080b00b7c2a1fddb", "Debug"), false, function(checked)
+        UI.DebugTab.Tab.Visible = checked
     end)
+    box.SameLine = true
 
     ---------------------------------
-    -- local sceneGroup = generalSettingsGroup:AddGroup("Scene Settings")
-    -- sceneGroup:AddText(Ext.Loca.GetTranslatedString("hadd9c724632b4e41ae4dbd58686b8db1c17f", "Tab Settings"))
+    local sceneGroup = generalSettingsGroup:AddGroup("NPCTab Settings")
+    sceneGroup:AddSeparatorText(Ext.Loca.GetTranslatedString("hb21edb40a9044ddcb50f2557b6a00ae27933", "NPCTab Settings"))
 
-    -- self:AddSettingBox(sceneGroup, Ext.Loca.GetTranslatedString("ha5a309de2e9542b2999d70313cf9455ab451", "Show all animations regardless of scene type"), false, function(check)
-    --     for _,SceneControl in pairs(UI.SceneControl.ActiveSceneControls) do
-    --         SceneControl:UpdateAnimationPicker()
-    --     end
-    -- end)
+    UI.Settings.AutomaticNPCScan = self:AddSettingBox(generalSettingsGroup, Ext.Loca.GetTranslatedString("hb2022efb943c40ee8e6a8bb9f354eb308d46", "Automatic NPC Scan"), true, function(checked)
+       if checked then
+            UI.NPCTab.ManualScan.Visible = false
+        else
+            UI.NPCTab.ManualScan.Visible = true
+        end
+    end)
+    UI.Settings.AutomaticNPCScan:Tooltip():AddText(Ext.Loca.GetTranslatedString("h96863be65f494a9ea56759ea763b38f06520", "Disabling this settings creates a manual 'Scan' button in the NPC Tab."))
 
     self:GenerateCredits()
 end
