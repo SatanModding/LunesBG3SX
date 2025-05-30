@@ -824,7 +824,13 @@ Data.WhitelistedEntities = {
 -- Anyone can add specific entities to it via:
 -- table.insert(Mods.BG3SX.Data.BlacklistedEntities, "An Entity UUID")
 Data.BlacklistedEntities = {
-    "f854ffc7-a16a-4431-8e5d-77d514580bff", -- Magron, Headless Hag Victim
+    "f854ffc7-a16a-4431-8e5d-77d514580bff", -- Magron, Headless Hag 
+    "1b5e6e47-03bc-41b6-91e9-dbe6ba86ffe8", -- Gale Mirror Image
+    "1cedd0c1-6bfe-4f32-a1e7-78b0acf209a9", -- Gale Mirror Image
+    "244735bd-a5e6-4e70-b6e6-becbf70a54b8", -- Gale Mirror Image
+    "f6fb700a-5086-404c-ba15-7cf16642fc22", -- Gale Mirror Image
+    "ddf3dd37-fa65-4351-9f55-e50b1211fcfe", -- Gale Mirror Image
+    "30edc515-b6f2-42c0-8459-41ae4c36b349", -- Gale Mirror Image
 }
 
 -- WHITE-/BLACKLIST CHECK
