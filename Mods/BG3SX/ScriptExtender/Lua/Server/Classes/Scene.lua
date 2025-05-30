@@ -25,7 +25,7 @@ local initialize
 ---@param props             table   - Table of all props currently in a scene
 ---@param switchPlaces      boolean - Boolean for PlayAnimation to check if actors have been switched - TODO: need a cleaner way to handle this
 ---@param campFlags         table   - Table of entities with campflags applied before scene to reapply on Destroy() - Ignore those who didn't - PleaseStay Mod compatibility
----@paran summons           table   - Table of summons saved per involved entity
+---@paran Summons           table   - Table of summons saved per involved entity
 ---@param equipment         table   - Table of [uuid] of entity and a table of their equipment
 ---@param armorset          table   - Table of [uuid] of entity and a table of their armorset
 ---@param slots             table   - Format: {uuid = entry.VisualResource, index = i} 
@@ -43,7 +43,7 @@ function Scene:new(entities, equipment, armorset, slots)
         cameraZoom      = {},
         props           = {},
         campFlags       = {},
-        summons         = {},
+        Summons         = {},
         equipment       = equipment,
         armorset        = armorset,
         slots           = slots,
@@ -54,7 +54,7 @@ function Scene:new(entities, equipment, armorset, slots)
 
 
     -- Somehow can't set rootPosition/rotation within the metatable construction, it poops itself trying to do this - rootPosition.x, rootPosition.y, rootPosition.z = Osi.GetPosition(entities[1])
-    
+
     --local position = entities[1].Transfrom.Transform.Translate
     --instance.rootPosition.x, instance.rootPosition.y, instance.rootPosition.z = position[1], position[2], position[3]
     --local rotation = entities[1].Transfrom.Transform.RotationQuat
@@ -80,7 +80,7 @@ end
 ---@param entity string - UUID of the entity 
 local function setStartLocations(scene)
     for _,character in pairs(scene.entities) do
-        
+
         local entity = Ext.Entity.Get(character)
         --local position = {}
         --position.x, position.y, position.z = Osi.GetPosition(entity)
@@ -180,8 +180,8 @@ end
 --Checks if the summon to hide is a participating entity in any scene
 function Scene.ExistsInScene(uuid)
     for _,scene in pairs(Data.SavedScenes) do
-        for _,entity in pairs(scene.entities) do
-            if entity == uuid then
+        for _,entityUuid in pairs(scene.entities) do
+            if entityUuid == uuid then
                 return false
             end
         end
@@ -190,65 +190,94 @@ function Scene.ExistsInScene(uuid)
 end
 
 function Scene:HideSummons()
-    for _,entry in pairs(self.summons) do
-        if Scene.ExistsInScene(entry.summon.Uuid.EntityUuid) then
-
-        end
-    end 
-end
-
--- TODO: See if we can squish it a bit
--- Toggles visibility of all summons of entities involved in a scene
-function Scene:ToggleSummonVisibility()
-    if #self.summons > 0 then
-        -- _P("Setting summon entries visible")
-        for _,entry in pairs(self.summons) do
-            local entity = entry.entity
-            local summon = entry.summon
-            local startLocation
-            for _,locationEntry in pairs(self.startLocations) do
-                -- _D(self.startLocations)
-                -- _P(locationEntry.entity)
-                -- _P(entity.Uuid.EntityUuid)
-                local locationEntity = Ext.Entity.Get(locationEntry.entity)
-
-                if locationEntity.Uuid.EntityUuid == entity.Uuid.EntityUuid then
-                    -- _P("iteration entity == entity")
-                    startLocation = locationEntry
-                    -- _D(startLocation)
-                end
-            end
-            Osi.SetDetached(summon.Uuid.EntityUuid, 0)
-            Osi.SetVisible(summon.Uuid.EntityUuid, 1)
-            Entity:ToggleWalkThrough(summon.Uuid.EntityUuid)
-            Osi.RemoveBoosts(summon.Uuid.EntityUuid, "ActionResourceBlock(Movement)", 0, "", "")
-            Osi.TeleportToPosition(summon.Uuid.EntityUuid, startLocation.position.x, startLocation.position.y, startLocation.position.z, "", 0, 0, 0, 0, 1)
-        end
-        self.summons = {}
-    else
-        -- _P("Setting summons invisible and adding them to scene.summons")
-        for _,entry in pairs(self.entities) do
-            local entity = Ext.Entity.Get(entry)
-            local partymembers = Ext.Entity.GetAllEntitiesWithComponent("PartyMember")
-            for _,potentialSummon in pairs(partymembers) do
-                if potentialSummon.IsSummon then
-                    local summon = potentialSummon
-                    local summoner = summon.IsSummon.field_20 -- or field_8 - of them might be owner and the other one the summoner
-                    -- _P("Entity: ", entity, " with uuid: ", entity.Uuid.EntityUuid)
-                    -- _P("Summon: ", summon, " with uuid: ", summon.Uuid.EntityUuid)
-                    -- _P("Summoner: ", summoner, " with uuid: ", summoner.Uuid.EntityUuid)
-                    if summoner.Uuid.EntityUuid == entity.Uuid.EntityUuid then
-                        -- _P("Making ", summon.Uuid.EntityUuid, " invisible")
-                        Osi.SetDetached(summon.Uuid.EntityUuid, 1)
-                        Osi.SetVisible(summon.Uuid.EntityUuid, 0)
-                        Entity:ToggleWalkThrough(summon.Uuid.EntityUuid)
-                        Osi.AddBoosts(summon.Uuid.EntityUuid, "ActionResourceBlock(Movement)", "", "")
-                        table.insert(self.summons, {entity = entity, summon = summon})
+    if self.Summons and Table.TableSize(self.Summons) > 0 then
+        for entityUuid,summons in pairs(self.Summons) do
+            if summons and Table.TableSize(summons) > 0 then
+                for _,summon in pairs(summons) do
+                    if not Scene.ExistsInScene(entityUuid) then
+                        Osi.SetVisible(summon, 0)
                     end
                 end
             end
         end
     end
+end
+
+function Scene:ShowSummons()
+    if self.Summons and Table.TableSize(self.Summons) > 0 then
+        -- _P("[BG3SX][Scene.lua] - Scene:ShowSummons() - Showing summons for all involved entities")
+        -- _D(self.Summons)
+        for entityUuid,summons in pairs(self.Summons) do
+            -- _P("[BG3SX][Scene.lua] - Scene:ShowSummons() - 1 - Getting summons for entity " .. entityUuid)
+            if summons and Table.TableSize(summons) > 0 then
+                -- _P("[BG3SX][Scene.lua] - Scene:ShowSummons() - 2 - Iterating summons for entity " .. entityUuid)
+                -- _D(summons)
+                for _,summon in pairs(summons) do
+                    -- _P("[BG3SX][Scene.lua] - Scene:ShowSummons() - 3 - Showing summon " .. summon .. " for entity " .. entityUuid)
+                    Osi.SetVisible(summon, 1)
+                end
+            end
+        end
+    end
+end
+
+function Scene:CleanupSummons()
+    if Table.TableSize(self.Summons) > 0 then
+        for entityUuid,summons in pairs(self.Summons) do
+            for _,summon in pairs(summons) do
+                local startLocation
+                for _,locationEntry in pairs(self.startLocations) do
+                    -- _P("[BG3SX][Scene.lua] - Scene:CleanupSummons() - Checking if locationEntry.entity " .. locationEntry.entity .. " contains entity " .. entityUuid)
+                    if Helper.StringContainsOne(Helper.CleanPrefix(locationEntry.entity), entityUuid) then
+                        -- _P("[BG3SX][Scene.lua] - Scene:CleanupSummons() - Found start location for summon " .. summon .. " of entity " .. entityUuid)
+                        startLocation = locationEntry
+                        -- _D(startLocation)
+                        break
+                    end
+                end
+                Osi.SetDetached(summon, 0)
+                Entity:ToggleWalkThrough(summon)
+                Osi.RemoveBoosts(summon, "ActionResourceBlock(Movement)", 0, "", "")
+                Osi.TeleportToPosition(summon, startLocation.position[1], startLocation.position[2], startLocation.position[3], "", 0, 0, 0, 0, 1)
+            end
+        end
+        self:ShowSummons() -- Show summons again after teleporting them back to their start locations
+        self.Summons = nil
+    end
+end
+
+-- Gets all summons of involved entities and sets them up
+function Scene:SetupAndHideSummons()
+    self.Summons = {}
+    local partymembers = Ext.Entity.GetAllEntitiesWithComponent("PartyMember")
+    for _,entityUuid in pairs(self.entities) do
+        if not self.Summons[entityUuid] then
+            self.Summons[entityUuid] = {}
+        end
+        if partymembers and Table.TableSize(partymembers) > 0 then
+            for _,potentialSummon in pairs(partymembers) do
+                if potentialSummon.IsSummon then
+                    local summon = potentialSummon
+                    local summonIsInvolved = false
+                    for _, entityUuid in pairs(self.entities) do
+                        if Helper.StringContainsOne(Helper.CleanPrefix(summon.Uuid.EntityUuid), entityUuid) then
+                            summonIsInvolved = true -- Summon is == an involved entity
+                        end
+                    end
+                    if summonIsInvolved == false then -- Only add summons that are not involved in the scene
+                        local summoner = summon.IsSummon.field_20 -- or field_8 - of them might be owner and the other one the summoner
+                        if Helper.StringContainsOne(Helper.CleanPrefix(entityUuid), summoner.Uuid.EntityUuid) then
+                            Osi.SetDetached(summon.Uuid.EntityUuid, 1)
+                            Entity:ToggleWalkThrough(summon.Uuid.EntityUuid)
+                            Osi.AddBoosts(summon.Uuid.EntityUuid, "ActionResourceBlock(Movement)", "", "")
+                            table.insert(self.Summons[entityUuid], summon.Uuid.EntityUuid)
+                        end
+                    end
+                end
+            end
+        end
+    end
+    self:HideSummons()
 end
 
 -- vvvvvv Keep this for whenever IsSummon is replicatable vvvvvv
@@ -337,14 +366,12 @@ initialize = function(scene)
     --for _, scene in pairs(Data.SavedScenes) do
        -- _D(scene.entities)
     --end
-  
-
 
     -- print("initializing scene")
 
     setStartLocations(scene) -- Save start location of each entity to later teleport them back
     saveCampFlags(scene) -- Saves which entities had campflags applied before
-    scene:ToggleSummonVisibility() -- Toggles summon visibility and collision - on Scene:Destroy() it also teleports them back to start location
+    scene:SetupAndHideSummons() -- Hides summons and removes collision - on Scene:Destroy() it also teleports them back to start location
 
 
     -- We do this before in a seperate loop to already apply this to all entities before actors are spawned one by one
@@ -365,7 +392,7 @@ initialize = function(scene)
         -- Osi.SetVisible(entity, 0)               -- 0 = Invisible
         Entity:ToggleWalkThrough(character)        -- To prevent interactions with other entities even while invisible and untargetable
         scene:ToggleCampFlags(character)            -- Toggles camp flags so companions don't return to tents
-    
+
         --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Body"])
         --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Face"])
     end
@@ -378,12 +405,12 @@ initialize = function(scene)
                 Event.RequestRotation:Broadcast({character = character, target = scene.entities[1]})
             end
         end)
-        
+
         --Osi.TeleportToPosition(entity, self.rootPosition.x, self.rootPosition.y, self.rootPosition.z) -- now handled correctly in actor initialization
-        
+
         --local startLocation = self.startLocations[1]
         --Entity:RotateEntity(entity, startLocation.rotationHelper)
-       
+
 
     -- for _, entity in pairs(self.entities) do
     --     table.insert(self.actors, Actor:new(entity))
@@ -392,7 +419,7 @@ initialize = function(scene)
 
     if scene.SceneType == "MasturbateMale" or scene.SceneType == "MasturbateFemale" then
     elseif scene.SceneType == "Straight" then -- Handle this in a different way to enable actor swapping even for straight animations
-        
+
         -- In case of actor1 not being male, swap them around to still assign correct animations initially
         if not Entity:HasPenis(scene.entities[1]) then
             local savedActor = scene.entities[1]
@@ -401,6 +428,7 @@ initialize = function(scene)
         end
     end
 
+    _D(scene)
     Event.NewScene:Broadcast(scene)
     Ext.ModEvents.BG3SX.SceneCreated:Throw({scene})
 end
@@ -453,7 +481,7 @@ function Scene:MoveSceneToLocation(newLocation)
                 Event.RequestTeleport:Broadcast({character = prop, target = newLocation})
             end
         end
-    
+
 
     --scene:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
     --Sex:PlayAnimation(entity, self.currentAnimation) -- Play prior animation again
@@ -467,7 +495,7 @@ end
 ---@param location any
 function Scene:RotateScene(location)
     -- print("called rotate scene")
-    
+
     for _, character in pairs(self.entities) do
         Event.RequestRotation:Broadcast({character = character, target = location})
     end
@@ -541,9 +569,9 @@ local function sceneEntityReset(character)
     local scene = Scene:FindSceneByEntity(character)
     local startLocation
 
-    
+
     Entity:Redress(character, scene.armorset[character], scene.equipment[character], scene.slots[character])
-    
+
     --print("Out of sex genital is ", outOfSexGenital)
     Genital.OverrideGenital(outOfSexGenital, entity)
 
@@ -566,7 +594,7 @@ local function sceneEntityReset(character)
     Osi.RemoveStatus(character, "BG3SX_DisableAI", "") -- Unlocks AI
 
     scene:ToggleCampFlags(character) -- Toggles camp flags so companions return to tents IF they had them before
-    
+
     -- Re-attach entity to make it selectable again
     Osi.SetDetached(character, 0)
     if Table.Contains(scene.CouldJoinCombat, character) then -- Check if entity was allowed combat before
@@ -585,13 +613,13 @@ end
 function Scene:Destroy()
     self:CancelAllSoundTimers()
     self:DestroyProps()
-    self:ToggleSummonVisibility()
-    
+    self:CleanupSummons()
+
     -- self:StopAnimation() -- maybe use this new function instead of playing a "nothing" animation
     for _, entity in pairs(self.entities) do
-    
+
         sceneEntityReset(entity)
-        
+
         local nothing = "88f5df46-921d-4a28-93b6-202df636966c" -- Random UUID - This is nothing, NULL or "" doesn't work, crashes the game.
         Osi.PlayAnimation(entity, nothing) -- To cancel out of any ongoing animations
         Osi.PlaySound(entity, Data.Sounds.Orgasm[math.random(1, #Data.Sounds.Orgasm)]) -- TODO - change this to a generic sound for when we use this for non-sex instead
@@ -638,18 +666,18 @@ function Scene:SwapPosition()
         if self.UnlockedSwaps or (Entity:HasPenis(self.entities[1]) == Entity:HasPenis(self.entities[2])) then
             _P("SWAPPI")
             local savedActor = self.entities[1]
-            
+
             Ext.ModEvents.BG3SX.SceneSwitchPlacesBefore:Throw({self.entities})
-            
-            
+
+
             self.entities[1] = self.entities[2]
             self.entities[2] = savedActor
-            
+
             Ext.ModEvents.BG3SX.SceneSwitchPlacesAfter:Throw({self.entities})
-            
+
             self:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
-            
-            
+
+
             self:PlayAnimation(self.currentAnimation)
             -- Sex:PlayAnimation(savedActor, self.currentAnimation)
         end
