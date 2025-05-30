@@ -190,11 +190,43 @@ function AppearanceTab:UpdateGenitalGroup(whitelisted)
                     Event.SetInactiveGenital:SendToServer({ID = USERID, Genital = Genital.uuid, uuid = UI:GetSelectedCharacter()})
                 end
             end
+
+            if currentRow and #currentRow.Children > 0 then -- Check if the last row has any children
+                categoryHeader.Visible = true
+            else
+                categoryHeader.Visible = false
+            end
         end
     end
 end
 
-
+function AppearanceTab:UpdateReplicationListener()
+    self.ReplicationListener = {}
+    for _,character in pairs(UI.PartyInterface.Characters) do
+        Ext.Entity.OnChange("GameObjectVisual", function()
+            if character.Uuid == UI:GetSelectedCharacter() then
+                self:UpdateStrippingGroup(character.Uuid)
+                self:UpdateToggleVisibilityGroup(character.Uuid)
+                self:UpdateEquipmentAreaGroup(character.Uuid)
+                self:FetchGenitals()
+            end
+        end, Ext.Entity.Get(character.Uuid))
+        self.ReplicationListener[character.Uuid] = true
+    end
+    if UI.PartyInterface.CurrentNPCs ~= nil then
+        for _,npc in pairs(UI.PartyInterface.CurrentNPCs) do
+            Ext.Entity.OnChange("GameObjectVisual", function()
+                if npc.Uuid == UI:GetSelectedCharacter() then
+                    self:UpdateStrippingGroup(npc.Uuid)
+                    self:UpdateToggleVisibilityGroup(npc.Uuid)
+                    self:UpdateEquipmentAreaGroup(npc.Uuid)
+                    self:FetchGenitals()
+                end
+            end, Ext.Entity.Get(npc.Uuid))
+            self.ReplicationListener[npc.Uuid] = true
+        end
+    end
+end
 
 -- Check for NULL REFERENCEs because of too early destroyed IMGUI elements
 -- for i = 1000, 5000 do
