@@ -145,6 +145,7 @@ end
 function WhitelistTab:GenerateModdedWhitelist()
     if not self.ModdedTagsHeader then
         self.ModdedTagsHeader = self.Tab:AddCollapsingHeader("Modded Entries")
+        self.ModdedTagsHeader.Visible = false
     end
 
     local modsByName = {}
@@ -190,6 +191,11 @@ function WhitelistTab:GenerateModdedWhitelist()
                 end
             end
         end
+    end
+    if self.ModdedTagsHeader.Children and #self.ModdedTagsHeader.Children > 0 then
+        self.ModdedTagsHeader.Visible = true
+    else
+        self.ModdedTagsHeader.Visible = false
     end
 end
 
