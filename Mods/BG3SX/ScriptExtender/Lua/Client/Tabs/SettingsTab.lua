@@ -40,6 +40,8 @@ function SettingsTab:Init()
     --         SceneControl:UpdateAnimationPicker()
     --     end
     -- end)
+
+    self:GenerateCredits()
 end
 
 function SettingsTab:AddSettingBox(group, label, defaultValue, callback)
@@ -57,6 +59,18 @@ function SettingsTab:AddSettingButton(group, label, callback)
         callback()
     end
     return button
+end
+
+function SettingsTab:GenerateCredits()
+    local creditsGroup = self.Tab:AddGroup("Credits")
+    creditsGroup:AddSeparatorText(Ext.Loca.GetTranslatedString("hd1aa350cf2bf4942b9be983b18920e88g247", "Credits"))
+
+    creditsGroup:AddText(Ext.Loca.GetTranslatedString("h554123bc72a54633ad9d1768c065e80d4431", "This mod was created with a lot of help by the amazing BG3 Modding Community,\nbut we would like to thank a few contributors specifically:"))
+    creditsGroup:AddText(Ext.Loca.GetTranslatedString("h89d4bb3b5a474a2b80143206bfeb07821c8a", "Contributors: kit, ltpitb, Aahz, Volitio, LaughingLeader"))
+    creditsGroup:AddText(Ext.Loca.GetTranslatedString("h2f2930940303487eb3355ef98472ddcdg8d0", "If you would like to contribute, please join our Discord server:"))
+    local discordLink = creditsGroup:AddInputText("")
+    discordLink.Text = "https://discord.gg/ChndmEPUpt"
+    -- discordLink.SameLine = true
 end
 
 return SettingsTab
