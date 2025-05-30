@@ -118,6 +118,11 @@ Event.SendGenitals:SetHandler(function (payload)
     end
 end)
 
+Event.SendIgnoredTags:SetHandler(function(payload)
+    if UI.WhitelistTab and UI.WhitelistTab.IgnoredTags then
+        UI.WhitelistTab.IgnoredTags = payload
+    end
+end)
 Event.SendUserTags:SetHandler(function (payload)
     if UI.WhitelistTab and UI.WhitelistTab.UserTags then
         UI.WhitelistTab.UserTags.Tags = payload

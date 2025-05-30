@@ -743,7 +743,7 @@ Data.AllowedTagsAndRaces = {
 
 Data.ModdedTags = {}
 
-local unimportantTags = { -- These tags will get skipped by Whitelist
+local IgnoredTags = { -- These tags will get skipped by Whitelist
     --#region System
     "00000000-0000-0000-0000-000000000000", -- EMPTY
     "0fcfa622-a3c9-4a03-aab4-2a74904b62eb", -- EMPTY
@@ -779,6 +779,7 @@ local unimportantTags = { -- These tags will get skipped by Whitelist
     "ffd08582-7396-4cac-bcd4-8f9cd0fd8ef3", -- REALLY Astarion
     --#endregion
 }
+
 Data.ClassTags = {
     "02913f9a-f696-40cf-acdf-32032afab32c", -- Barbarian
     "d93434bd-6b71-4789-b128-ee24156057cc", -- Bard
@@ -832,6 +833,19 @@ Data.BlacklistedEntities = {
     "ddf3dd37-fa65-4351-9f55-e50b1211fcfe", -- Gale Mirror Image
     "30edc515-b6f2-42c0-8459-41ae4c36b349", -- Gale Mirror Image
 }
+
+if Ext.IsServer() then
+    Event.FetchIgnoredTags:SetHandler(function (payload)
+        local combinedTagsToIgnore = {}
+        for _, tag in ipairs(IgnoredTags) do
+            table.insert(combinedTagsToIgnore, tag)
+        end
+        for _, tag in ipairs(Data.ClassTags) do
+            table.insert(combinedTagsToIgnore, tag)
+        end
+        Event.SendIgnoredTags:SendToClient(combinedTagsToIgnore, payload.ID)
+    end)
+end
 
 -- WHITE-/BLACKLIST CHECK
 -- Use !whitelist or !blacklist to check against HostCharacter
@@ -952,8 +966,8 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
     end
     for i,tag in ipairs(tags) do
         local skip = false
-        for _,unimportantTag in pairs(unimportantTags) do
-            if tag == unimportantTag then
+        for _,tagToIgnore in pairs(IgnoredTags) do
+            if tag == tagToIgnore then
                 skip = true
             end
         end
