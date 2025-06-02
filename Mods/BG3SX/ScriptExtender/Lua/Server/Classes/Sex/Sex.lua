@@ -5,13 +5,13 @@
 Ext.Osiris.RegisterListener("UsingSpellOnTarget", 6, "after", function(_, target, spell, _, _, _)
 
 
-    if spell == "BG3SX_ManualErections" then
-        Mods.BG3SX.SexUserVars.SetAutoSexGenital(false,target)
-    end
+    -- if spell == "BG3SX_ManualErections" then
+    --     Mods.BG3SX.SexUserVars.SetAutoSexGenital(false,target)
+    -- end
 
-    if spell == "BG3SX_AutoSexGenital" then
-        Mods.BG3SX.SexUserVars.SetAutoSexGenital(true,target)
-    end
+    -- if spell == "BG3SX_AutoSexGenital" then
+    --     Mods.BG3SX.SexUserVars.SetAutoSexGenital(true,target)
+    -- end
 end)
 
 

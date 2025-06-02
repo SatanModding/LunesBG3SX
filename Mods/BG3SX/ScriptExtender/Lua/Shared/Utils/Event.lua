@@ -81,13 +81,15 @@ Event:New("SendFilteredAnimations")
 
 --- Whitelist Tab
 -- Client -> Server
+Event:New("FetchIgnoredTags")
 Event:New("FetchUserTags")
 Event:New("FetchWhitelist")
 -- Server -> Client
+Event:New("SendIgnoredTags")
 Event:New("SendUserTags")
 Event:New("SendWhitelist")
 
---- Whitelist Tab
+--- NPC Tab
 -- Client -> Server
 Event:New("RequestStripNPC")
 Event:New("RequestDressNPC")
@@ -126,7 +128,7 @@ Event:New("FinishedBuildingNPCUI")
 Event:New("RestoreNPCTab")
 Event:New("SatanSync")
 
-
+Event:New("DestroyAllScenes")
 
 Event:New("ReapplyWaterfall")
 

@@ -16,6 +16,8 @@ end
 function WhitelistTab:Init()
     local sep = self.Tab:AddSeparatorText("(Read-only) Tags of selected character:")
     sep:SetStyle("SeparatorTextPadding", 5)
+    self.IgnoredTags = {}
+    self:FetchIgnoredTags()
     self.UserTags = {Header = self.Tab:AddCollapsingHeader("Character Tags")}
     self.Whitelists = {}
     self:FetchUserTags()
@@ -24,6 +26,9 @@ function WhitelistTab:Init()
     self:FetchWhitelist()
 end
 
+function WhitelistTab:FetchIgnoredTags()
+    Event.FetchIgnoredTags:SendToServer({ID = USERID})
+end
 function WhitelistTab:FetchUserTags()
     Event.FetchUserTags:SendToServer({ID = USERID, Character = _C().Uuid.EntityUuid})
 end
@@ -44,11 +49,12 @@ function WhitelistTab:GenerateWhitelistArea()
         self:GenerateBlacklistedEntities()
         self:GenerateWhitelist()
     end
-
 end
 
-function WhitelistTab:IsAllowed(tag)
-    return self.Whitelists.Whitelist[tag].Allowed
+function WhitelistTab:IsAllowed(tagName,tag)
+    if self.Whitelists.Whitelist[tagName] then
+        return self.Whitelists.Whitelist[tagName].Allowed
+    else return false end
 end
 function WhitelistTab:GetReason(tag)
     if self.Whitelists and self.Whitelists.Whitelist and self.Whitelists.Whitelist[tag] and self.Whitelists.Whitelist[tag].Reason then
@@ -72,30 +78,35 @@ function WhitelistTab:UpdateUserTags(tags)
     end
     table.sort(tagsByName)
     for name,tag in pairsByKeys(tagsByName) do
-        local tagTreeNode = header:AddTree(name)
-        local uuidText = tagTreeNode:AddText("UUID:")
-        local uuid = tagTreeNode:AddInputText("")
-        uuid.Text = tag[1]
-        uuid.SameLine = true
-        local allowedStatus = tagTreeNode:AddCheckbox("Allowed")
-        allowedStatus.SameLine = true
-        if self.Whitelists and Table.TableSize(self.Whitelists) > 0 then -- Only add an allowedStatus when WhitelistTab is found
-            if self:IsAllowed(name) then
-                allowedStatus.Checked = true
+        local ignoreThisTag = false
+        for _,tagToIgnore in pairs(self.IgnoredTags) do
+            if tag[1] == tagToIgnore then
+                ignoreThisTag = true
+            end
+        end
+        if not ignoreThisTag then
+            local tagTreeNode = header:AddTree(name)
+            local uuidText = tagTreeNode:AddText("UUID:")
+            local uuid = tagTreeNode:AddInputText("")
+            uuid.Text = tag[1]
+            uuid.SameLine = true
+            local allowedStatus = tagTreeNode:AddCheckbox("Allowed")
+            allowedStatus.SameLine = true
+            if self.Whitelists and Table.TableSize(self.Whitelists) > 0 then -- Only add an allowedStatus when WhitelistTab is found
+                local allowedOrNot = self:IsAllowed(name, tag[1])
+                allowedStatus.Checked = allowedOrNot
+                -- allowedStatus.ItemReadOnly = true
                 allowedStatus.OnChange = function()
-                    allowedStatus.Checked = true
+                    allowedStatus.Checked = allowedOrNot
                 end
-            else
-                allowedStatus.Checked = false
-                allowedStatus.OnChange = function()
-                    allowedStatus.Checked = false
-                end
-                if self:GetReason(name) then
-                    local tooltip = allowedStatus:Tooltip()
-                    local tooltipText = tooltip:AddText(self:GetReason(name))
-                else
-                    local tooltip = allowedStatus:Tooltip()
-                    local tooltipText = tooltip:AddText("No reason provided")
+                if allowedOrNot == false then
+                    if self:GetReason(name) then
+                        local tooltip = allowedStatus:Tooltip()
+                        local tooltipText = tooltip:AddText(self:GetReason(name))
+                    else
+                        local tooltip = allowedStatus:Tooltip()
+                        local tooltipText = tooltip:AddText("No reason provided")
+                    end
                 end
             end
         end
@@ -111,7 +122,7 @@ function WhitelistTab:GenerateWhitelist()
     for TagName,Content in sortedPairs(self.Whitelists.Whitelist) do
         if Helper.IsUpperCase(TagName) then
             if TagName ~= "KID" and TagName ~= "GOBLIN_KID" then
-                local tagTree = self.WhitelistHeader:AddTree(TagName)
+                local tagTree = self.WhitelistHeader:AddTree(tostring(TagName))
                 if Content.Allowed ~= nil then
                     local allowedStatus = tagTree:AddCheckbox("")
                     -- allowedStatus.SameLine = true
@@ -145,6 +156,7 @@ end
 function WhitelistTab:GenerateModdedWhitelist()
     if not self.ModdedTagsHeader then
         self.ModdedTagsHeader = self.Tab:AddCollapsingHeader("Modded Entries")
+        self.ModdedTagsHeader.Visible = false
     end
 
     local modsByName = {}
@@ -190,6 +202,11 @@ function WhitelistTab:GenerateModdedWhitelist()
                 end
             end
         end
+    end
+    if self.ModdedTagsHeader.Children and #self.ModdedTagsHeader.Children > 0 then
+        self.ModdedTagsHeader.Visible = true
+    else
+        self.ModdedTagsHeader.Visible = false
     end
 end
 

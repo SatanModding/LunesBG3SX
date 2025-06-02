@@ -1873,12 +1873,11 @@ function Data.CreateUIGenitalPayload(uuid)
     end
 
     local payload = {}
-    local hardCodedGenitalTypesChangeThis =
-    {
-    "BG3SX_VanillaVulva",
-    "BG3SX_VanillaFlaccid",
-    "BG3SX_SimpleErections",
-    "BG3SX_OtherGenitals"
+    local hardCodedGenitalTypesChangeThis = {
+        "BG3SX_VanillaVulva",
+        "BG3SX_VanillaFlaccid",
+        "BG3SX_SimpleErections",
+        "BG3SX_OtherGenitals"
     }
   
     local permittedGenitals = Genital.getPermittedGenitals(entity)

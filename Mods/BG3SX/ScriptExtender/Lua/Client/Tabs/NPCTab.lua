@@ -182,6 +182,15 @@ function NPCTab:Init()
     -- scan once after initializing
     -- print("SETTING UIEXIST TO TRUE")
 
+
+    self.ManualScan = self.Tab:AddButton("Scan")
+    self.ManualScan.IDContext = tostring(math.random(1000,100000))
+    self.ManualScan.SameLine = true
+    self.ManualScan.Visible = false
+    self.ManualScan.OnClick = function()
+        self:ScanForNPCs()
+    end
+
     self:ScanForNPCs()
 end
 
@@ -204,6 +213,7 @@ Event.RestoreNPCTab:SetHandler(function(payload)
         end
         UI.PartyInterface:SetSelectedCharacter(previouslySelected)
         UI.AppearanceTab:FetchGenitals()
+        -- UI.AppearanceTab:UpdateReplicationListener()
     end
 
     Helper.DelayUntilTrue(restoreNPCTab, condition, 100)
@@ -218,15 +228,14 @@ end)
 
 local tick = 0
 -- TODO - create settings 
-local continuousUpdaesEnabled = true
 
 local function OnTick()
     tick = tick +1
-    -- all 2 seconds assuming 60 ticks / second
-    local TASK_CHECK_FREQUENCY = 120
+    -- all 6 seconds assuming 60 ticks / second
+    local TASK_CHECK_FREQUENCY = 360
 
     if (tick % TASK_CHECK_FREQUENCY == 0) then
-        if UI.Ready and continuousUpdaesEnabled then
+        if UI.Ready and UI.Settings.AutomaticNPCScan.Checked then
             NPCTab:ScanForNPCs()
         end
     end

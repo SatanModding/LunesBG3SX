@@ -94,7 +94,7 @@ function SceneControlInstance:Destroy(backToServer)
     self.Reference:Destroy() -- Delete SceneTab Reference Imgui Element
     self.Reference = nil -- Set to nil for NoSceneText update
     UI.SceneTab:UpdateNoSceneText()
-    Event.RequestSyncActiveScenes:SendToServer()
+    -- Event.RequestSyncActiveScenes:SendToServer()
 
     for componentName,component in pairs(self) do
         if (component ~= self.ID) and (component ~= self.Window) then
@@ -181,6 +181,7 @@ function SceneControlInstance:ResetPosition()
 end
 
 function SceneControlInstance:CreateSceneTabReference()
+    UI.SceneTab.ActiveScenesSeparator.Visible = true
     local refGroup = UI.SceneTab.Tab:AddGroup("")
     local popup = refGroup:AddPopup(self.Window.Label)
     local ref = refGroup:AddSelectable(self.Window.Label)

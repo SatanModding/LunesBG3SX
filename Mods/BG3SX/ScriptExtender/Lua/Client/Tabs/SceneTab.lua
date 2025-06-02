@@ -77,6 +77,9 @@ function SceneTab:CreateNewSceneArea()
     self.ControlsText = self.Tab:AddText("Mouse:\nLeft click | Right click to cancel\nController:\nLeft stick to start targeting + A | B to cancel")
     self.ControlsText.SameLine = true
 
+    self.ActiveScenesSeparator = self.Tab:AddSeparatorText(Ext.Loca.GetTranslatedString("hb393d16ea9494b2a8adfec48663c7512a69g", "Running Scenes"))
+    self.ActiveScenesSeparator.Visible = false
+
     self.InfoText = self.Tab:AddText("")
     self.InfoText.Visible = false
 end
@@ -100,7 +103,9 @@ function SceneTab:UpdateNoSceneText()
     end
     if stillOneActive then
         self.NoSceneText.Visible = false -- Keep it hidden
+        self.ActiveScenesSeparator.Visible = true
     else
+        self.ActiveScenesSeparator.Visible = false
         self.NoSceneText.Visible = true -- Show it again
     end
 end
@@ -123,9 +128,9 @@ end
 
 -- Check all current scenes against all current SceneControls
 -- Checks all current scenes entities against all current SceneControl entities
--- When a scene is found thats 
+-- When a scene is found thats not active anymore, it will destroy the SceneControl
 Event.SyncActiveScenes:SetHandler(function(SavedScenes)
-    if SavedScenes and #SavedScenes > 0 then
+    if SavedScenes and Table.TableSize(SavedScenes) > 0 then
         local isStillActive = {}
         for _,scene in pairs(SavedScenes) do
             for _,entity in pairs(scene.entities) do
@@ -137,7 +142,7 @@ Event.SyncActiveScenes:SetHandler(function(SavedScenes)
             local found
             for _,activeSceneControlEntity in pairs(activeSceneControl.Scene.entities) do
                 for _,entity in pairs(isStillActive) do
-                    if activeSceneControl == entity then
+                    if activeSceneControlEntity == entity then
                         found = true
                     end
                 end
@@ -147,8 +152,10 @@ Event.SyncActiveScenes:SetHandler(function(SavedScenes)
             end
         end
     else
-        -- No active scenes, destroy all scene controls
-        UI.SceneControl.ActiveSceneControls = {}
+        -- No active scenes, destroy all leftover SceneControls
+        for _,activeSceneControl in pairs(UI.SceneControl.ActiveSceneControls) do
+            activeSceneControl:Destroy()
+        end
     end
 end)
 

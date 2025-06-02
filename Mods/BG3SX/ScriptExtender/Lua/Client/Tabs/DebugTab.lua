@@ -6,105 +6,44 @@ function DebugTab:New(holder)
     if UI.DebugTab then return end -- Fix for infinite UI repopulation
 
     local instance = setmetatable({
-        Tab = holder:AddTabItem("Debug")
+        Tab = holder:AddTabItem(Ext.Loca.GetTranslatedString("hb4507f4d6c634f08a5e4080b00b7c2a1fddb", "Debug")),
     }, DebugTab)
     return instance
 end
 
 function DebugTab:Init()
-    local customEventButton = self.Tab:AddButton("Custom Event")
-    customEventButton.OnClick = function()
-        Event.CustomEvent:SendToServer("")
+    local generalSettingsGroup = self.Tab:AddGroup("GeneralDebug")
+
+    ---------------------------------
+    local showTabGroup = generalSettingsGroup:AddGroup("Scene Debug")
+    showTabGroup:AddText(Ext.Loca.GetTranslatedString("h89052b2849e84a10b8c2c9b0c6e431daf53g", "Scene Debug"))
+
+    self:AddSettingButton(generalSettingsGroup, Ext.Loca.GetTranslatedString("h2993f96bb07749708dd673c5bb49027dbagc", "Destroy All Scenes"), function()
+        Event.DestroyAllScenes:SendToServer()
+    end)
+
+    if Ext.Debug.IsDeveloperMode() then
+        self:AddSettingButton(generalSettingsGroup, Ext.Loca.GetTranslatedString("h3ca7538e44cc443d8b5dafc1924842305f17", "DeveloperMode Reset"), function()
+            Ext.Debug.Reset()
+        end)
     end
-    --self.Animations = {} 
-    --self.AnimationPickers = {}
-    --UI.GetAnimations()
-    self:NewLog()
 end
 
-local function getAllHeightmatchingAnims(heightmatchingtable)
-    local hmiAnims = {}
-    --Debug.Dump(heightmatchingtable)
-    for bodyIdentifier,matchups in pairs(heightmatchingtable) do
-        for bodyIdentifier2,anims in pairs(matchups) do
-            if anims then
-                if type(anims) == "string" then
-                    table.insert(hmiAnims, anims)
-                elseif type(anims) == "table" then
-                    for _,anim in pairs(anims) do
-                        table.insert(hmiAnims, anim)
-                    end
-                end
-            end
-        end
+function DebugTab:AddSettingBox(group, label, defaultValue, callback)
+    local checkBox = group:AddCheckbox(label)
+    checkBox.Checked = defaultValue
+    checkBox.OnChange = function()
+        callback(checkBox.Checked)
     end
-    return hmiAnims
-end
-local function updateCombo(combo, val)
-    local newIndex = combo.SelectedIndex + val
-    if newIndex <= 0 then
-        newIndex = #combo.Options
-    elseif newIndex > #combo.Options then
-        newIndex = 1
-    end
-    if combo.SelectedIndex == 0 then
-        newIndex = 1
-    end
-    combo.SelectedIndex = newIndex
-    combo.OnChange()
+    return checkBox
 end
 
-function DebugTab:UpdateAnimationPicker()
-    local debugbefore = Debug.USEPREFIX
-    Debug.USEPREFIX = false
-    table.sort(self.Animations)
-    UI.DestroyChildren(self.Tab)
-    self.AnimationsTable = self.Tab:AddTable("", 2)
-    --Debug.DumpS(self.Animations)
-    for AnimationName,Animation in pairsByKeys(self.Animations) do
-        local animRow = self.AnimationsTable.AddRow()
-        local animName = animRow:AddCell():AddText(AnimationName)
-        local buttonCell = animRow:AddCell()
-        local allAnimAnims = getAllHeightmatchingAnims(Animation.Heightmatching)
-        local animationPicker
-        local previousButton = buttonCell:AddButton("<-")
-        previousButton.OnClick = function()
-            updateCombo(animationPicker, -1)
-        end
-        previousButton.SameLine = true
-        animationPicker = buttonCell:AddCombo("")
-        animationPicker.Options = allAnimAnims
-        animationPicker.OnChange = function ()
-            -- Debug.Print("Combo OnChange")
-            if animationPicker.SelectedIndex ~= 0 then
-                Event.ChangeAnimation:SendToServer({
-                    ID = USERID,
-                    Caster = UI:GetSelectedCharacter(),
-                    Animation = animationPicker.Options[animationPicker.SelectedIndex + 1]
-                })
-            end
-        end
-        animationPicker.SameLine = true
-        local nextButton = buttonCell:AddButton("->")
-        nextButton.OnClick = function()
-            updateCombo(animationPicker, 1)
-        end
-        nextButton.SameLine = true
-        table.insert(self.AnimationPickers, {Previous = previousButton, AnimationPicker = animationPicker, Next = nextButton})
+function DebugTab:AddSettingButton(group, label, callback)
+    local button = group:AddButton(label)
+    button.OnClick = function()
+        callback()
     end
-    
-    Debug.USEPREFIX = debugbefore
+    return button
 end
 
-Log = {}
-Log.__index = Log
-function DebugTab:NewLog()
-    local instance = setmetatable({
-        Log = self.Tab:AddInputText("")
-    }, Log)
-    return instance
-end
-
-function Log:Update(txt)
-    self.Log.Text = txt
-end
+return DebugTab

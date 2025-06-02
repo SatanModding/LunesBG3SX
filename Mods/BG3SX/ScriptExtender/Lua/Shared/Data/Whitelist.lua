@@ -743,7 +743,7 @@ Data.AllowedTagsAndRaces = {
 
 Data.ModdedTags = {}
 
-local unimportantTags = { -- These tags will get skipped by Whitelist
+local IgnoredTags = { -- These tags will get skipped by Whitelist
     --#region System
     "00000000-0000-0000-0000-000000000000", -- EMPTY
     "0fcfa622-a3c9-4a03-aab4-2a74904b62eb", -- EMPTY
@@ -779,6 +779,7 @@ local unimportantTags = { -- These tags will get skipped by Whitelist
     "ffd08582-7396-4cac-bcd4-8f9cd0fd8ef3", -- REALLY Astarion
     --#endregion
 }
+
 Data.ClassTags = {
     "02913f9a-f696-40cf-acdf-32032afab32c", -- Barbarian
     "d93434bd-6b71-4789-b128-ee24156057cc", -- Bard
@@ -824,8 +825,27 @@ Data.WhitelistedEntities = {
 -- Anyone can add specific entities to it via:
 -- table.insert(Mods.BG3SX.Data.BlacklistedEntities, "An Entity UUID")
 Data.BlacklistedEntities = {
-    "f854ffc7-a16a-4431-8e5d-77d514580bff", -- Magron, Headless Hag Victim
+    "f854ffc7-a16a-4431-8e5d-77d514580bff", -- Magron, Headless Hag 
+    "1b5e6e47-03bc-41b6-91e9-dbe6ba86ffe8", -- Gale Mirror Image
+    "1cedd0c1-6bfe-4f32-a1e7-78b0acf209a9", -- Gale Mirror Image
+    "244735bd-a5e6-4e70-b6e6-becbf70a54b8", -- Gale Mirror Image
+    "f6fb700a-5086-404c-ba15-7cf16642fc22", -- Gale Mirror Image
+    "ddf3dd37-fa65-4351-9f55-e50b1211fcfe", -- Gale Mirror Image
+    "30edc515-b6f2-42c0-8459-41ae4c36b349", -- Gale Mirror Image
 }
+
+if Ext.IsServer() then
+    Event.FetchIgnoredTags:SetHandler(function (payload)
+        local combinedTagsToIgnore = {}
+        for _, tag in ipairs(IgnoredTags) do
+            table.insert(combinedTagsToIgnore, tag)
+        end
+        for _, tag in ipairs(Data.ClassTags) do
+            table.insert(combinedTagsToIgnore, tag)
+        end
+        Event.SendIgnoredTags:SendToClient(combinedTagsToIgnore, payload.ID)
+    end)
+end
 
 -- WHITE-/BLACKLIST CHECK
 -- Use !whitelist or !blacklist to check against HostCharacter
@@ -946,8 +966,8 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
     end
     for i,tag in ipairs(tags) do
         local skip = false
-        for _,unimportantTag in pairs(unimportantTags) do
-            if tag == unimportantTag then
+        for _,tagToIgnore in pairs(IgnoredTags) do
+            if tag == tagToIgnore then
                 skip = true
             end
         end

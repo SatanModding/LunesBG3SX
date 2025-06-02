@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <contentList>
-<!-- Visual -->
-	<content contentuid="h1e7bdab3f693cf4afafb4fcfabddbd240ee2" version="1">Erect</content>
-	<content contentuid="hd4f04d1df9c2ef4a70f8536f9013cd3ac073" version="1">Hairy Erect</content>
+
 
 <!-- UI Specific -->
     <!-- Party/NPC Interface -->
@@ -12,6 +10,7 @@
     <!-- Scene -->
     <content contentuid="hc21d333db09549dbbd1fcfaa6fdecb2a2b09" version="1">Scenes</content>
     <content contentuid="hc266ca8031ad49239c1cc596692c5102c9ba" version="1">Create Scene</content>
+    <content contentuid="hb393d16ea9494b2a8adfec48663c7512a69g" version="1">Running Scenes</content>
 
 	<!-- Appearance -->
     <content contentuid="h36809485096e467682a34b1a780bb4a4a816" version="1">Appearance</content>
@@ -24,6 +23,9 @@
     <content contentuid="ha0ba5dd9dcc94acca77258ba6254decb3784" version="1">MrFunsize Erections</content>
     <content contentuid="h12336834b5e64857bed909e165f752393cfb" version="1">Vanilla Vulvas</content>
     <content contentuid="hd0e090c89d924fa8ba6bfa2000ff8f479d8a" version="1">Vanilla Penises</content>
+        <!-- MrFunSize Genital Names -->
+        <content contentuid="h1e7bdab3f693cf4afafb4fcfabddbd240ee2" version="1">Erect</content>
+        <content contentuid="hd4f04d1df9c2ef4a70f8536f9013cd3ac073" version="1">Hairy Erect</content>
 
     <!-- Whitelist -->
     <content contentuid="hd3dd6bc5609a4d65a7f71567e596dc84b81d" version="1">Whitelist</content>
@@ -32,12 +34,25 @@
     <content contentuid="h3d507f295c0b468ea6429b9b00c3c4ed2534" version="1">NPCs</content>
 
     <!-- Setting -->
+    <content contentuid="hedf73cea14534ece90bc4da1cc5f647d58e8" version="1">Settings</content>
     <content contentuid="h053ec08807c449e5873fbad66bb709c2ead8" version="1">Tab Visibility</content>
     <content contentuid="hadd9c724632b4e41ae4dbd58686b8db1c17f" version="1">Tab Settings</content>
     <content contentuid="ha5a309de2e9542b2999d70313cf9455ab451" version="1">Show all animations regardless of scene type</content>
+        <!-- NPCTab Settings -->
+        <content contentuid="hb21edb40a9044ddcb50f2557b6a00ae27933" version="1">NPCTab Settings</content>
+        <content contentuid="hb2022efb943c40ee8e6a8bb9f354eb308d46" version="1">Automatic NPC Scan</content>
+        <content contentuid="h96863be65f494a9ea56759ea763b38f06520" version="1">Disabling this settings creates a manual 'Scan' button in the NPC Tab.</content>
+        <!-- Credits -->
+        <content contentuid="hd1aa350cf2bf4942b9be983b18920e88g247" version="1">Credits</content>
+        <content contentuid="h554123bc72a54633ad9d1768c065e80d4431" version="1">This mod was created with a lot of help by the amazing BG3 Modding Community,&lt;br&gt;but we would like to thank a few contributors specifically:</content>
+        <content contentuid="h89d4bb3b5a474a2b80143206bfeb07821c8a" version="1">Contributors: kit, ltpitb, Aahz, Volitio, Lunisole, LaughingLeader, Norbyte</content>
+        <content contentuid="h2f2930940303487eb3355ef98472ddcdg8d0" version="1">If you would like to contribute, please join our Discord server:</content>
 
-
-
+    <!-- Debug -->
+    <content contentuid="hb4507f4d6c634f08a5e4080b00b7c2a1fddb" version="1">Debug</content>
+    <content contentuid="h89052b2849e84a10b8c2c9b0c6e431daf53g" version="1">Scene Debug</content>
+    <content contentuid="h2993f96bb07749708dd673c5bb49027dbagc" version="1">Destroy All Scenes</content>
+    <content contentuid="h3ca7538e44cc443d8b5dafc1924842305f17" version="1">DeveloperMode Reset</content>
 
 
 
@@ -127,5 +142,4 @@
 	<content contentuid="h87ee4bfdg8b1bg494cg93a1g11b347703922" version="1">Tribbing</content>
 	<content contentuid="h2ca5ef2dg7f68g40dbg8c8dg05fd895a39b1" version="1">Finger</content>
 	<content contentuid="hb32715942ed4499b9ef6a288a729b0483578" version="1">Astarion Thrusting</content>
-
 </contentList>

@@ -156,10 +156,11 @@ function Genital.Initialize()
 	allVanillaPenises = getVanillaGenitals("PENIS")
 	allFunErections = collectFunErections()
 
+
 	local modGenitals = {}
 	-- Filter allGenitals to find additional genitals
 	for _,genital in ipairs(allGenitals) do
-		if not allVanillaVulvas[genital] and not allVanillaPenises[genital] and not allFunErections[genital] then
+		if not Table.Contains(allVanillaVulvas,genital) and not Table.Contains(allVanillaPenises,genital) and not Table.Contains(allFunErections,genital) then
 				table.insert(modGenitals, genital)
 		end
 	end

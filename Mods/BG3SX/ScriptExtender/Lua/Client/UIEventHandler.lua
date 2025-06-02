@@ -118,17 +118,24 @@ Event.SendGenitals:SetHandler(function (payload)
     end
 end)
 
+Event.SendIgnoredTags:SetHandler(function(payload)
+    if UI.WhitelistTab and UI.WhitelistTab.IgnoredTags then
+        UI.WhitelistTab.IgnoredTags = payload
+    end
+end)
 Event.SendUserTags:SetHandler(function (payload)
-    --_P("1")
-    --_D(payload)
-    UI.WhitelistTab.UserTags.Tags = payload
-    UI.WhitelistTab:UpdateUserTags(payload)
+    if UI.WhitelistTab and UI.WhitelistTab.UserTags then
+        UI.WhitelistTab.UserTags.Tags = payload
+        UI.WhitelistTab:UpdateUserTags(payload)
+    end
 end)
 Event.SendWhitelist:SetHandler(function (payload)
-    UI.WhitelistTab.Whitelists = payload
-    UI.WhitelistTab:GenerateWhitelistArea()
-    --_D(UI.WhitelistTab.UserTags.Tags)
-    UI.WhitelistTab:UpdateUserTags(UI.WhitelistTab.UserTags.Tags)
+    if UI.WhitelistTab and UI.WhitelistTab.Whitelists then
+        UI.WhitelistTab.Whitelists = payload
+        UI.WhitelistTab:GenerateWhitelistArea()
+        --_D(UI.WhitelistTab.UserTags.Tags)
+        UI.WhitelistTab:UpdateUserTags(UI.WhitelistTab.UserTags.Tags)
+    end
 end)
 
 ---------------------------------------------------------------------
