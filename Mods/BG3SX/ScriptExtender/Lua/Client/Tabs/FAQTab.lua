@@ -18,10 +18,10 @@ local QuestionsAndAnswers = {
         Abackup = "End the scene and try selecting them again in the opposite order."},
     [4] = {Qhandle = "hff7ad4cb7c3d4dbdb23cf44716292361f3e7", Ahandle = "hfb7fd003577047968bea8d2259a88f4a2bdb", 
         Qbackup = "Why is this NPC not appearing?", 
-        Abackup = "This might happen because of our whitelisting system, which was carried over from the old version. There are a lot of races that are simply incompatible with the animations or custom races which the author might just not want to be used with this mod. Check our discord for more information about our Whitelist if you have any more questions."},
+        Abackup = "This might happen because of our Whitelisting system which was carried over from the old version. There are a lot of races that are incompatible with the animations or custom races which the author might not want to be used with this mod. \n\nCheck our discord for more information about the Whitelist if you have any more questions."},
     [5] = {Qhandle = "h3e83c0f64c11487394781beeb0e7e34b6b6c", Ahandle = "h87416f4f5bbe410080bda5bff3905a00de3f", 
         Qbackup = "Why do animations not play?", 
-        Abackup = "This mod now requires the BG3AF - Animation Framework. Download it on Nexus",
+        Abackup = "This mod now requires the BG3AF - Animation Framework. \n\nDownload it on Nexus",
         hasLink = "https://www.nexusmods.com/baldursgate3/mods/16207?tab=description"},
     [6] = {Qhandle = "h4fe2874431f64db9bbffe78e84151ebd070b", Ahandle = "h360a70255b314ef4ba0add19fae6ea2cfa5c", 
         Qbackup = "Is the mod safe to uninstall mid-game?", 
@@ -29,7 +29,7 @@ local QuestionsAndAnswers = {
         hasLink = "https://www.nexusmods.com/baldursgate3/mods/9701"},
     [7] = {Qhandle = "h6f8f288c41e540aba1ca6c0ce8ea1b575508", Ahandle = "h787749887936488cba3f8e78e9a5266ea0d2", 
         Qbackup = "Can I use this mod in multiplayer?", 
-        Abackup = "Yes. However, with the introduction of crossplay in Patch 8, do note that this mod 100% requires Script Extender. That means that platforms where Script Extender is not available cannot run this mod. This means: - This mod will never be on console. More information here or as a video here - This mod does not natively run on MacOS. If you can get Script Extender to run on Mac, then it “could” work. (No way for us to test this. You are on your own, but please report back.) - This mod runs on linux and therefore on the SteamDeck using a specific setup (for more information/a guide, please check the modding community wiki here:)",
+        Abackup = "Yes. However, with the introduction of crossplay in Patch 8, do note that this mod 100% requires Script Extender. That means that platforms where Script Extender is not available cannot run this mod. This means: This mod will never be on console. \n\nThis mod does not natively run on MacOS. If you can get Script Extender to run on Mac, then it could work, but it is unsupported. We have no way to test this. You are on your own, but please report back. \n\nThis mod runs on Linux and therefore on the SteamDeck using a specific setup. For more information/a guide on setting it up, please check the modding community wiki page.",
         hasLink = "https://wiki.bg3.community/en/Tutorials/Mod-Use/How-to-install-Script-Extender#h-3-install-script-extender-on-linuxsteam-deck"},
     [8] = {Qhandle = "h753f9a320f8448918cc3e7b478b7b13b713c", Ahandle = "h685436bd554e4ca2be7290cb64fcd0c9adg8", 
         Qbackup = "Why does my [MODDED RACE] not work?", 
@@ -37,13 +37,13 @@ local QuestionsAndAnswers = {
         hasLink = "https://wiki.bg3.community/en/Tutorials/Mod-Integration/BG3SX/Whitelisting"},
     [9] = {Qhandle = "h8dce960da44a44fea0514ad965eaca7de825", Ahandle = "h38922ab68a914a12b264139e12729dc30ag5", 
         Qbackup = "Are there more animations?", 
-        Abackup = "Tells you to look again for 'BG3SX' on Nexusmods"},
+        Abackup = "*Tells you to look again for 'BG3SX' on Nexusmods*"},
     [10] = {Qhandle = "hfd931f4e1ff84548b18959a913d40d747272", Ahandle = "h35c20084183a4a4b9d550d9b5b9feb203g6g", 
         Qbackup = "My character has the wrong genitals/animations.", 
-        Abackup = "Are you using Oops All Futa (Penis) ? This mod conflicts with our internal genital logic and you will see wrong genitals/animations. We recommend you use our genital system to give female characters penises instead."},
+        Abackup = "Are you using Oops All Futa (Penis)? This mod conflicts with our internal genital logic and you will see wrong genitals/animations. \n\nWe recommend you use our genital system to give female characters penises instead."},
     [11] = {Qhandle = "h7db9d559dd8d40e48f33b1f375d6edec8d14", Ahandle = "hba616357ba5c484ba567bc402e7546e30240", 
         Qbackup = "Why do my scenes randomly break?", 
-        Abackup = "This might be due to your set auto-save interval. To ensure not breaking your save files in case you remove our mod at some point, we always destroy any ongoing scenes when the game enters into the saving state. The auto-save mod might cause problems here, make sure to keep that in mind."}
+        Abackup = "This might be due to your set auto-save interval. To ensure not breaking your save files in case you remove our mod at some point, we always destroy any ongoing scenes when the game enters into the saving state. \n\nThe auto-save mod might cause problems here, make sure to keep that in mind."}
 }
 
 ---@param holder ExtuiTabBar
