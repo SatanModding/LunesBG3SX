@@ -91,6 +91,7 @@ function FAQTab:GenerateFAQText()
         link = faqData[i]["hasLink"]
         self.questionHeader:AddInputText("", link)
     end
+    self.questionHeader.TextWrapPos = 0
     self.questionHeader = nil
 
    end
