@@ -59,6 +59,7 @@ Event.SendParty:SetHandler(function (payload)
         local party = payload
         UI.PartyInterface.Party = party
         UI.PartyInterface:UpdateParty()
+        -- UI.AppearanceTab:UpdateReplicationListener()
     end
     if not UI.PartyInterface then
         Ext.Timer.WaitFor(200, function ()

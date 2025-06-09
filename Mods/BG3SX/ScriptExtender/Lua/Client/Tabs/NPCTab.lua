@@ -213,7 +213,7 @@ Event.RestoreNPCTab:SetHandler(function(payload)
         end
         UI.PartyInterface:SetSelectedCharacter(previouslySelected)
         UI.AppearanceTab:FetchGenitals()
-        -- UI.AppearanceTab:UpdateReplicationListener()
+        -- UI.AppearanceTab:UpdateReplicationListener() -- this wasn't enabled, only enable the other commented out ones, check if this is needed
     end
 
     Helper.DelayUntilTrue(restoreNPCTab, condition, 100)
