@@ -213,12 +213,13 @@ end
 function SceneControlInstance:AddControlButtons()
     self.ControlButtons = {}
     local buttons = {
-        {Name = "Pause/Unpause", Icon = "Spell_Abjuration_ArcaneLock"},
+        {Name = "Pause", Icon = "BG3SX_PauseScene_Dormant"},
+        {Name = "Unpause", Icon = "BG3SX_PauseScene_Active", Visible = false}, -- Unpause is only visible when paused
         {Name = "Swap Position", Icon = "BG3SX_ICON_Scene_SwitchPlaces"},
         {Name = "Rotate Scene", Icon = "BG3SX_ICON_Scene_Rotate"},
         --"Change Camera Height",
         {Name = "Move Scene", Icon = "BG3SX_ICON_Scene_Move"},
-        {Name = "Stop Sex", Icon = "BG3SX_ICON_Scene_End"},
+        {Name = "End Scene", Icon = "BG3SX_StopSceneNew"},
     }
 
     for _,button in pairs(buttons) do
@@ -234,8 +235,14 @@ end
 
 function SceneControlInstance:AddButtonFunctionality(buttonLabel)
     --local UI = UI.GetUIByID(self.UI)
-    if buttonLabel == "Pause/Unpause" then
+    if buttonLabel == "Pause" then
         Event.TogglePause:SendToServer({ID = USERID, Scene = self.Scene})
+        self:HideButton("Pause")
+        self:ShowButton("Unpause")
+    elseif buttonLabel == "Unpause" then
+        Event.TogglePause:SendToServer({ID = USERID, Scene = self.Scene})
+        self:HideButton("Unpause")
+        self:ShowButton("Pause")
     elseif buttonLabel == "Swap Position" then
         Event.SwapPosition:SendToServer({ID = USERID, Scene = self.Scene})
     elseif buttonLabel == "Rotate Scene" then
@@ -244,7 +251,7 @@ function SceneControlInstance:AddButtonFunctionality(buttonLabel)
         Event.ChangeCameraHeight:SendToServer({ID = USERID})
     elseif buttonLabel == "Move Scene" then
         UI:AwaitInput("MoveScene", self.Scene)
-    elseif buttonLabel == "Stop Sex" then
+    elseif buttonLabel == "End Scene" then
         self:Destroy(true)
     end
 end
