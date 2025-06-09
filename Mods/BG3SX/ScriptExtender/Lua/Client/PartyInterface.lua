@@ -9,6 +9,7 @@
 ---@field Characters table
 ---@field CurrentNPCs table
 ---@field SelectedCharacter string
+
 PartyInterface = {}
 PartyInterface.__index = PartyInterface
 
@@ -41,18 +42,19 @@ function PartyInterface:UpdateParty()
     local maxTableWidth = 4
     local tableWidth = math.min(#self.Party, maxTableWidth)  -- Take lower
 
-    local t = self.PartyArea:AddTable("",tableWidth)
+    local t = self.PartyArea:AddTable("",tableWidth) -- 1 was tableWidth
     t.SizingFixedFit = true
     t.NoHostExtendX = true
-    t.Borders = true
+    -- t.Borders = true
 
-    local row
+    local row = t:AddRow()
+    local cell = row:AddCell()
     for i, character in ipairs(self.Party) do
         if i % maxTableWidth == 1 then
             row = t:AddRow()
-        end 
+        end
 
-        local newCharacter = self:AddCharacter(row, character[1])
+        local newCharacter = self:AddCharacter(cell, character[1])
 
         if i == 1 then
             self:SetSelectedCharacter(newCharacter.Uuid)
@@ -70,24 +72,26 @@ function PartyInterface:UpdateNPCs()
         self:SetSelectedCharacter(self.Party[1][1])
         return
     end
-    
+
     local maxTableWidth = 4
     local tableWidth = math.min(#self.NPCs, maxTableWidth)  -- Take lower
 
-    local t = self.NPCArea:AddTable("", tableWidth)
-    t.SizingFixedFit = true
+    local t = self.NPCArea:AddTable("", tableWidth) -- 1 was tableWidth
+    t.SizingFixedSame = true
     t.NoHostExtendX = true
-    t.Borders = true
+    -- t.Borders = true
 
-    local row
+    local row = t:AddRow()
     for i, npc in ipairs(self.NPCs) do
         if i % maxTableWidth == 1 then
             row = t:AddRow()
-        end 
+        end
 
-        local newNPC = self:AddNPC(row, npc)
+        local cell = row:AddCell()
+        local newNPC = self:AddNPC(cell, npc)
 
         -- Set the selected character if it's the last one being added
+        -- Could be made into a setting - Always select last added character
         if i == #self.NPCs then
             self:SetSelectedCharacter(newNPC.Uuid)
         end
@@ -95,7 +99,7 @@ function PartyInterface:UpdateNPCs()
 end
 
 function UI:SelectedCharacterUpdates(character)
-    if self.Await and self.Await.Reason == "NewScene" then
+    if self.Await and (self.Await.Reason == "NewSFWScene" or self.Await.Reason == "NewNSFWScene") then
         self:InputRecieved(character.Uuid)
     else
         local entity = Ext.Entity.Get(character.Uuid)
@@ -105,112 +109,143 @@ function UI:SelectedCharacterUpdates(character)
         self.AppearanceTab:UpdateToggleVisibilityGroup(character.Uuid)
         self.AppearanceTab:UpdateEquipmentAreaGroup(character.Uuid)
         self.AppearanceTab:FetchGenitals()
-        
+
         Event.FetchUserTags:SendToServer({ID = USERID, Character = character.Uuid})
         Camera:SnapCameraTo(entity)
     end
 end
 
+-- function PartyInterface:CheckIfAwaitingScenePartner()
+--     if UI.Await and UI.Await.Reason == "NewScene" then
+--         _P("Awaiting scene partner, checking for hovered entity")
+--         self:AwaitInput()
+--     else
+--         _P("Not awaiting scene partner, no input needed")
+--     end
+
+--     mouseoverTarget = self.PartyInterface:GetHovered().Uuid or nil
+--     if mouseoverTarget ~= nil then
+--         self:InputRecieved(mouseoverTarget)
+--     else
+--         self:CancelAwaitInput("No entity found")
+--     end
+-- end
+
+---@class CharacterInterface
 CharacterInterface = {}
 CharacterInterface.__index = CharacterInterface
 function PartyInterface:AddCharacter(parent, uuid)
     if not self.Characters then
         self.Characters = {}
     end
-    local cell = parent:AddCell()
 
-    local instance = setmetatable({
-        Uuid = uuid,
-        Name = Helper.GetName(uuid),
-        CharacterButton = nil,
-        NameText = nil,
-        Selected = nil
-    }, CharacterInterface)
+    local parent = parent or nil
+    if parent then
 
-    local foundOrigin
-    for uuid,origin in pairs(Data.Origins) do
-        if Helper.StringContains(uuid, instance.Uuid) then
-            foundOrigin = true
-            instance.CharacterButton = cell:AddImageButton("","EC_Portrait_"..origin, UI.Settings["PartyButtonSize"])
+        local charGroup = parent:AddGroup("CharacterGroup_" .. uuid)
+        charGroup.SameLine = true
+
+        local instance = setmetatable({
+            Uuid = uuid,
+            Name = Helper.GetName(uuid),
+            CharacterButton = nil, ---@class ExtuiImageButton
+            NameText = nil,
+            Selected = nil
+        }, CharacterInterface)
+
+        local foundOrigin
+        for uuid,origin in pairs(Data.Origins) do
+            if Helper.StringContains(uuid, instance.Uuid) then
+                foundOrigin = true
+                instance.CharacterButton = charGroup:AddImageButton("","EC_Portrait_"..origin, UI.Settings["PartyButtonSize"])
+            end
         end
-    end
-    if not foundOrigin then
-        instance.CharacterButton = cell:AddImageButton("","EC_Portrait_Generic", UI.Settings["PartyButtonSize"])
-    end
+        if not foundOrigin then
+            instance.CharacterButton = charGroup:AddImageButton("","EC_Portrait_Generic", UI.Settings["PartyButtonSize"])
+        end
+        -- local tooltip = instance.CharacterButton:Tooltip()
+        -- tooltip.PositionOffset = {100, 0}
 
-    instance.CharacterButton.OnClick = function()
-        UI:SelectedCharacterUpdates(instance)
+        instance.CharacterButton.OnClick = function()
+            UI:SelectedCharacterUpdates(instance)
+        end
+
+        instance.NameText = charGroup:AddText("")
+        instance.NameText.Label = instance.Name
+
+        table.insert(self.Characters, instance)
+        return instance
     end
-
-    instance.NameText = cell:AddText("")
-    instance.NameText.Label = instance.Name
-
-    table.insert(self.Characters, instance)
-    return instance
 end
 
+---@class NPCInterface
 NPCInterface = {}
 NPCInterface.__index = NPCInterface
 function PartyInterface:AddNPC(parent, uuid)
     if not self.CurrentNPCs then
         self.CurrentNPCs = {}
     end
+
     local parent = parent or nil
-    local cell = parent:AddCell()
+        if parent then
 
-    local instance = setmetatable({
-        Uuid = uuid,
-        Name = Helper.GetName(uuid),
-        CharacterButton = nil,
-        NameText = nil,
-        Selected = nil
-    }, NPCInterface)
+        local npcGroup = parent:AddGroup("NPCGroup_" .. uuid)
+        npcGroup.SameLine = true
 
-    local foundOrigin
-    for uuid,origin in pairs(Data.Origins) do
-        if Helper.StringContains(uuid, instance.Uuid) then
-            foundOrigin = true
-            instance.CharacterButton = cell:AddImageButton("","EC_Portrait_"..origin, UI.Settings["PartyButtonSize"])
-        end
-    end
-    if not foundOrigin then
-        instance.CharacterButton = cell:AddImageButton("","EC_Portrait_Generic", UI.Settings["PartyButtonSize"])
-    end
-    
-    instance.Popup = cell:AddPopup("NPCPopup")
-    instance.Popup.IDContext = math.random(1000,100000)
-    instance.CharacterButton.OnClick = function()
-        if not UI.Await then
-            instance.Popup:Open()
-        else
-            UI:SelectedCharacterUpdates(instance)
-        end
-    end
+        local instance = setmetatable({
+            Uuid = uuid,
+            Name = Helper.GetName(uuid),
+            CharacterButton = nil, ---@class ExtuiImageButton
+            NameText = nil,
+            Selected = nil
+        }, NPCInterface)
 
-    local selectNPC = instance.Popup:AddSelectable(Ext.Loca.GetTranslatedString("h2a86e31d7ec34b7490ead80f174354da5726", "Select"))
-    selectNPC.OnClick = function()
-        selectNPC.Selected = false
-        UI:SelectedCharacterUpdates(instance)
-    end
-
-    local removeNPC = instance.Popup:AddSelectable(Ext.Loca.GetTranslatedString("hbf2bfd2e408c493d9580e1fa08b7782d502g", "Remove"))
-    removeNPC.OnClick = function()
-        removeNPC.Selected = false
-        -- instance.Popup:Close()
-        for i,npcUuid in pairs(self.NPCs) do
-            if npcUuid == uuid then
-                table.remove(self.NPCs, i)
-                Event.RemovedNPCFromTab:SendToServer({ID=USERID, npc = uuid})
+        local foundOrigin
+        for uuid,origin in pairs(Data.Origins) do
+            if Helper.StringContains(uuid, instance.Uuid) then
+                foundOrigin = true
+                instance.CharacterButton = npcGroup:AddImageButton("","EC_Portrait_"..origin, UI.Settings["PartyButtonSize"])
             end
         end
-        self:UpdateNPCs()
+        if not foundOrigin then
+            instance.CharacterButton = npcGroup:AddImageButton("","EC_Portrait_Generic", UI.Settings["PartyButtonSize"])
+        end
+
+        instance.Popup = npcGroup:AddPopup("NPCPopup")
+        instance.Popup.IDContext = math.random(1000,100000)
+        instance.CharacterButton.OnClick = function()
+            if not UI.Await then
+                instance.Popup:Open()
+            else
+                UI:SelectedCharacterUpdates(instance)
+            end
+        end
+
+        local selectNPC = instance.Popup:AddSelectable(Ext.Loca.GetTranslatedString("h2a86e31d7ec34b7490ead80f174354da5726", "Select"))
+        selectNPC.OnClick = function()
+            selectNPC.Selected = false
+            UI:SelectedCharacterUpdates(instance)
+        end
+
+        local removeNPC = instance.Popup:AddSelectable(Ext.Loca.GetTranslatedString("hbf2bfd2e408c493d9580e1fa08b7782d502g", "Remove"))
+        removeNPC.OnClick = function()
+            removeNPC.Selected = false
+            -- instance.Popup:Close()
+            for i,npcUuid in pairs(self.NPCs) do
+                if npcUuid == uuid then
+                    table.remove(self.NPCs, i)
+                    Event.RemovedNPCFromTab:SendToServer({ID=USERID, npc = uuid})
+                end
+            end
+            self:UpdateNPCs()
+        end
+
+        instance.NameText = npcGroup:AddText("")
+        instance.NameText.Label = instance.Name
+
+        table.insert(self.CurrentNPCs, instance)
+        return instance
     end
-
-    instance.NameText = cell:AddText("")
-    instance.NameText.Label = instance.Name
-
-    table.insert(self.CurrentNPCs, instance)
-    return instance
 end
 
 function PartyInterface:SetSelectedCharacter(characterUuid)
@@ -251,28 +286,35 @@ end
 -- end)
 
 -- Only one can be hovered at a time
+
+---@class PartyInterface
+---@field GetHovered fun(self:PartyInterface):CharacterInterface|NPCInterface|nil
 function PartyInterface:GetHovered()
-    if UI.PartyInterface.Characters then 
+    -- _P("GetHovered called")
+    -- Debug.DumpS(self)
+    if self.Characters then
         -- _P("1")
-        for _,character in pairs(UI.PartyInterface.Characters) do
+        for _,character in pairs(self.Characters) do
             -- _P("2")
-            if character.CharacterButton.Statusflags["HoveredRect"] then
+            -- _D(character.CharacterButton.StatusFlags)
+            if character.CharacterButton.StatusFlags["HoveredRect"] then
                 -- _P("3")
                 return character
             end
         end
     end
-        if UI.PartyInterface.CurrenNPCs then 
-        for _,npc in pairs(UI.PartyInterface.CurrentNPCs) do
-            if npc.CharacterButton.Statusflags["HoveredRect"] then
+    if self.CurrentNPCs then
+        for _,npc in pairs(self.CurrentNPCs) do
+            if npc.CharacterButton.StatusFlags["HoveredRect"] then
                 return npc
             end
         end
     end
+    return nil
 end
 
 function PartyInterface:AddSelectedNPCSection()
-    
+
 end
 
 

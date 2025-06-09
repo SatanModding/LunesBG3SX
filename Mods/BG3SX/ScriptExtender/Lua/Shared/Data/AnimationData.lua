@@ -139,9 +139,10 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     ----------------------------------------------------
     -- Each of these is a metatable with additional parameters to set via object.Parameter, see AnimationData.New() -- Example: askForSex.Enabled = false
     
-    -- Seperated from Data.Animations because these 2 are the start spells which are handled differently and will create a scene
-    local startMasturbating = addIntroAnim("Start Masturbating", anim["MasturbateWank"].MapKey, anim["MasturbateStanding_V"].MapKey, {"NSFW", "Solo"})
-    local askForSex = addIntroAnim("Ask for Sex", anim["EmbraceTop"].MapKey, anim["EmbraceBtm"].MapKey, {"SFW", "NSFW"})
+    -- Seperated from Data.Animations because these are the start spells which are handled differently and will create a scene
+    local sfwStart = addIntroAnim("Start SFW", anim["Start SFW"].MapKey, nil, {"SFW", "Solo"})
+    local startMasturbating = addIntroAnim("Start Masturbating", anim["MasturbateWank"].MapKey, anim["MasturbateStanding_V"].MapKey, {"NSFW", "SoloV", "SoloP", "Masturbation", "Masturbate"})
+    local hugOrCarry = addIntroAnim("Hug or Carry", anim["EmbraceTop"].MapKey, anim["EmbraceBtm"].MapKey, {"SFW", "Paired",})
         
     -- Setting up heightmatching matchups
     local hmi = startMasturbating.Heightmatching or nil
@@ -152,7 +153,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         hmi:SetAnimation("Tall_V",  nil, anim["MasturbateStanding_Tall_V"].MapKey) -- TallF specific animation - Tall is what we call the "Strong" bodytype identifier
     end
 
-    local hmi = askForSex.Heightmatching
+    local hmi = hugOrCarry.Heightmatching
     if hmi then -- Instead of a specific bodytype/gender combo, just the bodytype matchup also works
         hmi:SetAnimation("Tall", "Med", anim["CarryingTop_Tall"].MapKey, anim["CarryingBtm_Med"].MapKey)
         hmi:SetAnimation("Med", "Tall", anim["EmbraceBtm"].MapKey, anim["EmbraceTop"].MapKey)
@@ -176,33 +177,33 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     -- etc.
     -- But always write BodyType -> BodyShape -> Genital, from left to right, when you combine them!
 
-    local grinding = addMainAnim("Grinding", anim["ScissorTop"].MapKey, anim["ScissorBtm"].MapKey, {"Lesbian"})
+    local grinding = addMainAnim("Grinding", anim["ScissorTop"].MapKey, anim["ScissorBtm"].MapKey, {"NSFW", "Lesbian"})
 
-    local eatpussy = addMainAnim("EatPussy",  anim["EatOutTop"].MapKey, anim["EatOutBtm"].MapKey, {"Straight", "Lesbian", "Oral"})
+    local eatpussy = addMainAnim("EatPussy",  anim["EatOutTop"].MapKey, anim["EatOutBtm"].MapKey, {"NSFW", "Straight", "Lesbian", "Oral"})
     eatpussy.SoundTop = Data.Sounds.Kissing
 
-    local fingerfuck = addMainAnim("FingerFuck",  anim["FingeringTop"].MapKey, anim["FingeringBtm"].MapKey, {"Straight", "Lesbian", "Gay", "Vaginal", "Anal"})
+    local fingerfuck = addMainAnim("FingerFuck",  anim["FingeringTop"].MapKey, anim["FingeringBtm"].MapKey, {"NSFW", "Straight", "Lesbian", "Gay", "Vaginal", "Anal"})
     fingerfuck.SoundTop = Data.Sounds.Kissing
 
-    local blowjob = addMainAnim("Blowjob",  anim["BlowjobTop"].MapKey, anim["BlowjobBtm"].MapKey, {"Straight", "Oral"})
+    local blowjob = addMainAnim("Blowjob",  anim["BlowjobTop"].MapKey, anim["BlowjobBtm"].MapKey, {"NSFW", "Straight", "Oral"})
     blowjob.SoundTop = Data.Sounds.Kissing
 
-    local laying = addMainAnim("Laying",  anim["LayingTop"].MapKey, anim["LayingBtm"].MapKey, {"Straight", "Gay", "Vaginal", "Anal"})
+    local laying = addMainAnim("Laying",  anim["LayingTop"].MapKey, anim["LayingBtm"].MapKey, {"NSFW", "Straight", "Gay", "Vaginal", "Anal"})
 
-    local doggy = addMainAnim("Doggy",  anim["DoggyTop"].MapKey, anim["DoggyBtm"].MapKey, {"Straight", "Gay", "Vaginal", "Anal"})
+    local doggy = addMainAnim("Doggy",  anim["DoggyTop"].MapKey, anim["DoggyBtm"].MapKey, {"NSFW", "Straight", "Gay", "Vaginal", "Anal"})
     
-    local cowgirl = addMainAnim("Cowgirl",  anim["CowgirlTop"].MapKey, anim["CowgirlBtm"].MapKey, {"Straight", "Gay", "Vaginal", "Anal"})
+    local cowgirl = addMainAnim("Cowgirl",  anim["CowgirlTop"].MapKey, anim["CowgirlBtm"].MapKey, {"NSFW", "Straight", "Gay", "Vaginal", "Anal"})
     cowgirl.SoundBottom = Data.Sounds.Kissing
 
-    local milking = addMainAnim("Milking",  anim["MilkingTop"].MapKey, anim["MilkingBtm"].MapKey, {"Straight", "Gay"})
+    local milking = addMainAnim("Milking",  anim["MilkingTop"].MapKey, anim["MilkingBtm"].MapKey, {"NSFW", "Straight", "Gay"})
     milking.SoundBottom = Data.Sounds.Kissing
 
-    local masturbateStanding = addMainAnim("Masturbate Standing", anim["MasturbateStanding_V"].MapKey, nil, {"SoloV"})
+    local masturbateStanding = addMainAnim("Masturbate Standing", anim["MasturbateStanding_V"].MapKey, nil, {"NSFW", "SoloV"})
 
-    local wanking = addMainAnim("Wanking",  anim["MasturbateWank"].MapKey, nil, {"SoloP"})
+    local wanking = addMainAnim("Wanking",  anim["MasturbateWank"].MapKey, nil, {"NSFW", "SoloP"})
     wanking.SoundBottom = Data.Sounds.Kissing
 
-    local bottlesit = addMainAnim("BottleSit",  anim["BottleSit"].MapKey, nil, {"Solo"}, {"0f2ccca6-3ce8-4271-aec0-820f6581c551"}) -- Prop: Bottle
+    local bottlesit = addMainAnim("BottleSit",  anim["BottleSit"].MapKey, nil, {"NSFW", "SoloV"}, {"0f2ccca6-3ce8-4271-aec0-820f6581c551"}) -- Prop: Bottle
 
     local vampireThrust = addMainAnim("YOUR_LAST_THRUST",  anim["VampireLord"].MapKey, nil, {"Test"})
 

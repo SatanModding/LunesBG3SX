@@ -24,6 +24,7 @@ local sets = Data.AnimationSets
 
         local links = {
             --#region Start
+            ["Start SFW"] = {MapKey = "c3af4377-7383-4aeb-a067-d8c36e82f716", AnimationID = "e333a111-8350-c192-152d-60a6a661462a"},
             ["EmbraceTop"] = {MapKey = "49d78660-5175-4ed2-9853-840bb58cf34a", AnimationID = "61a83621-65e3-400d-8444-58f3e8db3fb9"},
             ["EmbraceBtm"] = {MapKey = "10fee5b7-d674-436c-994c-616e01efcb90", AnimationID = "2ef3a003-54a9-4551-be7f-4f5e16d51dd3"},
             ["CarryingTop_Tall"] = {MapKey = "04922882-0a2d-4945-8790-cef50276373d", AnimationID = "516cb2de-500e-4a33-93e9-4339a4353dde"},

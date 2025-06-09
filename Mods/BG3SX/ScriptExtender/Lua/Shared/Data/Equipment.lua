@@ -22,3 +22,24 @@ Data.Equipment.Slots = {
     "Ranged Main Weapon",
     "Ranged Offhand Weapon"
 }
+
+Data.Equipment.WeaponSlots = {
+    "MeleeMainHand",
+    "MeleeOffHand",
+    "RangedMainHand",
+    "RangedOffHand",
+    "Melee Main Weapon",
+    "Melee Offhand Weapon",
+    "Ranged Main Weapon",
+    "Ranged Offhand Weapon"
+}
+Data.Equipment.ArmourSlots = {
+    "Boots",
+    "Breast",
+    "Cloak",
+    "Gloves",
+    "Helmet",
+    "Underwear",
+    "VanityBody",
+    "VanityBoots"
+}

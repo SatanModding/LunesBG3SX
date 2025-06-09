@@ -57,7 +57,7 @@ end
 function NPC:UpdateNPCs(npcs)
     --print("updating mod variable")
     Ext.Vars.GetModVariables(ModuleUUID).BG3SX_AddedNPCs = npcs
-    _D(Ext.Vars.GetModVariables(ModuleUUID).BG3SX_AddedNPCs)
+    -- _D(Ext.Vars.GetModVariables(ModuleUUID).BG3SX_AddedNPCs)
     Ext.Vars.SyncModVariables(ModuleUUID)
 end
 

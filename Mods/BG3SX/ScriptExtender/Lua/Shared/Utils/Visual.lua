@@ -643,7 +643,8 @@ end
 ---@param entity EntityHandle  - uuid of the entity
 ---@param toBeAdded table - entries to be added . Format: {uuid = entry.VisualResource, index = i}
 function Visual.addVisualSetSlot(entity, toBeAdded)
-
+    -- _P("Adding")
+    -- _D(toBeAdded)
     local slots = Visual.getSlots(entity)
 
     for i, entry in pairs(slots) do

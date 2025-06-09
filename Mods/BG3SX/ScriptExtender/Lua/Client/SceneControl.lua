@@ -127,6 +127,7 @@ function SceneControlInstance:Initialize()
 
     self.Animations = {}
     self.AnimationPicker = {}
+
     self:CreateAnimationControlArea()
     self:CreateSceneTabReference()
 end
@@ -184,7 +185,7 @@ function SceneControlInstance:CreateSceneTabReference()
     UI.SceneTab.ActiveScenesSeparator.Visible = true
     local refGroup = UI.SceneTab.Tab:AddGroup("")
     local popup = refGroup:AddPopup(self.Window.Label)
-    local ref = refGroup:AddSelectable(self.Window.Label)
+    local ref = refGroup:AddSelectable(self.Scene.Type .. " Scene: " .. self.Window.Label)
     local openButton = popup:AddSelectable("Open Scene Control")
     local closeButton = popup:AddSelectable("End Scene")
     -- closeButton.SameLine = true
@@ -223,13 +224,33 @@ function SceneControlInstance:AddControlButtons()
     }
 
     for _,button in pairs(buttons) do
-        local iconButton = self.Window:AddImageButton(button.Name, button.Icon, {50*ViewPortScale,50*ViewPortScale})
+        local iconButton = self.Window:AddImageButton("\t" .. button.Name, button.Icon, {50*ViewPortScale,50*ViewPortScale})
+        iconButton.UserData = button.Name
         table.insert(self.ControlButtons, iconButton)
         iconButton.SameLine = true
+        if button.Visible == false then
+            iconButton.Visible = false
+        end
         iconButton.OnClick = function()
-            self:AddButtonFunctionality(iconButton.Label)
+            self:AddButtonFunctionality(iconButton.UserData)
         end
         iconButton:Tooltip():AddText(iconButton.Label)
+    end
+end
+
+function SceneControlInstance:ShowButton(name)
+    for _,button in pairs(self.ControlButtons) do
+        if button.UserData == name then
+            button.Visible = true
+        end
+    end
+end
+
+function SceneControlInstance:HideButton(name)
+    for _,button in pairs(self.ControlButtons) do
+        if button.UserData == name then
+            button.Visible = false
+        end
     end
 end
 
@@ -260,6 +281,20 @@ end
 -- Sends an Event to Server, requesting Animations 
 function SceneControlInstance:CreateAnimationControlArea()
     self:AddControlButtons()
+
+--#region No Animations Group
+    self.NoAnimGroup = self.Window:AddGroup("No Animations")
+    local noAnimSelectable = self.NoAnimGroup:AddSelectable(Ext.Loca.GetTranslatedString("h2b0c1f8d3e4a4b7f9c5d6e7f8a9b0c1d2e3f4","No Animations. Click me for Infos!"))
+    local noAnimPopup = self.NoAnimGroup:AddPopup("")
+    noAnimPopup.IDContext = math.random(100000, 999999) -- Random ID to avoid conflicts
+    noAnimSelectable.OnClick = function()
+        noAnimSelectable.Selected = false
+        noAnimPopup:Open()
+    end
+    local noAnimationsInfoPart1 = noAnimPopup:AddText(Ext.Loca.GetTranslatedString("h267d0a9d1a2240ffbedc0fa051388f9c8b52","No additional solo animations available for this scene. Our discord has nice tutorials tho!"))
+    self.NoAnimGroup.Visible = false
+--#endregion
+
     Event.FetchAllAnimations:SendToServer({ID = USERID, SceneControl = self.ID})
 end
 
@@ -267,8 +302,6 @@ function SceneControlInstance:UpdateAnimationData(animationData)
     self.Animations = animationData
     self:UpdateAnimationPicker()
 end
-
-
 
 local function getAllMods(animationData)
     local mods = {}
@@ -288,8 +321,6 @@ local function getAllMods(animationData)
     end
     return sortedMods
 end
-
-
 
 local function getAllCategories(allAnims)
     local allCategories = {}
@@ -483,33 +514,52 @@ local function updateCombo(combo, val)
 end
 
 function SceneControlInstance:GetAnimationsBySceneType()
-    local type = self.Scene.SceneType
+    local type = self.Scene.Type
+    local sceneType = self.Scene.SceneType
     local animsByType = {}
-    for moduleUUID,Anims in pairs(self.Animations) do
-        for AnimationName,AnimationData in pairs(Anims) do
-            if AnimationData.Enabled == true then
-                local hmi = AnimationData.Heightmatching
-                if not animsByType[moduleUUID] then
-                    animsByType[moduleUUID] = {}
+    if type == "SFW" then
+        for moduleUUID,Anims in pairs(self.Animations) do
+            for AnimationName,AnimationData in pairs(Anims) do
+                if AnimationData.Enabled == true then
+                    if Table.Contains(AnimationData.Categories, type) and Table.Contains(AnimationData.Categories, sceneType) then
+                        if not animsByType[moduleUUID] then
+                            animsByType[moduleUUID] = {}
+                        end
+                        animsByType[moduleUUID][AnimationName] = AnimationData
+                    end
                 end
-                if (type == "SoloP") or (type == "SoloV") then
-                    local matchT = hmi.matchingTable
-                    if matchT and #matchT > 0 then
-                        for _,matchup in pairs(matchT) do
-                            if matchup.Solo then
-                                if Table.Contains(AnimationData.Categories, type) then
-                                    animsByType[moduleUUID][AnimationName] = AnimationData
+            end
+        end
+    elseif type == "NSFW" then
+        for moduleUUID,Anims in pairs(self.Animations) do
+            for AnimationName,AnimationData in pairs(Anims) do
+                if AnimationData.Enabled == true then
+                    local hmi = AnimationData.Heightmatching
+                    if not animsByType[moduleUUID] then
+                        animsByType[moduleUUID] = {}
+                    end
+                    if (sceneType == "SoloP") or (sceneType == "SoloV") then
+                        local matchT = hmi.matchingTable
+                        if AnimationName == "BottleSit" then
+                            _D(matchT)
+                        end
+                        if matchT and #matchT > 0 then
+                            for _,matchup in pairs(matchT) do
+                                if matchup.Solo then
+                                    if Table.Contains(AnimationData.Categories, sceneType) then
+                                        animsByType[moduleUUID][AnimationName] = AnimationData
+                                    end
                                 end
                             end
                         end
-                    end
-                elseif (type == "Lesbian") or (type == "Straight") or (type == "Gay") then
-                    if hmi.fallbackTop and hmi.fallbackBottom then
-                        if Table.Contains(AnimationData.Categories, type) then
-                            animsByType[moduleUUID][AnimationName] = AnimationData
-                        else
-                            if UI.Settings["UnlockedAnimations"] then
+                    elseif (sceneType == "Lesbian") or (sceneType == "Straight") or (sceneType == "Gay") then
+                        if hmi.fallbackTop and hmi.fallbackBottom then
+                            if Table.Contains(AnimationData.Categories, sceneType) then
                                 animsByType[moduleUUID][AnimationName] = AnimationData
+                            else
+                                if UI.Settings["UnlockedAnimations"] then
+                                    animsByType[moduleUUID][AnimationName] = AnimationData
+                                end
                             end
                         end
                     end
@@ -555,10 +605,12 @@ end
 
 function SceneControlInstance:HidePicker()
     self.AnimationPicker.Group.Visible = false
+    self.NoAnimGroup.Visible = true
 end
 
 function SceneControlInstance:ShowPicker()
     self.AnimationPicker.Group.Visible = true
+    self.NoAnimGroup.Visible = false
 end
 
 function SceneControlInstance:GetUpdatedPickerAnims()

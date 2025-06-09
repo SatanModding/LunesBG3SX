@@ -34,9 +34,9 @@ end)
 --------------------------------
 
 -- Determines the scene type based on how many entities and penises are involved
----@param  scene Scene       - The scene to check
----@return sceneType string
-function Sex:DetermineSceneType(scene)
+---@param  entities table       - The entities to check
+---@return string sceneType - The scene type based on the number of entities and penises
+function Sex:DetermineSceneType(entities)
 
 
     --  print("PeePee Server Test")
@@ -69,7 +69,7 @@ function Sex:DetermineSceneType(scene)
 
     local involvedEntities = 0
     local penises = 0
-    for _,entity in pairs(scene.entities) do
+    for _,entity in pairs(entities) do
         involvedEntities = involvedEntities+1
         if Entity:HasPenis(entity) then
             penises = penises+1
@@ -122,7 +122,7 @@ function Sex:PlayAnimation(character, animData)
     -- TODO - make this dependant on actor instead of entity and refresh when genital has changed
 
 
-    local scene = Scene:FindSceneByEntity(character)
+    local scene = Scene.FindSceneByEntity(character)
     --print("entity is in scene ", scene)
     local sceneType = Sex:DetermineSceneType(scene)
     --print("scene type is ", sceneType)
@@ -166,13 +166,56 @@ end
 ---@param caster            string  - The caster UUID
 ---@param targets           table   - The targets UUIDs
 ---@param animationData     table   - The animation data to use
-function Sex:StartSexSpellUsed(caster, targets, animationData)
-    local scene
-
+function Sex:NewSFWScenePreSetup(caster, targets, animationData)
     if animationData then
-        -- _P("----------------------------- [BG3SX][Sex.lua] - Creating new scene -----------------------------")
-        -- TODO - sexHavers should be able to be deleted, as the scenes are saved on the client
-        -- TODO - check NPC
+        local involved = {caster}
+        for _,target in pairs(targets) do
+            if not Helper.StringContainsOne(caster,target) then -- To not add caster twice if it might also be the target
+                table.insert(involved, target)
+            end
+        end
+        -- for _,involved in pairs(involved) do
+        --     Effect:Fade(involved, 666)
+        -- end
+
+        local scene = Scene:New({Type = "SFW", Entities = involved, Fade = 666}):Init()
+    end
+end
+
+function Sex:PreNSFWSceneSetup(characters)
+    local actualInvolvedCharacters = {}
+    if Helper.StringContainsOne(characters[1],characters[2]) then
+        table.insert(actualInvolvedCharacters, characters[1])
+    else
+        table.insert(actualInvolvedCharacters, characters[1])
+        table.insert(actualInvolvedCharacters, characters[2])
+    end
+
+    local strippedEQ = {}
+    -- local equipments = {}
+    -- local armorsets = {}
+    -- local slots = {}
+
+    -- Erection Handling
+    for _, character in pairs(actualInvolvedCharacters) do
+        local entity = Ext.Entity.Get(character)
+        Genital.GiveSexGenital(entity)
+
+        local stripping = SexUserVars.GetAllowStripping(entity)
+        if not (stripping == false) then
+            local armorset, equipment, slot = Sex:Strip(character)
+            strippedEQ[character] = {Armorset = armorset, Equipment = equipment, Slot = slot}
+        end
+    end
+    return strippedEQ
+end
+
+--- Handles the StartSexSpellUsed Event by starting new animations based on spell used
+---@param caster            string  - The caster UUID
+---@param targets           table   - The targets UUIDs
+---@param animationData     table   - The animation data to use
+function Sex:StartSexSpellUsed(caster, targets, animationData)
+    if animationData then
         local sexHavers = {caster}
         for _,target in pairs(targets) do
             if not Helper.StringContainsOne(caster,target) then -- To not add caster twice if it might also be the target
@@ -221,20 +264,24 @@ function Sex:StartSexSpellUsed(caster, targets, animationData)
                 -- stripping
                 local stripping = SexUserVars.GetAllowStripping(entity)
                 if not (stripping == false) then
-                    armorset, equipment, slot = Sex:Strip(character)
+                    local armorset, equipment, slot = Sex:Strip(character)
                     armorsets[character] = armorset
                     equipments[character] = equipment
                     slots[character] = slot
                 end
             end
 
-            Scene:new(sexHavers, equipments, armorsets, slots)
+            -- Scene:New(sexHavers, equipments, armorsets, slots)
+            Scene:New({Type = "NSFW", Entities = sexHavers, Equipments = equipments, ArmorSets = armorsets, Slots = slots, Fade = 666, Strip = true})
+            -- local scene = Scene:New({Entities = sexHavers})
+            -- scene.Equipments = equipments
+            -- scene.ArmorSets = armorsets
+            -- scene.Slots = slots
+            -- scene:Init()
 
             --TODO - remove timer
             --Ext.Timer.WaitFor(2000, function ()
-
             --end)
-
         end
 
         -- Timer to delay scene creation for the fadeout

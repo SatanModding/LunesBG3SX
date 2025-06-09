@@ -90,7 +90,7 @@ function Entity:HasPenis(uuid)
         elseif  Table.Contains(genitalTags, penis) then
             return true
         end
-        
+
     end
 
     -- If entity is polymorphed (e.g., Disguise Self spell)
@@ -241,7 +241,7 @@ end
 -- function Entity:TryGetEntityValue(uuid, component, field1, field2, field3)
 --     local entity = Ext.Entity.Get(uuid)
 --     local v, doStop
-    
+
 --     v = resolveEntityArg(entity)
 --     if not v then
 --         return nil
@@ -357,7 +357,7 @@ function Entity:UnequipAll(uuid)
     --Osi.SetArmourSet(uuid, 0)
 
     print("called Unequip All for entity ", uuid)
-    
+
     local oldEquipment = {}
     for _, slotName in ipairs(Data.Equipment.Slots) do
         local gearPiece = Osi.GetEquippedItem(uuid, slotName)
@@ -384,11 +384,34 @@ function Entity:UnequipAll(uuid)
     return oldEquipment
 end
 
+-- Unequips all equipment from an entity except for a specific item
+---@param uuid          string  - The entity UUID to unequip
+---@param except        table  - Table of equipmentslots to keep equipped
+function Entity.UnequipAllExcept(uuid, except)
+    local oldEquipment = {}
+    local slotsToUnequip = {}
+
+    for i,slotName in ipairs(Data.Equipment.Slots) do
+        if not Table.Contains(except, slotName) then
+
+            _P("Unequipping slot: " .. slotName)
+            local gearPiece = Osi.GetEquippedItem(uuid, slotName)
+            if gearPiece then
+                Osi.LockUnequip(gearPiece, 0)
+                Osi.Unequip(uuid, gearPiece)
+                oldEquipment[#oldEquipment+1] = gearPiece
+            end
+        end
+    end
+
+    return oldEquipment
+end
+
 
 -- Gets a table of equipped items
 ---@param uuid              string  - The entity UUID to unequip
 ---@return currentEquipment table   - Collection of every equipped items
-function Entity:GetEquipment(uuid)    
+function Entity:GetEquipment(uuid)
     local currentEquipment = {}
     for _, slotName in ipairs(Data.Equipment.Slots) do
         local gearPiece = Osi.GetEquippedItem(uuid, slotName)
@@ -399,35 +422,37 @@ function Entity:GetEquipment(uuid)
     return currentEquipment
 end
 
+---@class StrippedEQ
+---@field Armorset number - If an entities armorset was on or off (1/0)
+---@field Equipment table - A table of all equipped items
+---@field Slots table - A table of all visual resources of the entity
 
 -- Re-equips all equipment of an entity
 ---@param entity      string      - The entity UUID to equip
----@param armorset  ArmorSet    - The entities prior armorset
----@paran slots table -  Format: {uuid = entry.VisualResource, index = i}
-function Entity:Redress(entity, oldArmourSet, oldEquipment, slots)
+---@param strippedEQ  StrippedEQ  - A table containing the stripped equipment data
+function Entity:Redress(entity, strippedEQ)
 
-
-    if oldArmourSet and (type(oldArmourSet) == "number") then
-        Osi.SetArmourSet(entity, oldArmourSet)
+    if strippedEQ.Armorset and (type(strippedEQ.Armorset) == "number") then
+        Osi.SetArmourSet(entity, strippedEQ.Armorset)
     end
 
-    if oldEquipment then
-        for _, item in ipairs(oldEquipment) do
+    if strippedEQ.Equipment then
+        for _, item in ipairs(strippedEQ.Equipment) do
             Osi.Equip(entity, item)
         end
     end
 
-    oldArmourSet = nil
-    oldEquipment = nil
+    strippedEQ.Armorset = nil
+    strippedEQ.Equipment = nil
 
-    if slots then 
+    if strippedEQ.Slots then
         local actualEntity = Ext.Entity.Get(entity)
         if not actualEntity then
             print("is not an entity ", entity)
         end
 
-        NPC.Redress(actualEntity, slots)
-        Event.SyncNPCDress:Broadcast({Uuid = actualEntity.Uuid.EntityUuid, Visuals = slots})
+        NPC.Redress(actualEntity, strippedEQ.Slots)
+        Event.SyncNPCDress:Broadcast({Uuid = actualEntity.Uuid.EntityUuid, Visuals = strippedEQ.Slots})
     end
 
 
@@ -496,7 +521,7 @@ local function getCCBodyType(bodytype, bodyshape)
     for _, entry in pairs(CC_BODYTYPE) do
         if (entry.type == bodytype) and (entry.shape == bodyshape) then
             return entry.cc
-        end 
+        end
     end
 end
 
@@ -552,7 +577,7 @@ function Entity:FindAngleToTarget(entity, target)
     local dif = {
         y = entityPos.y - targetPos.y,
         x = entityPos.x - targetPos.x,
-        z = entityPos.z - targetPos.z,  
+        z = entityPos.z - targetPos.z,
     }
     local degree = math.atan(dif.y, dif.x)
     return degree
@@ -731,7 +756,7 @@ end
 
 --     -- revert to originial type to prevent weird things from happening
 --     -- Timer necessary because else the visual change doesn't show if we revert to 4 too fast.
-    
+
 
 --     Ext.Timer.WaitFor(100, function()
 --         entity.GameObjectVisual.Type = 4
@@ -754,7 +779,7 @@ end
 --         Entity:GiveShapeshiftedVisual(character, visual)
 --         -- print("Debug: called Entity:GiveShapeshiftedVisual with character = " .. tostring(character) .. " and visual = " .. tostring(visual))
 --     -- end)
-   
+
 -- end
 
 

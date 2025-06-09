@@ -20,7 +20,7 @@ end
 
 -- Fades the screen black (e.g. during Setup of a Scene)
 ---@param entity    string  - The affected entities UUID
----@param duration  Time    - The time the fade is active
+---@param duration  number    - The time the fade is active
 function Effect:Fade(entity, duration)
     if Entity:IsPlayable(entity) then
         Osi.ScreenFadeTo(entity, 0.1, 0.1, "ScreenFade")

@@ -11,64 +11,91 @@ local initialize
 -- CONSTRUCTOR
 --------------------------------------------------------------
 
--- Todo: Check if it requires cleanup of unused parameters
 ---@class Scene
----@param entities          table   - Table with entity uuids to use for a scene
----@param rootPosition      table   - Table of x,y,z coordinates
----@param rotation          table   - Table with x,y,z,w 
----@param startLocations    table   - Saves the start locations (Position/Rotation) of each entity to teleport back to when scene is destroyed
----@param entityScales      table   - Saves the start entity scales
----@param currentAnimation  table   - Table of the current animation being played
----@param currentSounds     table   - Table of currently playing sounds
----@param timerHandles      table   - Timer handles in case they have to be cancelled (failsave)
----@param cameraZoom        table   - Unused - Was intended to store previous zoom levels per entity - handled differently now
----@param props             table   - Table of all props currently in a scene
----@param switchPlaces      boolean - Boolean for PlayAnimation to check if actors have been switched - TODO: need a cleaner way to handle this
----@param campFlags         table   - Table of entities with campflags applied before scene to reapply on Destroy() - Ignore those who didn't - PleaseStay Mod compatibility
----@paran Summons           table   - Table of summons saved per involved entity
----@param equipment         table   - Table of [uuid] of entity and a table of their equipment
----@param armorset          table   - Table of [uuid] of entity and a table of their armorset
----@param slots             table   - Format: {uuid = entry.VisualResource, index = i} 
-function Scene:new(entities, equipment, armorset, slots)
+---@field New fun(self:Scene, ...:SceneParameters):Scene
+---@field Get fun(self:Scene, uuid:string):Scene|nil
+---@field FindSceneByEntity fun(entityToSearch:string):Scene|nil
+---@field PreNSFWSceneSetup fun(self:Scene)
+---@field Init fun(self:Scene)
+---@field getStartLocation fun(self:Scene, entity:string):table, table
+---@field setStartLocations fun(self:Scene)
+---@field saveCampFlags fun(self:Scene)
+---@field EntityReset fun(self:Scene)
+---@field MoveSceneToLocation fun(self:Scene, newLocation:table)
+---@field RotateScene fun(self:Scene, location:table)
+---@field StopAnimation fun(self:Scene)
+---@field PlayAnimation fun(self:Scene, animationData:table)
+---@field TogglePause fun(self:Scene)
+---@field ScreenFade fun(self:Scene, duration:number)
+---@field CleanupSummons fun(self:Scene)
+---@field HideSummons fun(self:Scene)
+---@field ShowSummons fun(self:Scene)
+---@field SetupAndHideSummons fun(self:Scene)
+---@field ScaleEntity fun(self:Scene, entityUuid:string)
+---@field CreateProps fun(self:Scene)
+---@field DestroyProps fun(self:Scene)
+---@field RegisterNewSoundTimer fun(self:Scene, newSoundTimer:integer)
+---@field CancelAllSoundTimers fun(self:Scene)
+---@field ToggleCampFlags fun(self:Scene, entity:string)
+---@field Destroy fun(self:Scene)
+
+---@class SceneParameters
+---@field Type            string|nil - Type of the scene, SFW or NSFW
+---@field Entities        table|nil  - Table with entity uuids to use for a scene,
+---@field SceneType       string|nil  - Type of the scene, based of involved penises - TODO: Rename to MatchupType
+---@field RootPosition    table|nil  - Table of x,y,z coordinates
+---@field Rotation        table|nil  - Table with x,y,z,w rotation
+---@field StartLocations  table|nil  - Saves the start locations (Position/Rotation) of each entity to teleport back to when scene is destroyed
+---@field EntityScales    table|nil  - Saves the start entity scales
+---@field CurrentAnimation table|nil  - Table of the current animation being played
+---@field CurrentSounds   table|nil  - Table of currently playing sounds
+---@field TimerHandles    table|nil  - Timer handles in case they have to be cancelled (failsave)
+---@field CameraZoom      table|nil  - Unused - Was intended to store previous zoom levels per entity - handled differently now
+---@field Props           table|nil  - Table of all props currently in a scene
+---@field SwitchPlaces    boolean|nil - Boolean for PlayAnimation to check if actors have been switched - TODO: need a cleaner way to handle this
+---@field CampFlags       table|nil  - Table of entities with campflags applied before scene to reapply on Destroy() - Ignore those who didn't - PleaseStay Mod compatibility
+---@field Summons         table|nil  - Table of summons saved per involved entity
+---@field Equipment       table|nil  - Table of [uuid] of entity and a table of their equipment
+---@field Armorset        table|nil  - Table of [uuid] of entity and a table of their armorset
+---@field Slots           table|nil  - Format: {uuid = entry.VisualResource, index = i}
+---@field UnlockedSwaps   boolean|nil - If the scene has unlocked swaps for actors
+---@field CouldJoinCombat table|nil  - Table of entities that could join combat before the scene started
+---@field WasOnStage      table|nil  - Table of entities that were on stage before the scene started
+---@field Fade            number|nil - Fade effect for the scene
+---@field StrippedEQ      table<string,StrippedEQ>|nil  - Table of stripped equipment, armorset and slots per entity, used to restore equipment on Scene:Destroy()
+
+-- Creeated a new Scene Instance
+---@param ... SceneParameters
+---@return Scene
+function Scene:New(...)
+    local args = (...)
     local instance      = setmetatable({
         Uuid            = Helper.GenerateUUID(), -- Unique identifier for the scene
-        entities        = entities,
-        rootPosition    = {},
-        rotation        = {},
-        startLocations  = {}, -- NEVER change this after initialize - Used to teleport everyone back on Scene:Destroy()
-        entityScales    = {},
-        currentAnimation= {},
-        currentSounds   = {},
-        timerHandles    = {},
-        cameraZoom      = {},
-        props           = {},
-        campFlags       = {},
-        Summons         = {},
-        equipment       = equipment,
-        armorset        = armorset,
-        slots           = slots,
-        UnlockedSwaps   = false,
-        CouldJoinCombat = {},
-        WasOnStage      = {},
+        Type            = args.Type or "SFW" or "NSFW", -- Type of the object
+        entities        = args.Entities or {},
+        SceneType       = Sex:DetermineSceneType(args.Entities) or nil,
+        rootPosition    = args.RootPosition or {},
+        rotation        = args.Rotation or {},
+        startLocations  = args.StartLocations or {}, -- NEVER change this after initialize - Used to teleport everyone back on Scene:Destroy()
+        entityScales    = args. EntityScales or {},
+        currentAnimation= args.CurrentAnimation or {},
+        currentSounds   = args.CurrentSounds or {},
+        timerHandles    = args.TimerHandles or {},
+        cameraZoom      = args.CameraZoom or {},
+        props           = args.Props or {},
+        campFlags       = args.CampFlags or {},
+        Summons         = args.Summons or {},
+        equipment       = args.Equipment or {},
+        armorset        = args.Armorset or {},
+        slots           = args.Slots or {},
+        UnlockedSwaps   = args.UnlockedSwaps or false,
+        CouldJoinCombat = args.CouldJoinCombat or {},
+        WasOnStage      = args.WasOnStage or {},
+        Fade            = args.Fade or nil,
+        StrippedEQ      = args.StrippedEQ or {}, -- Table of stripped equipment per entity
     }, Scene)
-
-
-    -- Somehow can't set rootPosition/rotation within the metatable construction, it poops itself trying to do this - rootPosition.x, rootPosition.y, rootPosition.z = Osi.GetPosition(entities[1])
-
-    --local position = entities[1].Transfrom.Transform.Translate
-    --instance.rootPosition.x, instance.rootPosition.y, instance.rootPosition.z = position[1], position[2], position[3]
-    --local rotation = entities[1].Transfrom.Transform.RotationQuat
-    --.rotation.x, instance.rotation.y, instance.rotation.z, instance.rotation.w = rotation[1],rotation[2],rotation[3],rotation[4]
-
-    instance.SceneType = Sex:DetermineSceneType(instance)
-
-    initialize(instance)
-
     return instance
 end
-
-
--- Something crashes when starting a scene
 
 ----------------------------------------------------------------------------------------------------
 -- 
@@ -90,6 +117,7 @@ local function setStartLocations(scene)
 
         table.insert(scene.startLocations, {entity = character, position = position, rotation = rotation})
     end
+    scene.rootPosition = scene.startLocations[1].position -- Set the root position to the first entities position
 end
 
 
@@ -114,8 +142,8 @@ end
 ----------------------------------------------------------------------------------------------------
 
 -- Goes through every currently running scene until it finds the entityToSearch
----@param entityToSearch uuid
-function Scene:FindSceneByEntity(entityToSearch)
+---@param entityToSearch string
+function Scene.FindSceneByEntity(entityToSearch)
     -- _P(entityToSearch)
     for i, scene in ipairs(Data.SavedScenes) do
         for _, entity in pairs(scene.entities) do
@@ -125,14 +153,16 @@ function Scene:FindSceneByEntity(entityToSearch)
             end
         end
     end
-    -- _P("[BG3SX][Scene.lua] - Scene:FindSceneByEntity - Entity not found in any existing scenes! This shouldn't happen anymore. Contact mod author about what you did.")
+    Debug.Print("Entity not found in any existing scenes!")
 end
 
--- Returns all entities (parents) from a scene
----@param sceneToSearch Scene
-function Scene:EntitiesByScene(sceneToSearch)
-    return sceneToSearch.entities
-    -- _P("[BG3SX][Scene.lua] - Scene:FindSceneByEntity - Entity not found in any existing scenes! This shouldn't happen anymore. Contact mod author about what you did.")
+function Scene.Get(uuid)
+    for _, scene in ipairs(Data.SavedScenes) do
+        if scene.Uuid == uuid then
+            return scene
+        end
+    end
+    Debug.Print("Scene with UUID " .. uuid .. " not found in any existing scenes!")
 end
 
 -- Campflag Management
@@ -182,11 +212,11 @@ function Scene.ExistsInScene(uuid)
     for _,scene in pairs(Data.SavedScenes) do
         for _,entityUuid in pairs(scene.entities) do
             if entityUuid == uuid then
-                return false
+                return true
             end
         end
     end
-    return true
+    return false
 end
 
 function Scene:HideSummons()
@@ -194,7 +224,7 @@ function Scene:HideSummons()
         for entityUuid,summons in pairs(self.Summons) do
             if summons and Table.TableSize(summons) > 0 then
                 for _,summon in pairs(summons) do
-                    if not Scene.ExistsInScene(entityUuid) then
+                    if Scene.ExistsInScene(entityUuid) then
                         Osi.SetVisible(summon, 0)
                     end
                 end
@@ -280,6 +310,62 @@ function Scene:SetupAndHideSummons()
     self:HideSummons()
 end
 
+function Scene:AppearanceSetup()
+    local strippedEQ = {}
+
+    -- Erection Handling
+    for _, character in pairs(self.entities) do
+        local entity = Ext.Entity.Get(character)
+
+        if self.Type == "NSFW" then
+            Genital.GiveSexGenital(entity)
+        end
+
+        local stripping = SexUserVars.GetAllowStripping(entity)
+        if not (stripping == false) then
+            local armorset, equipment, slot = self:Unequip(character)
+            strippedEQ[character] = {Armorset = armorset, Equipment = equipment, Slot = slot}
+        end
+    end
+    self.StrippedEQ = strippedEQ
+end
+
+function Scene:Unequip(character)
+    local armorset = {}
+    local equipment = {}
+    local slot = {}
+
+    local entity = Ext.Entity.Get(character)
+    if not entity then
+        Debug.Print("Is not a valid entity " .. character)
+    end
+
+    if self.Type == "SFW" then
+        if Entity:IsNPC(character) then
+        -- NPCs only have slots in their CharacterVisualResourceID
+            -- slot = NPC.StripNPC(entity) -- Call on Server
+            -- Event.SyncNPCStrip:Broadcast(entity.Uuid.EntityUuid) -- Call on Client
+            equipment = Entity.UnequipAllExcept(character, Data.Equipment.ArmourSlots)
+        else
+            equipment = Entity.UnequipAllExcept(character, Data.Equipment.ArmourSlots)
+            armorset = Osi.GetArmourSet(character)
+        end
+
+    elseif self.Type == "NSFW" then
+        if Entity:IsNPC(character) then
+        -- NPCs only have slots in their CharacterVisualResourceID
+            slot = NPC.StripNPC(entity) -- Call on Server
+            Event.SyncNPCStrip:Broadcast(entity.Uuid.EntityUuid) -- Call on Client
+            equipment = Entity:UnequipAll(character)
+        else
+            equipment = Entity:UnequipAll(character)
+            armorset = Osi.GetArmourSet(character)
+        end
+    end
+
+    return armorset, equipment, slot
+end
+
 -- vvvvvv Keep this for whenever IsSummon is replicatable vvvvvv
 
 -- Whenever we can replicate the owner fields we may be able to reuse this party and just replicate the IsSummon component after swapping out the owner
@@ -319,9 +405,13 @@ end
 -- Prop Management
 -----------------------------------------------------
 function Scene:CreateProps()
+    _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Creating props for current animation")
     if self.currentAnimation.Props then
+        _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Props found for current animation: " .. #self.currentAnimation.Props)
         for _,animDataProp in pairs(self.currentAnimation.Props) do
-            local sceneProp = Osi.CreateAt(animDataProp, self.rootPosition.x, self.rootPosition.y, self.rootPosition.z, 1, 0, "")
+            _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Creating prop " .. animDataProp)
+            local sceneProp = Osi.CreateAt(animDataProp, self.rootPosition[1], self.rootPosition[2], self.rootPosition[3], 1, 0, "")
+            _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Created prop " .. sceneProp)
             Osi.SetMovable(sceneProp,0)
             table.insert(self.props, sceneProp)
         end
@@ -343,11 +433,11 @@ end
 -----------------------------------------------------
 
 -- Scale entity for camera
----@param entity uuid
-function Scene:ScaleEntity(entity)
-    local startScale = Entity:TryGetEntityValue(entity, nil, {"GameObjectVisual", "Scale"})
-    table.insert(self.entityScales, {entity = entity, scale = startScale})
-    Entity:Scale(entity, 0.5)
+---@param entityUuid string
+function Scene:ScaleEntity(entityUuid)
+    local startScale = Entity:TryGetEntityValue(entityUuid, nil, {"GameObjectVisual", "Scale"})
+    table.insert(self.entityScales, {entity = entityUuid, scale = startScale})
+    Entity:Scale(entityUuid, 0.5)
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -357,30 +447,40 @@ end
 ----------------------------------------------------------------------------------------------------
 
 -- Initializes the actor
----@param self instance - The scene instance
-initialize = function(scene)
-    table.insert(Data.SavedScenes, scene)
-    Ext.ModEvents.BG3SX.SceneInit:Throw({scene})
+function Scene:Init()
+-- initialize = function(scene)
+    table.insert(Data.SavedScenes, self)
+    Ext.ModEvents.BG3SX.SceneInit:Throw({self})
 
     --print("all saved scenes")
     --for _, scene in pairs(Data.SavedScenes) do
        -- _D(scene.entities)
     --end
 
+    if self.Type == "SFW" then
+        if Table.TableSize(self.entities) == 1 then
+            self.SceneType = "Solo"
+        elseif Table.TableSize(self.entities) == 2 then
+            self.SceneType = "Paired"
+        end
+    end
+
     -- print("initializing scene")
 
-    setStartLocations(scene) -- Save start location of each entity to later teleport them back
-    saveCampFlags(scene) -- Saves which entities had campflags applied before
-    scene:SetupAndHideSummons() -- Hides summons and removes collision - on Scene:Destroy() it also teleports them back to start location
+    setStartLocations(self) -- Save start location of each entity to later teleport them back
+    saveCampFlags(self) -- Saves which entities had campflags applied before
+    self:SetupAndHideSummons() -- Hides summons and removes collision - on Scene:Destroy() it also teleports them back to start location
+    self:AppearanceSetup()
 
 
     -- We do this before in a seperate loop to already apply this to all entities before actors are spawned one by one
-    for _, character in pairs(scene.entities) do
+    for _, character in pairs(self.entities) do
+        Entity:ClearActionQueue(character)
         Osi.AddBoosts(character, "ActionResourceBlock(Movement)", "", "") -- Blocks movement
         Osi.ApplyStatus(character, "BG3SX_DisableAI", -1, 1, "")
         -- Osi.SetDetached(character, 1) -- Make entity untargetable
         if Osi.CanJoinCombat(character) == 1 then
-            table.insert(scene.CouldJoinCombat, character) -- Save if entity was allowed to join combat before
+            table.insert(self.CouldJoinCombat, character) -- Save if entity was allowed to join combat before
         end
         if Osi.IsOnStage(character) == 1 then
             -- table.insert(scene.WasOnStage, character) -- Save if entity was on stage before
@@ -391,7 +491,7 @@ initialize = function(scene)
         --self:DetachSummons(entity) -- TODO: Add something to handle summon/follower movement here
         -- Osi.SetVisible(entity, 0)               -- 0 = Invisible
         Entity:ToggleWalkThrough(character)        -- To prevent interactions with other entities even while invisible and untargetable
-        scene:ToggleCampFlags(character)            -- Toggles camp flags so companions don't return to tents
+        self:ToggleCampFlags(character)            -- Toggles camp flags so companions don't return to tents
 
         --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Body"])
         --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Face"])
@@ -400,9 +500,9 @@ initialize = function(scene)
         -- TODO - why do we wait?
         Ext.Timer.WaitFor(200, function ()
             -- print("requesting teleport")
-            for _, character in pairs(scene.entities) do
-                Event.RequestTeleport:Broadcast({character= character, target = scene.entities[1]})
-                Event.RequestRotation:Broadcast({character = character, target = scene.entities[1]})
+            for _, character in pairs(self.entities) do
+                Event.RequestTeleport:Broadcast({character= character, target = self.rootPosition})
+                Event.RequestRotation:Broadcast({character = character, target = self.entities[1]})
             end
         end)
 
@@ -417,33 +517,35 @@ initialize = function(scene)
     --     self:ScaleEntity(entity) -- After creating the actor to not create one with a smaller scale
     -- end
 
-    if scene.SceneType == "MasturbateMale" or scene.SceneType == "MasturbateFemale" then
-    elseif scene.SceneType == "Straight" then -- Handle this in a different way to enable actor swapping even for straight animations
+    if self.Type == "NSFW" then
+        if self.SceneType == "MasturbateMale" or self.SceneType == "MasturbateFemale" then
+        elseif self.SceneType == "Straight" then -- Handle this in a different way to enable actor swapping even for straight animations
 
-        -- In case of actor1 not being male, swap them around to still assign correct animations initially
-        if not Entity:HasPenis(scene.entities[1]) then
-            local savedActor = scene.entities[1]
-            scene.entities[1] = scene.entities[2]
-            scene.entities[2] = savedActor
+            -- In case of actor1 not being male, swap them around to still assign correct animations initially
+            if not Entity:HasPenis(self.entities[1]) then
+                local savedActor = self.entities[1]
+                self.entities[1] = self.entities[2]
+                self.entities[2] = savedActor
+            end
         end
     end
 
-    _D(scene)
-    Event.NewScene:Broadcast(scene)
-    Ext.ModEvents.BG3SX.SceneCreated:Throw({scene})
+    -- _D(self)
+    Event.NewScene:Broadcast(self)
+    Ext.ModEvents.BG3SX.SceneCreated:Throw({self})
 end
 
----@param object GUIDSTRING
----@param status string
----@param causee GUIDSTRING
----@param storyActionID integer
-function OnStatusApplied(object, status, causee, storyActionID)
-    if status == "BG3SX_DisableAI" then
-        _P("Applied status " .. status .. " to " .. object)
-    end
+-- If no entities are passed, use the scenes entities so it can be used even without a scene
+---@param duration number - Duration of the fade effect
+---@param entities table|nil - Table of entities to apply the fade effect to, if not passed it will use the scenes entities
+function Scene:ScreenFade(duration, entities)
+    local entities = entities or self.entities
+    for _,character in pairs(entities) do
+        if Entity:IsPlayable(character) then
+            Effect:Fade(character, duration)
+        end
+    end    
 end
-Ext.Osiris.RegisterListener("StatusApplied", 4, "after", OnStatusApplied)
-
 
 ----------------------------------------------------------------------------------------------------
 -- 
@@ -556,56 +658,62 @@ end
 ----------------------------------------------------------------------------------------------------
 
 -- Handles the generic stuff to reset on an entity on Scene:Destroy()
-local function sceneEntityReset(character)
-    -- dress them
-    -- give out of scene genitals back
-    local entity = Ext.Entity.Get(character)
-    if not entity then
-        -- Debug.Print("is not a valid entity ".. character)
-    end
-
-    -- Debug.Print("Scene reset for character " .. character)
-    local outOfSexGenital = SexUserVars.GetGenital("BG3SX_OutOfSexGenital", entity)
-    local scene = Scene:FindSceneByEntity(character)
-    local startLocation
-
-
-    Entity:Redress(character, scene.armorset[character], scene.equipment[character], scene.slots[character])
-
-    --print("Out of sex genital is ", outOfSexGenital)
-    Genital.OverrideGenital(outOfSexGenital, entity)
-
-    -- Getting old position
-    -- print("all startLoctions")
-    -- _D(scene.startLocations)
-
-    for _, entry in ipairs(scene.startLocations) do
-        if entry.entity == character then
-            startLocation = entry
+function Scene:EntityReset()
+    for _,character in pairs(self.entities) do
+        -- dress them
+        -- give out of scene genitals back
+        local entity = Ext.Entity.Get(character)
+        if not entity then
+            -- Debug.Print("is not a valid entity ".. character)
         end
+
+        if self.Type == "NSFW" then
+            if Entity:IsNPC(character) then
+                _P("Removing genitals from NPC " .. character)
+                NPC.RemoveGenitals(entity) -- Remove genitals from NPCs
+            else
+                local outOfSexGenital = SexUserVars.GetGenital("BG3SX_OutOfSexGenital", entity)
+                Genital.OverrideGenital(outOfSexGenital, entity)
+            end
+        end
+        if Entity:IsNPC(character) then
+            NPC.Redress(entity, self.StrippedEQ[character].Slot)
+        end
+        Entity:Redress(character, self.StrippedEQ[character])
+
+        local startLocation
+        for _, entry in ipairs(self.startLocations) do
+            if entry.entity == character then
+                startLocation = entry
+            end
+        end
+
+        -- print("teleporting ", character , " to the startposition ", startLocation.position[1], startLocation.position[2],startLocation.position[3] )
+
+        Event.RequestTeleport:Broadcast({character = character, target = {startLocation.position[1], startLocation.position[2], startLocation.position[3]}})
+        Event.RequestRotation:Broadcast({character = character, target = startLocation.rotation})
+
+        Osi.RemoveBoosts(character, "ActionResourceBlock(Movement)", 0, "", "") -- Unlocks movement
+        Osi.RemoveStatus(character, "BG3SX_DisableAI", "") -- Unlocks AI
+
+        self:ToggleCampFlags(character) -- Toggles camp flags so companions return to tents IF they had them before
+
+        -- Re-attach entity to make it selectable again
+        Osi.SetDetached(character, 0)
+        if Table.Contains(self.CouldJoinCombat, character) then -- Check if entity was allowed combat before
+            Osi.SetCanJoinCombat(character, 1) -- Re-enable combat
+        end
+        if Table.Contains(self.WasOnStage, character) then -- Check if entity was on stage before
+            -- Osi.SetOnStage(character, 1) -- Re-enable AI
+        end
+
+        local nothing = "88f5df46-921d-4a28-93b6-202df636966c" -- Random UUID - This is nothing, NULL or "" doesn't work, crashes the game.
+        Osi.PlayAnimation(character, nothing) -- To cancel out of any ongoing animations
+        Osi.PlaySound(character, Data.Sounds.Orgasm[math.random(1, #Data.Sounds.Orgasm)]) -- TODO - change this to a generic sound for when we use this for non-sex instead
+
+        -- local animationWaterfall = Mods.BG3AF.AnimationWaterfall.Get(character)
+        -- animationWaterfall:RemoveWaterfallElement(Data.AnimationSets["BG3SX_Body"].Uuid)
     end
-
-    -- print("teleporting ", character , " to the startposition ", startLocation.position[1], startLocation.position[2],startLocation.position[3] )
-
-    Event.RequestTeleport:Broadcast({character = character, target = {startLocation.position[1], startLocation.position[2], startLocation.position[3]}})
-    Event.RequestRotation:Broadcast({character = character, target = startLocation.rotation})
-
-    Osi.RemoveBoosts(character, "ActionResourceBlock(Movement)", 0, "", "") -- Unlocks movement
-    Osi.RemoveStatus(character, "BG3SX_DisableAI", "") -- Unlocks AI
-
-    scene:ToggleCampFlags(character) -- Toggles camp flags so companions return to tents IF they had them before
-
-    -- Re-attach entity to make it selectable again
-    Osi.SetDetached(character, 0)
-    if Table.Contains(scene.CouldJoinCombat, character) then -- Check if entity was allowed combat before
-        Osi.SetCanJoinCombat(character, 1) -- Re-enable combat
-    end
-    if Table.Contains(scene.WasOnStage, character) then -- Check if entity was on stage before
-        -- Osi.SetOnStage(character, 1) -- Re-enable AI
-    end
-
-    -- local animationWaterfall = Mods.BG3AF.AnimationWaterfall.Get(character)
-    -- animationWaterfall:RemoveWaterfallElement(Data.AnimationSets["BG3SX_Body"].Uuid)
 end
 
 
@@ -614,20 +722,7 @@ function Scene:Destroy()
     self:CancelAllSoundTimers()
     self:DestroyProps()
     self:CleanupSummons()
-
-    -- self:StopAnimation() -- maybe use this new function instead of playing a "nothing" animation
-    for _, entity in pairs(self.entities) do
-
-        sceneEntityReset(entity)
-
-        local nothing = "88f5df46-921d-4a28-93b6-202df636966c" -- Random UUID - This is nothing, NULL or "" doesn't work, crashes the game.
-        Osi.PlayAnimation(entity, nothing) -- To cancel out of any ongoing animations
-        Osi.PlaySound(entity, Data.Sounds.Orgasm[math.random(1, #Data.Sounds.Orgasm)]) -- TODO - change this to a generic sound for when we use this for non-sex instead
-
-        if Entity:IsNPC(entity) then
-            NPC.RemoveGenitals(entity)
-        end
-    end
+    self:EntityReset()
 
     for i,scene in ipairs(Data.SavedScenes) do
         if scene == self then

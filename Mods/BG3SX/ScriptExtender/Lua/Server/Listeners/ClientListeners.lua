@@ -12,84 +12,171 @@ Event.RequestSyncActiveScenes:SetHandler(function ()
     Event.SyncActiveScenes:Broadcast(Data.SavedScenes)
 end)
 
-
-Event.AskForSex:SetHandler(function (payload)
-    -- Debug.Print("ASK FOR SEX RECEIVED")
-    -- Debug.Dump(payload)
+Event.NewSceneRequest:SetHandler(function (payload)
     local caster = payload.Caster
     local target = payload.Target
-    --Debug.Print("CASTER ".. caster)
-    --Debug.Print("TARGET ".. target)
+    local type = payload.Type
 
-
-    local allow = true
-    for _,scene in pairs(Data.SavedScenes) do
-        for _,involved in pairs(scene.entities) do
-            if (caster == involved) or (target == involved) then
-                allow = false
-                Debug.Print("Requestee or target already in a scene")
-                -- TODO: Show this in UI as well
-            end
+    if Scene.ExistsInScene(caster) or Scene.ExistsInScene(target) then
+        if Scene.ExistsInScene(caster) then
+            Debug.Print("Caster already in scene " .. Scene.FindSceneByEntity(caster).Uuid)
         end
+        if Scene.ExistsInScene(target) then
+            Debug.Print("Target already in scene " .. Scene.FindSceneByEntity(target).Uuid)
+        end
+        return
     end
 
-    if allow then
-        -- Add BG3SX AnimationSets
-        -- if BG3AFActive then
-        --     local function addWaterfallToEntity(entity, tbl)
-        --         local animWaterfall = Mods.BG3AF.AnimationWaterfall.Get(entity)
-        --         local waterfallEntry = animWaterfall:AddWaterfall(tbl)
-        --     end
-
-        --     local tbl = {
-        --         Resource = Data.AnimationSets["BG3SX_Body"].Uuid,
-        --         DynamicAnimationTag = "9bfa73ed-2573-4f48-adc3-e7e254a3aadb",
-        --         Slot = "", -- 0 = Body, 1 = Attachment
-        --         OverrideType = 0, -- 0 = Replace, 1 = Additive
-        --     }
-
-        --     addWaterfallToEntity(caster, tbl)
-        --     if not Helper.StringContainsOne(caster, target) then
-        --         addWaterfallToEntity(target, tbl)
-        --     end
-        -- else
-        --     Debug.Print("BG3AF not found")
-        -- end
-
-        -- masturbation 
-        if Helper.StringContainsOne(caster, target) then
-            if Entity:IsWhitelisted(caster, true) then
-                Entity:ClearActionQueue(caster)
-                -- Ext.Timer.WaitFor(200, function() -- Wait for erections
-                    Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Start Masturbating"])
-                -- end)
-                Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Start Masturbating"]})
-            end
-
-        -- sex
-        else
-            if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
-                Entity:ClearActionQueue(caster)
-                Entity:ClearActionQueue(target)
-                -- Ext.Timer.WaitFor(200, function() -- Wait for erections
-                    Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Ask for Sex"])
-                -- end)
-                Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Ask for Sex"]})
-            end
-        end
+    if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
+    else return
     end
 
+    if type == "SFW" then
+        if Helper.StringContainsOne(caster, target) then -- SoloScene
+            local scene = Scene:New({Type = "SFW", Entities = {caster}, Animation = Data.IntroAnimations[ModuleUUID]["Start SFW"], Fade = 666})
+            scene:Init()
+            scene:PlayAnimation(Data.IntroAnimations[ModuleUUID]["Start SFW"])
+            
+        else-- PairedScene
+            local scene = Scene:New({Type = "SFW", Entities = {caster, target}, Animation = Data.IntroAnimations[ModuleUUID]["Hug or Carry"], Fade = 666})
+            scene:Init()
+            scene:PlayAnimation(Data.IntroAnimations[ModuleUUID]["Hug or Carry"])
+        end
+
+    elseif type == "NSFW" then
+        if Helper.StringContainsOne(caster, target) then -- SoloScene
+            local scene = Scene:New({Type = "NSFW", Entities = {caster}, Animation = Data.IntroAnimations[ModuleUUID]["Start Masturbating"], Fade = 666})
+            scene:Init()
+            scene:PlayAnimation(Data.IntroAnimations[ModuleUUID]["Start Masturbating"])
+            
+        else -- PairedScene
+            local scene = Scene:New({Type = "NSFW", Entities = {caster, target}, Animation = Data.IntroAnimations[ModuleUUID]["Hug or Carry"], Fade = 666})
+            scene:Init()
+            scene:PlayAnimation(Data.IntroAnimations[ModuleUUID]["Hug or Carry"])
+        end
+    else
+        Debug.Print("Unknown scene type: " .. type)
+    end
+end)
+
+Event.NewSFWScene:SetHandler(function (payload)
+    local caster = payload.Caster
+    local target = payload.Target
+
+    if Scene.ExistsInScene(caster) or Scene.ExistsInScene(target) then
+        Debug.Print("Caster or target already in a scene")
+        return
+    end
+
+    -- Add BG3SX AnimationSets
+    -- if BG3AFActive then
+    --     local function addWaterfallToEntity(entity, tbl)
+    --         local animWaterfall = Mods.BG3AF.AnimationWaterfall.Get(entity)
+    --         local waterfallEntry = animWaterfall:AddWaterfall(tbl)
+    --     end
+
+    --     local tbl = {
+    --         Resource = Data.AnimationSets["BG3SX_Body"].Uuid,
+    --         DynamicAnimationTag = "9bfa73ed-2573-4f48-adc3-e7e254a3aadb",
+    --         Slot = "", -- 0 = Body, 1 = Attachment
+    --         OverrideType = 0, -- 0 = Replace, 1 = Additive
+    --     }
+
+    --     addWaterfallToEntity(caster, tbl)
+    --     if not Helper.StringContainsOne(caster, target) then
+    --         addWaterfallToEntity(target, tbl)
+    --     end
+    -- else
+    --     Debug.Print("BG3AF not found")
+    -- end
+
+    if Helper.StringContainsOne(caster, target) then -- SoloScene
+        if Entity:IsWhitelisted(caster, true) then
+            Entity:ClearActionQueue(caster)
+            -- Ext.Timer.WaitFor(200, function() -- Wait for erections
+                -- Sex:NewSFWScenePreSetup(caster, {target}, Data.IntroAnimations[ModuleUUID]["Start Masturbating"])
+            Scene:New({Type = "SFW", Entities = {caster}, Animation = Data.IntroAnimations[ModuleUUID]["Start Masturbating"]}):Init()
+            -- end)
+            -- Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Start Masturbating"]})
+        end
+
+    else -- PairedScene
+        if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
+            Entity:ClearActionQueue(caster)
+            Entity:ClearActionQueue(target)
+            -- Ext.Timer.WaitFor(200, function() -- Wait for erections
+                -- Sex:NewSFWScenePreSetup(caster, {target}, Data.IntroAnimations[ModuleUUID]["Ask for Sex"])
+                Scene:New({Type = "SFW", Entities = {caster, target}, Animation = Data.IntroAnimations[ModuleUUID]["Ask for Sex"]}):Init()
+            -- end)
+            -- Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Ask for Sex"]})
+        end
+    end
+end)
+
+Event.NewNSFWScene:SetHandler(function (payload)
+    local caster = payload.Caster
+    local target = payload.Target
+    -- local type = payload.Type
+
+    if Scene.ExistsInScene(caster) or Scene.ExistsInScene(target) then
+        Debug.Print("Caster or target already in a scene")
+        return
+    end
+
+    -- Add BG3SX AnimationSets
+    -- if BG3AFActive then
+    --     local function addWaterfallToEntity(entity, tbl)
+    --         local animWaterfall = Mods.BG3AF.AnimationWaterfall.Get(entity)
+    --         local waterfallEntry = animWaterfall:AddWaterfall(tbl)
+    --     end
+
+    --     local tbl = {
+    --         Resource = Data.AnimationSets["BG3SX_Body"].Uuid,
+    --         DynamicAnimationTag = "9bfa73ed-2573-4f48-adc3-e7e254a3aadb",
+    --         Slot = "", -- 0 = Body, 1 = Attachment
+    --         OverrideType = 0, -- 0 = Replace, 1 = Additive
+    --     }
+
+    --     addWaterfallToEntity(caster, tbl)
+    --     if not Helper.StringContainsOne(caster, target) then
+    --         addWaterfallToEntity(target, tbl)
+    --     end
+    -- else
+    --     Debug.Print("BG3AF not found")
+    -- end
+
+    if Helper.StringContainsOne(caster, target) then -- SoloScene
+        if Entity:IsWhitelisted(caster, true) then
+            Entity:ClearActionQueue(caster)
+            -- Ext.Timer.WaitFor(200, function() -- Wait for erections
+                -- Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Start Masturbating"])
+                Scene:New({Type = "NSFW", Entities = {caster}, Animation = Data.IntroAnimations[ModuleUUID]["Start Masturbating"]}):Init()
+            -- end)
+            -- Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Start Masturbating"]})
+        end
+
+    else -- PairedScene
+        if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
+            Entity:ClearActionQueue(caster)
+            Entity:ClearActionQueue(target)
+            -- Ext.Timer.WaitFor(200, function() -- Wait for erections
+                -- Sex:StartSexSpellUsed(caster, {target}, Data.IntroAnimations[ModuleUUID]["Ask for Sex"])
+                Scene:New({Type = "NSFW", Entities = {caster, target}, Animation = Data.IntroAnimations[ModuleUUID]["Ask for Sex"]}):Init()
+            -- end)
+            -- Ext.ModEvents.BG3SX.StartSexSpellUsed:Throw({caster = caster, target = target, animData = Data.IntroAnimations[ModuleUUID]["Ask for Sex"]})
+        end
+    end
 end)
 
 
 Event.TogglePause:SetHandler(function (payload)
-    local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
+    local scene = Scene.FindSceneByEntity(payload.Scene.entities[1])
     scene:TogglePause()
     -- If we add transitioning animations - our own loop system we need to also pause potential scene timers
 end)
 
 Event.SwapPosition:SetHandler(function (payload)
-    local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
+    local scene = Scene.FindSceneByEntity(payload.Scene.entities[1])
     scene:SwapPosition()
 end)
 
@@ -97,7 +184,7 @@ Event.ChangeCameraHeight:SetHandler(function (payload)
     Debug.Print("Currently not Implemented - Needs access to Camera Control")
 end)
 Event.MoveScene:SetHandler(function (payload)
-    local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
+    local scene = Scene.FindSceneByEntity(payload.Scene.entities[1])
     local position = payload.Position -- vec3 WorldPosition table {x,y,z}
 
     scene:MoveSceneToLocation(position)
@@ -105,7 +192,7 @@ end)
 
 
 Event.StopSex:SetHandler(function (payload)
-    local scene = Scene:FindSceneByEntity(payload.Scene.entities[1]) -- Re-get scene because scene send as payload lost metatable status
+    local scene = Scene.FindSceneByEntity(payload.Scene.entities[1]) -- Re-get scene because scene send as payload lost metatable status
     if scene then
         -- Event.SceneControlInstanceDestroyed:Broadcast(payload.Scene.entities)
         scene:Destroy()
@@ -128,13 +215,13 @@ end)
 
 
 Event.RotateScene:SetHandler(function (payload)
-    local scene = Scene:FindSceneByEntity(payload.Scene.entities[1])
+    local scene = Scene.FindSceneByEntity(payload.Scene.entities[1])
     local position = payload.Position
     scene:RotateScene(position)
 end)
 
 Event.FetchAnimations:SetHandler(function (payload)
-    local sceneType = Scene:FindSceneByEntity(payload.Caster)
+    local sceneType = Scene.FindSceneByEntity(payload.Caster)
     local container = nil
     for _,type in pairs(Data.SceneTypes) do
         if type.sceneType == sceneType then
@@ -209,6 +296,7 @@ end)
 
 Ext.Osiris.RegisterListener("LevelGameplayStarted", 2, "after", function(_, _)
     Event.ChangeCharacter:Broadcast("")
+    -- UI.AppearanceTab:UpdateReplicationListener()
 end)
 
 
@@ -230,7 +318,7 @@ Event.ChangeAnimation:SetHandler(function (payload)
     local caster = payload.Caster
     local moduleUUID = payload.moduleUUID
     local animationData = payload.AnimationData
-    local scene = Scene:FindSceneByEntity(caster)
+    local scene = Scene.FindSceneByEntity(caster)
     -- _D(scene)
     -- _D(animationData)
     scene:PlayAnimation(animationData)
@@ -275,8 +363,8 @@ Event.FetchUserTags:SetHandler(function(payload)
 end)
 
 -- Ext.ModEvents.BG3AF.WaterfallReplicated:Subscribe(function (uuid)
---     if Scene:FindSceneByEntity(uuid) then
---         local scene = Scene:FindSceneByEntity(uuid)
+--     if Scene.FindSceneByEntity(uuid) then
+--         local scene = Scene.FindSceneByEntity(uuid)
 --         if scene and not scene.ReplicatedWaterfalls then
 --             scene.ReplicatedWaterfalls = {}
 --         end

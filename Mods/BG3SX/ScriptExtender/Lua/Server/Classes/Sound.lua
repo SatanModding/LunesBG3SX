@@ -30,7 +30,7 @@ end
 --------------------------------------------------------------
 
 playSound = function(self)
-    local scene = Scene:FindSceneByEntity(self.actor)
+    local scene = Scene.FindSceneByEntity(self.actor)
     if scene then
         local minRepeatTime = self.duration - 200
         local maxRepeatTime = self.duration + 200

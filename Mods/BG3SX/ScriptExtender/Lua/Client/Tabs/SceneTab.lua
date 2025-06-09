@@ -5,7 +5,7 @@ SceneTab.__index = SceneTab
 
 function SceneTab:New(holder)
     if UI.SceneTab then return end -- Fix for infinite UI repopulation
-    
+
     local instance = setmetatable({
         Tab = holder:AddTabItem(Ext.Loca.GetTranslatedString("hc21d333db09549dbbd1fcfaa6fdecb2a2b09", "Scenes")),
         Scenes = {},
@@ -55,23 +55,23 @@ end
 function SceneTab:CreateNewSceneArea()
     self.NoSceneText = self.Tab:AddText("No active scenes, create one by:\n1. Select a character in the UI.\n2. Click the BG3SX button.\n3. Select a character of your choice to start a scene with\n(In open world or UI)")
 
-    self.SFWSceneButton = self.Tab:AddImageButton("Create SFW Scene", "Action_Song_BardDance", {100,100})
-    self.SFWSceneButton:Tooltip():AddText("Create SFW Scene")
+    self.SFWSceneButton = self.Tab:AddImageButton("\t " .. Ext.Loca.GetTranslatedString("hfea9831b6ec148f1a9ddd486c3a0257c0610", "Create SFW Scene"), "BG3SX_SFW_Scene", {75,75})
+    self.SFWSceneButton:Tooltip():AddText("\t " .. Ext.Loca.GetTranslatedString("hfea9831b6ec148f1a9ddd486c3a0257c0610", "Create SFW Scene"))
     self.SFWSceneButton.OnClick = function()
         if self.NewSceneEligible == true then
-            self:AwaitNewScene() -- Currently does the same as regular new scene button
+            self:AwaitNewScene("SFW") -- Currently does the same as regular new scene button
         end
     end
-    self.SFWSceneButton.Visible = false
+    -- self.SFWSceneButton.Visible = false
 
-    self.NSFWSceneButton = self.Tab:AddImageButton(Ext.Loca.GetTranslatedString("hc266ca8031ad49239c1cc596692c5102c9ba", "Create Scene"), "BG3SX_ICON_MAIN", {100,100})
-    self.NSFWSceneButton:Tooltip():AddText(Ext.Loca.GetTranslatedString("hc266ca8031ad49239c1cc596692c5102c9ba", "Create Scene"))
+    self.NSFWSceneButton = self.Tab:AddImageButton("\t" .. Ext.Loca.GetTranslatedString("hc266ca8031ad49239c1cc596692c5102c9ba", "Create NSFW Scene"), "BG3SX_ICON_MAIN", {75,75})
+    self.NSFWSceneButton:Tooltip():AddText("\t" .. Ext.Loca.GetTranslatedString("hc266ca8031ad49239c1cc596692c5102c9ba", "Create NSFW Scene"))
     self.NSFWSceneButton.OnClick = function()
         if self.NewSceneEligible == true then
-            self:AwaitNewScene()
+            self:AwaitNewScene("NSFW")
         end
     end
-    -- self.NSFWSceneButton.SameLine = true
+    self.NSFWSceneButton.SameLine = true
 
     self.NewSceneEligible = true
     self.ControlsText = self.Tab:AddText("Mouse:\nLeft click | Right click to cancel\nController:\nLeft stick to start targeting + A | B to cancel")
@@ -84,8 +84,12 @@ function SceneTab:CreateNewSceneArea()
     self.InfoText.Visible = false
 end
 
-function SceneTab:AwaitNewScene()
-    UI:AwaitInput("NewScene")
+function SceneTab:AwaitNewScene(type)
+    if type == "SFW" then
+        UI:AwaitInput("NewSFWScene")
+    elseif type == "NSFW" then
+        UI:AwaitInput("NewNSFWScene")
+    end
 end
 
 function SceneTab:UpdateNoSceneText()

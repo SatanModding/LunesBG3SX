@@ -1095,7 +1095,7 @@ function Entity:HasTags(uuid)
     if tags and #tags >0 then
         return true
     else
-        local msg = "[BG3SX][Whitelist.lua]\n Not a single Tag was found on this entity. Please contact race mod author."
+        local msg = "[BG3SX][Whitelist.lua]\n Not a single Tag was found on entity " .. uuid .. ". Please contact race mod author."
         _P(msg)
         Ext.Loca.UpdateTranslatedString(popuphandle, msg)
         Osi.OpenMessageBox(uuid, popupkey)

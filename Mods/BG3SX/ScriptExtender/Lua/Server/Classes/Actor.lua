@@ -38,7 +38,7 @@ function Actor:new(parent)
         armour           = {},
         isResculpted     = false,
     }, Actor)
-    local scene = Scene:FindSceneByEntity(parent) -- Warning: Don't create scene reference in actor metatable or dumps of a scene will infinite loop
+    local scene = Scene.FindSceneByEntity(parent) -- Warning: Don't create scene reference in actor metatable or dumps of a scene will infinite loop
     instance.position = scene.rootPosition
     instance.uuid = Osi.CreateAt(Osi.GetTemplate(parent), instance.position.x, instance.position.y, instance.position.z, 1, 0, "")
 

@@ -9,8 +9,11 @@
 
     <!-- Scene -->
     <content contentuid="hc21d333db09549dbbd1fcfaa6fdecb2a2b09" version="1">Scenes</content>
-    <content contentuid="hc266ca8031ad49239c1cc596692c5102c9ba" version="1">Create Scene</content>
+    <content contentuid="hfea9831b6ec148f1a9ddd486c3a0257c0610" version="1">Create SFW Scene</content>
+    <content contentuid="hc266ca8031ad49239c1cc596692c5102c9ba" version="1">Create NSFW Scene</content>
     <content contentuid="hb393d16ea9494b2a8adfec48663c7512a69g" version="1">Running Scenes</content>
+        <!-- SceneControl -->
+        <content contentuid="h267d0a9d1a2240ffbedc0fa051388f9c8b52" version="1">No additional solo animations available for this scene. Our discord has nice tutorials tho!</content>
 
 	<!-- Appearance -->
     <content contentuid="h36809485096e467682a34b1a780bb4a4a816" version="1">Appearance</content>

@@ -16,7 +16,7 @@ Ext.Osiris.RegisterListener("UsingSpell", 5, "after", function(caster, spell, _,
     -- if spell == "BG3SX_SwitchPlaces" then
     --     -- TODO: Find a way to make this dynamic and not hardcoded to only switch actor[1] and actor[2]
     --     -- Sex:SwitchPlaces(caster) -- bundle all of this in a new function instead to handle place switching
-    --     local scene = Scene:FindSceneByEntity(caster)
+    --     local scene = Scene.FindSceneByEntity(caster)
     --     local savedActor = scene.actors[1]
 
     --     Ext.ModEvents.BG3SX.SceneSwitchPlacesBefore:Throw({scene.actors})
@@ -31,7 +31,7 @@ Ext.Osiris.RegisterListener("UsingSpell", 5, "after", function(caster, spell, _,
     --     Sex:ChangeCameraHeight(caster)
     -- end
     -- if spell == "BG3SX_StopAction" then
-    --     local scene = Scene:FindSceneByEntity(caster)
+    --     local scene = Scene.FindSceneByEntity(caster)
     --     scene:Destroy()
     -- end
 end)

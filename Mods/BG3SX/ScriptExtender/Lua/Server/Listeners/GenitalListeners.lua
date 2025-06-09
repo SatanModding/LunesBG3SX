@@ -48,33 +48,35 @@ Event.SetActiveGenital:SetHandler(function (payload)
 
     -- If active is changed, update UserVars, search for active actors, and change their genitals as well
 
-    local scene = Scene:FindSceneByEntity(uuid)
+    local scene = Scene.FindSceneByEntity(uuid)
 
     -- character is currently in a sex scene (currently only works for scenes of 1 or 2 characters)
     if scene then
-        -- immediately swap genitals
-        Genital.OverrideGenital(genital, entity)
+        if scene.Type == "NSFW" then
+            -- immediately swap genitals
+            Genital.OverrideGenital(genital, entity)
 
-        scene.SceneType = Helper.DetermineSceneType(scene)
-        -- if it is apaired animation, then swap the "top" and "bottom" based on genitals
-        if #scene.entities == 2 then
-            if Entity:HasPenis(scene.entities[1]) ~= Entity:HasPenis(scene.entities[2]) then
-                if not Entity:HasPenis(scene.entities[1]) then
-                    local savedActor = scene.entities[1]
-                    scene.entities[1] = scene.entities[2]
-                    scene.entities[2] = savedActor
+            scene.SceneType = Helper.DetermineSceneType(scene)
+            -- if it is apaired animation, then swap the "top" and "bottom" based on genitals
+            if #scene.entities == 2 then
+                if Entity:HasPenis(scene.entities[1]) ~= Entity:HasPenis(scene.entities[2]) then
+                    if not Entity:HasPenis(scene.entities[1]) then
+                        local savedActor = scene.entities[1]
+                        scene.entities[1] = scene.entities[2]
+                        scene.entities[2] = savedActor
+                    end
                 end
             end
-        end
 
-        for _, character in pairs(scene.entities) do    
-            Event.UpdateSceneControlPicker:SendToClient({SceneType = scene.SceneType, Character = character}, character)
+            for _, character in pairs(scene.entities) do    
+                Event.UpdateSceneControlPicker:SendToClient({SceneType = scene.SceneType, Character = character}, character)
 
-                -- wait for the replication event to be sent to the AF and the AniamtionWaterfall to be re-adde don client
-            --Ext.Timer.WaitFor(2000, function ()
-                -- print("resetting animation")
-                -- Animation.ResetAnimation(uuid)
-            --end)
+                    -- wait for the replication event to be sent to the AF and the AniamtionWaterfall to be re-adde don client
+                --Ext.Timer.WaitFor(2000, function ()
+                    -- print("resetting animation")
+                    -- Animation.ResetAnimation(uuid)
+                --end)
+            end
         end
     end
 end)

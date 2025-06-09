@@ -35,7 +35,9 @@ Event:New("SendWhitelistStatus")
 
 --- Scene specific
 -- Client -> Server
-Event:New("AskForSex")
+Event:New("NewSceneRequest")
+Event:New("NewSFWScene")
+Event:New("NewNSFWScene")
 Event:New("ChangeAnimation")
 Event:New("SwapPosition")
 Event:New("RotateScene")

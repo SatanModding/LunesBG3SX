@@ -110,7 +110,7 @@ end
 
 function UI:CreateEventHandler()
     if not self.Await then -- Sanity Check
-        return nil,nil,nil
+        return nil,nil,nil,nil
     end
 
     local reason = self.Await.Reason
@@ -132,7 +132,8 @@ function UI:CreateEventHandler()
     --- MOUSE Buttons
     ---------------------------------------------------------
 
-    local mouseHandler = Ext.Events.MouseButtonInput:Subscribe(function (e)
+    local mouseHandler
+    mouseHandler = Ext.Events.MouseButtonInput:Subscribe(function (e)
         e:PreventAction() --jjdoorframe()
         if e.Button == 1 and e.Pressed == true then
             if getMouseover() and getMouseover().Inner then
@@ -141,23 +142,34 @@ function UI:CreateEventHandler()
                     self:InputRecieved(mouseoverPosition)
                 elseif reason == "RotateScene" then
                     self:InputRecieved(mouseoverPosition)
-                elseif reason == "NewScene" then
+                elseif reason == "NewSFWScene" or reason == "NewNSFWScene" then
+                    _P("NewSFWScene or NewNSFWScene")
                     if getMouseover().Inner.Inner[1] then
                         if getMouseover().Inner.Inner[1].Character then
-                            mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInterface:GetHovered().Uuid or nil
+                            mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or nil
                             if mouseoverTarget ~= nil then
                                 self:InputRecieved(mouseoverTarget)
                             else
                                 self:CancelAwaitInput("No entity found")
                             end
-                            self:InputRecieved(mouseoverTarget)
+                        elseif self.PartyInterface:GetHovered() then
+                            mouseoverTarget = self.PartyInterface:GetHovered().Uuid or nil
+                            if mouseoverTarget ~= nil then
+                                self:InputRecieved(mouseoverTarget)
+                            else
+                                self:CancelAwaitInput("No entity found")
+                            end
                         else
                             self:CancelAwaitInput("No entity found")
                         end
                     else
                         self:CancelAwaitInput("No entity found")
                     end
+                else
+                    self:CancelAwaitInput("No entity found")
                 end
+            else
+                self:CancelAwaitInput("No entity found")
             end
         elseif e.Button == 3 and e.Pressed == true then -- Button 3 is right click | 2 is middle mouse click
             self:CancelAwaitInput("Canceled") -- Cancel
@@ -188,9 +200,16 @@ function UI:CreateEventHandler()
             enteredTargeting = true
             self:HideWindows()
         elseif e.Button == "A" and e.Pressed == true and not enteredTargeting then-- UI target selection handling, when not in targeting mode
-            if reason == "NewScene" then
+            if reason == "NewSFWScene" or reason == "NewNSFWScene" then
                 if getMouseover() and getMouseover().UIEntity then -- In case a UI entity has been found
-                    mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInterface:GetHovered().Uuid or nil
+                    mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or nil
+                    if mouseoverTarget ~= nil then
+                        self:InputRecieved(mouseoverTarget)
+                    else
+                        self:CancelAwaitInput("No entity found")
+                    end
+                elseif self.PartyInterface:GetHovered() then
+                    mouseoverTarget = self.PartyInterface:GetHovered().Uuid or nil
                     if mouseoverTarget ~= nil then
                         self:InputRecieved(mouseoverTarget)
                     else
@@ -212,14 +231,21 @@ function UI:CreateEventHandler()
                     elseif reason == "RotateScene" then
                         self:InputRecieved(mouseoverPosition)
                         self:ShowWindows()
-                    elseif reason == "NewScene" then
+                    elseif reason == "NewSFWScene" or reason == "NewNSFWScene" then
                         if getMouseover().Inner.Inner[1] then
                             if getMouseover().Inner.Inner[1].Character then
-                                mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or self.PartyInterface:GetHovered().Uuid or nil
+                                mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or nil
                                 if mouseoverTarget ~= nil then
                                     self:InputRecieved(mouseoverTarget)
                                 else
-                                    self:CancelAwaitInput("No entity found")
+                                   controllerCancelAwaitInput("No entity found")
+                                end
+                            elseif self.PartyInterface:GetHovered() then
+                                mouseoverTarget = self.PartyInterface:GetHovered().Uuid or nil
+                                if mouseoverTarget ~= nil then
+                                    self:InputRecieved(mouseoverTarget)
+                                else
+                                    controllerCancelAwaitInput("No entity found")
                                 end
                             else
                                 controllerCancelAwaitInput("No entity found")
@@ -227,7 +253,11 @@ function UI:CreateEventHandler()
                         else
                             controllerCancelAwaitInput("No entity found")
                         end
+                    else
+                        controllerCancelAwaitInput("No entity found")
                     end
+                else
+                    controllerCancelAwaitInput("No entity found")
                 end
             elseif e.Button == "LeftStick" and e.Pressed == true then
                 enteredTargeting = false
@@ -299,9 +329,10 @@ end
 function UI:InputRecieved(inputPayload)
     if not self.Await then return end
     local reason = self.Await.Reason
-    if reason == "NewScene" then
-        -- _P("Ask for sex request. Caster: ", _C().Uuid.EntityUuid, " target = ", inputPayload)
-        Event.AskForSex:SendToServer({ID = USERID, Caster = UI:GetSelectedCharacter(), Target = inputPayload})
+    if reason == "NewSFWScene" then
+        Event.NewSceneRequest:SendToServer({ID = USERID, Caster = UI:GetSelectedCharacter(), Target = inputPayload, Type = "SFW"})
+    elseif reason == "NewNSFWScene" then
+        Event.NewSceneRequest:SendToServer({ID = USERID, Caster = UI:GetSelectedCharacter(), Target = inputPayload, Type = "NSFW"})
     elseif reason == "RotateScene" then
         Event.RotateScene:SendToServer({ID = USERID, Scene = self.Await.Payload, Position = inputPayload})
     elseif reason == "MoveScene" then

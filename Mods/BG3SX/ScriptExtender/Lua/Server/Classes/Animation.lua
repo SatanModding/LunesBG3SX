@@ -19,7 +19,7 @@ function Animation:New(actor, animData)
    
 
     local hmInstance = animData.Heightmatching
-    local scene = Scene:FindSceneByEntity(actor)
+    local scene = Scene.FindSceneByEntity(actor)
     local hmAnim
     local hmAnim2
     if hmInstance then
@@ -106,7 +106,7 @@ function Animation.ResetAnimation(character)
     -- while sex is active.... 
 
     -- print("resetting animation")
-    local currentScene = Scene:FindSceneByEntity(character)
+    local currentScene = Scene.FindSceneByEntity(character)
     if currentScene then
         -- print("scene exists. Resetting")
         -- ClientChanged takes a bit, If aniamtion is called too early, it gets reset again
