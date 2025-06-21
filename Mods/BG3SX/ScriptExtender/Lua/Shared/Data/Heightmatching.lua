@@ -584,15 +584,17 @@ function Heightmatching:NewGetAnimation(character1, character2, unlocked)
       return self.fallbackTop, self.fallbackBottom
     end
 
-    bs,bt,g = 0,0,"__"
+    -- === Entity One ===
+    local bs, bt, g = 0, 0, "__"
     if unlocked then
         -- print("is unlocked true ", unlocked)
         bs, bt = Heightmatching.GetEntityBodyUnlocked(character1)
     else
         bs, bt, g = Heightmatching.GetEntityBody(character1)
     end
-
-    local body = bs..bt..g
+    local body1 = bs .. bt .. g
+    local e1 = Ext.Entity.Get(character1)
+    local name1 = Helper.GetEntityName(e1)
 
     local scoresEntityOne = {}
 
@@ -603,21 +605,28 @@ function Heightmatching:NewGetAnimation(character1, character2, unlocked)
     local bestHMEntityOne = getBestValueOfAllScores(scoresEntityOne)
 
 
-    -- if Masturbation
+    -- === Masturbation (solo) ===
     if not character2 or Helper.StringContainsOne(character1, character2) then
-        print("BEST MATCH IS " .. bestHMEntityOne .. " with animation " , matchingTable[bestHMEntityOne].Solo)
-        return matchingTable[bestHMEntityOne].Solo
-    else
-        print("BEST MATCH IS " .. bestHMEntityOne .. " with the animations ")
-        -- _D(matchingTable[bestHMEntityOne])
+        return matchingTable[name1].Solo or matchingTable[bestHMEntityOne].Solo
     end
 
-    -- if Sex
-    bs2,bt2,g2 = 0,0, "__"
+    -- === Entity Two ===
+    local bs2, bt2, g2 = 0, 0, "__"
     if unlocked then
         bs2, bt2 = Heightmatching.GetEntityBodyUnlocked(character2)
     else
-        bs2, bt2, g = Heightmatching.GetEntityBody(character2)
+        bs2, bt2, g2 = Heightmatching.GetEntityBody(character2)
+    end
+    local body2 = bs2 .. bt2 .. g2
+    local e2 = Ext.Entity.Get(character2)
+    local name2 = Helper.GetEntityName(e2)
+
+    -- === Try direct name-to-name match ===
+    if matchingTable[name1] and matchingTable[name1][name2] then
+        local anim = matchingTable[name1][name2]
+        if anim then
+            return anim.Top, anim.Bottom
+        end
     end
 
     local body2 = bs2..bt2..g2
