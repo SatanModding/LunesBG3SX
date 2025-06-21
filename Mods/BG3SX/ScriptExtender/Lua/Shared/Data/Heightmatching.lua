@@ -456,8 +456,8 @@ end
 -- Custom scoring function
 local function custom_score(char1, char2)
 
-    if (char1 == "P" and char2 == "P") or  (char1 == "V" and char2 == "V") then -- (char1 == "_" and char2 == "_") or 
-        return 100000 -- Prioritize matching "_" with "P" or "V"
+    --if (char1 == "P" and char2 == "P") or  (char1 == "V" and char2 == "V") then -- (char1 == "_" and char2 == "_") or 
+        return 1 -- Prioritize matching "_" with "P" or "V"
         -- ridiculously high score for testing
     elseif char1 == char2 then
         return 1 -- High score for match

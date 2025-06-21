@@ -834,6 +834,10 @@ Data.BlacklistedEntities = {
     "30edc515-b6f2-42c0-8459-41ae4c36b349", -- Gale Mirror Image
 }
 
+if Ext.Mod.GetMod("f88e61e3-1996-e948-38a6-bd5d7e495b0d") then -- Teenager Mol Mod
+    table.insert(Data.BlacklistedEntities, "c8ab1ca6-96bb-467e-91c9-af87bc4d3925") -- Mol
+end
+
 if Ext.IsServer() then
     Event.FetchIgnoredTags:SetHandler(function (payload)
         local combinedTagsToIgnore = {}
