@@ -13,6 +13,7 @@ Data.Equipment.Slots = {
     "VanityBody",
     "VanityBoots",
     --Weapons
+    "MusicalInstrument",
     "MeleeMainHand",
     "MeleeOffHand",
     "RangedMainHand",
@@ -24,6 +25,7 @@ Data.Equipment.Slots = {
 }
 
 Data.Equipment.WeaponSlots = {
+    "MusicalInstrument",
     "MeleeMainHand",
     "MeleeOffHand",
     "RangedMainHand",
