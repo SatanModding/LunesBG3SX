@@ -15,7 +15,7 @@ Data.BodyLibrary.BodyType = {
 -- Strong is only for humanoids
 Data.BodyLibrary.BodyShape = {
     [0] = "Med",
-    [1] = "Tall",
+    [1] = "Strong",
     [2] = "Small", -- Custom
     [3] = "Tiny" -- Custom
 }
