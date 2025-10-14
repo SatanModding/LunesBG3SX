@@ -9,6 +9,13 @@
 ---@field Characters table
 ---@field CurrentNPCs table
 ---@field SelectedCharacter string
+---@field Init fun(self:PartyInterface)
+---@field UpdateParty fun(self:PartyInterface)
+---@field UpdateNPCs fun(self:PartyInterface)
+---@field AddCharacter fun(self:PartyInterface, parent:ExtuiStyledRenderable, uuid:string):CharacterInterface
+---@field AddNPC fun(self:PartyInterface, parent:ExtuiStyledRenderable, uuid:string):NPCInterface
+---@field SetSelectedCharacter fun(self:PartyInterface, characterUuid:string)
+---@field GetHovered fun(self:PartyInterface):CharacterInterface|NPCInterface|nil
 
 PartyInterface = {}
 PartyInterface.__index = PartyInterface

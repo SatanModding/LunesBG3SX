@@ -334,7 +334,7 @@ function Heightmatching:NewGetAnimation(character1, character2, unlocked)
     end
     local bestHMEntityOne = getBestValueOfAllScores(scoresEntityOne)
 
-    -- === 1 Entity ===
+    -- === If no second entity, get solo animation ===
     if not character2 or Helper.StringContainsOne(character1, character2) then
         print("BEST MATCH IS " .. bestHMEntityOne .. " with animation " , matchingTable[bestHMEntityOne].Solo)
         return matchingTable[bestHMEntityOne].Solo
