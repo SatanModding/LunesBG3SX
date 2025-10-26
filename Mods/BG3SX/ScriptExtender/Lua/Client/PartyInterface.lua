@@ -34,6 +34,7 @@ function PartyInterface:Init()
     UI:RegisterSetting("PartyButtonSize",{100*ViewPortScale,100*ViewPortScale})
 
     self.PartyArea = self.Wrapper:AddCollapsingHeader("Party")
+    self.PartyArea.DefaultOpen = true
     self.NPCArea = self.Wrapper:AddCollapsingHeader("NPCs")
     self.NPCArea.Visible = false
 
