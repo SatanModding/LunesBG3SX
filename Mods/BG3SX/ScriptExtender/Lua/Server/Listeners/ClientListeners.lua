@@ -16,6 +16,8 @@ Event.NewSceneRequest:SetHandler(function (payload)
     local caster = payload.Caster
     local target = payload.Target
     local type = payload.Type
+    local isResponse = payload.IsResponse
+    local accepted = payload.Accepted
 
     if Scene.ExistsInScene(caster) or Scene.ExistsInScene(target) then
         if Scene.ExistsInScene(caster) then
@@ -27,8 +29,62 @@ Event.NewSceneRequest:SetHandler(function (payload)
         return
     end
 
-    if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
-    else return
+    local consentGranted = false
+
+    if not (Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true)) then
+        return
+    end
+
+    -- NPCs are assumed to automatically consent (this is the workaround for now)
+    if Entity:IsNPC(target) then
+        consentGranted = true
+    end
+
+    -- For player response with consent, proceed
+    if isResponse and accepted then
+        consentGranted = true
+    end
+
+    if isResponse and not accepted then
+        Debug.Print(string.format("[BG3SX] Consent not given by target %s — aborting scene.", target))
+        return
+    end
+
+    -- For initial player requests, first ask for consent
+    if not consentGranted and not isResponse then
+        local entity = Ext.Entity.Get(target)
+        local targetClient = nil
+
+        -- Only send consent form if the target is a different player avatar
+        if entity
+        and entity.UserReservedFor
+        and entity.UserReservedFor.UserID
+        and entity.CharacterCreationStats  -- only playable characters have this component?
+        and not Entity:IsNPC(target)
+        and not Helper.StringContainsOne(caster, target)
+        then
+            local targetUserID = entity.UserReservedFor.UserID
+            local casterEntity = Ext.Entity.Get(caster)
+            local casterUserID = casterEntity and casterEntity.UserReservedFor and casterEntity.UserReservedFor.UserID or nil
+
+            -- Make sure target and caster are not the same player (prevents self-consent requests for solo scenes)
+            if targetUserID and (not casterUserID or targetUserID ~= casterUserID) then
+                targetClient = targetUserID
+            end
+        end
+
+        if targetClient then
+            Debug.Print(string.format("[BG3SX] Sending consent request to client %s for target %s", targetClient, target))
+            Event.RequestSceneConsent:SendToClient({
+                Caster = caster,
+                Target = target,
+                Type = type
+            }, targetClient)
+
+            return
+        else
+            Debug.Print(string.format("[BG3SX] Skipping consent — target is NPC or self: %s", tostring(target)))
+        end
     end
 
     if type == "SFW" then
@@ -36,7 +92,7 @@ Event.NewSceneRequest:SetHandler(function (payload)
             local scene = Scene:New({Type = "SFW", Entities = {caster}, Animation = Data.IntroAnimations[ModuleUUID]["Start SFW"], Fade = 666})
             scene:Init()
             scene:PlayAnimation(Data.IntroAnimations[ModuleUUID]["Start SFW"])
-            
+
         else-- PairedScene
             local scene = Scene:New({Type = "SFW", Entities = {caster, target}, Animation = Data.IntroAnimations[ModuleUUID]["Hug or Carry"], Fade = 666})
             scene:Init()
@@ -48,7 +104,7 @@ Event.NewSceneRequest:SetHandler(function (payload)
             local scene = Scene:New({Type = "NSFW", Entities = {caster}, Animation = Data.IntroAnimations[ModuleUUID]["Start Masturbating"], Fade = 666})
             scene:Init()
             scene:PlayAnimation(Data.IntroAnimations[ModuleUUID]["Start Masturbating"])
-            
+
         else -- PairedScene
             local scene = Scene:New({Type = "NSFW", Entities = {caster, target}, Animation = Data.IntroAnimations[ModuleUUID]["Hug or Carry"], Fade = 666})
             scene:Init()

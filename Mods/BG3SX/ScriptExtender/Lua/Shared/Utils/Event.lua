@@ -54,6 +54,7 @@ Event:New("UpdateSceneControlPicker")
 Event:New("DestroyAllSceneControls")
 Event:New("SyncActiveScenes")
 Event:New("SceneControlInstanceDestroyed")
+Event:New("RequestSceneConsent")
 
 
 --- Genitals
