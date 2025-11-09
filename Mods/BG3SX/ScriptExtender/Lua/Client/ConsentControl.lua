@@ -53,6 +53,15 @@ function ConsentControlInstance:Initialize()
     self.Window:SetStyle("WindowRounding", 10)
     self.Window.Closeable = true
     self.Window.NoResize = true
+    self.Window.NoCollapse = true
+
+    self.Window.Open = true
+
+    self.Window.OnClose = function()
+        if not self.IsDestroyed then
+            self:Decline()
+        end
+    end
 
     local casterName = Helper.GetName(self.Payload.Caster) or "Player"
     local requestText = self.Window:AddText(string.format(

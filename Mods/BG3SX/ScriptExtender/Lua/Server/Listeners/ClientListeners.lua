@@ -35,6 +35,21 @@ Event.NewSceneRequest:SetHandler(function (payload)
         return
     end
 
+    -- Check if caster or target is incapacitated etc
+    local casterIncapacitated, casterStatusType = Data.Statuses.HasInvalidStatusType(caster)
+    if casterIncapacitated then
+        Debug.Print(string.format("[BG3SX] Caster %s has status type %s, blocking scene start.", 
+            caster, casterStatusType))
+        return
+    end
+    
+    local targetIncapacitated, targetStatusType = Data.Statuses.HasInvalidStatusType(target)
+    if targetIncapacitated then
+        Debug.Print(string.format("[BG3SX] Target %s has status type %s, blocking scene start.", 
+            target, targetStatusType))
+        return
+    end
+
     -- NPCs are assumed to automatically consent (this is the workaround for now)
     if Entity:IsNPC(target) then
         consentGranted = true
@@ -437,3 +452,4 @@ Event.ToggleInvisibility:SetHandler(function (uuid)
         Osi.SetVisible(uuid, 0)
     end
 end)
+
