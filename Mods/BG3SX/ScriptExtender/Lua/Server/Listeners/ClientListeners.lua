@@ -34,6 +34,16 @@ Event.NewSceneRequest:SetHandler(function (payload)
         return
     end
 
+    if Osi.IsDead(caster) == 1 then
+        Debug.Print(string.format("[BG3SX] Caster %s is dead, blocking scene start.", caster))
+        return
+    end
+    
+    if Osi.IsDead(target) == 1 then
+        Debug.Print(string.format("[BG3SX] Target %s is dead, blocking scene start.", target))
+        return
+    end
+
     -- Check if caster or target is incapacitated etc
     local casterIncapacitated, casterStatusType = Data.Statuses.HasInvalidStatusType(caster)
     if casterIncapacitated then
