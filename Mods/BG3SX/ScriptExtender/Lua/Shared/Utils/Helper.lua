@@ -421,14 +421,14 @@ function Helper.GetName(uuid)
     else
         return "No Name"
     end
- 
+
 end
 
 function Helper.IsUUID(val)
     local uuid_pattern = "^[0-9a-fA-F]{8}%-[0-9a-fA-F]{4}%-[1-5][0-9a-fA-F]{3}%-[89abAB][0-9a-fA-F]{3}%-[0-9a-fA-F]{12}$"
     return type(val) == "string" and val:match(uuid_pattern) ~= nil
 end
-    
+
 
 function Helper.GetAllClients()
 
@@ -440,12 +440,62 @@ function Helper.GetAllClients()
         if Ext.Entity.Get(partymember).ClientControl then
             table.insert(clients, partymember)
         end
-        
+
     end
 
     return clients
 end
 
+-- Helper function to safely get the client ID for an entity
+---@param uuid string The entity UUID
+---@return integer|nil clientId The client ID if valid, nil otherwise
+function Helper.GetClientIdForEntity(uuid)
+    local entity = Ext.Entity.Get(uuid)
+    if not entity then
+        Debug.Print("[BG3SX] GetClientIdForEntity: Entity not found for UUID: " .. tostring(uuid))
+        return nil
+    end
+
+    -- Check if entity has UserReservedFor component (for player avatars)
+    if entity.UserReservedFor and entity.UserReservedFor.UserID then
+        Debug.Print("[BG3SX] GetClientIdForEntity: Found UserReservedFor.UserID for " .. tostring(uuid))
+        return entity.UserReservedFor.UserID
+    end
+
+    -- For summons etc, try to find the owner's client
+    if entity.Owner and entity.Owner.Owner then
+        Debug.Print("[BG3SX] GetClientIdForEntity: Entity is owned, checking owner")
+        return Helper.GetClientIdForEntity(entity.Owner.Owner)
+    end
+
+    Debug.Print("[BG3SX] GetClientIdForEntity: No valid client found for " .. tostring(uuid))
+    return nil
+end
+
+-- Helper function to safely send event to client
+---@param event table
+---@param payload table
+---@param targetUuid string|integer
+---@return boolean success
+function Helper.SafeSendToClient(event, payload, targetUuid)
+    local clientId
+
+    if type(targetUuid) == "number" then
+        clientId = targetUuid
+        Debug.Print(string.format("[BG3SX] SafeSendToClient: Using provided user ID: %s", clientId))
+    else
+        clientId = Helper.GetClientIdForEntity(targetUuid)
+
+        if not clientId then
+            Debug.Print("[BG3SX] SafeSendToClient: Cannot send event, no valid client for UUID: " .. tostring(targetUuid))
+            return false
+        end
+    end
+
+    Debug.Print(string.format("[BG3SX] SafeSendToClient: Sending event to client %s", clientId))
+    event:SendToClient(payload, clientId)
+    return true
+end
 
 
 
@@ -456,7 +506,7 @@ function Helper.OptionalDelay(func, delay)
     if not delay then
         func()
     else
-        Ext.Timer.WaitFor(delay, function() 
+        Ext.Timer.WaitFor(delay, function()
             func()
         end)
     end
@@ -494,7 +544,7 @@ function Helper.DelayUntilTrue(func, getcondition, checkInterval, maxIterations,
             Helper.DelayUntilTrue(func, getcondition, checkInterval, maxIterations, currentIteration)
         end)
     end
-    
+
 end
 
 
@@ -508,15 +558,15 @@ function Helper.SortWithPrio(tableToSort, prioTable)
     table.sort(keys, function(a, b)
         local aInPriority = prioTable[a] or false
         local bInPriority = prioTable[b] or false
-        
+
         if aInPriority and not bInPriority then
             return true
         end
-        
+
         if not aInPriority and bInPriority then
             return false
         end
-        
+
         return a < b
     end)
 
@@ -575,7 +625,7 @@ function getControlledCharacter()
 
 
     local controlled = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
-    
+
     for _,entity in pairs(controlled) do
 
             if entity.ClientCharacter and entity.ClientCharacter.OwnerUserID == 1 then

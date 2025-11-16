@@ -1,10 +1,9 @@
 Event.FetchScenes:SetHandler(function (payload)
     if Data.SavedScenes and #Data.SavedScenes > 0 then
-        -- _P("SavedScenes exists")
-        Event.SendScenes:SendToClient(Data.SavedScenes, payload.ID)
+        Helper.SafeSendToClient(Event.SendScenes, Data.SavedScenes, payload.ID)
         Event.UpdateScenes:Broadcast(Data.SavedScenes)
     else
-        Event.SendScenes:SendToClient("Empty", payload.ID)
+        Helper.SafeSendToClient(Event.SendScenes, "Empty", payload.ID)
     end
 end)
 
@@ -68,9 +67,9 @@ Event.NewSceneRequest:SetHandler(function (payload)
     -- For initial player requests, first ask for consent
     if not consentGranted and not isResponse then
         local entity = Ext.Entity.Get(target)
-        local targetClient = nil
+        local shouldRequestConsent = false
 
-        -- Only send consent form if the target is a different player avatar
+        -- Only send consent if the target is a different player avatar
         if entity
         and entity.UserReservedFor
         and entity.UserReservedFor.UserID
@@ -82,23 +81,33 @@ Event.NewSceneRequest:SetHandler(function (payload)
             local casterEntity = Ext.Entity.Get(caster)
             local casterUserID = casterEntity and casterEntity.UserReservedFor and casterEntity.UserReservedFor.UserID or nil
 
-            -- Make sure target and caster are not the same player (prevents self-consent requests for solo scenes)
+            -- Make sure target and caster are not the same local player
             if targetUserID and (not casterUserID or targetUserID ~= casterUserID) then
-                targetClient = targetUserID
+                shouldRequestConsent = true
             end
         end
 
-        if targetClient then
-            Debug.Print(string.format("[BG3SX] Sending consent request to client %s for target %s", targetClient, target))
-            Event.RequestSceneConsent:SendToClient({
-                Caster = caster,
-                Target = target,
-                Type = type
-            }, targetClient)
+        if shouldRequestConsent then
+            Debug.Print(string.format("[BG3SX] Attempting to send consent request for target %s", target))
+            
+            -- New safeguard function
+            local success = Helper.SafeSendToClient(
+                Event.RequestSceneConsent,
+                {
+                    Caster = caster,
+                    Target = target,
+                    Type = type
+                },
+                target
+            )
+            
+            if not success then
+                Debug.Print("[BG3SX] Failed to send consent request - no valid client found, aborting scene request")
+            end
 
             return
         else
-            Debug.Print(string.format("[BG3SX] Skipping consent — target is NPC or self: %s", tostring(target)))
+            Debug.Print(string.format("[BG3SX] Skipping consent – target is NPC or self: %s", tostring(target)))
         end
     end
 
@@ -269,19 +278,17 @@ Event.StopSex:SetHandler(function (payload)
         scene:Destroy()
     end
 end)
+
 Event.FetchGenitals:SetHandler(function (payload)
-
-    -- Debug.Print("Recevied FetchGenitals for character ".. payload.Character)
-
-
-    -- local conts = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
-    -- if conts ~= nil then
-    --     for k, v in pairs(conts) do
-    --         --print("sending payload to ", v.UserReservedFor.UserID)
-    --         -- Event.SendGenitals:SendToClient({ID = payload.ID, Data = Data.CreateUIGenitalPayload(payload.Character), Whitelisted = Entity:IsWhitelisted(payload.Character)}, v.UserReservedFor.UserID)
-    --     end
-    -- end
-    Event.SendGenitals:SendToClient({ID = payload.ID, Data = Data.CreateUIGenitalPayload(payload.Character), Whitelisted = Entity:IsWhitelisted(payload.Character)}, payload.ID)
+    Helper.SafeSendToClient(
+        Event.SendGenitals,
+        {
+            ID = payload.ID, 
+            Data = Data.CreateUIGenitalPayload(payload.Character), 
+            Whitelisted = Entity:IsWhitelisted(payload.Character)
+        },
+        payload.ID
+    )
 end)
 
 
@@ -340,19 +347,23 @@ end)
 
 Event.FetchParty:SetHandler(function (payload)
     local party = Osi.DB_PartyMembers:Get(nil)
-    -- _P("SEND PARTY ----------------------TO CLIENT WITH ID", payload.ID, "--------------------------")
-    Event.SendParty:SendToClient(party, payload.ID)
+    Helper.SafeSendToClient(Event.SendParty, party, payload.ID)
 end)
 
 Event.FetchWhitelist:SetHandler(function (payload)
-    local newPayload = {Whitelist = Data.AllowedTagsAndRaces, ModdedTags = Data.ModdedTags, Whitelisted = Data.WhitelistedEntities, Blacklisted = Data.BlacklistedEntities}
-    Event.SendWhitelist:SendToClient(newPayload, payload.ID)
+    local newPayload = {
+        Whitelist = Data.AllowedTagsAndRaces, 
+        ModdedTags = Data.ModdedTags, 
+        Whitelisted = Data.WhitelistedEntities, 
+        Blacklisted = Data.BlacklistedEntities
+    }
+    Helper.SafeSendToClient(Event.SendWhitelist, newPayload, payload.ID)
 end)
 
 Event.RequestWhitelistStatus:SetHandler(function (payload)
     local uuid = payload.Uuid
     local status = Entity:IsWhitelisted(uuid)
-    Event.SendWhitelistStatus:SendToClient({Status = status}, payload.ID)
+    Helper.SafeSendToClient(Event.SendWhitelistStatus, {Status = status}, payload.ID)
 end)
 
 
@@ -398,19 +409,13 @@ end)
 
 
 Event.FetchWhitelistedNPCs:SetHandler(function(payload)
-    -- print("reveived FetchWhitelistedNPCs")
     local tbl = payload.tbl
     local filtered = {}
-
-    -- print("dumping payload")
-    -- _D(payload.client)
 
     if not payload.client then
         Debug.Print("ERROR, CLIENT NOT FOUND")
         return
     end
-
-
 
     for _, character in pairs(tbl) do
         if Entity:IsWhitelisted(character) then
@@ -418,8 +423,7 @@ Event.FetchWhitelistedNPCs:SetHandler(function(payload)
         end
     end
 
-    -- Debug.Print("sending event  Event.SendWhitelistedNPCs:SendToClient")
-    Event.SendWhitelistedNPCs:SendToClient(filtered, payload.client)
+    Helper.SafeSendToClient(Event.SendWhitelistedNPCs, filtered, payload.client)
 end)
 
 Event.FetchUserTags:SetHandler(function(payload)
@@ -430,7 +434,7 @@ Event.FetchUserTags:SetHandler(function(payload)
     for _,tagUUID in pairs(tags) do
         table.insert(nonArrayTags,tagUUID)
     end
-    Event.SendUserTags:SendToClient(nonArrayTags, payload.ID)
+    Helper.SafeSendToClient(Event.SendUserTags, nonArrayTags, payload.ID)
 end)
 
 -- Ext.ModEvents.BG3AF.WaterfallReplicated:Subscribe(function (uuid)
