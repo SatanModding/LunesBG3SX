@@ -39,7 +39,7 @@ function SettingsTab:Init()
     local sceneGroup = generalSettingsGroup:AddGroup("NPCTab Settings")
     sceneGroup:AddSeparatorText(Ext.Loca.GetTranslatedString("hb21edb40a9044ddcb50f2557b6a00ae27933", "NPCTab Settings"))
 
-    UI.Settings.AutomaticNPCScan = self:AddSettingBox(generalSettingsGroup, Ext.Loca.GetTranslatedString("hb2022efb943c40ee8e6a8bb9f354eb308d46", "Automatic NPC Scan"), true, function(checked)
+    UI.Settings.AutomaticNPCScan = self:AddSettingBox(generalSettingsGroup, Ext.Loca.GetTranslatedString("hb2022efb943c40ee8e6a8bb9f354eb308d46", "Automatic NPC Scan"), false, function(checked)
        if checked then
             UI.NPCTab.ManualScan.Visible = false
         else

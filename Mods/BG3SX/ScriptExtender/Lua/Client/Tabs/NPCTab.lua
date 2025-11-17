@@ -186,7 +186,7 @@ function NPCTab:Init()
     self.ManualScan = self.Tab:AddButton("Scan")
     self.ManualScan.IDContext = tostring(math.random(1000,100000))
     self.ManualScan.SameLine = true
-    self.ManualScan.Visible = false
+    self.ManualScan.Visible = true
     self.ManualScan.OnClick = function()
         self:ScanForNPCs()
     end
