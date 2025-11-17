@@ -19,7 +19,7 @@ function Sound:New(actor, animSpell)
         actor = actor,
         soundTable = animSpell.SoundTop or animSpell.SoundBottom or nil,
         duration = animSpell.Duration
-    }, Animation)
+    }, Sound)
     playSound(instance) -- Automatically calls this function on creation
 
     return instance
@@ -37,7 +37,7 @@ playSound = function(self)
         local nothing = "1f012ea2-236e-473c-b261-4523753ab9bb" -- Can't use NULL
         Osi.PlaySound(self.actor, nothing) -- First, stop current sound
 
-        if self.SoundTable then
+        if self.soundTable then
             local sound = self.soundTable[math.random(1, #self.soundTable)]
             if sound then
                 Osi.PlaySound(self.actor, sound) -- Plays a random entry of sounds on an actor
