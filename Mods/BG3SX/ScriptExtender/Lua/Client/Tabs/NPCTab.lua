@@ -78,9 +78,7 @@ function NPCTab:ScanForNPCs()
             local entity = Ext.Entity.Get(character)
             if entity and Math.IsWithinDistanceBetweenEntities(_C(), entity, distance) then
                 if IsNPC(entity) then
-                    if Osi.IsDead(entity.Uuid.EntityUuid) ~= 1 then
-                        table.insert(inRange, Helper.GetName(entity.Uuid.EntityUuid) .. " - " .. entity.Uuid.EntityUuid)
-                    end
+                    table.insert(inRange, Helper.GetName(entity.Uuid.EntityUuid) .. " - " .. entity.Uuid.EntityUuid)
                 end
             end
         end
