@@ -38,7 +38,7 @@
 				</node>
 				<node id="Resource">
 					<attribute id="ID" type="FixedString" value="f1bc6e5c-9a1b-418b-8c23-23b8d98caf36" />
-					<attribute id="Name" type="LSString" value="BG3SX_Face" />
+					<attribute id="Name" type="LSString" value="BG3SX_Head" />
 					<attribute id="PreviewVisualResourceID" type="guid" value="00000000-0000-0000-0000-000000000000" />
 					<attribute id="SourceFile" type="LSString" value="" />
 					<attribute id="_OriginalFileVersion_" type="int64" value="144115207403209016" />

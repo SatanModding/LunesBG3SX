@@ -1,21 +1,26 @@
+local BG3AF
+if BG3AFActive then
+    BG3AF = Mods.BG3AF.API
+end
+
 Data.AnimationSets = { -- Check BG3AF about what Slot and Type means
-["BG3SX_Body"] = {Uuid = "bfa9dad2-2a5b-45cc-b770-9537badf9152", Slot = 0, Type = "Visual"},
-["BG3SX_Loco"] = {Uuid = "0c914b3f-5f24-441b-9be6-c25f4a424cfa", Slot = 0, Type = "Visual"},
-["BG3SX_Idle"] = {Uuid = "284eea6d-c693-4e4f-8527-f40433169e0c", Slot = 0, Type = "Visual"},
-["BG3SX_Face"] = {Uuid = "f1bc6e5c-9a1b-418b-8c23-23b8d98caf36", Slot = 1, Type = "VisualSet"},
-["BG3SX_Tail"] = {Uuid = "71d2f8cc-22e3-4aa6-b2af-3e34d87f6565", Slot = 1, Type = "VisualSet"},
-["BG3SX_Wings"] = {Uuid = "2a36331a-e834-488f-b6dd-c6ec68e083a5", Slot = 1, Type = "VisualSet"},
-["BG3SX_Other"] = {Uuid = "010d18d9-36a5-4625-b49b-84912e101818", Slot = 1, Type = "VisualSet"},
+    ["BG3SX_Body"] = {Resource = "bfa9dad2-2a5b-45cc-b770-9537badf9152", Slot = 0, Type = "Visual"},
+    ["BG3SX_Loco"] = {Resource = "0c914b3f-5f24-441b-9be6-c25f4a424cfa", Slot = 0, Type = "Visual"},
+    ["BG3SX_Idle"] = {Resource = "284eea6d-c693-4e4f-8527-f40433169e0c", Slot = 0, Type = "Visual"},
+    ["BG3SX_Head"] = {Resource = "f1bc6e5c-9a1b-418b-8c23-23b8d98caf36", Slot = 1, Type = "VisualSet"},
+    ["BG3SX_Tail"] = {Resource = "71d2f8cc-22e3-4aa6-b2af-3e34d87f6565", Slot = 1, Type = "VisualSet"},
+    ["BG3SX_Wings"] = {Resource = "2a36331a-e834-488f-b6dd-c6ec68e083a5", Slot = 1, Type = "VisualSet"},
+    ["BG3SX_Other"] = {Resource = "010d18d9-36a5-4625-b49b-84912e101818", Slot = 1, Type = "VisualSet"},
 }
 local sets = Data.AnimationSets
 
 -- if Ext.IsServer() then -- because this file is loaded through _initData.lua which is also loaded on the client
     if BG3AFActive then
-        local as = Mods.BG3AF.AnimationSet
+        local as = BG3AF.AnimationSet
         local body = as.Get() -- Gets an AnimationSet - Check BG3AF for options
         local face = as.Get("Face")
         --local body = as.Get(Data.AnimationSets["BG3SX_Body"].Uuid) -- Gets an AnimationSet - Check BG3AF for options
-        --local face = as.Get(Data.AnimationSets["BG3SX_Face"].Uuid)
+        --local face = as.Get(Data.AnimationSets["BG3SX_Head"].Uuid)
 
         if Ext.IsServer() then
             Data.AnimLinks = {}
@@ -73,7 +78,7 @@ local sets = Data.AnimationSets
 
         -- AF TESTING
         -- local body = as.Get(sets["BG3SX_Body"].Uuid) -- bfa9dad2- is bg3sx specific animset, check Public/BG3SX/Content/Assets/[PAK]_AnimationSets
-        -- local face = as.Get(sets["BG3SX_Face"].Uuid)
+        -- local face = as.Get(sets["BG3SX_Head"].Uuid)
         for entry,content in pairs(links) do
             body:AddLink(content.MapKey, content.AnimationID, "")
             face:AddLink(content.MapKey, faceAnim, "")
@@ -106,8 +111,18 @@ local sets = Data.AnimationSets
 local char = Osi.GetHostCharacter()
 local animSet = Mods.BG3SX.Data.AnimationSets
 animSet.AddSetToEntity(char, animSet["BG3SX_Body"])
-animSet.AddSetToEntity(char, animSet["BG3SX_Face"])
+animSet.AddSetToEntity(char, animSet["BG3SX_Head"])
 local animWaterfall = Mods.BG3AF.AnimationWaterfall.Get(char)
 local waterfall = animWaterfall:GetWaterfall()
 Osi.PlayAnimation(char, "ff7a5a30-b661-4192-bd8f-118373e3f4b8")
 ]]--
+
+-- Some basic photomode stuff
+-- We can move this later
+
+BG3AF.PhotoModeEmoteCollection.Create({
+    ModuleUuid = ModuleUUID,
+    ResourceUUID = "8c2f6e91-83ce-4b4f-b83f-dc0d289a058d",
+    DisplayName = "BG3SX",
+    Name = "BG3SX",
+})

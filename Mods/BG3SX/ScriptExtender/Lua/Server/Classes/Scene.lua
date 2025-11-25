@@ -4,6 +4,11 @@
 --
 ----------------------------------------------------------------------------------------
 
+local BG3AF
+if BG3AFActive then
+    BG3AF = Mods.BG3AF.API
+end
+
 Data.SavedScenes = {}
 
 local initialize
@@ -473,7 +478,7 @@ function Scene:Init()
     self:AppearanceSetup()
 
 
-    -- We do this before in a seperate loop to already apply this to all entities before actors are spawned one by one
+    -- We do this before in a seperate loop to already apply this to all entities (-- old stuff -> before actors are spawned one by one)
     for _, character in pairs(self.entities) do
         Entity:ClearActionQueue(character)
         Osi.AddBoosts(character, "ActionResourceBlock(Movement)", "", "") -- Blocks movement
@@ -493,8 +498,9 @@ function Scene:Init()
         Entity:ToggleWalkThrough(character)        -- To prevent interactions with other entities even while invisible and untargetable
         self:ToggleCampFlags(character)            -- Toggles camp flags so companions don't return to tents
 
-        --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Body"])
-        --Data.AnimationSets.AddSetToEntity(entity, Data.AnimationSets["BG3SX_Face"])
+        if BG3AFActive then
+            BG3AF.TemplateAnimationSetOverride.Get(character):AddSets(ModuleUUID, Data.AnimationSets)
+        end
     end
 
         -- TODO - why do we wait?
@@ -711,12 +717,14 @@ function Scene:EntityReset()
         end
 
         local nothing = "88f5df46-921d-4a28-93b6-202df636966c" -- Random UUID - This is nothing, NULL or "" doesn't work, crashes the game.
-        Osi.PlayAnimation(character, nothing) -- To cancel out of any ongoing animations
+        Osi.PlayAnimation(character, nothing) -- To cancel out of any ongoing animations -- TODO: Make this into its own function like Animation.Cancel()
         if self.Type == "NSFW" then
             Osi.PlaySound(character, Data.Sounds.Orgasm[math.random(1, #Data.Sounds.Orgasm)])
         end
-        -- local animationWaterfall = Mods.BG3AF.AnimationWaterfall.Get(character)
-        -- animationWaterfall:RemoveWaterfallElement(Data.AnimationSets["BG3SX_Body"].Uuid)
+        
+        if BG3AFActive then
+            BG3AF.TemplateAnimationSetOverride.Get(character):RemoveSets(ModuleUUID, Data.AnimationSets)
+        end
     end
 end
 

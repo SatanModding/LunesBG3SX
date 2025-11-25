@@ -3,34 +3,28 @@
 --                      For handling the main functionalities
 --
 ----------------------------------------------------------------------------------------
--- local aW
+-- local BG3AF
 -- if BG3AFActive then
---     aW = Mods.BG3AF.AnimationWaterfall
+--     BG3AF = Mods.BG3AF.API
 -- end
 
 local function initializeParty()
     local party = Osi.DB_PartyMembers:Get(nil)
     -- _P("---------------------OnSessionLoaded Whitelist Check---------------------")
     for i = #party, 1, -1 do
-        if Entity:IsWhitelisted(party[i][1]) then
-            local entity = Ext.Entity.Get(party[i][1])
+        local character = party[i][1]
+        if Entity:IsWhitelisted(character) then
+            local entity = Ext.Entity.Get(character)
             if not entity then
-                Debug.Print("is not a entity " .. party[i][1])
+                Debug.Print("is not a entity " .. character)
             else
-                -- print("adding genital for ", party[i][1])
+                -- print("adding genital for ", character)
                 Genital.AddGenitalIfHasNone(entity)
                 Genital.AssignDefaultIfHasNotYet(entity)
 
-                local tbl = {
-                    Resource = Data.AnimationSets["BG3SX_Body"].Uuid,
-                    DynamicAnimationTag = "9bfa73ed-2573-4f48-adc3-e7e254a3aadb",
-                    Slot = 0, -- 0 = Body, 1 = Attachment
-                    -- OverrideType = "0", -- 0 = Replace, 1 = Additive
-                }
-            
-                -- Mods.BG3AF.AnimationWaterfall.Get(party[i][1]):AddWaterfall(tbl)
-                -- _P("Added waterfall entry for " .. party[i][1])
-                -- _D(entity.AnimationWaterfall.Waterfall)
+                -- if BG3AFActive then
+                --     BG3AF.TemplateAnimationSetOverride.Get(character):AddSets(ModuleUUID, Data.AnimationSets)
+                -- end
             end
         end
 
@@ -97,12 +91,16 @@ function OnSessionLoaded()
         local party = Osi.DB_PartyMembers:Get(nil)
         -- Debug.Print("CharacterJoinedParty send")
         for _,member in pairs(party) do
+            local character = member[1]
             --if Table.Contains(oldparty, member) then (commenting this oldparty condition out as it seems to prevent a proper party update
-                local entity = Ext.Entity.Get(member[1])
+                local entity = Ext.Entity.Get(character)
                 if entity.ClientControl then
-                    Event.SendParty:SendToClient(party, member[1])
+                    Event.SendParty:SendToClient(party, character)
                 end
             --end
+            -- if BG3AFActive then
+            --     BG3AF.TemplateAnimationSetOverride.Get(character):AddSets(ModuleUUID, Data.AnimationSets)
+            -- end
         end
         -- oldparty = party
     end)

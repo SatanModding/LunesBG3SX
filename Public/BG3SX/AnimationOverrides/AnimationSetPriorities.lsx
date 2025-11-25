@@ -20,7 +20,7 @@
                     <attribute id="UUID" type="guid" value="284eea6d-c693-4e4f-8527-f40433169e0c"/>
                 </node>
                 <node id="AnimationSetPriority">
-                    <attribute id="Name" type="LSString" value="BG3SX_Face"/>
+                    <attribute id="Name" type="LSString" value="BG3SX_Head"/>
                     <attribute id="Priority" type="int32" value="1"/>
                     <attribute id="UUID" type="guid" value="f1bc6e5c-9a1b-418b-8c23-23b8d98caf36"/>
                 </node>

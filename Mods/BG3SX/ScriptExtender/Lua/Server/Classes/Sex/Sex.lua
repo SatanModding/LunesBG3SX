@@ -346,16 +346,15 @@ function Sex:ChangeCameraHeight(uuid)
 end
 
 
-local function reapplyWaterfall(cmd, uuid)
+-- local function reapplyWaterfall(cmd, uuid)
 
-    -- add the bfa (BG3SX Waterfall) to the entity again 
-    local sx = "bfa9dad2-2a5b-45cc-b770-9537badf9152"
-    Mods.BG3AF.AnimationWaterfall.Get(uuid):AddWaterfall(sx)
+--     local sx = "bfa9dad2-2a5b-45cc-b770-9537badf9152"
+--     Mods.BG3AF.AnimationWaterfall.Get(uuid):AddWaterfall(sx)
 
     -- Event.ReapplyWaterfall:Broadcast(uuid)
 
     
-end
+-- end
 
 
 
@@ -370,4 +369,4 @@ end
 
 
 
-ConsoleCommand.New("rw", reapplyWaterfall, "Does the thing")
+--ConsoleCommand.New("rw", reapplyWaterfall, "Does the thing")
