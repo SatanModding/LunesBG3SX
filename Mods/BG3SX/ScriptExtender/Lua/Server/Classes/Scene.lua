@@ -4,9 +4,9 @@
 --
 ----------------------------------------------------------------------------------------
 
-local BG3AF
+local BG3AF = {}
 if BG3AFActive then
-    BG3AF = Mods.BG3AF.API
+    BG3AF = Mods.BG3AF
 end
 
 Data.SavedScenes = {}

@@ -1,6 +1,6 @@
-local BG3AF
+local BG3AF = {}
 if BG3AFActive then
-    BG3AF = Mods.BG3AF.API
+    BG3AF = Mods.BG3AF
 end
 
 Data.AnimationSets = { -- Check BG3AF about what Slot and Type means
@@ -17,10 +17,10 @@ local sets = Data.AnimationSets
 -- if Ext.IsServer() then -- because this file is loaded through _initData.lua which is also loaded on the client
     if BG3AFActive then
         local as = BG3AF.AnimationSet
-        local body = as.Get() -- Gets an AnimationSet - Check BG3AF for options
-        local face = as.Get("Face")
+        local body = as.Get(Data.AnimationSets["BG3SX_Body"].Resource) -- Gets an AnimationSet - Check BG3AF for options
+        local head = as.Get(Data.AnimationSets["BG3SX_Head"].Resource) -- Gets an AnimationSet - Check BG3AF for options
         --local body = as.Get(Data.AnimationSets["BG3SX_Body"].Uuid) -- Gets an AnimationSet - Check BG3AF for options
-        --local face = as.Get(Data.AnimationSets["BG3SX_Head"].Uuid)
+        --local head = as.Get(Data.AnimationSets["BG3SX_Head"].Uuid)
 
         if Ext.IsServer() then
             Data.AnimLinks = {}
@@ -67,8 +67,8 @@ local sets = Data.AnimationSets
             ["VampireLord"] = {MapKey = "e65aae61-ad31-4450-a1d6-7690627fcecb", AnimationID = "20df5080-d133-4d50-9652-8b594c98e2a9"},
             --#endregion
         }
-        local faceAnim = "cd8b98d1-5ae2-f4f7-ce9d-8b47a3252b4d" -- "Crying" AnimID for BG3SX
-        local faceIdle = "60b456ce-107e-909c-9d01-f6e309d31c8a" -- AnimID for face Idle animations
+        local headAnim = "cd8b98d1-5ae2-f4f7-ce9d-8b47a3252b4d" -- "Crying" AnimID for BG3SX
+        local headIdle = "60b456ce-107e-909c-9d01-f6e309d31c8a" -- AnimID for head Idle animations
         local idles = { -- Regular idle animation MapKeys (Standing around)
             "392073ca-c6e0-4f7d-848b-ffb0b510500b",
             "04922882-0a2d-4945-8790-cef50276373d",
@@ -81,19 +81,26 @@ local sets = Data.AnimationSets
         -- local face = as.Get(sets["BG3SX_Head"].Uuid)
         for entry,content in pairs(links) do
             body:AddLink(content.MapKey, content.AnimationID, "")
-            face:AddLink(content.MapKey, faceAnim, "")
+            head:AddLink(content.MapKey, headAnim, "")
             if Ext.IsServer() then
                 Data.AnimLinks[entry] = content
             end
         end
         for _,idle in pairs(idles) do
-            face:AddLink(idle, faceIdle)
+            head:AddLink(idle, headIdle)
         end
         -- Ext.Timer.WaitFor(5000, function()
             -- Debug.Print("Added AnimationSet links to BG3SX AnimationSet")
             -- local body = as.Get(sets["BG3SX_Body"].Uuid)
             -- _D(body[1].AnimationBank.AnimationSubSets[""].Animation)
         -- end)
+
+        BG3AF.EmoteCollection.Create({
+            ModuleUuid = ModuleUUID,
+            ResourceUUID = "8c2f6e91-83ce-4b4f-b83f-dc0d289a058d",
+            -- DisplayName = "BG3SX",
+            Name = "BG3SX",
+        })
     else
         Debug.Print("BG3AF not found")
     end
@@ -120,9 +127,3 @@ Osi.PlayAnimation(char, "ff7a5a30-b661-4192-bd8f-118373e3f4b8")
 -- Some basic photomode stuff
 -- We can move this later
 
-BG3AF.PhotoModeEmoteCollection.Create({
-    ModuleUuid = ModuleUUID,
-    ResourceUUID = "8c2f6e91-83ce-4b4f-b83f-dc0d289a058d",
-    DisplayName = "BG3SX",
-    Name = "BG3SX",
-})

@@ -1,7 +1,12 @@
 -- If I don't define this, the console yells at me
 ModuleUUID = "df8b9877-5662-4411-9d08-9ee2ec4d8d9e"
 
-BG3AFActive = Mods and Mods.BG3AF
+BG3AFActive = nil
+if Mods.BG3AF ~= nil then
+    BG3AFActive = true
+else
+    BG3AFActive = false
+end
 
 ------------------------------------
         -- Init Classes --

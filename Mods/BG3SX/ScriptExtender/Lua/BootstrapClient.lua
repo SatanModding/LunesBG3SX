@@ -1,5 +1,10 @@
 NULL = "NULL_00000000-0000-0000-0000-000000000000"
-BG3AFActive = Mods and Mods.BG3AF
+BG3AFActive = nil
+if Mods.BG3AF ~= nil then
+    BG3AFActive = true
+else
+    BG3AFActive = false
+end
 
 ------------------------------------
         -- Init Classes --
