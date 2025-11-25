@@ -428,7 +428,7 @@ Event.FetchWhitelistedNPCs:SetHandler(function(payload)
     end
 
     for _, character in pairs(tbl) do
-        if Entity:IsWhitelisted(character) then
+        if Entity:IsWhitelisted(character) and Osi.IsDead(character) ~= 1 then
             table.insert(filtered, character)
         end
     end
