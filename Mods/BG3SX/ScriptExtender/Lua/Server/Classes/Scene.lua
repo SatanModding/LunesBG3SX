@@ -627,14 +627,17 @@ end
 
 function Scene:PlayAnimation(animationData)
     local animDataParent = Data.GetAnimDataParent(animationData)
-    -- Debug.DumpS(animDataParent)
     if animDataParent then
         for _, char in pairs (self.entities) do
             Animation:New(char, animDataParent[animationData.Mod][animationData.Name])
 
-            -- Only play sound if is enabled for a given animation entry
+            -- Only start sound timers if none are running yet
             if animDataParent[animationData.Mod][animationData.Name].Sound == true then
-                Sound:New(char, animDataParent[animationData.Mod][animationData.Name])
+                if #self.timerHandles == 0 then
+                    -- No sounds running yet, start them
+                    Sound:New(char, animDataParent[animationData.Mod][animationData.Name])
+                end
+                -- If sounds are already running, they'll automatically pick up the new animation's sounds on next loop
             end
         end
 
@@ -709,8 +712,9 @@ function Scene:EntityReset()
 
         local nothing = "88f5df46-921d-4a28-93b6-202df636966c" -- Random UUID - This is nothing, NULL or "" doesn't work, crashes the game.
         Osi.PlayAnimation(character, nothing) -- To cancel out of any ongoing animations
-        Osi.PlaySound(character, Data.Sounds.Orgasm[math.random(1, #Data.Sounds.Orgasm)]) -- TODO - change this to a generic sound for when we use this for non-sex instead
-
+        if self.Type == "NSFW" then
+            Osi.PlaySound(character, Data.Sounds.Orgasm[math.random(1, #Data.Sounds.Orgasm)])
+        end
         -- local animationWaterfall = Mods.BG3AF.AnimationWaterfall.Get(character)
         -- animationWaterfall:RemoveWaterfallElement(Data.AnimationSets["BG3SX_Body"].Uuid)
     end
@@ -770,7 +774,8 @@ function Scene:SwapPosition()
 
             Ext.ModEvents.BG3SX.SceneSwitchPlacesAfter:Throw({self.entities})
 
-            self:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
+            --self:CancelAllSoundTimers() -- no longer needed
+            -- Sounds will automatically adapt on next loop
 
 
             self:PlayAnimation(self.currentAnimation)

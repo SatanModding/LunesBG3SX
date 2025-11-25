@@ -1,10 +1,9 @@
 Event.FetchScenes:SetHandler(function (payload)
     if Data.SavedScenes and #Data.SavedScenes > 0 then
-        -- _P("SavedScenes exists")
-        Event.SendScenes:SendToClient(Data.SavedScenes, payload.ID)
+        Helper.SafeSendToClient(Event.SendScenes, Data.SavedScenes, payload.ID)
         Event.UpdateScenes:Broadcast(Data.SavedScenes)
     else
-        Event.SendScenes:SendToClient("Empty", payload.ID)
+        Helper.SafeSendToClient(Event.SendScenes, "Empty", payload.ID)
     end
 end)
 
@@ -16,6 +15,8 @@ Event.NewSceneRequest:SetHandler(function (payload)
     local caster = payload.Caster
     local target = payload.Target
     local type = payload.Type
+    local isResponse = payload.IsResponse
+    local accepted = payload.Accepted
 
     if Scene.ExistsInScene(caster) or Scene.ExistsInScene(target) then
         if Scene.ExistsInScene(caster) then
@@ -27,8 +28,97 @@ Event.NewSceneRequest:SetHandler(function (payload)
         return
     end
 
-    if Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true) then
-    else return
+    local consentGranted = false
+
+    if not (Entity:IsWhitelisted(caster, true) and Entity:IsWhitelisted(target, true)) then
+        return
+    end
+
+    if Osi.IsDead(caster) == 1 then
+        Debug.Print(string.format("[BG3SX] Caster %s is dead, blocking scene start.", caster))
+        return
+    end
+    
+    if Osi.IsDead(target) == 1 then
+        Debug.Print(string.format("[BG3SX] Target %s is dead, blocking scene start.", target))
+        return
+    end
+
+    -- Check if caster or target is incapacitated etc
+    local casterIncapacitated, casterStatusType = Data.Statuses.HasInvalidStatusType(caster)
+    if casterIncapacitated then
+        Debug.Print(string.format("[BG3SX] Caster %s has status type %s, blocking scene start.", 
+            caster, casterStatusType))
+        return
+    end
+    
+    local targetIncapacitated, targetStatusType = Data.Statuses.HasInvalidStatusType(target)
+    if targetIncapacitated then
+        Debug.Print(string.format("[BG3SX] Target %s has status type %s, blocking scene start.", 
+            target, targetStatusType))
+        return
+    end
+
+    -- NPCs are assumed to automatically consent (this is the workaround for now)
+    if Entity:IsNPC(target) then
+        consentGranted = true
+    end
+
+    -- For player response with consent, proceed
+    if isResponse and accepted then
+        consentGranted = true
+    end
+
+    if isResponse and not accepted then
+        Debug.Print(string.format("[BG3SX] Consent not given by target %s — aborting scene.", target))
+        return
+    end
+
+    -- For initial player requests, first ask for consent
+    if not consentGranted and not isResponse then
+        local entity = Ext.Entity.Get(target)
+        local shouldRequestConsent = false
+
+        -- Only send consent if the target is a different player avatar
+        if entity
+        and entity.UserReservedFor
+        and entity.UserReservedFor.UserID
+        and entity.CharacterCreationStats  -- only playable characters have this component?
+        and not Entity:IsNPC(target)
+        and not Helper.StringContainsOne(caster, target)
+        then
+            local targetUserID = entity.UserReservedFor.UserID
+            local casterEntity = Ext.Entity.Get(caster)
+            local casterUserID = casterEntity and casterEntity.UserReservedFor and casterEntity.UserReservedFor.UserID or nil
+
+            -- Make sure target and caster are not the same local player
+            if targetUserID and (not casterUserID or targetUserID ~= casterUserID) then
+                shouldRequestConsent = true
+            end
+        end
+
+        if shouldRequestConsent then
+            Debug.Print(string.format("[BG3SX] Attempting to send consent request for target %s", target))
+            
+            -- New safeguard function
+            local success = Helper.SafeSendToClient(
+                Event.RequestSceneConsent,
+                {
+                    Caster = caster,
+                    Target = target,
+                    Type = type
+                },
+                target
+            )
+            
+            if not success then
+                Debug.Print("[BG3SX] Failed to send consent request - no valid client found, aborting scene request")
+            end
+
+            return
+        else
+            Debug.Print(string.format("[BG3SX] Skipping consent – target is NPC or self: %s", tostring(target)))
+        end
     end
 
     if type == "SFW" then
@@ -36,7 +126,7 @@ Event.NewSceneRequest:SetHandler(function (payload)
             local scene = Scene:New({Type = "SFW", Entities = {caster}, Animation = Data.IntroAnimations[ModuleUUID]["Start SFW"], Fade = 666})
             scene:Init()
             scene:PlayAnimation(Data.IntroAnimations[ModuleUUID]["Start SFW"])
-            
+
         else-- PairedScene
             local scene = Scene:New({Type = "SFW", Entities = {caster, target}, Animation = Data.IntroAnimations[ModuleUUID]["Hug or Carry"], Fade = 666})
             scene:Init()
@@ -48,7 +138,7 @@ Event.NewSceneRequest:SetHandler(function (payload)
             local scene = Scene:New({Type = "NSFW", Entities = {caster}, Animation = Data.IntroAnimations[ModuleUUID]["Start Masturbating"], Fade = 666})
             scene:Init()
             scene:PlayAnimation(Data.IntroAnimations[ModuleUUID]["Start Masturbating"])
-            
+
         else -- PairedScene
             local scene = Scene:New({Type = "NSFW", Entities = {caster, target}, Animation = Data.IntroAnimations[ModuleUUID]["Hug or Carry"], Fade = 666})
             scene:Init()
@@ -198,19 +288,17 @@ Event.StopSex:SetHandler(function (payload)
         scene:Destroy()
     end
 end)
+
 Event.FetchGenitals:SetHandler(function (payload)
-
-    -- Debug.Print("Recevied FetchGenitals for character ".. payload.Character)
-
-
-    -- local conts = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
-    -- if conts ~= nil then
-    --     for k, v in pairs(conts) do
-    --         --print("sending payload to ", v.UserReservedFor.UserID)
-    --         -- Event.SendGenitals:SendToClient({ID = payload.ID, Data = Data.CreateUIGenitalPayload(payload.Character), Whitelisted = Entity:IsWhitelisted(payload.Character)}, v.UserReservedFor.UserID)
-    --     end
-    -- end
-    Event.SendGenitals:SendToClient({ID = payload.ID, Data = Data.CreateUIGenitalPayload(payload.Character), Whitelisted = Entity:IsWhitelisted(payload.Character)}, payload.ID)
+    Helper.SafeSendToClient(
+        Event.SendGenitals,
+        {
+            ID = payload.ID, 
+            Data = Data.CreateUIGenitalPayload(payload.Character), 
+            Whitelisted = Entity:IsWhitelisted(payload.Character)
+        },
+        payload.ID
+    )
 end)
 
 
@@ -269,19 +357,23 @@ end)
 
 Event.FetchParty:SetHandler(function (payload)
     local party = Osi.DB_PartyMembers:Get(nil)
-    -- _P("SEND PARTY ----------------------TO CLIENT WITH ID", payload.ID, "--------------------------")
-    Event.SendParty:SendToClient(party, payload.ID)
+    Helper.SafeSendToClient(Event.SendParty, party, payload.ID)
 end)
 
 Event.FetchWhitelist:SetHandler(function (payload)
-    local newPayload = {Whitelist = Data.AllowedTagsAndRaces, ModdedTags = Data.ModdedTags, Whitelisted = Data.WhitelistedEntities, Blacklisted = Data.BlacklistedEntities}
-    Event.SendWhitelist:SendToClient(newPayload, payload.ID)
+    local newPayload = {
+        Whitelist = Data.AllowedTagsAndRaces, 
+        ModdedTags = Data.ModdedTags, 
+        Whitelisted = Data.WhitelistedEntities, 
+        Blacklisted = Data.BlacklistedEntities
+    }
+    Helper.SafeSendToClient(Event.SendWhitelist, newPayload, payload.ID)
 end)
 
 Event.RequestWhitelistStatus:SetHandler(function (payload)
     local uuid = payload.Uuid
     local status = Entity:IsWhitelisted(uuid)
-    Event.SendWhitelistStatus:SendToClient({Status = status}, payload.ID)
+    Helper.SafeSendToClient(Event.SendWhitelistStatus, {Status = status}, payload.ID)
 end)
 
 
@@ -327,28 +419,21 @@ end)
 
 
 Event.FetchWhitelistedNPCs:SetHandler(function(payload)
-    -- print("reveived FetchWhitelistedNPCs")
     local tbl = payload.tbl
     local filtered = {}
-
-    -- print("dumping payload")
-    -- _D(payload.client)
 
     if not payload.client then
         Debug.Print("ERROR, CLIENT NOT FOUND")
         return
     end
 
-
-
     for _, character in pairs(tbl) do
-        if Entity:IsWhitelisted(character) then
+        if Entity:IsWhitelisted(character) and Osi.IsDead(character) ~= 1 then
             table.insert(filtered, character)
         end
     end
 
-    -- Debug.Print("sending event  Event.SendWhitelistedNPCs:SendToClient")
-    Event.SendWhitelistedNPCs:SendToClient(filtered, payload.client)
+    Helper.SafeSendToClient(Event.SendWhitelistedNPCs, filtered, payload.client)
 end)
 
 Event.FetchUserTags:SetHandler(function(payload)
@@ -359,7 +444,7 @@ Event.FetchUserTags:SetHandler(function(payload)
     for _,tagUUID in pairs(tags) do
         table.insert(nonArrayTags,tagUUID)
     end
-    Event.SendUserTags:SendToClient(nonArrayTags, payload.ID)
+    Helper.SafeSendToClient(Event.SendUserTags, nonArrayTags, payload.ID)
 end)
 
 -- Ext.ModEvents.BG3AF.WaterfallReplicated:Subscribe(function (uuid)
@@ -381,3 +466,4 @@ Event.ToggleInvisibility:SetHandler(function (uuid)
         Osi.SetVisible(uuid, 0)
     end
 end)
+

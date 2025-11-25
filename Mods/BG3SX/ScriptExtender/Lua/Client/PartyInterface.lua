@@ -34,6 +34,7 @@ function PartyInterface:Init()
     UI:RegisterSetting("PartyButtonSize",{100*ViewPortScale,100*ViewPortScale})
 
     self.PartyArea = self.Wrapper:AddCollapsingHeader("Party")
+    self.PartyArea.DefaultOpen = true
     self.NPCArea = self.Wrapper:AddCollapsingHeader("NPCs")
     self.NPCArea.Visible = false
 
@@ -42,30 +43,67 @@ function PartyInterface:Init()
 end
 
 function PartyInterface:UpdateParty()
-    -- _D(self.Party)
+    local previouslySelectedUuid = self.SelectedCharacter and self.SelectedCharacter.Uuid or nil
+    
     self.Characters = nil
     UI.DestroyChildren(self.PartyArea)
 
     local maxTableWidth = 4
-    local tableWidth = math.min(#self.Party, maxTableWidth)  -- Take lower
+    local tableWidth = math.min(#self.Party, maxTableWidth) -- Take lower
 
     local t = self.PartyArea:AddTable("",tableWidth) -- 1 was tableWidth
     t.SizingFixedFit = true
     t.NoHostExtendX = true
-    -- t.Borders = true
 
     local row = t:AddRow()
     local cell = row:AddCell()
+    local ownedAvatarCharacter = nil
+    local firstSelectableCharacter = nil
+    local previouslySelectedCharacter = nil
+    
     for i, character in ipairs(self.Party) do
         if i % maxTableWidth == 1 then
             row = t:AddRow()
+            cell = row:AddCell()
         end
 
         local newCharacter = self:AddCharacter(cell, character[1])
 
-        if i == 1 then
-            self:SetSelectedCharacter(newCharacter.Uuid)
+        if newCharacter then
+            -- Check if this is the previously selected character
+            if previouslySelectedUuid and Helper.StringContains(newCharacter.Uuid, previouslySelectedUuid) then
+                previouslySelectedCharacter = newCharacter
+            end
+            
+            local canBeSelected = self:CanBeSelectedAsCaster(newCharacter.Uuid)
+            
+            -- Check if this is the current user's owned avatar (not an NPC)
+            if canBeSelected and not Entity:IsNPC(newCharacter.Uuid) then
+                local entity = Ext.Entity.Get(newCharacter.Uuid)
+                local currentUserEntity = Ext.Entity.Get(USERID)
+                
+                if entity and entity.UserReservedFor and entity.UserReservedFor.UserID and
+                   currentUserEntity and currentUserEntity.UserReservedFor and currentUserEntity.UserReservedFor.UserID then
+                    if entity.UserReservedFor.UserID == currentUserEntity.UserReservedFor.UserID then
+                        ownedAvatarCharacter = newCharacter
+                    end
+                end
+            end
+            
+            -- First selectable character as fallback
+            if not firstSelectableCharacter and canBeSelected then
+                firstSelectableCharacter = newCharacter
+            end
         end
+    end
+    
+    -- Priority: previously selected (if still valid) > owned avatar > first selectable character
+    if previouslySelectedCharacter and self:CanBeSelectedAsCaster(previouslySelectedCharacter.Uuid) then
+        self:SetSelectedCharacter(previouslySelectedCharacter.Uuid)
+    elseif ownedAvatarCharacter then
+        self:SetSelectedCharacter(ownedAvatarCharacter.Uuid)
+    elseif firstSelectableCharacter then
+        self:SetSelectedCharacter(firstSelectableCharacter.Uuid)
     end
 end
 
@@ -109,6 +147,11 @@ function UI:SelectedCharacterUpdates(character)
     if self.Await and (self.Await.Reason == "NewSFWScene" or self.Await.Reason == "NewNSFWScene") then
         self:InputRecieved(character.Uuid)
     else
+        if not self.PartyInterface:CanBeSelectedAsCaster(character.Uuid) then
+            self:DisplayInfoText("You can only control your own characters as casters", 3000)
+            return
+        end
+
         local entity = Ext.Entity.Get(character.Uuid)
         self.PartyInterface:SetSelectedCharacter(character.Uuid)
 
@@ -137,6 +180,29 @@ end
 --         self:CancelAwaitInput("No entity found")
 --     end
 -- end
+
+-- Helper to check if a character can be selected as a caster by the current user (e.g. not another player's avatar)
+function PartyInterface:CanBeSelectedAsCaster(uuid)
+    local entity = Ext.Entity.Get(uuid)
+    if not entity then
+        return false
+    end
+
+    -- NPCs can always be selected as casters
+    if Entity:IsNPC(uuid) then
+        return true
+    end
+
+    -- For player avatar characters, check ownership
+    if entity.UserReservedFor and entity.UserReservedFor.UserID then
+        local currentUserEntity = Ext.Entity.Get(USERID)
+        if currentUserEntity and currentUserEntity.UserReservedFor and currentUserEntity.UserReservedFor.UserID then
+            return entity.UserReservedFor.UserID == currentUserEntity.UserReservedFor.UserID
+        end
+    end
+
+    return false
+end
 
 ---@class CharacterInterface
 CharacterInterface = {}
@@ -170,11 +236,18 @@ function PartyInterface:AddCharacter(parent, uuid)
         if not foundOrigin then
             instance.CharacterButton = charGroup:AddImageButton("","EC_Portrait_Generic", UI.Settings["PartyButtonSize"])
         end
-        -- local tooltip = instance.CharacterButton:Tooltip()
-        -- tooltip.PositionOffset = {100, 0}
 
         instance.CharacterButton.OnClick = function()
-            UI:SelectedCharacterUpdates(instance)
+            -- Check if awaiting a target selection
+            if UI.Await and (UI.Await.Reason == "NewSFWScene" or UI.Await.Reason == "NewNSFWScene") then
+                UI:SelectedCharacterUpdates(instance)
+            else
+                if self:CanBeSelectedAsCaster(instance.Uuid) then
+                    UI:SelectedCharacterUpdates(instance)
+                else
+                    UI:DisplayInfoText("You can only control your own characters as casters", 3000)
+                end
+            end
         end
 
         instance.NameText = charGroup:AddText("")
@@ -256,7 +329,30 @@ function PartyInterface:AddNPC(parent, uuid)
 end
 
 function PartyInterface:SetSelectedCharacter(characterUuid)
-    -- _P("SetSelectedCharacter called with uuid: " .. characterUuid)
+    -- Check if the character can be selected as caster (unless already targeting)
+    if not UI.Await then
+        local canSelect = false
+
+        -- Check if it's an NPC
+        if Entity:IsNPC(characterUuid) then
+            canSelect = true
+        else
+            -- Check if it's owned by current user
+            local entity = Ext.Entity.Get(characterUuid)
+            if entity and entity.UserReservedFor and entity.UserReservedFor.UserID then
+                local currentUserEntity = Ext.Entity.Get(USERID)
+                if currentUserEntity and currentUserEntity.UserReservedFor and currentUserEntity.UserReservedFor.UserID then
+                    canSelect = (entity.UserReservedFor.UserID == currentUserEntity.UserReservedFor.UserID)
+                end
+            end
+        end
+
+        if not canSelect then
+            Debug.Print("[BG3SX] Attempted to select character not owned by current user and not an NPC")
+            return
+        end
+    end
+
     local characterAndNPCs = {}
     if self.Characters and #self.Characters > 0 then
         for _,character in pairs(self.Characters) do
@@ -270,20 +366,16 @@ function PartyInterface:SetSelectedCharacter(characterUuid)
     end
     for _,charOrNPC in pairs(characterAndNPCs) do
         if Helper.StringContains(charOrNPC.Uuid, characterUuid) then
-            charOrNPC.CharacterButton.Tint = {1.0, 0.8, 0.3, 1.0} -- Neutral Selected Color -- Beige
+            charOrNPC.CharacterButton.Tint = {0.0, 0.9, 0.0, 1.0} -- Green Selected Color
             charOrNPC.Selected = true
             self.SelectedCharacter = charOrNPC
-            -- _P("Selected character: " .. charOrNPC.Uuid)
-            -- Event.SetSelectedCharacter:SendToServer({ID = USERID, Uuid = charOrNPC.Uuid})
         else
             charOrNPC.CharacterButton.Tint = {1.0, 1.0, 1.0, 1.0} -- Reset to regular
-            -- _P("Resetting tint to regular for character: " .. charOrNPC.Uuid)
             charOrNPC.Selected = false
         end
     end
 
     Event.RequestWhitelistStatus:SendToServer({ID = USERID, Uuid = characterUuid})
-    -- print("Selected character persistance check ", self.SelectedCharacter.Uuid)
 end
 
 -- Event.SetSelectedCharacter:SetHandler(function (payload)
@@ -325,8 +417,5 @@ function PartyInterface:AddSelectedNPCSection()
 end
 
 
--- TODO:
--- Add Consent when targeting other players - withold scene creation until consent is given
--- Check Multiplayer
 
 return PartyInterface

@@ -36,6 +36,7 @@ local SettingsTab = Ext.Require("Client/Tabs/SettingsTab.lua")
 local SceneControl, SceneControlInstance = Ext.Require("Client/SceneControl.lua")
 local DebugTab = Ext.Require("Client/Tabs/DebugTab.lua")
 local FAQTab = Ext.Require("Client/Tabs/FAQTab.lua")
+local ConsentControl = Ext.Require("Client/ConsentControl.lua")
 
 --------------------------------------------------
 --------------------------------------------------
@@ -85,6 +86,7 @@ function UI:Init()
 
 
     self.SceneControl = SceneControl:Init()
+    self.ConsentControl = ConsentControl:Init()
 
     Event.FinishedBuildingNPCUI:SendToServer({ID=USERID})  -- Restores stored NPCs from last session
     self.Ready = true

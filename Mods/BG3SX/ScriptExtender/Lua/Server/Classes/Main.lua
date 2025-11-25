@@ -97,28 +97,28 @@ function OnSessionLoaded()
         local party = Osi.DB_PartyMembers:Get(nil)
         -- Debug.Print("CharacterJoinedParty send")
         for _,member in pairs(party) do
-            if Table.Contains(oldparty, member) then
-                local entity = Ext.Entity.Get(member)
+            --if Table.Contains(oldparty, member) then (commenting this oldparty condition out as it seems to prevent a proper party update
+                local entity = Ext.Entity.Get(member[1])
                 if entity.ClientControl then
-                    Event.SendParty:SendToClient(party, member)
+                    Event.SendParty:SendToClient(party, member[1])
                 end
-            end
+            --end
         end
-        oldparty = party
+        -- oldparty = party
     end)
 
     Ext.Osiris.RegisterListener("CharacterLeftParty", 1, "after", function(character)
         local party = Osi.DB_PartyMembers:Get(nil)
         -- Debug.Print("CharacterLeftParty send")
         for _,member in pairs(party) do
-            if Table.Contains(oldparty, member) then
-                local entity = Ext.Entity.Get(member)
+            --if Table.Contains(oldparty, member) then (commented out - same reason as above)
+                local entity = Ext.Entity.Get(member[1])
                 if entity.ClientControl then
-                    Event.SendParty:SendToClient(party, member)
+                    Event.SendParty:SendToClient(party, member[1])
                 end
-            end
+            --end
         end
-        oldparty = party
+        --oldparty = party
     end)
 
     Ext.Events.ResetCompleted:Subscribe(function(e)
