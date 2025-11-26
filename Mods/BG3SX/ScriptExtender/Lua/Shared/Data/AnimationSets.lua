@@ -4,21 +4,21 @@ if BG3AFActive then
 end
 
 Data.AnimationSets = { -- Check BG3AF about what Slot and Type means
-    ["BG3SX_Body"] = {Resource = "bfa9dad2-2a5b-45cc-b770-9537badf9152", Slot = 0, Type = "Visual"},
-    ["BG3SX_Loco"] = {Resource = "0c914b3f-5f24-441b-9be6-c25f4a424cfa", Slot = 0, Type = "Visual"},
-    ["BG3SX_Idle"] = {Resource = "284eea6d-c693-4e4f-8527-f40433169e0c", Slot = 0, Type = "Visual"},
-    ["BG3SX_Head"] = {Resource = "f1bc6e5c-9a1b-418b-8c23-23b8d98caf36", Slot = 1, Type = "VisualSet"},
-    ["BG3SX_Tail"] = {Resource = "71d2f8cc-22e3-4aa6-b2af-3e34d87f6565", Slot = 1, Type = "VisualSet"},
-    ["BG3SX_Wings"] = {Resource = "2a36331a-e834-488f-b6dd-c6ec68e083a5", Slot = 1, Type = "VisualSet"},
-    ["BG3SX_Other"] = {Resource = "010d18d9-36a5-4625-b49b-84912e101818", Slot = 1, Type = "VisualSet"},
+    {Resource = "bfa9dad2-2a5b-45cc-b770-9537badf9152", Slot = 0, Type = "Visual"},
+    {Resource = "0c914b3f-5f24-441b-9be6-c25f4a424cfa", Slot = 0, Type = "Visual"},
+    {Resource = "284eea6d-c693-4e4f-8527-f40433169e0c", Slot = 0, Type = "Visual"},
+    {Resource = "f1bc6e5c-9a1b-418b-8c23-23b8d98caf36", Slot = 1, Type = "VisualSet"},
+    {Resource = "71d2f8cc-22e3-4aa6-b2af-3e34d87f6565", Slot = 1, Type = "VisualSet"},
+    {Resource = "2a36331a-e834-488f-b6dd-c6ec68e083a5", Slot = 1, Type = "VisualSet"},
+    {Resource = "010d18d9-36a5-4625-b49b-84912e101818", Slot = 1, Type = "VisualSet"},
 }
 local sets = Data.AnimationSets
 
 -- if Ext.IsServer() then -- because this file is loaded through _initData.lua which is also loaded on the client
     if BG3AFActive then
         local as = BG3AF.AnimationSet
-        local body = as.Get(Data.AnimationSets["BG3SX_Body"].Resource) -- Gets an AnimationSet - Check BG3AF for options
-        local head = as.Get(Data.AnimationSets["BG3SX_Head"].Resource) -- Gets an AnimationSet - Check BG3AF for options
+        local body = as.Get(Data.AnimationSets[1].Resource) -- Gets an AnimationSet - Check BG3AF for options
+        local head = as.Get(Data.AnimationSets[2].Resource) -- Gets an AnimationSet - Check BG3AF for options
         --local body = as.Get(Data.AnimationSets["BG3SX_Body"].Uuid) -- Gets an AnimationSet - Check BG3AF for options
         --local head = as.Get(Data.AnimationSets["BG3SX_Head"].Uuid)
 
