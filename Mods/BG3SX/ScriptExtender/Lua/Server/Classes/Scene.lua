@@ -504,11 +504,17 @@ function Scene:Init()
     end
 
         -- TODO - why do we wait?
+        local baselineRotation = self.startLocations[1].rotation
         Ext.Timer.WaitFor(200, function ()
-            -- print("requesting teleport")
+            -- Teleport all characters to root position
             for _, character in pairs(self.entities) do
-                Event.RequestTeleport:Broadcast({character= character, target = self.rootPosition})
-                Event.RequestRotation:Broadcast({character = character, target = self.entities[1]})
+                Event.RequestTeleport:Broadcast({character = character, target = self.rootPosition})
+            end
+            
+            -- Set BOTH characters to be rotated in the SAME world direction
+            -- This gives animations a baseline for their Root_M baked in rotation offsets
+            for _, character in pairs(self.entities) do
+                Event.RequestRotation:Broadcast({character = character, target = baselineRotation})
             end
         end)
 
