@@ -481,7 +481,7 @@ function Scene:Init()
     -- We do this before in a seperate loop to already apply this to all entities (-- old stuff -> before actors are spawned one by one)
     for _, character in pairs(self.entities) do
         Entity:ClearActionQueue(character)
-        Osi.AddBoosts(character, "ActionResourceBlock(Movement)", "", "") -- Blocks movement
+        -- Osi.AddBoosts(character, "ActionResourceBlock(Movement)", "", "") -- Blocks movement
         Osi.ApplyStatus(character, "BG3SX_DisableAI", -1, 1, "")
         -- Osi.SetDetached(character, 1) -- Make entity untargetable
         if Osi.CanJoinCombat(character) == 1 then
@@ -503,9 +503,9 @@ function Scene:Init()
         end
     end
 
-        -- TODO - why do we wait?
+        -- TODO - why do we wait? (because a short enough timer won't apply the DisableAI status successfully)
         local baselineRotation = self.startLocations[1].rotation
-        Ext.Timer.WaitFor(200, function ()
+        Ext.Timer.WaitFor(500, function ()
             -- Teleport all characters to root position
             for _, character in pairs(self.entities) do
                 Event.RequestTeleport:Broadcast({character = character, target = self.rootPosition})
