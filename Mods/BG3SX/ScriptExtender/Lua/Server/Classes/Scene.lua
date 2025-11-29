@@ -504,18 +504,30 @@ function Scene:Init()
     end
 
         -- TODO - why do we wait? (because a short enough timer won't apply the DisableAI status successfully)
-        local baselineRotation = self.startLocations[1].rotation
         Ext.Timer.WaitFor(500, function ()
-            -- Teleport all characters to root position
+            -- Force a small movement to ensure steering is updated
+            -- This seems to prevent misalignment issues when characters are motionless at triggers/save load
             for _, character in pairs(self.entities) do
-                Event.RequestTeleport:Broadcast({character = character, target = self.rootPosition})
+                local entity = Ext.Entity.Get(character)
+                if entity and entity.Transform then
+                    local currentPos = entity.Transform.Transform.Translate
+                    local nudgePos = {currentPos[1] + 0.1, currentPos[2], currentPos[3]}
+                    Event.RequestTeleport:Broadcast({character = character, target = nudgePos})
+                end
             end
             
-            -- Set BOTH characters to be rotated in the SAME world direction
-            -- This gives animations a baseline for their Root_M baked in rotation offsets
-            for _, character in pairs(self.entities) do
-                Event.RequestRotation:Broadcast({character = character, target = baselineRotation})
-            end
+            Ext.Timer.WaitFor(20, function()
+                -- Teleport all characters to root position
+                for _, character in pairs(self.entities) do
+                    Event.RequestTeleport:Broadcast({character = character, target = self.rootPosition})
+                end
+                
+                -- Set all characters to be rotated in the SAME world direction
+                -- This gives animations a baseline for their Root_M baked in rotation offsets
+                for _, character in pairs(self.entities) do
+                    Event.RequestRotation:Broadcast({character = character, target = self.entities[1]})
+                end
+            end)
         end)
 
         --Osi.TeleportToPosition(entity, self.rootPosition.x, self.rootPosition.y, self.rootPosition.z) -- now handled correctly in actor initialization
