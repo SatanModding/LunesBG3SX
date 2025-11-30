@@ -703,10 +703,13 @@ function Scene:EntityReset()
                 Genital.OverrideGenital(outOfSexGenital, entity)
             end
         end
-        if Entity:IsNPC(character) then
-            NPC.Redress(entity, self.StrippedEQ[character].Slot)
+        -- Only redress if the character was actually stripped (e.g. if stripping was toggled off)
+        if self.StrippedEQ[character] then
+            if Entity:IsNPC(character) then
+                NPC.Redress(entity, self.StrippedEQ[character].Slot)
+            end
+            Entity:Redress(character, self.StrippedEQ[character])
         end
-        Entity:Redress(character, self.StrippedEQ[character])
 
         local startLocation
         for _, entry in ipairs(self.startLocations) do
