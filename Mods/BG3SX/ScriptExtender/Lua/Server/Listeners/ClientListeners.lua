@@ -352,7 +352,7 @@ end)
 Event.FetchAllAnimations:SetHandler(function (payload)
     local animations = Data.Animations
     local client = payload.ID
-    Event.SendAllAnimations:SendToClient({Animations = animations, SceneControl = payload.SceneControl}, client)
+    Helper.SafeSendToClient(Event.SendAllAnimations, {Animations = animations, SceneControl = payload.SceneControl}, client)
 end)
 
 Event.FetchParty:SetHandler(function (payload)

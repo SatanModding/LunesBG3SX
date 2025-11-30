@@ -165,16 +165,21 @@ Event.SendAllAnimations:SetHandler(function (payload)
     --Debug.Dump(payload)
     local animData = payload.Animations
     local sceneID = payload.SceneControl
-    local sceneTab = UI.SceneTab
+
     --Debug.Print("SendAllAnimations")
     --_P(Table.TableSize(animData))
-    for _,sceneControl in pairs(SceneControl.ActiveSceneControls) do
-        if sceneControl.ID == sceneID then
-            -- Debug.Print("FOUND SCENECONTROL")
-            sceneControl:UpdateAnimationData(animData)
+
+    if UI and UI.SceneControl and UI.SceneControl.ActiveSceneControls then
+        for _,sceneControl in pairs(UI.SceneControl.ActiveSceneControls) do
+            if sceneControl.ID == sceneID then
+                -- Debug.Print("FOUND SCENECONTROL")
+                sceneControl:UpdateAnimationData(animData)
+                break
+            end
         end
     end
 end)
+
 Event.UpdateSceneControlPicker:SetHandler(function (payload)
     local sceneControl = UI.SceneControl:FindInstanceByEntity(payload.Character)
     sceneControl.Scene.SceneType = payload.SceneType
