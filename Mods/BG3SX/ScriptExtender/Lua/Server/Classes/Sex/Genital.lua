@@ -79,7 +79,7 @@ function Genital.getModGenitals(modName)
         local visualResource = Ext.StaticData.Get(genital, "CharacterCreationAppearanceVisual").VisualResource
 		local resource = Ext.Resource.Get(visualResource, "Visual") -- Visualbank
 	    local sourceFile = Helper.GetPropertyOrDefault(resource, "SourceFile", nil)
-		if sourceFile then 
+		if sourceFile then
 			if Helper.StringContains(sourceFile, modName) then
 				table.insert(modGenitals, genital)
 			end
@@ -142,13 +142,13 @@ function Genital.IsPenis(genital)
 	else
 		return false
 	end
-	
+
 end
 
 
 -- Add Genital containers - Vanilla & MrFunSize are always added
 function Genital.Initialize()
- 
+
 
 	-- Default gentials that come with BG3SX
 	allGenitals = collectAllGenitals()
@@ -170,12 +170,12 @@ function Genital.Initialize()
 	-- Debug.Print("GOT ALL GENITALS")
 
 	--Ext.Timer.WaitFor(200, function()
-	
+
 	-- Debug.Print("Sending GenitalsLoaded Event")
 	Event.GenitalsLoaded:Broadcast("Hewwwo I have fetched all genitaws uwu")
 	--end)
 
-	
+
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -203,9 +203,13 @@ end
 ---@return table|nil				- Table of IDs of CharacterCreationAppearaceVisuals
 function Genital.getPermittedGenitals(entity)
 
+	-- Halsin is a special boy (needs human/hairy genitals, not hairless elf genitals)
+	local halsin = "S_GLO_Halsin_7628bc0e-52b8-42a7-856a-13a6fd413323"
+	local useParentRace = (entity.Uuid.EntityUuid ~= halsin)
+
 	-- Elf, Half elf and drow share genitals in vanilla
-	local permittedGenitals = Visual.getPermittedVisual(entity, allGenitals, "CharacterCreationAppearanceVisual", true, true)
-	
+	local permittedGenitals = Visual.getPermittedVisual(entity, allGenitals, "CharacterCreationAppearanceVisual", true, useParentRace)
+
 	if (#permittedGenitals == 0) then
 		return nil
 	else
@@ -280,7 +284,7 @@ function Genital.GetFirstBestGenital(entity)
 
 		end
 	end
-	
+
 
 	for _, genital in pairs(genitalsToSearch) do
 		-- alternatively if hasPenis == false and IsPenis == false, also reuturn (both are/have vulva)
@@ -289,7 +293,7 @@ function Genital.GetFirstBestGenital(entity)
 			return genital
 		end
 	end
-	
+
 end
 
 
@@ -333,7 +337,7 @@ function Genital.GetDefaultErection(entity)
 		return permittedFunErections[1]
 
 	end
-	
+
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -398,7 +402,7 @@ function Genital.AddGenitalIfHasNone(entity)
 		Visual.Replicate(entity)
 
 		SexUserVars.AssignGenital("BG3SX_OutOfSexGenital", toBeAdded, entity)
-		
+
 	end
 end
 
@@ -487,15 +491,15 @@ function Genital.GiveSexGenital(entity)
 
 	end
 
-	
+
 end
 
-	
+
 -- removes erections from all characters in the list, if applicable
 ---@entity EntityHandle
 function  Genital.RemoveSexGenital(entity)
-	
+
 	local normalGenital = SexUserVars.GetGenital("BG3SX_OutOfSexGenital", entity)
 	Genital.OverrideGenital(normalGenital, entity)
-	
+
 end

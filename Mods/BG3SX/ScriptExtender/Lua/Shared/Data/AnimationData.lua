@@ -214,6 +214,11 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
         hmi:SetAnimation("Tall_V",  nil, anim["MasturbateStanding_Tall_V"].MapKey)
     end
 
+    local hmi = bottlesit.Heightmatching
+    if hmi then
+        hmi:SetAnimation("_V", nil, anim["BottleSit"].MapKey)
+    end
+
     -- Automatic NSFW Tag adding
     for uuid,modanims in pairs(anims) do
         if uuid == ModuleUUID then -- Only for this mod

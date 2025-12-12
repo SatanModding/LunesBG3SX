@@ -543,7 +543,7 @@ function SceneControlInstance:GetAnimationsBySceneType()
                         if AnimationName == "BottleSit" then
                             _D(matchT)
                         end
-                        if matchT and #matchT > 0 then
+                        if matchT and next(matchT) ~= nil then
                             for _,matchup in pairs(matchT) do
                                 if matchup.Solo then
                                     if Table.Contains(AnimationData.Categories, sceneType) then

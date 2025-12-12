@@ -481,7 +481,7 @@ function Scene:Init()
     -- We do this before in a seperate loop to already apply this to all entities (-- old stuff -> before actors are spawned one by one)
     for _, character in pairs(self.entities) do
         Entity:ClearActionQueue(character)
-        Osi.AddBoosts(character, "ActionResourceBlock(Movement)", "", "") -- Blocks movement
+        -- Osi.AddBoosts(character, "ActionResourceBlock(Movement)", "", "") -- Blocks movement
         Osi.ApplyStatus(character, "BG3SX_DisableAI", -1, 1, "")
         -- Osi.SetDetached(character, 1) -- Make entity untargetable
         if Osi.CanJoinCombat(character) == 1 then
@@ -503,13 +503,31 @@ function Scene:Init()
         end
     end
 
-        -- TODO - why do we wait?
-        Ext.Timer.WaitFor(200, function ()
-            -- print("requesting teleport")
+        -- TODO - why do we wait? (because a short enough timer won't apply the DisableAI status successfully)
+        Ext.Timer.WaitFor(500, function ()
+            -- Force a small movement to ensure steering is updated
+            -- This seems to prevent misalignment issues when characters are motionless at triggers/save load
             for _, character in pairs(self.entities) do
-                Event.RequestTeleport:Broadcast({character= character, target = self.rootPosition})
-                Event.RequestRotation:Broadcast({character = character, target = self.entities[1]})
+                local entity = Ext.Entity.Get(character)
+                if entity and entity.Transform then
+                    local currentPos = entity.Transform.Transform.Translate
+                    local nudgePos = {currentPos[1] + 0.1, currentPos[2], currentPos[3]}
+                    Event.RequestTeleport:Broadcast({character = character, target = nudgePos})
+                end
             end
+            
+            Ext.Timer.WaitFor(20, function()
+                -- Teleport all characters to root position
+                for _, character in pairs(self.entities) do
+                    Event.RequestTeleport:Broadcast({character = character, target = self.rootPosition})
+                end
+                
+                -- Set all characters to be rotated in the SAME world direction
+                -- This gives animations a baseline for their Root_M baked in rotation offsets
+                for _, character in pairs(self.entities) do
+                    Event.RequestRotation:Broadcast({character = character, target = self.entities[1]})
+                end
+            end)
         end)
 
         --Osi.TeleportToPosition(entity, self.rootPosition.x, self.rootPosition.y, self.rootPosition.z) -- now handled correctly in actor initialization
@@ -685,10 +703,13 @@ function Scene:EntityReset()
                 Genital.OverrideGenital(outOfSexGenital, entity)
             end
         end
-        if Entity:IsNPC(character) then
-            NPC.Redress(entity, self.StrippedEQ[character].Slot)
+        -- Only redress if the character was actually stripped (e.g. if stripping was toggled off)
+        if self.StrippedEQ[character] then
+            if Entity:IsNPC(character) then
+                NPC.Redress(entity, self.StrippedEQ[character].Slot)
+            end
+            Entity:Redress(character, self.StrippedEQ[character])
         end
-        Entity:Redress(character, self.StrippedEQ[character])
 
         local startLocation
         for _, entry in ipairs(self.startLocations) do
