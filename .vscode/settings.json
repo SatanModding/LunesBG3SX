@@ -1,9 +1,0 @@
-{
-    "bg3ModHelper.rootModPath": "/home/skiz/modding/mods/LunesBG3SX",
-    "bg3ModHelper.packingPriority": 0,
-    "bg3ModHelper.modName": "BG3SX",
-    "Lua.diagnostics.globals": [
-        "Ext",
-        "Osi"
-    ]
-}
