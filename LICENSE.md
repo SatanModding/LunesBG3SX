@@ -45,6 +45,6 @@ If you create content that integrates with BG3SX, please credit "BG3SX by Skiz, 
 
 ---
 
-**For permissions beyond this license, contact:** _skiz__ on Discord
+**For permissions beyond this license, contact:** \_skiz\_\_ on Discord
 
 **Last Updated:** December 2025
