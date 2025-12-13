@@ -45,9 +45,9 @@ function UI:New(mcm)
     local window
     if mcm then
         window = mcm:AddChildWindow("BG3SX")
-    else
-        window = Ext.IMGUI.NewWindow("BG3SX")
-        window:SetSize({500*ViewPortScale, 500*ViewPortScale}, "FirstUseEver")
+    -- else
+    --     window = Ext.IMGUI.NewWindow("BG3SX")
+    --     window:SetSize({500*ViewPortScale, 500*ViewPortScale}, "FirstUseEver")
     end
 
     self.Window = window
@@ -145,7 +145,7 @@ function UI:CreateEventHandler()
                 elseif reason == "RotateScene" then
                     self:InputRecieved(mouseoverPosition)
                 elseif reason == "NewSFWScene" or reason == "NewNSFWScene" then
-                    _P("NewSFWScene or NewNSFWScene")
+                    -- _P("NewSFWScene or NewNSFWScene")
                     if getMouseover().Inner.Inner[1] then
                         if getMouseover().Inner.Inner[1].Character then
                             mouseoverTarget = getUUIDFromUserdata(getMouseover()) or getMouseover().UIEntity.Uuid.EntityUuid or nil
@@ -460,11 +460,11 @@ end
 if MCMActive then
     Mods.BG3MCM.IMGUIAPI:InsertModMenuTab(ModuleUUID, "BG3SX", function(mcm)
         UI:New(mcm):Init()
-        _P("-------------------------------------- [BG3SX] MCM Tab Loaded --------------------------------------")
+        -- _P("-------------------------------------- [BG3SX] MCM Tab Loaded --------------------------------------")
     end)
-else
-    UI:New():Init()
-    _P("-------------------------- [BG3SX] No MCM Loaded - Standalone Window Created -----------------------")
+-- else
+--     UI:New():Init()
+    -- _P("-------------------------- [BG3SX] No MCM Loaded - Standalone Window Created -----------------------")
 end
 
 return UI

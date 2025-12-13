@@ -172,7 +172,7 @@ function Genital.Initialize()
 	--Ext.Timer.WaitFor(200, function()
 
 	-- Debug.Print("Sending GenitalsLoaded Event")
-	Event.GenitalsLoaded:Broadcast("Hewwwo I have fetched all genitaws uwu")
+	-- Event.GenitalsLoaded:Broadcast("Hewwwo I have fetched all genitaws uwu")
 	--end)
 
 
@@ -238,7 +238,7 @@ function Genital.getFilteredGenitals(modName, listOfGenitals)
 		modGenitals = Genital.getModGenitals(modName)
 	end
 	if not modGenitals then
-		_P("[BG3SX][Genital.lua] Error, spell not configured correctly, cannot get genitals")
+		_P("[BG3SX][Genital.lua] Couldn't find modded genitals for modName: " .. modName)
 		return
 	end
 
@@ -361,7 +361,7 @@ function Genital.OverrideGenital(newGenital, entity)
 		Debug.Print(entity.Uuid.EntityUuid.. " is not whitelisted to receive genitals")
 	end
 
-	print("overriding genitals with " , newGenital, " for ", Helper.GetName(entity.Uuid.EntityUuid))
+	-- print("overriding genitals with " , newGenital, " for ", Helper.GetName(entity.Uuid.EntityUuid))
 
 
 	local componentPath = {"CharacterCreationAppearance" ,"Visuals"}
@@ -457,26 +457,26 @@ function Genital.GiveSexGenital(entity)
 
 	-- print("giving genitals")
 	if not sexGenital then
-		print("NO SEX GENITAL HAS BEEN SET")
+		-- print("NO SEX GENITAL HAS BEEN SET")
 		if not hasPenis then
-			print("NO PENIS")
+			-- print("NO PENIS")
 			if currentGenital then
 				-- if already has vulva, no need to add another
-				print("ALREADY HAS VULVA. RETURNING")
+				-- print("ALREADY HAS VULVA. RETURNING")
 				SexUserVars.AssignGenital("BG3SX_SexGenital", currentGenital, entity)
 				return
 			else
 				sexGenital = Genital.GetFirstBestGenital(entity)
-				print("CHOSE VULVA ", sexGenital)
+				-- print("CHOSE VULVA ", sexGenital)
 			end
 		else
-			print("CHOOSING SIMPLE ERECTION")
+			-- print("CHOOSING SIMPLE ERECTION")
 			sexGenital = Genital.GetDefaultErection(entity)
 		end
 	end
 
 
-	_P("CHOSEN GENITAL ", sexGenital, " FOR ", entity.Uuid.EntityUuid)
+	-- _P("CHOSEN GENITAL ", sexGenital, " FOR ", entity.Uuid.EntityUuid)
 
 	SexUserVars.AssignGenital("BG3SX_SexGenital", sexGenital, entity)
 

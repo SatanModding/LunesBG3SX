@@ -24,7 +24,7 @@ function SceneControl:FindInstanceByEntity(entityToSearch)
     for _,instance in pairs(self.ActiveSceneControls) do
         for _, entity in pairs(instance.Scene.entities) do
             if Helper.StringContainsOne(entityToSearch, entity) then
-                _P("Found scene control for entity: ", entityToSearch)
+                -- _P("Found scene control for entity: ", entityToSearch)
                 return instance
             end
         end
@@ -52,7 +52,9 @@ function SceneControlInstance:New(Scene)
         Scene = Scene, --check if it needs to be updated when scene changes or if this points to the original one
         Window = Ext.IMGUI.NewWindow(id),
         }, SceneControlInstance)
+    instance.Window.IDContext = tostring(math.random(100000, 999999)) -- Random ID to avoid conflicts
     instance:UpdateWindowName()
+    instance.Window.IDContext = instance.Window.Label .. instance.Window.IDContext -- Random ID to avoid conflicts
     table.insert(SceneControl.ActiveSceneControls, instance)
     instance:Initialize()
     return instance

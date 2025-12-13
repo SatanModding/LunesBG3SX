@@ -140,11 +140,11 @@ function Shapeshift.AddCustomVisualOverride(entity, visual)
         local visuals = {}
 
         for _, entry in pairs(entity.AppearanceOverride.Visual.Visuals) do
-            print("inserting ", entry)
+            -- print("inserting ", entry)
             table.insert(visuals,entry)
         end
 
-        print("inserting new entry", visual)
+        -- print("inserting new entry", visual)
         table.insert(visuals, visual)
         entity.AppearanceOverride.Visual.Visuals = visuals
         

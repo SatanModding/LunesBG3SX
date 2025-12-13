@@ -281,7 +281,7 @@ Event.RequestDressNPC:SetHandler(function (payload)
     local clothes = SexUserVars.GetNPCClothes(entity)
 
     if not clothes then
-        print("no clothes saved for ", entity.Uuid.EntityUuid)
+        -- print("no clothes saved for ", entity.Uuid.EntityUuid)
         return
     end
 

@@ -91,7 +91,7 @@ playAnimation = function(self)
 
   --  Osi.PlayAnimation(self.actor.uuid, "") -- First, stop current animation on actor
     if self.animationData.Loop == true then
-        _P("Playing ", self.animation, " for ", self.actor)
+        -- _P("Playing ", self.animation, " for ", self.actor)
         Osi.PlayLoopingAnimation(self.actor, "", self.animation, "", "", "", "", "")
     else
         Osi.PlayAnimation(self.actor, self.animation)

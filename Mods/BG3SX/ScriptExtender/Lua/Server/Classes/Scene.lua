@@ -410,13 +410,13 @@ end
 -- Prop Management
 -----------------------------------------------------
 function Scene:CreateProps()
-    _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Creating props for current animation")
+    -- _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Creating props for current animation")
     if self.currentAnimation.Props then
-        _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Props found for current animation: " .. #self.currentAnimation.Props)
+        -- _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Props found for current animation: " .. #self.currentAnimation.Props)
         for _,animDataProp in pairs(self.currentAnimation.Props) do
-            _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Creating prop " .. animDataProp)
+            -- _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Creating prop " .. animDataProp)
             local sceneProp = Osi.CreateAt(animDataProp, self.rootPosition[1], self.rootPosition[2], self.rootPosition[3], 1, 0, "")
-            _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Created prop " .. sceneProp)
+            -- _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Created prop " .. sceneProp)
             Osi.SetMovable(sceneProp,0)
             table.insert(self.props, sceneProp)
         end
@@ -696,7 +696,7 @@ function Scene:EntityReset()
 
         if self.Type == "NSFW" then
             if Entity:IsNPC(character) then
-                _P("Removing genitals from NPC " .. character)
+                -- _P("Removing genitals from NPC " .. character)
                 NPC.RemoveGenitals(entity) -- Remove genitals from NPCs
             else
                 local outOfSexGenital = SexUserVars.GetGenital("BG3SX_OutOfSexGenital", entity)
@@ -792,7 +792,7 @@ function Scene:SwapPosition()
         return
     else
         if self.UnlockedSwaps or (Entity:HasPenis(self.entities[1]) == Entity:HasPenis(self.entities[2])) then
-            _P("SWAPPI")
+            -- _P("SWAPPI")
             local savedActor = self.entities[1]
 
             Ext.ModEvents.BG3SX.SceneSwitchPlacesBefore:Throw({self.entities})

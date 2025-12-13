@@ -38,7 +38,7 @@ function PartyInterface:Init()
     self.NPCArea = self.Wrapper:AddCollapsingHeader("NPCs")
     self.NPCArea.Visible = false
 
-    Debug.Print("REQUESTING FETCHPARTY TO CLIENT WITH ID " .. USERID)
+    -- Debug.Print("REQUESTING FETCHPARTY TO CLIENT WITH ID " .. USERID)
     Event.FetchParty:SendToServer({ID = USERID})
 end
 

@@ -108,8 +108,8 @@ function Entity:HasPenis(uuid)
     if Entity:IsPlayable(uuid) then
         -- print(uuid, " is playable. Determining genital type")
         if Osi.IsTagged(uuid, "GENITAL_PENIS_d27831df-2891-42e4-b615-ae555404918b") == 1 then
-            _P("-------------------")
-            _P(uuid .. "ISPLAYABLE")
+            -- _P("-------------------")
+            -- _P(uuid .. "ISPLAYABLE")
             return true
         end
         if Osi.IsTagged(uuid, "GENITAL_VULVA_a0738fdf-ca0c-446f-a11d-6211ecac3291") == 1 then
@@ -321,7 +321,7 @@ end
 --- @param newComponent any
 function Entity:UpdateEntityComponent(entity, previousComponent, path, newComponent)
 
-    print("updating path")
+    -- print("updating path")
 
     if #path == 1 then -- End of recursion, time to set
         local targetComponent = previousComponent or entity
@@ -356,7 +356,7 @@ end
 function Entity:UnequipAll(uuid)
     --Osi.SetArmourSet(uuid, 0)
 
-    print("called Unequip All for entity ", uuid)
+    -- print("called Unequip All for entity ", uuid)
 
     local oldEquipment = {}
     for _, slotName in ipairs(Data.Equipment.Slots) do
@@ -394,7 +394,7 @@ function Entity.UnequipAllExcept(uuid, except)
     for i,slotName in ipairs(Data.Equipment.Slots) do
         if not Table.Contains(except, slotName) then
 
-            _P("Unequipping slot: " .. slotName)
+            -- _P("Unequipping slot: " .. slotName)
             local gearPiece = Osi.GetEquippedItem(uuid, slotName)
             if gearPiece then
                 Osi.LockUnequip(gearPiece, 0)
@@ -448,7 +448,7 @@ function Entity:Redress(entity, strippedEQ)
     if strippedEQ.Slots then
         local actualEntity = Ext.Entity.Get(entity)
         if not actualEntity then
-            print("is not an entity ", entity)
+            -- print("is not an entity ", entity)
         end
 
         NPC.Redress(actualEntity, strippedEQ.Slots)

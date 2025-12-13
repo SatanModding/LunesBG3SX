@@ -98,7 +98,7 @@ Event.NewSceneRequest:SetHandler(function (payload)
         end
 
         if shouldRequestConsent then
-            Debug.Print(string.format("[BG3SX] Attempting to send consent request for target %s", target))
+            -- Debug.Print(string.format("[BG3SX] Attempting to send consent request for target %s", target))
             
             -- New safeguard function
             local success = Helper.SafeSendToClient(
@@ -112,12 +112,12 @@ Event.NewSceneRequest:SetHandler(function (payload)
             )
             
             if not success then
-                Debug.Print("[BG3SX] Failed to send consent request - no valid client found, aborting scene request")
+                -- Debug.Print("[BG3SX] Failed to send consent request - no valid client found, aborting scene request")
             end
 
             return
         else
-            Debug.Print(string.format("[BG3SX] Skipping consent – target is NPC or self: %s", tostring(target)))
+            -- Debug.Print(string.format("[BG3SX] Skipping consent – target is NPC or self: %s", tostring(target)))
         end
     end
 

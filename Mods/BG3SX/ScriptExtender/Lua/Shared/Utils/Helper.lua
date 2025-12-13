@@ -237,9 +237,9 @@ end
 
 ---@return EntityHandle|nil
 function Helper.GetLocalControlledEntity()
-    _DS(Ext.Entity.GetAllEntitiesWithComponent("ClientControl"))
+    -- _DS(Ext.Entity.GetAllEntitiesWithComponent("ClientControl"))
     for _, entity in pairs(Ext.Entity.GetAllEntitiesWithComponent("ClientControl")) do
-        _P(entity.UserReservedFor.UserID)
+        -- _P(entity.UserReservedFor.UserID)
         if entity.UserReservedFor.UserID == 1 or entity.UserReservedFor.UserID == "1" then
             return entity
         end
@@ -452,23 +452,23 @@ end
 function Helper.GetClientIdForEntity(uuid)
     local entity = Ext.Entity.Get(uuid)
     if not entity then
-        Debug.Print("[BG3SX] GetClientIdForEntity: Entity not found for UUID: " .. tostring(uuid))
+        -- Debug.Print("[BG3SX] GetClientIdForEntity: Entity not found for UUID: " .. tostring(uuid))
         return nil
     end
 
     -- Check if entity has UserReservedFor component (for player avatars)
     if entity.UserReservedFor and entity.UserReservedFor.UserID then
-        Debug.Print("[BG3SX] GetClientIdForEntity: Found UserReservedFor.UserID for " .. tostring(uuid))
+        -- Debug.Print("[BG3SX] GetClientIdForEntity: Found UserReservedFor.UserID for " .. tostring(uuid))
         return entity.UserReservedFor.UserID
     end
 
     -- For summons etc, try to find the owner's client
     if entity.Owner and entity.Owner.Owner then
-        Debug.Print("[BG3SX] GetClientIdForEntity: Entity is owned, checking owner")
+        -- Debug.Print("[BG3SX] GetClientIdForEntity: Entity is owned, checking owner")
         return Helper.GetClientIdForEntity(entity.Owner.Owner)
     end
 
-    Debug.Print("[BG3SX] GetClientIdForEntity: No valid client found for " .. tostring(uuid))
+    -- Debug.Print("[BG3SX] GetClientIdForEntity: No valid client found for " .. tostring(uuid))
     return nil
 end
 
@@ -482,17 +482,17 @@ function Helper.SafeSendToClient(event, payload, targetUuid)
 
     if type(targetUuid) == "number" then
         clientId = targetUuid
-        Debug.Print(string.format("[BG3SX] SafeSendToClient: Using provided user ID: %s", clientId))
+        -- Debug.Print(string.format("[BG3SX] SafeSendToClient: Using provided user ID: %s", clientId))
     else
         clientId = Helper.GetClientIdForEntity(targetUuid)
 
         if not clientId then
-            Debug.Print("[BG3SX] SafeSendToClient: Cannot send event, no valid client for UUID: " .. tostring(targetUuid))
+            -- Debug.Print("[BG3SX] SafeSendToClient: Cannot send event, no valid client for UUID: " .. tostring(targetUuid))
             return false
         end
     end
 
-    Debug.Print(string.format("[BG3SX] SafeSendToClient: Sending event to client %s", clientId))
+    -- Debug.Print(string.format("[BG3SX] SafeSendToClient: Sending event to client %s", clientId))
     event:SendToClient(payload, clientId)
     return true
 end

@@ -161,7 +161,7 @@ function NPCTab:Init()
         if not npc then
             -- print("no npc added in function, choosing selected from list")
             npc = self.InRange.Choice.Options[self.InRange.Choice.SelectedIndex + 1]
-            print(npc)
+            -- print(npc)
         end
         if npc then
             local uuid = npc:match(" %- (.+)")

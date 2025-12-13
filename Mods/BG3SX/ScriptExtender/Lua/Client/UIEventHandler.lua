@@ -8,11 +8,11 @@ Event.InitUIAfterReset:SetHandler(function()
     if MCMActive then
         Mods.BG3MCM.IMGUIAPI:InsertModMenuTab(ModuleUUID, "BG3SX", function(mcm)
             UI:New(mcm):Init()
-            _P("-------------------------------------- [BG3SX] MCM Tab Loaded --------------------------------------")
+            -- _P("-------------------------------------- [BG3SX] MCM Tab Loaded --------------------------------------")
         end)
-    else
-        UI:New():Init()
-        _P("-------------------------- [BG3SX] No MCM Loaded - Standalone Window Created -----------------------")
+    -- else
+    --     UI:New():Init()
+    --     _P("-------------------------- [BG3SX] No MCM Loaded - Standalone Window Created -----------------------")
     end
 end)
 

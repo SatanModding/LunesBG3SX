@@ -297,8 +297,7 @@ local function getBestValueOfAllScores(scores)
     for _, entry in pairs(scores) do
         -- Debug thingy
         if entry.score == bestScore then
-            Debug.Print("The same score was found for ".. entry.str .. " and " .. bestString)
-            Debug.Print("Please check your files")
+            Debug.Print("The same score for finding a matching animation was found for ".. entry.str .. " and " .. bestString .. ". This selected animations modder may need to update its heightmatching setup")
 
         elseif entry.score > bestScore then
             bestScore = entry.score
@@ -336,7 +335,7 @@ function Heightmatching:NewGetAnimation(character1, character2, unlocked)
 
     -- === If no second entity, get solo animation ===
     if not character2 or Helper.StringContainsOne(character1, character2) then
-        print("BEST MATCH IS " .. bestHMEntityOne .. " with animation " , matchingTable[bestHMEntityOne].Solo)
+        -- print("BEST MATCH IS " .. bestHMEntityOne .. " with animation " , matchingTable[bestHMEntityOne].Solo)
         return matchingTable[bestHMEntityOne].Solo
     else
         -- print("BEST MATCH IS " .. bestHMEntityOne .. " with the animations ")
@@ -361,7 +360,7 @@ function Heightmatching:NewGetAnimation(character1, character2, unlocked)
     end
 
     local bestHMEntityTwo = getBestValueOfAllScores(scoresEntityTwo)
-    print("BEST MATCH IS " .. bestHMEntityTwo .. " with animation " , matchingTable[bestHMEntityOne][bestHMEntityTwo].Bottom)
+    -- print("BEST MATCH IS " .. bestHMEntityTwo .. " with animation " , matchingTable[bestHMEntityOne][bestHMEntityTwo].Bottom)
 
     local animationSet = matchingTable[bestHMEntityOne][bestHMEntityTwo]
 

@@ -37,13 +37,13 @@ end)
 
 Event.SetActiveGenital:SetHandler(function (payload)
 
-    print("Event set active gential")
+    -- print("Event set active gential")
 
     local uuid = payload.uuid
     local genital = payload.Genital
     local entity = Ext.Entity.Get(uuid)
 
-    print("Assigning new sex genital to ", genital)
+    -- print("Assigning new sex genital to ", genital)
     SexUserVars.AssignGenital("BG3SX_SexGenital", genital, entity)
 
     -- If active is changed, update UserVars, search for active actors, and change their genitals as well
@@ -118,7 +118,7 @@ Ext.Osiris.RegisterListener("ObjectTransformed", 2, "after", function(object, to
     local conts = Ext.Entity.GetAllEntitiesWithComponent("ClientControl")
     if conts ~= nil then
         for k, v in pairs(conts) do
-            print("sending genital update event for " , Helper.GetName(v.Uuid.EntityUuid))
+            -- print("sending genital update event for " , Helper.GetName(v.Uuid.EntityUuid))
             Event.SendGenitals:SendToClient({ID = nil, Data = Data.CreateUIGenitalPayload(v.Uuid.EntityUuid)}, v.UserReservedFor.UserID)
         end
     end
