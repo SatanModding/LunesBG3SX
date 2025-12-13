@@ -95,12 +95,15 @@ local sets = Data.AnimationSets
             -- _D(body[1].AnimationBank.AnimationSubSets[""].Animation)
         -- end)
 
-        BG3AF.EmoteCollection.Create({
-            ModuleUuid = ModuleUUID,
-            ResourceUUID = "8c2f6e91-83ce-4b4f-b83f-dc0d289a058d",
-            -- DisplayName = "BG3SX",
-            Name = "BG3SX",
-        })
+        if not Ext.StaticData.Get("8c2f6e91-83ce-4b4f-b83f-dc0d289a058d", "PhotoModeEmoteCollection") then
+            Debug.Print("First load of this Session, creating BG3SX Emote Collection")
+            BG3AF.EmoteCollection.Create({
+                ModuleUuid = ModuleUUID,
+                ResourceUUID = "8c2f6e91-83ce-4b4f-b83f-dc0d289a058d",
+                -- DisplayName = "BG3SX",
+                Name = "BG3SX",
+            })
+        end
     else
         Debug.Print("BG3AF not found")
     end
