@@ -35,7 +35,7 @@ playSound = function(self)
     -- fetch sound data dynamically from current animation
     local soundTable = nil
     if scene.currentAnimation then
-        if Helper.StringContainsOne(scene.entities[1], self.actor) then
+        if self.actor == scene.entities[1] then
             soundTable = scene.currentAnimation.SoundTop
         else
             soundTable = scene.currentAnimation.SoundBottom or scene.currentAnimation.SoundTop

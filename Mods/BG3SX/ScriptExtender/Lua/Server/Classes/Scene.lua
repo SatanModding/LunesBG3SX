@@ -652,16 +652,17 @@ end
 function Scene:PlayAnimation(animationData)
     local animDataParent = Data.GetAnimDataParent(animationData)
     if animDataParent then
+        -- Cancel all existing sound timers to prevent overlapping sounds when cycling animations
+        if animDataParent[animationData.Mod][animationData.Name].Sound == true then
+            self:CancelAllSoundTimers()
+        end
+
         for _, char in pairs (self.entities) do
             Animation:New(char, animDataParent[animationData.Mod][animationData.Name])
 
-            -- Only start sound timers if none are running yet
+            -- Start sound for each character
             if animDataParent[animationData.Mod][animationData.Name].Sound == true then
-                if #self.timerHandles == 0 then
-                    -- No sounds running yet, start them
-                    Sound:New(char, animDataParent[animationData.Mod][animationData.Name])
-                end
-                -- If sounds are already running, they'll automatically pick up the new animation's sounds on next loop
+                Sound:New(char, animDataParent[animationData.Mod][animationData.Name])
             end
         end
 
