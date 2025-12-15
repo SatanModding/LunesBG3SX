@@ -1,13 +1,25 @@
-Ext.Events.NetMessage:Subscribe(function(e) 
-    if (e.Channel == "BG3SX_NPCStrip") then
-        local strip = Ext.Json.Parse(e.Payload)
-        Ext.Resource.Get(strip.resource,"CharacterVisual").VisualSet.Slots = strip.naked
-    end
-    if (e.Channel == "BG3SX_NPCDress") then
-        local dress = Ext.Json.Parse(e.Payload)
-        Ext.Resource.Get(dress.resource,"CharacterVisual").VisualSet.Slots = dress.dressed
-    end
+-- Ext.Events.NetMessage:Subscribe(function(e) 
+--     if (e.Channel == "BG3SX_NPCStrip") then
+--         local character = Ext.Json.Parse(e.Payload)
+--         Debug.Print("Stripping for NPC in multiplayer required")
+--     end
+--     if (e.Channel == "BG3SX_NPCDress") then
+--         local character = Ext.Json.Parse(e.Payload)
+--         Debug.Print("Redressing for NPC in multiplayer required")
+--     end
+-- end)
+
+Event.SyncNPCStrip:SetHandler(function(payload)
+    local entity = Ext.Entity.Get(payload)
+    NPC.StripNPC(entity)
+    -- Debug.Print("[CLIENT] SyncNPCStrip for " .. payload)
 end)
+Event.SyncNPCDress:SetHandler(function(payload)
+    local entity = Ext.Entity.Get(payload.Uuid)
+    NPC.Redress(entity, payload.Visuals)
+    -- Debug.Print("[CLIENT] SyncNPCDress for " .. payload.Uuid)
+end)
+
 
 -- Doesn't work with ModEvents because it needs to be replicated on all clients
 

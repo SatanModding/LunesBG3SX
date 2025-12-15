@@ -15,7 +15,7 @@ Data.BodyLibrary.BodyType = {
 -- Strong is only for humanoids
 Data.BodyLibrary.BodyShape = {
     [0] = "Med",
-    [1] = "Tall",
+    [1] = "Strong",
     [2] = "Small", -- Custom
     [3] = "Tiny" -- Custom
 }
@@ -1520,6 +1520,22 @@ Data.BodyLibrary.PENIS = {
     }
 }
 
+
+
+-- Function to set Kid Tags to disallowed every 10 seconds
+local function saveTheKids()
+    Ext.Timer.WaitFor(10000, function()
+        if Data.AllowedTagsAndRaces["KID"].Allowed == true then
+            Data.AllowedTagsAndRaces["KID"].Allowed = false
+        end
+        if Data.AllowedTagsAndRaces["GOBLIN_KID"].Allowed == true then
+            Data.AllowedTagsAndRaces["GOBLIN_KID"].Allowed = false
+        end
+        saveTheKids()
+    end)
+end
+saveTheKids()
+
 ---------------------------------------------------------------------------------------------------------
 
 --                                        MrFunSize Erections
@@ -1820,3 +1836,67 @@ Data.BodyLibrary.FunErections = {
         visualID = "274508c8-30ee-43f4-964f-6a264fae13c2"
     },
 }
+
+---------------------------------------------------------------------------------------------------------
+
+--                                           Modded Genitals
+
+---------------------------------------------------------------------------------------------------------
+
+Data.BodyLibrary.ModdedGenitals = {
+}
+
+function Data.AddModdedGenitals(moduleuuid, type, table)
+    local t = Data.BodyLibrary.ModdedGenitals
+    if not t[Ext.Mod.GetMod(moduleuuid).Info.Name] then
+        t[Ext.Mod.GetMod(moduleuuid).Info.Name] = {}
+    end
+    t[moduleuuid][type] = table
+end
+
+-- local myPenisTable = {}
+-- Mods.BG3SX.Data.AddModdedGenitals(ModuleUUID, "Penis", myPenisTable)
+
+---------------------------------------------------------------------------------------------------------
+
+--                                     Client Payload Generation
+
+---------------------------------------------------------------------------------------------------------
+
+
+-- TODO - should probably be moved to genitals 
+function Data.CreateUIGenitalPayload(uuid)
+    --Debug.Print("Creating UI Payload for " .. uuid)
+    local entity = Ext.Entity.Get(uuid)
+    if not entity then
+        Debug.Print("Not a valid entity uuid " .. uuid)
+    end
+
+    local payload = {}
+    local hardCodedGenitalTypesChangeThis = {
+        "BG3SX_VanillaVulva",
+        "BG3SX_VanillaFlaccid",
+        "BG3SX_SimpleErections",
+        "BG3SX_OtherGenitals"
+    }
+  
+    local permittedGenitals = Genital.getPermittedGenitals(entity)
+    for _, mod in pairs(hardCodedGenitalTypesChangeThis) do
+        -- _P(mod)
+        payload[mod] = {}
+        local genitalContent = {}
+        local genitals = Genital.getFilteredGenitals(mod, permittedGenitals)
+
+        for _, genital in pairs(genitals) do
+            local name = Visual.GetName(genital)
+            table.insert(genitalContent, {name = name, uuid = genital})
+        end
+
+        payload[mod] = genitalContent
+        --_D(genitalContent)
+    end
+    --_P("Genital Payload")
+    --_DS(payload)
+    --Debug.Dump(payload)
+    return payload
+end

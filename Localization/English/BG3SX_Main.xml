@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<contentList>
+
+<!-- UI Specific -->
+    <!-- Party/NPC Interface -->
+    <content contentuid="h2a86e31d7ec34b7490ead80f174354da5726" version="1">Select</content>
+    <content contentuid="hbf2bfd2e408c493d9580e1fa08b7782d502g" version="1">Remove</content>
+
+    <!-- Scene -->
+    <content contentuid="hc21d333db09549dbbd1fcfaa6fdecb2a2b09" version="1">Scenes</content>
+    <content contentuid="hfea9831b6ec148f1a9ddd486c3a0257c0610" version="1">Create SFW Scene</content>
+    <content contentuid="hc266ca8031ad49239c1cc596692c5102c9ba" version="1">Create NSFW Scene</content>
+    <content contentuid="hb393d16ea9494b2a8adfec48663c7512a69g" version="1">Running Scenes</content>
+        <!-- SceneControl -->
+        <content contentuid="h267d0a9d1a2240ffbedc0fa051388f9c8b52" version="1">No additional solo animations available for this scene. Our discord has nice tutorials tho!</content>
+
+	<!-- Appearance -->
+    <content contentuid="h36809485096e467682a34b1a780bb4a4a816" version="1">Appearance</content>
+    <content contentuid="hd050a087bef04ed4b4b8c775b458b6c2d786" version="1">Allow Stripping</content>
+    <content contentuid="h2080108a2c8d4e509be9b53c2421a1c4eb95" version="1">Toggle Invisibility</content>
+    <content contentuid="h5217dc9e84404c68a890c1b21fb1b22dca33" version="1">Strip NPC</content>
+    <content contentuid="h95893257756e4bacba737e735eb75c6ba1d0" version="1">Dress NPC</content>
+    <content contentuid="hfe5bebe645244c108b0fd82dcf10dcc22177" version="1">Genitals</content>
+    <content contentuid="h7d29c52c0c6a4e7d8e2d284f0267b139f1ec" version="1">Modded Genitals</content>
+    <content contentuid="ha0ba5dd9dcc94acca77258ba6254decb3784" version="1">MrFunsize Erections</content>
+    <content contentuid="h12336834b5e64857bed909e165f752393cfb" version="1">Vanilla Vulvas</content>
+    <content contentuid="hd0e090c89d924fa8ba6bfa2000ff8f479d8a" version="1">Vanilla Penises</content>
+        <!-- MrFunSize Genital Names -->
+        <content contentuid="h1e7bdab3f693cf4afafb4fcfabddbd240ee2" version="1">Erect</content>
+        <content contentuid="hd4f04d1df9c2ef4a70f8536f9013cd3ac073" version="1">Hairy Erect</content>
+
+    <!-- Whitelist -->
+    <content contentuid="hd3dd6bc5609a4d65a7f71567e596dc84b81d" version="1">Whitelist</content>
+
+    <!-- NPC -->
+    <content contentuid="h3d507f295c0b468ea6429b9b00c3c4ed2534" version="1">NPCs</content>
+
+    <!-- Setting -->
+    <content contentuid="hedf73cea14534ece90bc4da1cc5f647d58e8" version="1">Settings</content>
+    <content contentuid="h053ec08807c449e5873fbad66bb709c2ead8" version="1">Tab Visibility</content>
+    <content contentuid="hadd9c724632b4e41ae4dbd58686b8db1c17f" version="1">Tab Settings</content>
+    <content contentuid="ha5a309de2e9542b2999d70313cf9455ab451" version="1">Show all animations regardless of scene type</content>
+        <!-- NPCTab Settings -->
+        <content contentuid="hb21edb40a9044ddcb50f2557b6a00ae27933" version="1">NPCTab Settings</content>
+        <content contentuid="hb2022efb943c40ee8e6a8bb9f354eb308d46" version="1">Automatic NPC Scan</content>
+        <content contentuid="h96863be65f494a9ea56759ea763b38f06520" version="1">Disabling this settings creates a manual 'Scan' button in the NPC Tab.</content>
+        <!-- Credits -->
+        <content contentuid="hd1aa350cf2bf4942b9be983b18920e88g247" version="1">Credits</content>
+        <content contentuid="h554123bc72a54633ad9d1768c065e80d4431" version="1">This mod was created with a lot of help by the amazing BG3 Modding Community,but we would like to thank a few contributors specifically:</content>
+        <content contentuid="h89d4bb3b5a474a2b80143206bfeb07821c8a" version="1">Contributors: kit, ltpitb, baeator, Aahz, Volitio, Lunisole, LaughingLeader, Norbyte</content>
+        <content contentuid="h2f2930940303487eb3355ef98472ddcdg8d0" version="1">If you would like to contribute, please join our Discord server:</content>
+
+    <!-- Debug -->
+    <content contentuid="hb4507f4d6c634f08a5e4080b00b7c2a1fddb" version="1">Debug</content>
+    <content contentuid="h89052b2849e84a10b8c2c9b0c6e431daf53g" version="1">Scene Debug</content>
+    <content contentuid="h2993f96bb07749708dd673c5bb49027dbagc" version="1">Destroy All Scenes</content>
+    <content contentuid="h3ca7538e44cc443d8b5dafc1924842305f17" version="1">DeveloperMode Reset</content>
+
+    <!--FAQ-->
+    <content contentuid="h96a223099d1e4ef6bdcf0b9caf5fcbbdc4cc" version="1">FAQ</content>
+    <content contentuid="ha37b1e058dce47878e1a2e7a70aa03223009" version="1">I don't see the spells in my hotbar.</content>
+    <content contentuid="h38f408132d3d49fea142807a3ceadcd2b350" version="1">Spells have been replaced by the UI you are reading this from. All spell functionalities have been split into different tabs. They are named appropriately.</content>
+    <content contentuid="hb0e474b8282b4046b32a2becfd1ffea4b75c" version="1">How do I get the controls back after I closed the menu?</content>
+    <content contentuid="hb168cf0ac61f46bba340c563a603b7be377f" version="1">When you create a scene, a window will pop up. This window is for THIS scene only. If you close it, it can be found underneath the "New Scene" button, simply named after the characters that are involved.</content>
+    <content contentuid="h3508ad30db0442159391217fb7d043ea9f38" version="1">I don't see any animation options for my pairing.</content>
+    <content contentuid="h04d2f3f612e34ecc8faecbbc425f52af7996" version="1">End the scene and try selecting them again in the opposite order.</content>
+    <content contentuid="hff7ad4cb7c3d4dbdb23cf44716292361f3e7" version="1">Why is this NPC not appearing?</content>
+    <content contentuid="hfb7fd003577047968bea8d2259a88f4a2bdb" version="1">This might happen because of our Whitelisting system which was carried over from the old version. There are a lot of races that are incompatible with the animations or custom races which the author might not want to be used with this mod. Check our discord for more information about the Whitelist if you have any more questions.</content>
+    <content contentuid="h3e83c0f64c11487394781beeb0e7e34b6b6c" version="1">Why do animations not play?</content>
+    <content contentuid="h87416f4f5bbe410080bda5bff3905a00de3f" version="1">This mod now requires the BG3AF - Animation Framework. Download it on Nexus</content>
+    <content contentuid="h4fe2874431f64db9bbffe78e84151ebd070b" version="1">Is the mod safe to uninstall mid-game?</content>
+    <content contentuid="h360a70255b314ef4ba0add19fae6ea2cfa5c" version="1">It's generally advised to use Volitio's Mod Uninstaller before removing mods. A leftover spell or passive on an entity may otherwise lead to issues loading your save file.</content>
+    <content contentuid="h6f8f288c41e540aba1ca6c0ce8ea1b575508" version="1">Can I use this mod in multiplayer?</content>
+    <content contentuid="h787749887936488cba3f8e78e9a5266ea0d2" version="1">Yes. However, with the introduction of crossplay in Patch 8, do note that this mod 100% requires Script Extender. That means that platforms where Script Extender is not available cannot run this mod. This means: This mod will never be on console. This mod does not natively run on MacOS. If you can get Script Extender to run on Mac, then it could work, but it is unsupported. We have no way to test this. You are on your own, but please report back. This mod runs on Linux and therefore on the SteamDeck using a specific setup. For more information/a guide on setting it up, please check the modding community wiki page.</content>
+    <content contentuid="h753f9a320f8448918cc3e7b478b7b13b713c" version="1">Why does my [MODDED RACE] not work?</content>
+    <content contentuid="h685436bd554e4ca2be7290cb64fcd0c9adg8" version="1">See all information about this here</content>
+    <content contentuid="h8dce960da44a44fea0514ad965eaca7de825" version="1">Are there more animations?</content>
+    <content contentuid="h38922ab68a914a12b264139e12729dc30ag5" version="1">Tells you to look again for "BG3SX" on Nexusmods</content>
+    <content contentuid="hfd931f4e1ff84548b18959a913d40d747272" version="1">My character has the wrong genitals/animations.</content>
+    <content contentuid="h35c20084183a4a4b9d550d9b5b9feb203g6g" version="1">Are you using Oops All Futa (Penis)? This mod conflicts with our internal genital logic and you may see wrong genitals/animations. We recommend using our Appearance tab to give feminine characters penises instead.</content>
+    <content contentuid="h7db9d559dd8d40e48f33b1f375d6edec8d14" version="1">Why do my scenes randomly break?</content>
+    <content contentuid="hba616357ba5c484ba567bc402e7546e30240" version="1">This might be due to your set auto-save interval. To ensure not breaking your save files in case you remove our mod at some point, we always destroy any ongoing scenes when the game enters into the saving state. The auto-save mod might cause problems here, make sure to keep that in mind.</content>
+
+<!-- OLD TRANSLATIONHANDLES - NO NEED TO TRANSLATE THEM - KEPT TO BE SAVE -->
+
+<!-- MAIN -->
+	<content contentuid="hc53c7f99ge6bcg40ffg9c3fg9ebd31a82940" version="1">Sex</content>
+	<content contentuid="hf8d87b70ge53ag4a26gb758g3b9cccddbba0" version="1">Ask For Sex</content>
+	<content contentuid="h8f892314gf60ag45d3g86fegadd638f56439" version="1">Masturbate</content>
+
+<!-- During Scene -->
+	<content contentuid="h94dec276g082cg4180g8cd3g8f2d37d9021f" version="1">Stop Sex</content>
+	<content contentuid="haa8b4615g725ag4013g9d09g0ab48e3f422f" version="1">End the current scene.</content>
+
+	<content contentuid="h818a9789g4007g46c6gacd4g27e42b08b4ee" version="1">Change Position</content>
+	<content contentuid="hdf32ca9bg81bag4282gbd97g92124556b2e4" version="1">Change the current sex position.</content>
+
+	<content contentuid="h8649d899g2704g4ca5gae5bgcb08b6857d42" version="1">Switch Places</content>
+	<content contentuid="hb918558bg3115g4475g968agc318a2bd6852" version="1">Switch the places of the top/bottom actors of the scene.</content>
+	
+	<content contentuid="h8cc6d8e0ga472g4b25gb556g7ab2e08e6149" version="2">Move Scene</content>
+	<content contentuid="h3ae22e3ag2aeag4d6ag8fbcgd9c4215cc7ec" version="2">Teleports the scene to a chosen location.</content>
+
+	<content contentuid="h25c91f38g98cdg455ag91eag0ae9949d9275" version="1">Rotate Scene</content>
+	<content contentuid="h5665918bg6d42g42f2g8916gcb333ccb6f27" version="1">Rotates the scene towards a chosen direction.</content>
+
+	<content contentuid="h4ff48f80gde7ag4ceegab9fg65a3bd76eb41" version="1">Camera Height</content>
+	<content contentuid="he66202a5g851dg4da2ga426g92e8927d09f2" version="1">Change camera height. Only works if your character is selected.</content>
+
+<!-- Genital Options -->
+	<content contentuid="h21ce3424g5b22g4f55gb74agaff6e54d99c8" version="1">BG3SX - Change Genitals</content>
+    <content contentuid="had40702dg5f74g4d8bgb2b8g73515ee3c7bb" version="1">Vanilla Vulva</content>
+    <content contentuid="h700ba475g79e8g4492ga857g3c2c70daf3aa" version="1">Vanilla Soft Penis</content>
+    <content contentuid="hba30be70g980ag4b97gab34g0c452e5eba9e" version="1">MrFunSize Erection</content>
+    <content contentuid="h8a8ec2cdge262g481bg9424g0d8dcfb2a4f9" version="1">Other Genitals</content>
+    <content contentuid="h1cbdf6f6af2b42b086b8c3626eaa5bc09f37" version="1">Block Stripping</content>
+    <content contentuid="h2b093b5fbc9642129d9bd335e1701c9b284c" version="1">If this is active, the entity will not strip</content>
+
+<!-- Options -->
+	<content contentuid="h796ee3bdgc50ag4e29g82d3g5baf5834bee4" version="1">BG3SX - Options</content>
+    <content contentuid="hfead6a09g7781g46f5ga3efg515094ce93a6" version="1">Automatic Erections during Sex</content>
+    <content contentuid="ha026391fg9de8g4991g8460gcaae6fc3cf21" version="1">Manually toggle Erections</content>
+    <content contentuid="h1cbdf6f6af2b42b086b8c3626eaa5bc09f37" version="1">Block Stripping</content>
+    <content contentuid="h2b093b5fbc9642129d9bd335e1701c9b284c" version="1">If this is active, the entity will not strip</content>
+
+<!-- Passives -->
+    <content contentuid="h1cbdf6f6af2b42b086b8c3626eaa5bc09f37" version="1">Toggle Stripping On/Off</content> 
+	<content contentuid="h6183f539gad38g4948g89fdgf93b87c288ec" version="1">Stripping Blocked</content>
+	<content contentuid="h5b7303dfgde02g417dgbb26g0843d58ebef4" version="1">If enabled, prevents stripping of a character before a scene.</content>
+
+<!-- MASTURBATION -->
+	<content contentuid="h8fbd124bg315eg4e0fg8f0fga6c8cc0c07b2" version="1">Wank</content>
+	<content contentuid="hd46783feg2f86g42a3g8be1g92695ddcbfc0" version="1">Masturbate Standing</content>
+
+	<content contentuid="hbe549eebgabfdg4bcag9f74g6d0aeb44bc90" version="1">Sit on Bottle</content>
+	<content contentuid="h00aada49g2cf4g46c3g8d16g7d349c935237" version="1">They made them that shape for a reason!</content>
+
+<!-- PAIRED -->
+	<content contentuid="h69495600gc9feg44ecgb45cg94567212f2c0" version="1">Doggy</content>
+	<content contentuid="h0f8061f9gba69g439agb831gfe24524c36a5" version="1">Cowgirl</content>
+	<content contentuid="h49225c4fg0f4ag4423g8f57g01fd9f4afd8c" version="1">Blowjob</content>
+	<content contentuid="hd7eb2c49g5178g4b6egb548gbc63e76bc8a2" version="1">Laying</content>
+	<content contentuid="hde4ef0aegc669g4790g8e8ag4656336d70c9" version="1">Milking</content>
+	<content contentuid="h6e324c41gfce5g460agb651gdbd787281d51" version="1">Eat Pussy</content>
+	<content contentuid="h87ee4bfdg8b1bg494cg93a1g11b347703922" version="1">Tribbing</content>
+	<content contentuid="h2ca5ef2dg7f68g40dbg8c8dg05fd895a39b1" version="1">Finger</content>
+	<content contentuid="hb32715942ed4499b9ef6a288a729b0483578" version="1">Astarion Thrusting</content>
+
+</contentList>

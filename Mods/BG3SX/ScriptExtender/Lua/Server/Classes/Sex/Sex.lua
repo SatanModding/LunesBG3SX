@@ -1,3 +1,22 @@
+-- TODO: remove this when UI is implemented
+
+
+
+Ext.Osiris.RegisterListener("UsingSpellOnTarget", 6, "after", function(_, target, spell, _, _, _)
+
+
+    -- if spell == "BG3SX_ManualErections" then
+    --     Mods.BG3SX.SexUserVars.SetAutoSexGenital(false,target)
+    -- end
+
+    -- if spell == "BG3SX_AutoSexGenital" then
+    --     Mods.BG3SX.SexUserVars.SetAutoSexGenital(true,target)
+    -- end
+end)
+
+
+
+
 ----------------------------------------------------------------------------------------
 --
 --                               For handling Sex functionalities
@@ -14,30 +33,43 @@
 -- General
 --------------------------------
 
--- Terminates all running scenes
-function Sex:TerminateAllScenes()
-    if Data.SavedScenes and #Data.SavedScenes > 0 then
-        for i = #Data.SavedScenes, 1, -1 do
-            local scene = Data.SavedScenes[i]
-            for _,parent in pairs(scene.entities) do
-                if Entity:IsNPC(parent) then
-                    NPC:RemoveGenitals(parent)
-                    NPC:Redress(parent)
-                end
-            end
-            scene:Destroy()
-        end
-    end
-end
-
-
 -- Determines the scene type based on how many entities and penises are involved
----@param  scene Scene       - The scene to check
----@return sceneType string
-function Sex:DetermineSceneType(scene)
+---@param  entities table       - The entities to check
+---@return string sceneType - The scene type based on the number of entities and penises
+function Sex:DetermineSceneType(entities)
+
+
+    --  print("PeePee Server Test")
+
+    -- local function GetConfig()
+    --     local modVars = Ext.Vars.GetModVariables(ModuleUUID)
+    --     local config = {}
+    --     if modVars and modVars.PeePee then
+    --         config = modVars.PeePee
+    --     end
+    --     return config
+    -- end
+
+    -- local function UpdateConfig(config)
+    --     Ext.Vars.GetModVariables(ModuleUUID).PeePee = config
+    --     print('PeePee Configuration updated!')
+    --     _D(GetConfig())
+    -- end
+
+    -- local function DoSomething()
+
+    --     print("current")
+    --     _D(GetConfig()) -- prints "[]" after a save and reload
+    --     UpdateConfig("PooPoo") -- is only "PooPoo" until save is saved and loaded
+    -- end
+
+    -- DoSomething()
+
+
+
     local involvedEntities = 0
     local penises = 0
-    for _,entity in pairs(scene.entities) do
+    for _,entity in pairs(entities) do
         involvedEntities = involvedEntities+1
         if Entity:HasPenis(entity) then
             penises = penises+1
@@ -48,16 +80,10 @@ function Sex:DetermineSceneType(scene)
             return entry.sceneType
         end
     end
+
 end
 
 
--- Removes the sex spells on an entity when scene has ended
----@param entity    Entity  - The entity uuid to remove the spells from
-function Sex:RemoveSexSceneSpells(entity)
-    for _,spell in pairs(Data.Spells.SexSceneSpells) do -- Configurable in Shared/Data/Spells.lua
-     Osi.RemoveSpell(entity, spell)
-    end
-end
 
 
 -- Animations
@@ -72,32 +98,45 @@ end
 local function playAnimationAndSound(scene, animSpell)
     local newAnimation
     local newSound
-    for _,actor in pairs(scene.actors) do
-        newAnimation = Animation:new(actor, animSpell)
-        newSound = Sound:new(actor, animSpell)
-    end
 
-    Ext.ModEvents.BG3SX.AnimationChange:Throw({newAnimation})
-    Ext.ModEvents.BG3SX.SoundChange:Throw({newSound})
+    for _,actor in pairs(scene.entities) do
+        --print("creating new animation class for ", actor, " with animation ", animSpell)
+        newAnimation = Animation:New(actor, animSpell)
+        Ext.ModEvents.BG3SX.AnimationChange:Throw({newAnimation})
+
+        -- Only play sound if is enabled for a given animation entry
+        if animSpell.Sound == true then
+            newSound = Sound:New(actor, animSpell)
+            Ext.ModEvents.BG3SX.SoundChange:Throw({newSound})
+        end
+    end
 end
 
 
 -- TODO: This might need to become its own class
 -- Determines which type of scene the entity is part of and assigns the appropriate animations and sounds to the actors involved
----@param entity    Entity  - The entity which used a new animation spell
+---@param character    string  - The entity which used a new animation spell
 ---@param spell     string   - The chosen animations data table
-function Sex:PlayAnimation(entity, animSpell)
-    local scene = Scene:FindSceneByEntity(entity)
+function Sex:PlayAnimation(character, animData)
+
+    -- TODO - make this dependant on actor instead of entity and refresh when genital has changed
+
+
+    local scene = Scene.FindSceneByEntity(character)
+    --print("entity is in scene ", scene)
     local sceneType = Sex:DetermineSceneType(scene)
+    --print("scene type is ", sceneType)
 
     if sceneType == "MasturbateMale" or sceneType == "MasturbateFemale" then
     elseif sceneType == "Straight" then -- Handle this in a different way to enable actor swapping even for straight animations
+
         -- In case of actor1 not being male, swap them around to still assign correct animations
-        if not Entity:HasPenis(scene.actors[1].parent) then
-            local savedActor = scene.actors[1]
-            scene.actors[1] = scene.actors[2]
-            scene.actors[2] = savedActor
+        if not Entity:HasPenis(scene.entities[1]) then
+            local savedActor = scene.entities[1]
+            scene.entities[1] = scene.entities[2]
+            scene.entities[2] = savedActor
         end
+
     -- Might need to switch to free-form animation choosing because Heightmatching already is pretty complicated with 2 entities
     -- elseif sceneType == "FFF" then
     -- elseif sceneType == "FFM" then
@@ -105,12 +144,12 @@ function Sex:PlayAnimation(entity, animSpell)
     -- elseif sceneType == "MMM" then
     end
 
-    playAnimationAndSound(scene, animSpell)
+    playAnimationAndSound(scene, animData)
 
     -- Prop handling
-    if animSpell ~= scene.currentAnimation then
+    if animData ~= scene.currentAnimation then
         -- If animation is not the same as before save the new animationData table to the scene to use for prop management, teleporting or rotating
-        scene.currentAnimation = animSpell
+        scene.currentAnimation = animData
         scene:DestroyProps() -- Props rely on scene.currentAnimation
         scene:CreateProps()
     end
@@ -127,111 +166,157 @@ end
 ---@param caster            string  - The caster UUID
 ---@param targets           table   - The targets UUIDs
 ---@param animationData     table   - The animation data to use
-function Sex:StartSexSpellUsed(caster, targets, animationData)
-    local scene
+function Sex:NewSFWScenePreSetup(caster, targets, animationData)
     if animationData then
-        -- _P("----------------------------- [BG3SX][Sex.lua] - Creating new scene -----------------------------")
+        local involved = {caster}
+        for _,target in pairs(targets) do
+            if not Helper.StringContainsOne(caster,target) then -- To not add caster twice if it might also be the target
+                table.insert(involved, target)
+            end
+        end
+        -- for _,involved in pairs(involved) do
+        --     Effect:Fade(involved, 666)
+        -- end
+
+        local scene = Scene:New({Type = "SFW", Entities = involved, Fade = 666}):Init()
+    end
+end
+
+function Sex:PreNSFWSceneSetup(characters)
+    local actualInvolvedCharacters = {}
+    if Helper.StringContainsOne(characters[1],characters[2]) then
+        table.insert(actualInvolvedCharacters, characters[1])
+    else
+        table.insert(actualInvolvedCharacters, characters[1])
+        table.insert(actualInvolvedCharacters, characters[2])
+    end
+
+    local strippedEQ = {}
+    -- local equipments = {}
+    -- local armorsets = {}
+    -- local slots = {}
+
+    -- Erection Handling
+    for _, character in pairs(actualInvolvedCharacters) do
+        local entity = Ext.Entity.Get(character)
+        Genital.GiveSexGenital(entity)
+
+        local stripping = SexUserVars.GetAllowStripping(entity)
+        if not (stripping == false) then
+            local armorset, equipment, slot = Sex:Strip(character)
+            strippedEQ[character] = {Armorset = armorset, Equipment = equipment, Slot = slot}
+        end
+    end
+    return strippedEQ
+end
+
+--- Handles the StartSexSpellUsed Event by starting new animations based on spell used
+---@param caster            string  - The caster UUID
+---@param targets           table   - The targets UUIDs
+---@param animationData     table   - The animation data to use
+function Sex:StartSexSpellUsed(caster, targets, animationData)
+    if animationData then
         local sexHavers = {caster}
         for _,target in pairs(targets) do
-            if target ~= caster then -- To not add caster twice if it might also be the target
+            if not Helper.StringContainsOne(caster,target) then -- To not add caster twice if it might also be the target
                 table.insert(sexHavers, target)
             end
         end
         for _,involved in pairs(sexHavers) do
             Effect:Fade(involved, 666)
         end
+
         -- Delay the rest as well, since scene initilization is delayed for 1 second to avoid user seeing behind the scenes stuff
         local function haveSex()
-            scene = Scene:new(sexHavers)
 
-            -- TODO - works for masturbation but not for sex
-            for _, actor in pairs(scene.actors) do
-                -- _P("giving erection to ", actor.parent , "`s clone ", actor.uuid)
-                -- If Shpeshifted ,  the genitals have to eb transferred 
-                Genital:GiveGenitalsToActor(actor)
-                Genital:GiveErectionToActor(actor)
-                --print("visuals ")
-                --_D(Ext.Entity.Get(actor.uuid).AppearanceOverride.Visual.Visuals)
-            end 
-            Sex:InitSexSpells(scene)
-            Sex:PlayAnimation(caster, animationData)
+            local armorsets = {}
+            local equipments = {}
+            local slots = {}
+
+            -- erections
+            for _, character in pairs(sexHavers) do
+
+                local entity = Ext.Entity.Get(character)
+
+                Genital.GiveSexGenital(entity)
+
+                -- if BG3AFActive then
+                --     local function addWaterfallToEntity(entity, tbl)
+                --         local animWaterfall = Mods.BG3AF.AnimationWaterfall.Get(entity)
+                --         local waterfallEntry = animWaterfall:AddWaterfall(tbl)
+                --     end
+
+                --     local tbl = {
+                --         Resource = Data.AnimationSets["BG3SX_Body"].Uuid,
+                --         DynamicAnimationTag = "9bfa73ed-2573-4f48-adc3-e7e254a3aadb",
+                --         Slot = "", -- 0 = Body, 1 = Attachment
+                --         OverrideType = 0, -- 0 = Replace, 1 = Additive
+                --     }
+
+                --     addWaterfallToEntity(sexHavers[1], tbl)
+                --     if #sexHavers > 1 then
+                --         addWaterfallToEntity(sexHavers[2], tbl)
+                --     end
+                -- else
+                --     Debug.Print("BG3AF not found")
+                -- end
+
+                -- stripping
+                local stripping = SexUserVars.GetAllowStripping(entity)
+                if not (stripping == false) then
+                    local armorset, equipment, slot = Sex:Strip(character)
+                    armorsets[character] = armorset
+                    equipments[character] = equipment
+                    slots[character] = slot
+                end
+            end
+
+            -- Scene:New(sexHavers, equipments, armorsets, slots)
+            Scene:New({Type = "NSFW", Entities = sexHavers, Equipments = equipments, ArmorSets = armorsets, Slots = slots, Fade = 666, Strip = true})
+            -- local scene = Scene:New({Entities = sexHavers})
+            -- scene.Equipments = equipments
+            -- scene.ArmorSets = armorsets
+            -- scene.Slots = slots
+            -- scene:Init()
+
+            --TODO - remove timer
+            --Ext.Timer.WaitFor(2000, function ()
+            --end)
         end
+
+        -- Timer to delay scene creation for the fadeout
         Ext.Timer.WaitFor(333, function() haveSex() end)
     end
 end
 
 
---- Adds the main sex spells to an entity
----@param entity    string  - The entities UUID
-function Sex:AddMainSexSpells(entity)
-    if Entity:IsPlayable(entity) then
-        Osi.AddPassive(entity, "BG3SX_BLOCK_STRIPPING")
-        for _, spell in pairs(Data.Spells.MainSexSpells) do -- Configurable in Shared/Data/Spells.lua
-            Osi.AddSpell(entity, spell)
-        end
+
+-- TODO - implement NPC logic
+function Sex:Strip(character)
+
+    local armorset = {}
+    local equipment = {}
+    local slot = {}
+
+    local entity = Ext.Entity.Get(character)
+    if not entity then
+        Debug.Print("Is not a valid entity ", character)
     end
-end
-function Sex:RemoveMainSexSpells(entity)
-    for _, spell in pairs(Data.Spells.MainSexSpells) do  -- Configurable in Shared/Data/Spells.lua
-        Osi.RemoveSpell(entity, spell)
-    end
-end
 
 
--- Adds additional sex spells for an entity
----@param entity    string  - The entity UUID to give additional spells to
-local function addAdditionalSexActions(entity)
-    local scene = Scene:FindSceneByEntity(entity)
-    local spellCount = 1
-    for _,spell in pairs(Data.Spells.AdditionalSexActions) do  -- Configurable in Shared/Data/Spells.lua
-        -- If iteration lands on SwitchPlaces spell, check which scene type the entity is in and only add it if its not a solo one
-        if spell == "BG3SX_SwitchPlaces" then
-            local sceneType = Sex:DetermineSceneType(scene)
-            if not (sceneType == "MasturbateFemale" or sceneType == "MasturbateMale" or sceneType == "Straight") then
-                Ext.Timer.WaitFor(spellCount * 200, function()
-                    Osi.AddSpell(entity, spell)
-                    spellCount = spellCount + 1
-                end)
-            end            
-        else
-            Ext.Timer.WaitFor(spellCount*200, function()
-                Osi.AddSpell(entity, spell)
-                spellCount = spellCount+1
-            end)
-        end
-    end
-end
-
-
--- Give the entities the correct spells based on amount of entities and penises in the scene
--- Also add spells that everyone gets like end sex
----@param scene Scene   - The scene the function should get executed for
-function Sex:InitSexSpells(scene)
-    local sceneType = Sex:DetermineSceneType(scene)
-    for _, entity in pairs(scene.entities) do -- For each entity involved
-        if Entity:IsPlayable(entity) then -- Check if they are playable to not do this with NPCs
-            for _, entry in pairs(Data.SceneTypes) do
-                if sceneType == entry.sceneType then
-                    Osi.AddSpell(entity, entry.container) -- Add correct spellcontainer based on sceneType
-                end
-            end
-            addAdditionalSexActions(entity)
-        end
-    end
-end
-
-
--- Checks an uuid against the nonStripper table in EntityListeners.lua
----@param uuid any
-function Sex:IsStripper(uuid)
-    if Osi.HasActiveStatus(uuid, "BG3SX_BLOCK_STRIPPING_BOOST") == 1 then
-        -- _P("Has status ", uuid)
-        return false
+    if Entity:IsNPC(character) then
+    -- NPCs only have slots in their CharacterVisualResourceID
+        slot = NPC.StripNPC(entity) -- Call on Server
+        Event.SyncNPCStrip:Broadcast(entity.Uuid.EntityUuid) -- Call on Client
+        equipment = Entity:UnequipAll(character)
     else
-        return true
-    end 
-end
+        equipment = Entity:UnequipAll(character)
+        armorset = Osi.GetArmourSet(character)
+    end
 
+    return armorset, equipment, slot
+
+end
 
 ----------------------------------------------------------------------------------------------------
 -- 
@@ -257,5 +342,31 @@ function Sex:ChangeCameraHeight(uuid)
         end
         entity:Replicate("GameObjectVisual")
     end
-    Ext.ModEvents.BG3SX.CameraHeightChange:Throw({uuid}) 
+    Ext.ModEvents.BG3SX.CameraHeightChange:Throw({uuid})
 end
+
+
+-- local function reapplyWaterfall(cmd, uuid)
+
+--     local sx = "bfa9dad2-2a5b-45cc-b770-9537badf9152"
+--     Mods.BG3AF.AnimationWaterfall.Get(uuid):AddWaterfall(sx)
+
+    -- Event.ReapplyWaterfall:Broadcast(uuid)
+
+    
+-- end
+
+
+
+-- local function testCmd(cmd, a1, a2, ...)
+--     _P("Cmd: " .. cmd .. ", args: ", a1, ", ", a2);
+-- end
+
+
+-- Ext.RegisterConsoleCommand("test", testCmd);
+-- ConsoleCommand.New("Test", testCmd, "Test command to test the console command system")
+
+
+
+
+--ConsoleCommand.New("rw", reapplyWaterfall, "Does the thing")

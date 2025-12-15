@@ -7,8 +7,6 @@
 -- CONSTRUCTOR
 --------------------------------------------------------------
 
-
-
 -- Variables
 --------------------------------------------------------------
 
@@ -72,9 +70,32 @@ end
 ---@param uuid      string  - The entity UUID to check
 ---@return          boolean - Returns either 1 or 0
 function Entity:HasPenis(uuid)
+
+    local entity = Ext.Entity.Get(uuid)
+
+
+    local vulva = "a0738fdf-ca0c-446f-a11d-6211ecac3291"
+    local penis = "d27831df-2891-42e4-b615-ae555404918b"
+
+    -- Users can theoretically give the characters differen "flaccid" and "erect" genital
+    -- this is why we need to ask specifically for the "erect" version, not just the
+    -- current gential to get the correct animation
+    local sexGenital = SexUserVars.GetGenital("BG3SX_SexGenital", entity)
+    if sexGenital then
+        -- print(uuid, " has sex genital. Determining genital type")
+        local genitalTags =  Ext.StaticData.Get(sexGenital, "CharacterCreationAppearanceVisual").Tags
+        if Table.Contains(genitalTags, vulva) then
+            return false
+        -- this gives up the option to set custom genital types. Liek tentacles
+        elseif  Table.Contains(genitalTags, penis) then
+            return true
+        end
+
+    end
+
     -- If entity is polymorphed (e.g., Disguise Self spell)
     if Osi.HasAppliedStatusOfType(uuid, "POLYMORPHED") == 1 then
-        -- As of hotfix #17, "Femme Githyanki" disguise has a dick.
+        -- As of hotfix #17, the "Femme Githyanki" disguise has a penis for whatever reason.
         if Entity:TryGetEntityValue(uuid, nil, {"GameObjectVisual", "RootTemplateId"}) == "7bb034aa-d355-4973-9b61-4d83cf29d510" then
             return true
         end
@@ -85,11 +106,22 @@ function Entity:HasPenis(uuid)
     -- NPCs never get the tags. "Future" companions don't have them too.
     -- E.g., Halsin in Act 1 has no GENITAL_PENIS, he gets it only when his story allows him to join the active party in Act 2.
     if Entity:IsPlayable(uuid) then
+        -- print(uuid, " is playable. Determining genital type")
         if Osi.IsTagged(uuid, "GENITAL_PENIS_d27831df-2891-42e4-b615-ae555404918b") == 1 then
+            -- _P("-------------------")
+            -- _P(uuid .. "ISPLAYABLE")
             return true
         end
         if Osi.IsTagged(uuid, "GENITAL_VULVA_a0738fdf-ca0c-446f-a11d-6211ecac3291") == 1 then
             return false
+        end
+    else
+        -- 0 = penis, 1 = vagina [This assumes that everyone is cis]
+        local bodyType =  Ext.Entity.Get(uuid).BodyType.BodyType
+        if bodyType == 1 then
+            return false
+        else
+            return true
         end
     end
 
@@ -115,7 +147,7 @@ end
 
 -- NPCs don't have CharacterCreationStats
 function Entity:IsNPC(uuid)
-    local E = Helper:GetPropertyOrDefault(Ext.Entity.Get(uuid),"CharacterCreationStats", nil)
+    local E = Helper.GetPropertyOrDefault(Ext.Entity.Get(uuid),"CharacterCreationStats", nil)
     if E then
         return false
     else
@@ -174,11 +206,11 @@ function Entity:TryCopyEntityComponent(uuid_1, uuid_2, componentName)
     if componentName == "ServerItem" then
         for k, v in pairs(srcComponent) do
             if k ~= "Template" and k ~= "OriginalTemplate" then
-                Helper:TryToReserializeObject(dstComponent[k], v)
+                Helper.TryToReserializeObject(dstComponent[k], v)
             end
         end
     else
-        local serializeResult = Helper:TryToReserializeObject(srcComponent, dstComponent)
+        local serializeResult = Helper.TryToReserializeObject(srcComponent, dstComponent)
         if serializeResult then
             _P("[BG3SX][Entity.lua] - TryCopyEntityComponent, with component: " .. componentName)
             _P("[BG3SX][Entity.lua] - Serialization fail")
@@ -209,7 +241,7 @@ end
 -- function Entity:TryGetEntityValue(uuid, component, field1, field2, field3)
 --     local entity = Ext.Entity.Get(uuid)
 --     local v, doStop
-    
+
 --     v = resolveEntityArg(entity)
 --     if not v then
 --         return nil
@@ -245,9 +277,9 @@ end
 
 -- Tries to get the value of an entities component
 ---@param uuid              string      - The entity UUID to check
----@param previousComponent value       - component of previous iteration
+---@param previousComponent any|nil       - component of previous iteration
 ---@param components        table       - Sorted list of component path
----@return Value                        - Returns the value of a field within a component
+---@return any                        - Returns the value of a field within a component
 ---@example
 -- Entity:TryGetEntityValue("UUID", nil, {"ServerCharacter, "PlayerData", "HelmetOption"})
 -- nil as previousComponent on first call because it iterates over this parameter during recursion
@@ -255,23 +287,23 @@ function Entity:TryGetEntityValue(uuid, previousComponent, components)
     local entity = Ext.Entity.Get(uuid)
     if #components == 1 then -- End of recursion
         if not previousComponent then
-            local value = Helper:GetPropertyOrDefault(entity, components[1], nil)
+            local value = Helper.GetPropertyOrDefault(entity, components[1], nil)
             return value
         else
-            local value = Helper:GetPropertyOrDefault(previousComponent, components[1], nil)
+            local value = Helper.GetPropertyOrDefault(previousComponent, components[1], nil)
             return value
         end
     end
 
     local currentComponent
     if not previousComponent then -- Recursion
-        currentComponent = Helper:GetPropertyOrDefault(entity, components[1], nil)
+        currentComponent = Helper.GetPropertyOrDefault(entity, components[1], nil)
         -- obscure cases
         if not currentComponent then
             return nil
         end
     else
-        currentComponent = Helper:GetPropertyOrDefault(previousComponent, components[1], nil)
+        currentComponent = Helper.GetPropertyOrDefault(previousComponent, components[1], nil)
     end
 
     table.remove(components, 1)
@@ -281,12 +313,51 @@ function Entity:TryGetEntityValue(uuid, previousComponent, components)
 end
 
 
+
+--- Safely navigates a nested table using a path of keys.
+--- @param entity EntityHandle  
+--- @param previousComponent any|nil       - component of previous iteration
+--- @param path string[]   -- Array of keys to walk through . Ex. ["ServerCharacter", "CharacterCreationAppearance", "Visual"]
+--- @param newComponent any
+function Entity:UpdateEntityComponent(entity, previousComponent, path, newComponent)
+
+    -- print("updating path")
+
+    if #path == 1 then -- End of recursion, time to set
+        local targetComponent = previousComponent or entity
+        targetComponent[path[1]] = newComponent
+        return true
+    end
+
+    local currentComponent
+    if not previousComponent then
+        currentComponent = Helper.GetPropertyOrDefault(entity, path[1], nil)
+        if not currentComponent then
+            return false
+        end
+    else
+        currentComponent = Helper.GetPropertyOrDefault(previousComponent, path[1], nil)
+        if not currentComponent then
+            return false
+        end
+    end
+
+    table.remove(path, 1)
+    return Entity:UpdateEntityComponent(entity, currentComponent, path, newComponent)
+end
+
+
+
+
+
 -- Unequips all equipment from an entity
 ---@param uuid          string  - The entity UUID to unequip
----@return oldEquipment table   - Collection of every previously equipped item
+---@return table   - Collection of every previously equipped item
 function Entity:UnequipAll(uuid)
-    Osi.SetArmourSet(uuid, 0)
-    
+    --Osi.SetArmourSet(uuid, 0)
+
+    -- print("called Unequip All for entity ", uuid)
+
     local oldEquipment = {}
     for _, slotName in ipairs(Data.Equipment.Slots) do
         local gearPiece = Osi.GetEquippedItem(uuid, slotName)
@@ -296,6 +367,43 @@ function Entity:UnequipAll(uuid)
             oldEquipment[#oldEquipment+1] = gearPiece
         end
     end
+
+
+    -- for some reason weapons are not accessible via slots
+    local function removeAllEquippedWeapons(uuid)
+        for i=1, 4 do
+            local weapon = Osi.GetEquippedWeapon(uuid)
+            if weapon then
+                Osi.LockUnequip(weapon, 0)
+                Osi.Unequip(uuid, weapon)
+                oldEquipment[#oldEquipment+1] = weapon
+            end
+        end
+    end
+    -- removeAllEquippedWeapons(uuid)
+    return oldEquipment
+end
+
+-- Unequips all equipment from an entity except for a specific item
+---@param uuid          string  - The entity UUID to unequip
+---@param except        table  - Table of equipmentslots to keep equipped
+function Entity.UnequipAllExcept(uuid, except)
+    local oldEquipment = {}
+    local slotsToUnequip = {}
+
+    for i,slotName in ipairs(Data.Equipment.Slots) do
+        if not Table.Contains(except, slotName) then
+
+            -- _P("Unequipping slot: " .. slotName)
+            local gearPiece = Osi.GetEquippedItem(uuid, slotName)
+            if gearPiece then
+                Osi.LockUnequip(gearPiece, 0)
+                Osi.Unequip(uuid, gearPiece)
+                oldEquipment[#oldEquipment+1] = gearPiece
+            end
+        end
+    end
+
     return oldEquipment
 end
 
@@ -303,7 +411,7 @@ end
 -- Gets a table of equipped items
 ---@param uuid              string  - The entity UUID to unequip
 ---@return currentEquipment table   - Collection of every equipped items
-function Entity:GetEquipment(uuid)    
+function Entity:GetEquipment(uuid)
     local currentEquipment = {}
     for _, slotName in ipairs(Data.Equipment.Slots) do
         local gearPiece = Osi.GetEquippedItem(uuid, slotName)
@@ -314,17 +422,40 @@ function Entity:GetEquipment(uuid)
     return currentEquipment
 end
 
+---@class StrippedEQ
+---@field Armorset number - If an entities armorset was on or off (1/0)
+---@field Equipment table - A table of all equipped items
+---@field Slots table - A table of all visual resources of the entity
 
 -- Re-equips all equipment of an entity
 ---@param entity      string      - The entity UUID to equip
----@param armorset  ArmorSet    - The entities prior armorset
-function Entity:Redress(entity, oldArmourSet, oldEquipment)
-    Osi.SetArmourSet(entity, oldArmourSet)
-    for _, item in ipairs(oldEquipment) do
-        Osi.Equip(entity, item)
+---@param strippedEQ  StrippedEQ  - A table containing the stripped equipment data
+function Entity:Redress(entity, strippedEQ)
+
+    if strippedEQ.Armorset and (type(strippedEQ.Armorset) == "number") then
+        Osi.SetArmourSet(entity, strippedEQ.Armorset)
     end
-    oldArmourSet = nil
-    oldEquipment = nil
+
+    if strippedEQ.Equipment then
+        for _, item in ipairs(strippedEQ.Equipment) do
+            Osi.Equip(entity, item)
+        end
+    end
+
+    strippedEQ.Armorset = nil
+    strippedEQ.Equipment = nil
+
+    if strippedEQ.Slots then
+        local actualEntity = Ext.Entity.Get(entity)
+        if not actualEntity then
+            -- print("is not an entity ", entity)
+        end
+
+        NPC.Redress(actualEntity, strippedEQ.Slots)
+        Event.SyncNPCDress:Broadcast({Uuid = actualEntity.Uuid.EntityUuid, Visuals = strippedEQ.Slots})
+    end
+
+
 end
 
 
@@ -372,7 +503,7 @@ end
 --@param bs int           - bodyshape [0,1]
 local function getBody(character)
     -- Get the properties for the character
-    local E = Helper:GetPropertyOrDefault(Ext.Entity.Get(character),"CharacterCreationStats", nil)
+    local E = Helper.GetPropertyOrDefault(Ext.Entity.Get(character),"CharacterCreationStats", nil)
     local bt =  Ext.Entity.Get(character).BodyType.BodyType
     local bs = 0
     if E then
@@ -390,7 +521,7 @@ local function getCCBodyType(bodytype, bodyshape)
     for _, entry in pairs(CC_BODYTYPE) do
         if (entry.type == bodytype) and (entry.shape == bodyshape) then
             return entry.cc
-        end 
+        end
     end
 end
 
@@ -403,7 +534,7 @@ local function getRace(character)
     local race
     for _, tag in pairs(raceTags) do
         if Data.BodyLibrary.RaceTags[tag] then
-            race = Table:GetKey(Data.BodyLibrary.Races, Data.BodyLibrary.RaceTags[tag])
+            race = Table.GetKey(Data.BodyLibrary.Races, Data.BodyLibrary.RaceTags[tag])
             break
         end
     end
@@ -423,7 +554,7 @@ function Entity:SaveEntityRotation(uuid)
     entityPosition.x,entityPosition.y,entityPosition.z = Osi.GetPosition(uuid)
     local entityRotation = {}
     entityRotation.x,entityRotation.y,entityRotation.z = Osi.GetRotation(uuid)
-    local entityDegree = Math:DegreeToRadian(entityRotation.y)
+    local entityDegree = Math.DegreeToRadian(entityRotation.y)
     local distanceAwayFromEntity = 1 -- Can be changed
     local x = entityPosition.x + (distanceAwayFromEntity * math.cos(entityDegree))
     local y = entityPosition.y + (distanceAwayFromEntity * math.sin(entityDegree))
@@ -446,7 +577,7 @@ function Entity:FindAngleToTarget(entity, target)
     local dif = {
         y = entityPos.y - targetPos.y,
         x = entityPos.x - targetPos.x,
-        z = entityPos.z - targetPos.z,  
+        z = entityPos.z - targetPos.z,
     }
     local degree = math.atan(dif.y, dif.x)
     return degree
@@ -495,163 +626,151 @@ function Entity:CopyDisplayName(entityToCopyFrom, targetEntity)
 end
 
 
--- Returns the allowed animations for a character (based on whether they are an Origin, bodytype [and maybe race - waiting for test results])
----@param character any
-local function getAllowedAnimations(character)
-    -- General works for everyone. Origins get their special ones + general
-    -- Everyone else gets General
-    local allowedAnimations
-    local generics = Data.Animations["any"]
+-- -- Returns the allowed animations for a character (based on whether they are an Origin, bodytype [and maybe race - waiting for test results])
+-- ---@param character any
+-- local function getAllowedAnimations(character)
+--     -- General works for everyone. Origins get their special ones + general
+--     -- Everyone else gets General
+--     local allowedAnimations
+--     local generics = Data.Animations["any"]
 
-    -- Origin animations
-    for uuid, animationList in pairs(Data.Animations) do
-        if uuid == character then
-            allowedAnimations = Concat(generics, animationList)
-        end
-    end
+--     -- Origin animations
+--     for uuid, animationList in pairs(Data.Animations) do
+--         if uuid == character then
+--             allowedAnimations = Concat(generics, animationList)
+--         end
+--     end
 
-    -- Tavs etc
-    if allowedAnimations == nil then
-        allowedAnimations = generics
-    end
+--     -- Tavs etc
+--     if allowedAnimations == nil then
+--         allowedAnimations = generics
+--     end
 
-    local bt, bs = getBody(character)
-    local cc_bodytype = getCCBodyType(bt, bs)
-    local race = getRace(character)
+--     local bt, bs = getBody(character)
+--     local cc_bodytype = getCCBodyType(bt, bs)
+--     local race = getRace(character)
 
-    -- some animations are bodytype & race locked
-    if prayingAllowed(cc_bodytype, race) then
-        allowedAnimations = Concat(allowedAnimations, Data.Animations["pray"])
-    end
-    if thinkingAllowed(cc_bodytype, race) then
-        allowedAnimations = Concat(allowedAnimations, Data.Animations["think"])
-    end
-    return allowedAnimations
-end
-
-
-
-
--- gives shapeshifted entity a visual (like CCAV)
--- character string - UUID
--- visual string    - UUID
-function Entity:GiveShapeshiftedVisual(character, visual)
-    local entity = Ext.Entity.Get(character)        
-
-    -- usually this component never exists. AAE creates one too
-    if (not entity.AppearanceOverride) then
-        -- print("Adding Component")
-        entity:CreateComponent("AppearanceOverride") -- TODO: instead of timers subscribe to entity component
-    end
-
-    local visuals = {}
-    -- Eralyne figured out that type has to be 2 for changes to be visible.
-    -- We do not know why
-    entity.GameObjectVisual.Type = 2
-
-    -- _P("Overriding visuals of ", character)
-
-    for _, entry in pairs(entity.AppearanceOverride.Visual.Visuals) do
-        -- _P("inserting ", visual)
-        table.insert(visuals,entry)
-    end
-    -- _P("visuals to be added ")
-    -- _D(visuals)
-
-    -- _P("Visuals before adding")
-    -- _D(entity.AppearanceOverride.Visual.Visuals)
-
-    table.insert(visuals, visual)
-    entity.AppearanceOverride.Visual.Visuals = visuals
-    entity:Replicate("AppearanceOverride")
-    entity:Replicate("GameObjectVisual") 
-
-    -- _P("Visuals after adding")
-    -- _D(entity.AppearanceOverride.Visual.Visuals)
-
-    -- revert to originial type to prevent weird things from happening
-    -- Timer necessary because else the visual change doesn't show if we revert to 4 too fast. 
-    Ext.Timer.WaitFor(100, function()
-        entity.GameObjectVisual.Type = 4
-    end)
-end
-
-
--- Deletes a visual based on a type we are looking for
----@param character string  - UUID
----@param visual    string  - UUID
----@param type      string  - name (ex: Private Parts)
-function Entity:DeleteCurrentVisualOfType(character, visual, type)
-    local visualType = Visual:getType(visual) -- visualType = CCAV or CCSV
-    -- print("Debug: visualType = " .. tostring(visualType))
-    local entity = Ext.Entity.Get(character)
-
-    SatanPrint(GLOBALDEBUG, "current AppearanceOverride")
-    SatanDump(GLOBALDEBUG, entity.AppearanceOverride.Visual)
-
-    -- all visuals except for the one to be removed
-    local allowedVisuals= {}
-    if entity.AppearanceOverride then
-    -- if appearanceOverride then
-        for _, currentVisual in pairs(entity.AppearanceOverride.Visual.Visuals) do
-            SatanPrint( GLOBALDEBUG, " currentVisual = " .. tostring(currentVisual))
-            local contents = Ext.StaticData.Get(currentVisual, visualType)
-            -- print("Debug: contents = " .. tostring(contents))
-
-            if contents then
-                local slotName = contents.SlotName
-                SatanPrint(GLOBALDEBUG, "slotname " .. slotName)
-                -- print("Debug: slotName = " .. tostring(slotName))
-                if slotName and slotName ~= type then -- Only add
-                SatanPrint(GLOBALDEBUG, "type is not ".. type .. " adding to list to keep")
-                    table.insert(allowedVisuals, currentVisual)
-                    -- print("Debug: added visual to allowedVisuals = " .. tostring(visual))
-                end
-            else
-                SatanPrint(GLOBALDEBUG, "does not have contents " .. currentVisual)
-                table.insert(allowedVisuals, currentVisual)
-
-            end
-        end
-        -- print("Debug: allowedVisuals = " .. tostring(allowedVisuals))
-        SatanPrint(GLOBALDEBUG, "setting visuals to")
-        SatanDump(GLOBALDEBUG, allowedVisuals)
-        entity.AppearanceOverride.Visual.Visuals = allowedVisuals
-        -- print("Debug: updated entity.AppearanceOverride.Visual.Visuals = " .. tostring(entity.AppearanceOverride.Visual.Visuals))
-    end
-    local previousEntityType = entity.GameObjectVisual.Type
-    entity.GameObjectVisual.Type = 2
-    entity:Replicate("AppearanceOverride")
-    -- Ext.Timer.WaitFor(500, function() entity:Replicate("GameObjectVisual") end)
-    -- Entity:SetGameObjectVisualType(entity, previousEntityType)
-
-    -- revert to originial type to prevent weird things from happening
-    -- Timer necessary because else the visual change doesn't show if we revert to 4 too fast.
-    
-    --SatanDump(GLOBALDEBUG, entity.AppearanceOverride)
-    Ext.Timer.WaitFor(100, function()
-        entity.GameObjectVisual.Type = 4
-        --SatanDump(GLOBALDEBUG, entity.AppearanceOverride)
-    end)
-end
-
-
--- Gives shapeshifted entity a visual (like CCAV) and 
--- Deletes any other visuals of the same type (ex: type = private parts)
--- Replicates edited components -- TODO: Remosve replication from the other functions or this one
----@param character string  - UUID
----@param visual    string  - UUID
----@param type      string  - name (ex: Private Parts)
-function Entity:SwitchShapeshiftedVisual(character, visual, type)
-
-    Ext.Timer.WaitFor(200, function ()
-        SatanPrint(GLOBALDEBUG, "Removing " .. type .. " from " .. character .. " and adding " .. visual)
-        Entity:DeleteCurrentVisualOfType(character, visual, type)
-        Entity:GiveShapeshiftedVisual(character, visual)
-        -- print("Debug: called Entity:GiveShapeshiftedVisual with character = " .. tostring(character) .. " and visual = " .. tostring(visual))
-    end)
-   
-end
+--     -- some animations are bodytype & race locked
+--     if prayingAllowed(cc_bodytype, race) then
+--         allowedAnimations = Concat(allowedAnimations, Data.Animations["pray"])
+--     end
+--     if thinkingAllowed(cc_bodytype, race) then
+--         allowedAnimations = Concat(allowedAnimations, Data.Animations["think"])
+--     end
+--     return allowedAnimations
+-- end
 
 
 
+
+-- -- gives shapeshifted entity a visual (like CCAV)
+-- -- character string - UUID
+-- -- visual string    - UUID
+-- function Entity:GiveShapeshiftedVisual(character, visual)
+--     local entity = Ext.Entity.Get(character)        
+
+--     -- usually this component never exists. AAE creates one too
+--     if (not entity.AppearanceOverride) then
+--         -- print("Adding Component")
+--         entity:CreateComponent("AppearanceOverride") -- TODO: instead of timers subscribe to entity component
+--     end
+
+--     local visuals = {}
+--     -- Eralyne figured out that type has to be 2 for changes to be visible.
+--     -- We do not know why
+--     entity.GameObjectVisual.Type = 2
+
+--     -- _P("Overriding visuals of ", character)
+
+--     for _, entry in pairs(entity.AppearanceOverride.Visual.Visuals) do
+--         -- _P("inserting ", visual)
+--         table.insert(visuals,entry)
+--     end
+--     -- _P("visuals to be added ")
+--     -- _D(visuals)
+
+--     -- _P("Visuals before adding")
+--     -- _D(entity.AppearanceOverride.Visual.Visuals)
+
+--     table.insert(visuals, visual)
+--     entity.AppearanceOverride.Visual.Visuals = visuals
+--     entity:Replicate("AppearanceOverride")
+--     entity:Replicate("GameObjectVisual") 
+
+--     -- _P("Visuals after adding")
+--     -- _D(entity.AppearanceOverride.Visual.Visuals)
+
+--     -- revert to originial type to prevent weird things from happening
+--     -- Timer necessary because else the visual change doesn't show if we revert to 4 too fast. 
+--     Ext.Timer.WaitFor(100, function()
+--         entity.GameObjectVisual.Type = 4
+--     end)
+-- end
+
+
+-- -- Deletes a visual based on a type we are looking for
+-- ---@param character string  - UUID
+-- ---@param visual    string  - UUID
+-- ---@param type      string  - name (ex: Private Parts)
+-- function Entity:DeleteCurrentVisualOfType(character, visual, type)
+--     local visualType = Visual:getType(visual) -- visualType = CCAV or CCSV
+--     -- print("Debug: visualType = " .. tostring(visualType))
+--     local entity = Ext.Entity.Get(character)
+
+--     -- all visuals except for the one to be removed
+--     local allowedVisuals= {}
+--     if entity.AppearanceOverride then
+--     -- if appearanceOverride then
+--         for _, currentVisual in pairs(entity.AppearanceOverride.Visual.Visuals) do
+--             Debug.Print( " currentVisual = " .. tostring(currentVisual))
+--             local contents = Ext.StaticData.Get(currentVisual, visualType)
+--             -- print("Debug: contents = " .. tostring(contents))
+
+--             if contents then
+--                 local slotName = contents.SlotName
+--                 Debug.Print("slotname " .. slotName)
+--                 -- print("Debug: slotName = " .. tostring(slotName))
+--                 if slotName and slotName ~= type then -- Only add
+--                 Debug.Print("type is not ".. type .. " adding to list to keep")
+--                     table.insert(allowedVisuals, currentVisual)
+--                     -- print("Debug: added visual to allowedVisuals = " .. tostring(visual))
+--                 end
+--             else
+--                 Debug.Print("does not have contents " .. currentVisual)
+--                 table.insert(allowedVisuals, currentVisual)
+--             end
+--         end
+--         -- print("Debug: allowedVisuals = " .. tostring(allowedVisuals))
+--         Debug.Print("setting visuals to")
+--         --Debug.Dump(allowedVisuals)
+--         entity.AppearanceOverride.Visual.Visuals = allowedVisuals
+--         -- print("Debug: updated entity.AppearanceOverride.Visual.Visuals = " .. tostring(entity.AppearanceOverride.Visual.Visuals))
+--     end
+
+--     local previousEntityType = entity.GameObjectVisual.Type
+--     entity.GameObjectVisual.Type = 2
+--     entity:Replicate("AppearanceOverride")
+--     -- Ext.Timer.WaitFor(500, function() entity:Replicate("GameObjectVisual") end)
+--     -- Entity:SetGameObjectVisualType(entity, previousEntityType)
+
+--     -- revert to originial type to prevent weird things from happening
+--     -- Timer necessary because else the visual change doesn't show if we revert to 4 too fast.
+--     Ext.Timer.WaitFor(100, function()
+--         entity.GameObjectVisual.Type = 4
+--     end)
+-- end
+
+-- -- Gives shapeshifted entity a visual (like CCAV) and 
+-- -- Deletes any other visuals of the same type (ex: type = private parts)
+-- -- Replicates edited components -- TODO: Remosve replication from the other functions or this one
+-- ---@param character string  - UUID
+-- ---@param visual    string  - UUID
+-- ---@param type      string  - name (ex: Private Parts)
+-- function Entity:SwitchShapeshiftedVisual(character, visual, type)
+--     -- Ext.Timer.WaitFor(200, function ()
+--         Debug.Print("Removing " .. type .. " from " .. character .. " and adding " .. visual)
+--         Entity:DeleteCurrentVisualOfType(character, visual, type)
+--         Entity:GiveShapeshiftedVisual(character, visual)
+--         -- print("Debug: called Entity:GiveShapeshiftedVisual with character = " .. tostring(character) .. " and visual = " .. tostring(visual))
+--     -- end)
+-- end

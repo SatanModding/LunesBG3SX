@@ -24,8 +24,8 @@ local initialize
 function Actor:new(parent)
     local instance       = setmetatable({
         parent           = parent,
-        genital          = Genital:GetCurrentGenital(parent),
-        autoErection     = Ext.Entity.Get(parent).Vars.BG3SX_AutoErection == 1,
+        genital          = Genital.GetCurrentGenital(parent),
+        autoErection     = Ext.Entity.Get(parent).Vars.BG3SX_AutoSexGenital,
         oldArmourSet     = Osi.GetArmourSet(parent),
         oldEquipment     = Entity:GetEquipment(parent),
         isStripped       = Entity:HasEquipment(parent),
@@ -38,12 +38,12 @@ function Actor:new(parent)
         armour           = {},
         isResculpted     = false,
     }, Actor)
-    local scene = Scene:FindSceneByEntity(parent) -- Warning: Don't create scene reference in actor metatable or dumps of a scene will infinite loop
+    local scene = Scene.FindSceneByEntity(parent) -- Warning: Don't create scene reference in actor metatable or dumps of a scene will infinite loop
     instance.position = scene.rootPosition
     instance.uuid = Osi.CreateAt(Osi.GetTemplate(parent), instance.position.x, instance.position.y, instance.position.z, 1, 0, "")
-    SatanPrint(GLOBALDEBUG, "actor uuid ".. instance.uuid)
-    initialize(instance)
 
+    -- Debug.Print("actor uuid ".. instance.uuid)
+    initialize(instance)
     return instance
 end
 
@@ -113,7 +113,7 @@ function Actor:CopyEntityAppearanceOverrides()
     -- Type is special Appearance Edit Enhanced thing?
     Entity:TryCopyEntityComponent(self.parent, self.uuid, "GameObjectVisual")
     if entity.GameObjectVisual and entity.GameObjectVisual.Type ~= 0 then
-        SatanPrint(GLOBALDEBUG, "GameObjectVisual is not 0. It's ".. entity.GameObjectVisual.Type )
+        Debug.Print("GameObjectVisual is not 0. It's ".. entity.GameObjectVisual.Type )
         entity.GameObjectVisual.Type = 0
         entity:Replicate("GameObjectVisual")
     elseif not entity.GameObjectVisual then
@@ -129,7 +129,7 @@ function Actor:CopyEntityAppearanceOverrides()
     Ext.Timer.WaitFor(100, function()
         if self.isResculpted then
 
-            SatanPrint(GLOBALDEBUG, "is rescuplted")
+            Debug.Print("is resculpted")
 
             Entity:TryCopyEntityComponent(self.parent, self.uuid, "AppearanceOverride")
             entity.GameObjectVisual.Type = 2
@@ -137,10 +137,10 @@ function Actor:CopyEntityAppearanceOverrides()
             entity:Replicate("AppearanceOverride")
             entity:Replicate("GameObjectVisual")
         else
-            SatanPrint(GLOBALDEBUG, "is not resculpted")
+            Debug.Print("is not resculpted")
         end
 
-        SatanPrint(GLOBALDEBUG, " changed type to ".. entity.GameObjectVisual.Type)
+        Debug.Print(" changed type to ".. entity.GameObjectVisual.Type)
 
     end)
 
@@ -152,21 +152,22 @@ end
 -- TODO - Make sections within into their own functions
 -- TODO - Change type from 2 back to original type since it screws with other game stuff 
 -- https://discord.com/channels/1211056047784198186/1211069623835828345/1262896149962952936
-function Actor:TransformAppearance()
-    -- Get Looks
-    ----------------------------------------------------------------------------
-    local looksTemplate = self:GetLooks()
-    self:CopyEntityAppearanceOverrides()
-    Osi.Transform(self.uuid, looksTemplate, "8ec4cf19-e98e-465e-8e46-eba3a6204a39") -- Stripped
-    -- Osi.Transform(self.uuid, looksTemplate, "296bcfb3-9dab-4a93-8ab1-f1c53c6674c9") -- Invoke Duplicity
 
-    -- Get Equipment
-    ----------------------------------------------------------------------------
-    local isStripper = Sex:IsStripper(self.parent)
-    if not isStripper then
-        self:DressActor()
-    end
-end
+-- function Actor:TransformAppearance()
+--     -- Get Looks
+--     ----------------------------------------------------------------------------
+--     local looksTemplate = self:GetLooks()
+--     self:CopyEntityAppearanceOverrides()
+--     Osi.Transform(self.uuid, looksTemplate, "8ec4cf19-e98e-465e-8e46-eba3a6204a39") -- Stripped
+--     -- Osi.Transform(self.uuid, looksTemplate, "296bcfb3-9dab-4a93-8ab1-f1c53c6674c9") -- Invoke Duplicity
+
+--     -- Get Equipment
+--     ----------------------------------------------------------------------------
+--     local isStripper = Sex:IsStripper(self.parent)
+--     if not isStripper then
+--         self:DressActor()
+--     end
+-- end
 
 
 --- Copies the equipment from the parent entity to the actor
@@ -255,7 +256,7 @@ initialize = function(self)
     Ext.ModEvents.BG3SX.ActorInit:Throw({self.uuid})
     
     Osi.SetDetached(self.uuid, 1)
-    Osi.ApplyStatus(self.uuid, "BG3SX_SEXACTOR", -1) -- Marks them for SweatySex and IdleExpressions - TODO: Change those mods to just get an entities actor and do their thing without the boost
+   Osi.ApplyStatus(self.uuid, "BG3SX_SEXACTOR", -1) -- Marks them for SweatySex and IdleExpressions - TODO: Change those mods to just get an entities actor and do their thing without the boost
     Entity:ToggleWalkThrough(self.uuid)
     -- Entity:ToggleMovement(self.uuid) -- TODO: fix this
     Osi.AddBoosts(self.uuid, "ActionResourceBlock(Movement)", "", "")

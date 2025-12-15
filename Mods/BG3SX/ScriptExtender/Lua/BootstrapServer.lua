@@ -1,15 +1,25 @@
+-- If I don't define this, the console yells at me
+ModuleUUID = "df8b9877-5662-4411-9d08-9ee2ec4d8d9e"
+
+BG3AFActive = nil
+if Mods.BG3AF ~= nil then
+    BG3AFActive = true
+else
+    BG3AFActive = false
+end
+
 ------------------------------------
         -- Init Classes --
 ------------------------------------
 
 -- Pre-Construct our classes
-Ext.Require("Server/_constructor.lua")
-
--- Initialize Data Tables
-Ext.Require("Shared/Data/_init.lua")
+Ext.Require("Shared/_constructor.lua")
 
 -- Initialize Utils
-Ext.Require("Shared/Utils/_init.lua")
+Ext.Require("Shared/_initUtils.lua")
+
+-- Initialize Data Tables
+Ext.Require("Shared/_initData.lua")
 
 -- Initialize Sex Classes
 Ext.Require("Server/Classes/Sex/_init.lua")
@@ -20,6 +30,7 @@ Ext.Require("Server/Classes/_init.lua")
 -- Initiliaze Listeners
 Ext.Require("Server/Listeners/_init.lua")
 
+
 ------------------------------------
         -- Mod Events --
 ------------------------------------
@@ -29,6 +40,7 @@ Ext.Require("Server/Listeners/_init.lua")
 ------------------------------------------------------------------------------------------------------------------------------------------------
 -- "Channel" (Event Name)                                   - Payload Info                              - Where it Triggers
 
+Ext.RegisterModEvent("BG3SX", "AddAnimation")               --(modUUID, animationData)                  - AnimationData.lua
 Ext.RegisterModEvent("BG3SX", "StartSexSpellUsed")          --{caster, target, spellData}               - SexListeners.lua
 Ext.RegisterModEvent("BG3SX", "SexAnimationChange")         --{caster, animData}                        - SexListeners.lua
 Ext.RegisterModEvent("BG3SX", "SceneInit")                  --{scene}                                   - Scene.lua
@@ -45,57 +57,228 @@ Ext.RegisterModEvent("BG3SX", "CameraHeightChange")         --{uuid}            
 Ext.RegisterModEvent("BG3SX", "ActorDressed")               --{uuid, equipment}                         - Actor.lua
 Ext.RegisterModEvent("BG3SX", "GenitalChange")              --{uuid, newGenital}                        - Genital.lua
 
--- Clientside NPC Template functions need to be handled via NetMessages, not ModEvents - Please look at Client/NPCSync.lua
--- Ext.RegisterModEvent("BG3SX", "NPCStrip")                   --({naked = naked, resource = resource})    - NPCStripping.lua
--- Ext.RegisterModEvent("BG3SX", "NPCDress")                   --({dressed = dressed, resource = resource})- NPCStripping.lua
 
--- To subscribe to events:
-------------------------------------------------------------------------------------------------------------------------------------------------
-
--- Ext.ModEvents.BG3SX.Channel:Subscribe(function (payload) ... end)
-
--- Example:
--------------------------------------------------------------------
--- Ext.ModEvents.BG3SX.ActorDressed:Subscribe(function (e)
---     _P("ActorDressed received with PayLoad: ")
---     _D(e) -- Dumps the entire payload
--- end)
-
--- Or check ModEventsTester.lua
+-- Users can set whether they want to "unlock" all animations
+-- or only use "genital based" ones
+-- This means that 2 characters with penises will have accesss
+-- to the "lesbian" animations like "grinding", or "eating pussy" 
 
 
+local settings = {
+    Server = true,
+    Client = true,
+    SyncToClient = true,
+    SyncToServer = true,
+    SyncOnWrite = true,
+    WriteableOnClient = true,
+    WriteableOnServer = true
+}
+
+
+Ext.Vars.RegisterModVariable(ModuleUUID, "BG3SX_AddedNPCs", settings)
+
+Ext.Vars.RegisterModVariable(ModuleUUID, "BG3SX_ShowAllAnimations", {
+    Server = true, Client = true, SyncToClient = true
+})
 
 
 
--- Muffin stats loader
+
+local function OnSessionLoaded()
 
 
--- local modPath = 'Public/RunesOfFaerun/Stats/Generated/Data/'
--- local filesToReload = {
---     'Character.txt',
---     'Object.txt',
---     'Passive.txt',
---     'Projectile.txt',
---     'Shout.txt',
---     'Status.txt',
---     'Target.txt',
--- }
 
--- local function OnReset()
---     if filesToReload and #filesToReload then
---         for _, filename in pairs(filesToReload) do
---             if filename then
---                 local filePath = string.format('%s%s', modPath, filename)
---                 if string.len(filename) > 0 then
---                     Debug(string.format('RELOADING %s', filePath))
---                     ---@diagnostic disable-next-line: undefined-field
---                     Ext.Stats.LoadStatsFile(filePath, false)
---                 else
---                     Critical(string.format('Invalid file: %s', filePath))
---                 end
---             end
---         end
---     end
--- end
 
--- Ext.Events.ResetCompleted:Subscribe(OnReset)
+        local vars = Ext.Vars.GetModVariables(ModuleUUID)
+
+
+        -- print(vars)
+
+
+
+        if not vars.BG3SX_ShowAllAnimations then
+                -- print("BG3SX_ShowAllAnimations mod variable not initialized yet")
+                -- print("setting it to default value = false")
+                vars.BG3SX_ShowAllAnimations = false
+        end
+
+        -- Ext.Log.Print("BG3SX_ShowAllAnimations")
+        -- Ext.Log.Print(vars.BG3SX_ShowAllAnimations)
+        -- Ext.Log.Print("End BG3SX_ShowAllAnimations")
+
+        -- Ext.Vars.SyncModVariables(ModuleUUID)
+        Ext.Vars.SyncModVariables() -- SyncModVariables is called without parameters
+
+
+end
+
+
+Ext.Events.SessionLoaded:Subscribe(OnSessionLoaded)
+
+
+
+
+
+-- the original function from Norb wrongly parses commented out lines.
+-- LaughingLeader posted this fix 
+-- https://discord.com/channels/98922182746329088/771869529528991744/1324091645024796755
+
+
+
+local modifierLists = {
+        "Armor",
+        "Character",
+        "CriticalHitTypeData",
+        "InterruptData",
+        "Object",
+        "PassiveData",
+        "SpellData",
+        "Weapon",
+        "StatusData"
+}
+
+
+local functors = {
+        "ToggleOnFunctors",
+        "ToggleOffFunctors",
+        "StatsFunctors",
+        "StatsFunctorContext" ,
+        "FailureFunctors",
+        "PropertiesFunctors",
+        "SuccessFunctors",
+        "WeaponFunctors",
+        "HitFunctors",
+        "Failure",
+        "Properties",
+        "Success",
+        "OriginSpellFail",
+        "OriginSpellProperties",
+        "OriginSpellSuccess",
+        "SpellFail",
+        "SpellProperties",
+        "SpellSuccess",
+        "AuraStatuses",
+        "Functor",
+        "TickFunctors",
+        "ThrowableSpellFail",
+        "ThrowableSpellProperties",
+        "ThrowableSpellSuccess",
+        "OnApplyFail",
+        "OnApplyFunctors",
+        "OnApplySuccess",
+        "OnRemoveFail",
+        "OnRemoveFunctors",
+        "OnRemoveSuccess",
+        "OnRollsFailed",
+        "OnSuccess",
+        "OnTickFail",
+        "OnTickSuccess"
+}
+
+---@param object StatsObject
+local function purgeStat(object)
+
+        -- create basic stats of each type with default values
+        for _, modifierList in pairs(modifierLists) do
+                if not Ext.Stats.Get(modifierList) then
+                        Ext.Stats.Create(modifierList, modifierList)
+                end
+        end
+
+         -- sets most properties to a default value (None, "", {}, etc.)
+         object:CopyFrom(object.ModifierList)
+
+         -- properties of a stats cannot be gracefully accessed.
+         -- collect all of them first
+         local allProperties = {}
+         for key,_ in pairs(object) do
+                 allProperties[key] = true
+         end
+
+          -- functors don't inherit from the CopyFrom and have to be set manually
+          for _, functor in pairs(functors) do
+                 if allProperties[functor] then
+                        object:SetRawAttribute(functor, "")
+                 end
+         end
+
+end
+
+
+local SERVER = Ext.IsServer()
+
+local function LoadStatsFile(path, debug)
+	local file = Ext.IO.LoadFile(path, "data")
+	local object = nil
+	local entry = nil
+
+
+	for line in string.gmatch(file, "([^\r\n]+)\r*\n") do
+		if line:sub(1, 1) == "/" then
+			goto continue
+		end
+		local key, value = string.match(line, "%s*data%s+\"([^\"]+)\"%s+\"([^\"]*)\"")
+		if key ~= nil then
+			if object ~= nil then
+				if debug then print("\027[0;90m  Set: " .. key .. " = " .. value) end
+				object:SetRawAttribute(key, value)
+			end
+		else
+			local type = string.match(line, "%s*type%s+\"([^\"]+)\"")
+			if type ~= nil then
+				if object == nil and entry ~= nil then
+					if debug then print("\027[0;33mCreate new entry: " .. entry .. ", type " .. type) end
+					object = Ext.Stats.Create(entry, type)
+				end
+			else
+				entry = string.match(line, "%s*new%s+entry%s+\"([^\"]+)\"")
+				if entry ~= nil then
+					if object ~= nil and SERVER then
+						Ext.Stats.Sync(object.Name)
+					end
+
+					object = Ext.Stats.Get(entry, -1, false)
+
+					if object ~= nil then
+                                                purgeStat(object)
+						if debug then print("\027[0;37mUpdate existing entry: " .. entry) end
+					end
+				else
+					local using = string.match(line, "%s*using%s+\"([^\"]+)\"")
+					if using ~= nil then
+						if object ~= nil then
+							if debug then print("\027[0;90m  Inherit from: " .. using) end
+							object:CopyFrom(using)
+						end
+					else
+						if debug then Ext.Utils.PrintWarning("Unrecognized line: " .. line) end
+					end
+				end
+			end
+		end
+		::continue::
+	end
+
+	if object ~= nil and SERVER then
+		Ext.Stats.Sync(object.Name)
+	end
+end
+
+local filenames = {
+        "Passives"
+}
+
+local function OnReset()
+
+        for _, file in pairs(filenames) do
+        LoadStatsFile("Public/BG3SX/Stats/Generated/Data/"..file..".txt", true)
+        end
+
+        for _, stats in pairs(Ext.Stats.GetStats()) do
+                Ext.Stats.Sync(stats)
+        end
+end
+
+
+Ext.Events.ResetCompleted:Subscribe(OnReset)
+

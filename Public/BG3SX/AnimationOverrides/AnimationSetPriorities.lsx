@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<save>
+    <version major="5" minor="3" revision="65" build="302"/>
+    <region id="AnimationSetPriorities">
+        <node id="root">
+            <children>
+                <node id="AnimationSetPriority">
+                    <attribute id="Name" type="LSString" value="BG3SX_Body"/>
+                    <attribute id="Priority" type="int32" value="0"/>
+                    <attribute id="UUID" type="guid" value="bfa9dad2-2a5b-45cc-b770-9537badf9152"/>
+                </node>
+                <node id="AnimationSetPriority">
+                    <attribute id="Name" type="LSString" value="BG3SX_Loco"/>
+                    <attribute id="Priority" type="int32" value="0"/>
+                    <attribute id="UUID" type="guid" value="0c914b3f-5f24-441b-9be6-c25f4a424cfa"/>
+                </node>
+                <node id="AnimationSetPriority">
+                    <attribute id="Name" type="LSString" value="BG3SX_Idle"/>
+                    <attribute id="Priority" type="int32" value="0"/>
+                    <attribute id="UUID" type="guid" value="284eea6d-c693-4e4f-8527-f40433169e0c"/>
+                </node>
+                <node id="AnimationSetPriority">
+                    <attribute id="Name" type="LSString" value="BG3SX_Head"/>
+                    <attribute id="Priority" type="int32" value="1"/>
+                    <attribute id="UUID" type="guid" value="f1bc6e5c-9a1b-418b-8c23-23b8d98caf36"/>
+                </node>
+                <node id="AnimationSetPriority">
+                    <attribute id="Name" type="LSString" value="BG3SX_Tail"/>
+                    <attribute id="Priority" type="int32" value="1"/>
+                    <attribute id="UUID" type="guid" value="71d2f8cc-22e3-4aa6-b2af-3e34d87f6565"/>
+                </node>
+                <node id="AnimationSetPriority">
+                    <attribute id="Name" type="LSString" value="BG3SX_Wings"/>
+                    <attribute id="Priority" type="int32" value="1"/>
+                    <attribute id="UUID" type="guid" value="2a36331a-e834-488f-b6dd-c6ec68e083a5"/>
+                </node>
+                <node id="AnimationSetPriority">
+                    <attribute id="Name" type="LSString" value="BG3SX_Other"/>
+                    <attribute id="Priority" type="int32" value="1"/>
+                    <attribute id="UUID" type="guid" value="010d18d9-36a5-4625-b49b-84912e101818"/>
+                </node>
+            </children>
+        </node>
+    </region>
+</save>

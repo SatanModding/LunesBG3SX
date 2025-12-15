@@ -6,6 +6,8 @@
 --   bg3sxWhitelist["YourRaceTagName"] = {TAG = "YourRaceTagUUID", Allowed = nil} -- set Allowed to true or false
 -- end
 -- If your race has an out of the ordinary bodyshape please check our comments in Heightmatching.lua above our BodyShapeOverrides table (Ctrl+F is your friend)
+
+-- Debug.Print("Whitelist initialized")
 Data.AllowedTagsAndRaces = {
     ------------------------------------TAGS------------------------------------
     --- We keep sub-races allowed even when their parent race is disallowed to make it not too difficult for modders but keep them in here to not be unknown
@@ -465,7 +467,7 @@ Data.AllowedTagsAndRaces = {
     },
     ["REALLY_WOODHALFELF"] = {TAG = "8ac1b27c-c5c4-4a2c-95dd-256e4349e483", Allowed = true, -- Subrace
     },
-    ["REALLY_DISPLACER_BEAST"] = {TAG = "8fac3253-331c-4b9f-95fb-e2196fd1bc8d", Allowed = true,
+    ["REALLY_DISPLACER_BEAST"] = {TAG = "8fac3253-331c-4b9f-95fb-e2196fd1bc8d", Allowed = false, Reason = "BG3SX - No beasts"
     },
     ["REALLY_HILLDWARF"] = {TAG = "9a92ac6d-b7cc-4ccb-8965-074c6b36a342", Allowed = true, -- Subrace
     },
@@ -676,7 +678,7 @@ Data.AllowedTagsAndRaces = {
     ["BrassDragonborn"] = {UUID = "32f676f0-41ca-4469-baa6-341d5c95a708", Allowed = true},
     ["BronzeDragonborn"] = {UUID = "48318453-8aa8-4924-827d-173c957ac1de", Allowed = true},
     ["Butler"] = {UUID = "4d50d868-4c03-4c4b-86f3-009a652c8a7f", Allowed = false},
-    ["Cambion"] = {UUID = "b278457e-a3ee-45b1-8ff4-620b868c9193", Allowed = false}, -- No Animation Support
+    ["Cambion"] = {UUID = "b278457e-a3ee-45b1-8ff4-620b868c9193", Allowed = false},
     ["Cloaker"] = {UUID = "4742d30d-97b0-4537-a78a-0a803518be54", Allowed = false},
     ["CopperDragonborn"] = {UUID = "3f7e4753-277e-4259-9b29-423b9149cfb4", Allowed = true},
     ["DeathKnight"] = {UUID = "7722d7b5-c734-429e-b0f2-fd768caa5ae6", Allowed = false},
@@ -741,7 +743,7 @@ Data.AllowedTagsAndRaces = {
 
 Data.ModdedTags = {}
 
-Data.UnimportantTags = { -- These tags will get skipped by Whitelist
+local IgnoredTags = { -- These tags will get skipped by Whitelist
     --#region System
     "00000000-0000-0000-0000-000000000000", -- EMPTY
     "0fcfa622-a3c9-4a03-aab4-2a74904b62eb", -- EMPTY
@@ -757,20 +759,6 @@ Data.UnimportantTags = { -- These tags will get skipped by Whitelist
     "3b8a887d-7a26-426a-e697-97ec7e3f4d74", -- Wis Modifier
     "d2f86ec3-c41f-47e1-8acd-984872a4d7d5", -- RARE
     "0006ca6f-28f9-48e9-9f34-3deb32ff0fef", -- WPN_VFX_DAGGER
-    --#endregion
-    --#region Classes
-    "02913f9a-f696-40cf-acdf-32032afab32c", -- Barbarian
-    "d93434bd-6b71-4789-b128-ee24156057cc", -- Bard
-    "1671b4bf-4f47-4bb7-9cb9-80bb1f6009d5", -- Cleric
-    "44ac4317-4d38-4d28-80e2-94024c6e42f0", -- Druid
-    "1ae7017c-4884-4a43-bc4a-742fa0d201c0", -- Fighter
-    "e1e460bb-d0ae-4452-8529-c9e176558731", -- Monk
-    "6d85ab2d-5c23-498c-a61e-98f05a00177a", -- Paladin
-    "37a733c1-a862-4157-b92a-9cff46232c6a", -- Ranger
-    "f8a0608b-666c-4be6-a49c-03b369c10bd2", -- Rogue
-    "18266c0b-efbc-4c80-8784-ada4a37218d7", -- Sorcerer
-    "6fe3ae27-dc6c-4fc9-9245-710c790c396c", -- Wizard
-    "5804f55a-93f7-4281-9512-8d548a9e2a22", -- Warlock
     --#endregion
     --#region REALLY
     "264a6880-9a51-429c-a9fc-97f8952baf90", -- REALLY Generic
@@ -792,6 +780,21 @@ Data.UnimportantTags = { -- These tags will get skipped by Whitelist
     --#endregion
 }
 
+Data.ClassTags = {
+    "02913f9a-f696-40cf-acdf-32032afab32c", -- Barbarian
+    "d93434bd-6b71-4789-b128-ee24156057cc", -- Bard
+    "1671b4bf-4f47-4bb7-9cb9-80bb1f6009d5", -- Cleric
+    "44ac4317-4d38-4d28-80e2-94024c6e42f0", -- Druid
+    "1ae7017c-4884-4a43-bc4a-742fa0d201c0", -- Fighter
+    "e1e460bb-d0ae-4452-8529-c9e176558731", -- Monk
+    "6d85ab2d-5c23-498c-a61e-98f05a00177a", -- Paladin
+    "37a733c1-a862-4157-b92a-9cff46232c6a", -- Ranger
+    "f8a0608b-666c-4be6-a49c-03b369c10bd2", -- Rogue
+    "18266c0b-efbc-4c80-8784-ada4a37218d7", -- Sorcerer
+    "6fe3ae27-dc6c-4fc9-9245-710c790c396c", -- Wizard
+    "5804f55a-93f7-4281-9512-8d548a9e2a22", -- Warlock
+}
+
 Data.WhitelistedEntities = {
     --#region Companions
     "3ed74f06-3c60-42dc-83f6-f034cb47c679", -- ShadowHeart
@@ -806,9 +809,9 @@ Data.WhitelistedEntities = {
     "0de603c5-42e2-4811-9dad-f652de080eba", -- Minsc
     --#endregion
     --#region NPC's
-    -- "0133f2ad-e121-4590-b5f0-a79413919805", -- Bone Daddy - Broken Model, no fitting Genital, Rig doesn't accept the animations
+    -- "0133f2ad-e121-4590-b5f0-a79413919805", -- Withers - Download this mod for him to work: https://www.nexusmods.com/baldursgate3/mods/13995 (broken otherwise)
     "bc4b5efc-cbd3-4f8f-a31e-d37f801a038c", -- Ketheric
-    "bf24e0ec-a3a6-4905-bd2d-45dc8edf8101", -- Orin
+    "bf24e0ec-a3a6-4905-bd2d-45dc8edf8101", -- Orin -- No fitting Genital IIRC (miscolored)
     "491a7686-3081-405b-983c-289ec8781e0a", -- Mizora
     "6c55edb0-901b-4ba4-b9e8-3475a8392d9b", -- Dame Aylin
     "2f1880e6-1297-4ca3-a79c-9fabc7f179d3", -- Cazador
@@ -822,10 +825,31 @@ Data.WhitelistedEntities = {
 -- Anyone can add specific entities to it via:
 -- table.insert(Mods.BG3SX.Data.BlacklistedEntities, "An Entity UUID")
 Data.BlacklistedEntities = {
-    "58a69333-40bf-8358-1d17-fff240d7fb11", -- "Placeholder" - Doesn't exist
-    "3ed74f06-3c60-42dc-83f6-f034cb47c671", -- "Placeholder" - Doesn't exist
+    "f854ffc7-a16a-4431-8e5d-77d514580bff", -- Magron, Headless Hag 
+    "1b5e6e47-03bc-41b6-91e9-dbe6ba86ffe8", -- Gale Mirror Image
+    "1cedd0c1-6bfe-4f32-a1e7-78b0acf209a9", -- Gale Mirror Image
+    "244735bd-a5e6-4e70-b6e6-becbf70a54b8", -- Gale Mirror Image
+    "f6fb700a-5086-404c-ba15-7cf16642fc22", -- Gale Mirror Image
+    "ddf3dd37-fa65-4351-9f55-e50b1211fcfe", -- Gale Mirror Image
+    "30edc515-b6f2-42c0-8459-41ae4c36b349", -- Gale Mirror Image
 }
 
+if Ext.Mod.GetMod("f88e61e3-1996-e948-38a6-bd5d7e495b0d") then -- Teenager Mol Mod
+    table.insert(Data.BlacklistedEntities, "c8ab1ca6-96bb-467e-91c9-af87bc4d3925") -- Mol
+end
+
+if Ext.IsServer() then
+    Event.FetchIgnoredTags:SetHandler(function (payload)
+        local combinedTagsToIgnore = {}
+        for _, tag in ipairs(IgnoredTags) do
+            table.insert(combinedTagsToIgnore, tag)
+        end
+        for _, tag in ipairs(Data.ClassTags) do
+            table.insert(combinedTagsToIgnore, tag)
+        end
+        Event.SendIgnoredTags:SendToClient(combinedTagsToIgnore, payload.ID)
+    end)
+end
 
 -- WHITE-/BLACKLIST CHECK
 -- Use !whitelist or !blacklist to check against HostCharacter
@@ -837,7 +861,7 @@ Data.BlacklistedEntities = {
 --- @return boolean|string - Returns true for whitelisted entities, false if it is not listed.
 function Entity:IsWhitelistedEntity(uuid)
     for _, whitelistedUUID in ipairs(Data.WhitelistedEntities) do
-        if Helper:StringContains(uuid, whitelistedUUID) then
+        if Helper.StringContains(uuid, whitelistedUUID) then
             return true -- The UUID is whitelisted
         end
     end
@@ -850,7 +874,7 @@ end
 --- @return boolean|string - Returns true for blacklisted entities, false if it is not listed.
 function Entity:IsBlacklistedEntity(uuid)
     for _, blacklistedUUID in ipairs(Data.BlacklistedEntities) do
-        if Helper:StringContains(uuid, blacklistedUUID) then
+        if Helper.StringContains(uuid, blacklistedUUID) then
             return true -- The UUID is blacklisted
         end
     end
@@ -888,15 +912,27 @@ local popupkey = "BG3SX_Popup"
 -- Checks if an entity is part of our whitelisted tags/races table
 ---@param uuid string - UUID of an entity
 function Entity:IsWhitelistedTagOrRace(uuid, debug)
+    --print("checking is whitelisted for  ", uuid, " with debug message ", debug)
     local debug = debug or false
     local tags = Entity:TryGetEntityValue(uuid, nil, {"ServerRaceTag", "Tags"})
+    local NPCRace
+    if Entity:IsNPC(uuid) then
+        NPCRace = Entity:TryGetEntityValue(uuid, nil, {"Race", "Race"})
+    end
+    if Ext.IsClient() then
+        tags = Entity:TryGetEntityValue(uuid, nil, {"Tag", "Tags",})
+    end
     local quickTagCheck = Entity:TryGetEntityValue(uuid, nil, {"Tag", "Tags"})
     for _,quickTag in pairs(quickTagCheck) do
         if quickTag == Data.AllowedTagsAndRaces["KID"].TAG or quickTag == Data.AllowedTagsAndRaces["GOBLIN_KID"].TAG then
-            local msg = "[BG3SX][Whitelist.lua]\nCheck failed on:\n" .. uuid .. "\nFound disallowed tag with UUID:\n" .. quickTag .. "\nReason: 69"
-            _P(msg)
-            Ext.Loca.UpdateTranslatedString(popuphandle, msg)
-            Osi.OpenMessageBox(Osi.GetHostCharacter(), popupkey)
+            -- sometimes Whitelisted check is used internally to filter lists. We dont want to show messages in that case
+            if debug then
+                local msg = "[BG3SX][Whitelist.lua]\nCheck failed on:\n" .. uuid .. "\nFound disallowed tag with UUID:\n" .. quickTag .. "\nReason: 69"
+                _P(msg)
+                Ext.Loca.UpdateTranslatedString(popuphandle, msg)
+                --print("Opening messagebox")
+                Osi.OpenMessageBox(Osi.GetHostCharacter(), popupkey)
+            end
             return false
         end
     end
@@ -932,14 +968,19 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
         end
         return true
     end
-
     for i,tag in ipairs(tags) do
         local skip = false
-        for _,unimportantTag in pairs(Data.UnimportantTags) do
-            if tag == unimportantTag then
+        for _,tagToIgnore in pairs(IgnoredTags) do
+            if tag == tagToIgnore then
                 skip = true
             end
-        end 
+        end
+        for _,classTag in pairs(Data.ClassTags) do -- We don't check for class tags
+            if tag == classTag then
+                skip = true -- So skip if this tag is one
+            end
+        end
+
         if skip == false then
             local tagData = Ext.StaticData.Get(tag, "Tag")
             if tagData then
@@ -977,12 +1018,13 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
                             end
                             _P(msg)
                             Ext.Loca.UpdateTranslatedString(popuphandle, msg)
+                            --print("Opening messagebox HERE")
                             Osi.OpenMessageBox(uuid, popupkey)
                         end
                         return false
                     elseif tagInfo.Allowed == true then
                         hasAllowedTag = true
-                        if tagInfo.racesUsingTag then
+                        if tagInfo.racesUsingTag then -- If the tag is allowed, we go deeper into all races using that tag
                             for _, race in pairs(tagInfo.racesUsingTag) do
                                 local raceAllowed = checkParentTags(race.RACE)
                                 if not raceAllowed then
@@ -1021,6 +1063,24 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
         end
     end
 
+    -- Checking possible NPC races if not disallowed already
+    if NPCRace then
+        local raceName = Ext.StaticData.Get(NPCRace, "Race").Name
+        if Data.AllowedTagsAndRaces[raceName] then
+            if Data.AllowedTagsAndRaces[raceName].Allowed == true then
+                hasAllowedTag = true
+            else
+                if debug == true then
+                    local msg = "[BG3SX][Whitelist.lua]\nCheck failed on:\n" .. uuid .. "\nDisallowed NPC race found: " .. raceName
+                    _P(msg)
+                    Ext.Loca.UpdateTranslatedString(popuphandle, msg)
+                    Osi.OpenMessageBox(uuid, popupkey)
+                end
+                return false
+            end
+        end
+    end
+
     if hasAllowedTag then
         return true
     else
@@ -1034,25 +1094,148 @@ function Entity:IsWhitelistedTagOrRace(uuid, debug)
     end
 end
 
+function Entity:HasTags(uuid)
+    local tags = Entity:TryGetEntityValue(uuid, nil, {"Tag", "Tags"})
+    if tags and #tags >0 then
+        return true
+    else
+        local msg = "[BG3SX][Whitelist.lua]\n Not a single Tag was found on entity " .. uuid .. ". Please contact race mod author."
+        _P(msg)
+        Ext.Loca.UpdateTranslatedString(popuphandle, msg)
+        Osi.OpenMessageBox(uuid, popupkey)
+        return false
+    end
+end
+
+function Entity.CheckVisualAndTemplate(uuid)
+    local entity = Ext.Entity.Get(uuid)
+    if entity then
+        if entity.Visual and entity.Visual.Visual and entity.Visual.Visual.VisualResource and entity.Visual.Visual.VisualResource.Guid then
+            local visualID = entity.Visual.Visual.VisualResource.Guid
+            local resource = Ext.Resource.Get(visualID, "Visual")
+            if Helper.StringContains(resource.Name, "_CHD_") then
+                return true
+            else
+                return false
+            end
+        else
+            local function recursiveVisualResourceFind(templateID)
+                local template = Ext.Template.GetTemplate(templateID)
+                if template and template.Name then
+                    if Helper.StringContains(template.Name, "Child") then
+                        -- _P("Found Child")
+                        return true
+                    elseif template.Name == "BASE_Biped" then
+                        -- _P("Found BASE_Biped")
+                        return false
+                    else
+                        if template and template.ParentTemplateId then
+                            if recursiveVisualResourceFind(template.ParentTemplateId) then
+                                return true
+                            else
+                                return false
+                            end
+                        end
+                    end
+                    if template and template.ParentTemplateId then
+                        if recursiveVisualResourceFind(template.ParentTemplateId) then
+                            return true
+                        else
+                            return false
+                        end
+                    end
+                end
+            end
+            local rootTemplateID
+            if entity.GameObjectVisual and entity.GameObjectVisual.RootTemplateId then
+                if recursiveVisualResourceFind(entity.GameObjectVisual.RootTemplateId) then
+                    return true
+                else
+                    return false
+                end
+            end
+            return false
+        end
+    else
+        return false
+    end
+end
+
+function Entity.GetClassTags(uuid)
+    local entity = Ext.Entity.Get(uuid)
+    local combinedTags = {}
+    local classes = Entity:TryGetEntityValue(uuid, nil, {"Classes", "Classes"})
+    if classes then
+        for _,Classes in pairs(classes) do
+            local class = Classes.ClassUUID
+            local subclass = Classes.SubClassUUID
+            if class ~= "00000000-0000-0000-0000-000000000000" then
+                local classDesc = Ext.StaticData.Get(class, "ClassDescription")
+                local classTags = classDesc.Tags
+                for _,tag in pairs(classTags) do
+                    table.insert(combinedTags,tag)
+                end
+            end
+            if subclass ~= "00000000-0000-0000-0000-000000000000" then
+                local subclassDesc = Ext.StaticData.Get(subclass, "ClassDescription")
+                local subclassTags = subclassDesc.Tags
+                for _,tag in pairs(subclassTags) do
+                    table.insert(combinedTags,tag)
+                end
+            end
+        end
+        return combinedTags
+    else
+        return nil
+    end
+end
+
+local function whitelistTags(targetTable, tags)
+    if type(tags) == "string" then
+        if not Table.Contains(targetTable, tags) then
+            table.insert(targetTable,tags)
+        end
+    elseif type(tags) == "table" then
+        for _,uuid in pairs(tags) do
+            if not Table.Contains(targetTable, uuid) then
+                table.insert(targetTable,uuid)
+            end
+        end
+    end
+end
 
 --- Checks if an entity is allowed based on its UUID and current settings of Data.WhitelistedEntities, Data.BlacklistedEntities and Data.AllowedTagsAndRaces.
 --- @param uuid any - The UUID of the entity to check.
 --- @return boolean - Returns true if the entity is allowed, false otherwise.
 function Entity:IsWhitelisted(uuid, debug)
-    local debug = debug or false
-    if Entity:IsWhitelistedEntity(uuid) then -- If true it is allowed - return true
-        return true -- We do this seperately from the other checks to just immediately return true if they are indeed whitelisted here
+    if Entity.CheckVisualAndTemplate(uuid) then
+        return false -- If true, return false as "Is not Whitelisted"
     end
-    if Entity:IsBlacklistedEntity(uuid) then -- If true it is NOT allowed - return false
-        return false -- Entity not allowed
-    else -- Entity not found in the entity-specific white/blacklist, check Race/Tags whitelist now
+    local classTags = Entity.GetClassTags(uuid)
+    if classTags then
+        whitelistTags(Data.ClassTags, classTags) -- To fill the Data.ClassTags table with custom classes automatically
+    end
+
+    -- TODO: Get all Items and possible Item Tags and whitelist them
+
+    if Entity:HasTags(uuid) then
+        local debug = debug or false
+        if Entity:IsBlacklistedEntity(uuid) then -- If true it is NOT allowed - return false
+            return false -- Entity not allowed
+        elseif Entity:IsWhitelistedEntity(uuid) then -- If true it is allowed - return true
+            return true -- We do this seperately from the other checks to just immediately return true if they are indeed whitelisted here
+        end
+        
         if Entity:IsWhitelistedTagOrRace(uuid, debug) then
             return true -- Entity allowed by race/tags
         else
             return false -- Entity not allowed by race/tags
         end
+    else
+        return false
     end
 end
+
 
 -- Input a table of tag names to iterate over every tag in Data.AllowedTagsAndRaces and set them to either true or false
 ---@param tableOfTags table -- A table of tag names for the function to iterate over
@@ -1064,7 +1247,7 @@ function Data:SetAllowedTagsByName(tableOfTags, allow)
             if tag == tagToEdit then -- It checks each iteration if it finds an allowedTag you list in our table of tags -- IF it finds it, then...
             wList[tag].Allowed = allow -- You set it to whatever your allow parameter is
                 if wList[tag].racesUsingTag and #wList[tag].racesUsingTag > 0 then -- Then it checks if it has a racesUsingTag entry and if it has at least one entry itself
-                    for _,subTag in pairs(wList[tag].racesUsingTag) do -- Not it checks any of those subTags
+                    for _,subTag in pairs(wList[tag].racesUsingTag) do -- Then it checks any of those subTags
                         for _,subTagToEdit in pairs(tableOfTags) do -- Against any of the ones we want to allow
                             if subTag.Name == subTagToEdit then -- And if we find a match
                             wList[tag].racesUsingTag[subTag].Allowed = allow -- We set it to whatever your allow parameter is
@@ -1211,16 +1394,27 @@ end
 local function tagsandraces()
     getAllTagsAndRaces()
 end
-Ext.RegisterConsoleCommand("tagsandraces", tagsandraces);
+Ext.RegisterConsoleCommand("tagsandraces", tagsandraces)
 local function racewhitelist()
     Entity:IsWhitelistedTagOrRace(Osi.GetHostCharacter())
 end
-Ext.RegisterConsoleCommand("racewhitelist", racewhitelist);
+Ext.RegisterConsoleCommand("racewhitelist", racewhitelist)
 local function blacklist()
     Entity:IsBlacklistedEntity(Osi.GetHostCharacter())
 end
-Ext.RegisterConsoleCommand("blacklist", blacklist);
+Ext.RegisterConsoleCommand("blacklist", blacklist)
 local function whitelist()
     Entity:IsWhitelisted(Osi.GetHostCharacter())
 end
-Ext.RegisterConsoleCommand("whitelist", whitelist);
+Ext.RegisterConsoleCommand("whitelist", whitelist)
+
+local function showtags()
+    local tags = Entity:TryGetEntityValue(Osi.GetHostCharacter(), nil, {"Tag", "Tags"})
+    local output = {}
+    for _,tag in pairs(tags) do
+        local actualTag = Ext.StaticData.Get(tag, "Tag") or Ext.StaticData.Get(tag, "Race")
+        output[actualTag.Name] = actualTag.UUID
+    end
+    --Debug.Dump(output)
+end
+Ext.RegisterConsoleCommand("showtags", showtags)
