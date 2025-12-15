@@ -148,17 +148,17 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     local hmi = startMasturbating.Heightmatching or nil
     if hmi then -- Solo animation only needs to specify one bodyIdentifier and one animation UUID, the second body has to be set to nil
         hmi:SetAnimation("_P",  nil, anim["MasturbateWank"].MapKey)
-        --hmi:SetAnimation("Tall_P",  nil, anim["MasturbateWank"].MapKey) -- Animation doesn't exist - Anyone with a penis would play this regardless because of the previous entry
+        --hmi:SetAnimation("Strong_P",  nil, anim["MasturbateWank"].MapKey) -- Animation doesn't exist - Anyone with a penis would play this regardless because of the previous entry
         hmi:SetAnimation("_V",  nil, anim["MasturbateStanding_V"].MapKey)
-        hmi:SetAnimation("Tall_V",  nil, anim["MasturbateStanding_Tall_V"].MapKey) -- TallF specific animation - Tall is what we call the "Strong" bodytype identifier
+        hmi:SetAnimation("Strong_V",  nil, anim["MasturbateStanding_Tall_V"].MapKey) -- StrongF specific animation - Strong is what we call the "Strong" bodytype identifier
     end
 
     local hmi = hugOrCarry.Heightmatching
     if hmi then -- Instead of a specific bodytype/gender combo, just the bodytype matchup also works
-        hmi:SetAnimation("Tall", "Med", anim["CarryingTop_Tall"].MapKey, anim["CarryingBtm_Med"].MapKey)
-        hmi:SetAnimation("Med", "Tall", anim["EmbraceBtm"].MapKey, anim["EmbraceTop"].MapKey)
+        hmi:SetAnimation("Strong", "Med", anim["CarryingTop_Tall"].MapKey, anim["CarryingBtm_Med"].MapKey)
+        hmi:SetAnimation("Med", "Strong", anim["EmbraceBtm"].MapKey, anim["EmbraceTop"].MapKey)
         -- If we'd reverse the entry with the commented out line, the same animation would play even if we use SwitchPlaces
-        -- Like this, if we initiate with Tall + Med, the carrying animation plays, if we use SwitchPlaces, the regular fallback plays
+        -- Like this, if we initiate with Strong + Med, the carrying animation plays, if we use SwitchPlaces, the regular fallback plays
     end
 
     -- Additional Heightmatching Explanation
@@ -168,12 +168,12 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     -- Meaning if it finds a good match based on some priorities within the matchup table and present bodies it uses the found matchup animation entries to play
 
     -- When creating matchups, use a combination of these identifiers:
-    -- BodyType = {Tall, Med, Small, Tiny}
+    -- BodyType = {Strong, Med, Small, Tiny}
     -- BodyShape = {M, F}
     -- Genital = {_P, _V}
 
     -- Examples:
-    -- TallM_P, Tall_P, Tall, _P, M, Med_V, MedF_P, TallF
+    -- StrongM_P, Strong_P, Strong, _P, M, Med_V, MedF_P, StrongF
     -- etc.
     -- But always write BodyType -> BodyShape -> Genital, from left to right, when you combine them!
 
@@ -211,7 +211,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     ----------------------------------------------------
     local hmi = masturbateStanding.Heightmatching
     if hmi then
-        hmi:SetAnimation("Tall_V",  nil, anim["MasturbateStanding_Tall_V"].MapKey)
+        hmi:SetAnimation("Strong_V",  nil, anim["MasturbateStanding_Tall_V"].MapKey)
     end
 
     local hmi = bottlesit.Heightmatching
