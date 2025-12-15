@@ -708,79 +708,81 @@ end
 -- end
 
 
--- -- Deletes a visual based on a type we are looking for
--- ---@param character string  - UUID
--- ---@param visual    string  - UUID
--- ---@param type      string  - name (ex: Private Parts)
--- function Entity:DeleteCurrentVisualOfType(character, visual, type)
---     local visualType = Visual:getType(visual) -- visualType = CCAV or CCSV
---     -- print("Debug: visualType = " .. tostring(visualType))
---     local entity = Ext.Entity.Get(character)
+-- Deletes a visual based on a type we are looking for
+---@param character string  - UUID
+---@param visual    string  - UUID
+---@param type      string  - name (ex: Private Parts)
+function Entity:DeleteCurrentVisualOfType(character, visual, type)
+    local visualType = Visual:getType(visual) -- visualType = CCAV or CCSV
+    -- print("Debug: visualType = " .. tostring(visualType))
+    local entity = Ext.Entity.Get(character)
+
+    SatanPrint(GLOBALDEBUG, "current AppearanceOverride")
+    SatanDump(GLOBALDEBUG, entity.AppearanceOverride.Visual)
+
+    -- all visuals except for the one to be removed
+    local allowedVisuals= {}
+    if entity.AppearanceOverride then
+    -- if appearanceOverride then
+        for _, currentVisual in pairs(entity.AppearanceOverride.Visual.Visuals) do
+            SatanPrint( GLOBALDEBUG, " currentVisual = " .. tostring(currentVisual))
+            local contents = Ext.StaticData.Get(currentVisual, visualType)
+            -- print("Debug: contents = " .. tostring(contents))
+
+            if contents then
+                local slotName = contents.SlotName
+                SatanPrint(GLOBALDEBUG, "slotname " .. slotName)
+                -- print("Debug: slotName = " .. tostring(slotName))
+                if slotName and slotName ~= type then -- Only add
+                SatanPrint(GLOBALDEBUG, "type is not ".. type .. " adding to list to keep")
+                    table.insert(allowedVisuals, currentVisual)
+                    -- print("Debug: added visual to allowedVisuals = " .. tostring(visual))
+                end
+            else
+                SatanPrint(GLOBALDEBUG, "does not have contents " .. currentVisual)
+                table.insert(allowedVisuals, currentVisual)
+
+            end
+        end
+        -- print("Debug: allowedVisuals = " .. tostring(allowedVisuals))
+        SatanPrint(GLOBALDEBUG, "setting visuals to")
+        SatanDump(GLOBALDEBUG, allowedVisuals)
+        entity.AppearanceOverride.Visual.Visuals = allowedVisuals
+        -- print("Debug: updated entity.AppearanceOverride.Visual.Visuals = " .. tostring(entity.AppearanceOverride.Visual.Visuals))
+    end
+    local previousEntityType = entity.GameObjectVisual.Type
+    entity.GameObjectVisual.Type = 2
+    entity:Replicate("AppearanceOverride")
+    -- Ext.Timer.WaitFor(500, function() entity:Replicate("GameObjectVisual") end)
+    -- Entity:SetGameObjectVisualType(entity, previousEntityType)
+
+    -- revert to originial type to prevent weird things from happening
+    -- Timer necessary because else the visual change doesn't show if we revert to 4 too fast.
+    
+    --SatanDump(GLOBALDEBUG, entity.AppearanceOverride)
+    Ext.Timer.WaitFor(100, function()
+        entity.GameObjectVisual.Type = 4
+        --SatanDump(GLOBALDEBUG, entity.AppearanceOverride)
+    end)
+end
 
 
---     -- all visuals except for the one to be removed
---     local allowedVisuals= {}
---     if entity.AppearanceOverride then
---     -- if appearanceOverride then
---         for _, currentVisual in pairs(entity.AppearanceOverride.Visual.Visuals) do
---             Debug.Print( " currentVisual = " .. tostring(currentVisual))
---             local contents = Ext.StaticData.Get(currentVisual, visualType)
---             -- print("Debug: contents = " .. tostring(contents))
+-- Gives shapeshifted entity a visual (like CCAV) and 
+-- Deletes any other visuals of the same type (ex: type = private parts)
+-- Replicates edited components -- TODO: Remosve replication from the other functions or this one
+---@param character string  - UUID
+---@param visual    string  - UUID
+---@param type      string  - name (ex: Private Parts)
+function Entity:SwitchShapeshiftedVisual(character, visual, type)
 
---             if contents then
---                 local slotName = contents.SlotName
---                 Debug.Print("slotname " .. slotName)
---                 -- print("Debug: slotName = " .. tostring(slotName))
---                 if slotName and slotName ~= type then -- Only add
---                 Debug.Print("type is not ".. type .. " adding to list to keep")
---                     table.insert(allowedVisuals, currentVisual)
---                     -- print("Debug: added visual to allowedVisuals = " .. tostring(visual))
---                 end
---             else
---                 Debug.Print("does not have contents " .. currentVisual)
---                 table.insert(allowedVisuals, currentVisual)
-
---             end
---         end
---         -- print("Debug: allowedVisuals = " .. tostring(allowedVisuals))
---         Debug.Print("setting visuals to")
---         --Debug.Dump(allowedVisuals)
---         entity.AppearanceOverride.Visual.Visuals = allowedVisuals
---         -- print("Debug: updated entity.AppearanceOverride.Visual.Visuals = " .. tostring(entity.AppearanceOverride.Visual.Visuals))
---     end
---     local previousEntityType = entity.GameObjectVisual.Type
---     entity.GameObjectVisual.Type = 2
---     entity:Replicate("AppearanceOverride")
---     -- Ext.Timer.WaitFor(500, function() entity:Replicate("GameObjectVisual") end)
---     -- Entity:SetGameObjectVisualType(entity, previousEntityType)
-
---     -- revert to originial type to prevent weird things from happening
---     -- Timer necessary because else the visual change doesn't show if we revert to 4 too fast.
-
-
---     Ext.Timer.WaitFor(100, function()
---         entity.GameObjectVisual.Type = 4
-
---     end)
--- end
-
-
--- -- Gives shapeshifted entity a visual (like CCAV) and 
--- -- Deletes any other visuals of the same type (ex: type = private parts)
--- -- Replicates edited components -- TODO: Remosve replication from the other functions or this one
--- ---@param character string  - UUID
--- ---@param visual    string  - UUID
--- ---@param type      string  - name (ex: Private Parts)
--- function Entity:SwitchShapeshiftedVisual(character, visual, type)
-
---     -- Ext.Timer.WaitFor(200, function ()
---         Debug.Print("Removing " .. type .. " from " .. character .. " and adding " .. visual)
---         Entity:DeleteCurrentVisualOfType(character, visual, type)
---         Entity:GiveShapeshiftedVisual(character, visual)
---         -- print("Debug: called Entity:GiveShapeshiftedVisual with character = " .. tostring(character) .. " and visual = " .. tostring(visual))
---     -- end)
-
--- end
+    Ext.Timer.WaitFor(200, function ()
+        SatanPrint(GLOBALDEBUG, "Removing " .. type .. " from " .. character .. " and adding " .. visual)
+        Entity:DeleteCurrentVisualOfType(character, visual, type)
+        Entity:GiveShapeshiftedVisual(character, visual)
+        -- print("Debug: called Entity:GiveShapeshiftedVisual with character = " .. tostring(character) .. " and visual = " .. tostring(visual))
+    end)
+   
+end
 
 
 

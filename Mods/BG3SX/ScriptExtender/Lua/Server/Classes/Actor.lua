@@ -41,8 +41,8 @@ function Actor:new(parent)
     local scene = Scene.FindSceneByEntity(parent) -- Warning: Don't create scene reference in actor metatable or dumps of a scene will infinite loop
     instance.position = scene.rootPosition
     instance.uuid = Osi.CreateAt(Osi.GetTemplate(parent), instance.position.x, instance.position.y, instance.position.z, 1, 0, "")
-
-    -- Debug.Print("actor uuid ".. instance.uuid)
+    SatanPrint(GLOBALDEBUG, "actor uuid ".. instance.uuid)
+    initialize(instance)
 
     initialize(instance)
     return instance
@@ -114,7 +114,7 @@ function Actor:CopyEntityAppearanceOverrides()
     -- Type is special Appearance Edit Enhanced thing?
     Entity:TryCopyEntityComponent(self.parent, self.uuid, "GameObjectVisual")
     if entity.GameObjectVisual and entity.GameObjectVisual.Type ~= 0 then
-        Debug.Print("GameObjectVisual is not 0. It's ".. entity.GameObjectVisual.Type )
+        SatanPrint(GLOBALDEBUG, "GameObjectVisual is not 0. It's ".. entity.GameObjectVisual.Type )
         entity.GameObjectVisual.Type = 0
         entity:Replicate("GameObjectVisual")
     elseif not entity.GameObjectVisual then
@@ -130,7 +130,7 @@ function Actor:CopyEntityAppearanceOverrides()
     Ext.Timer.WaitFor(100, function()
         if self.isResculpted then
 
-            Debug.Print("is rescuplted")
+            SatanPrint(GLOBALDEBUG, "is rescuplted")
 
             Entity:TryCopyEntityComponent(self.parent, self.uuid, "AppearanceOverride")
             entity.GameObjectVisual.Type = 2
@@ -138,10 +138,10 @@ function Actor:CopyEntityAppearanceOverrides()
             entity:Replicate("AppearanceOverride")
             entity:Replicate("GameObjectVisual")
         else
-            Debug.Print("is not resculpted")
+            SatanPrint(GLOBALDEBUG, "is not resculpted")
         end
 
-        Debug.Print(" changed type to ".. entity.GameObjectVisual.Type)
+        SatanPrint(GLOBALDEBUG, " changed type to ".. entity.GameObjectVisual.Type)
 
     end)
 
@@ -153,13 +153,13 @@ end
 -- TODO - Make sections within into their own functions
 -- TODO - Change type from 2 back to original type since it screws with other game stuff 
 -- https://discord.com/channels/1211056047784198186/1211069623835828345/1262896149962952936
--- function Actor:TransformAppearance()
---     -- Get Looks
---     ----------------------------------------------------------------------------
---     local looksTemplate = self:GetLooks()
---     self:CopyEntityAppearanceOverrides()
---     Osi.Transform(self.uuid, looksTemplate, "8ec4cf19-e98e-465e-8e46-eba3a6204a39") -- Stripped
---     -- Osi.Transform(self.uuid, looksTemplate, "296bcfb3-9dab-4a93-8ab1-f1c53c6674c9") -- Invoke Duplicity
+function Actor:TransformAppearance()
+    -- Get Looks
+    ----------------------------------------------------------------------------
+    local looksTemplate = self:GetLooks()
+    self:CopyEntityAppearanceOverrides()
+    Osi.Transform(self.uuid, looksTemplate, "8ec4cf19-e98e-465e-8e46-eba3a6204a39") -- Stripped
+    -- Osi.Transform(self.uuid, looksTemplate, "296bcfb3-9dab-4a93-8ab1-f1c53c6674c9") -- Invoke Duplicity
 
 --     -- Get Equipment
 --     ----------------------------------------------------------------------------
