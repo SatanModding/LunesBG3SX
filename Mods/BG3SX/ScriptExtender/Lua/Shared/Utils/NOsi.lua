@@ -21,13 +21,13 @@ function NOsi.TeleportTo(character, character2)
         local entity = Ext.Entity.Get(character)
         local entity2 = Ext.Entity.Get(character2)
         if not entity then
-                Debug.Print("Character" .. character .. " is not an entity")
+                Debug.Print("Character " .. character .. " is not an entity")
                 return
         elseif not entity2 then
-                Debug.Print("Character" .. character2 .. " is not an entity")
+                Debug.Print("Character " .. character2 .. " is not an entity")
                 return
         else
-                -- print("Ttransforming")
+                -- print("Transforming")
                 local targetposition = entity2.Transform.Transform.Translate
                 entity.Transform.Transform.Translate = targetposition
                 entity.Visual.Visual:SetWorldTranslate(targetposition)
@@ -204,7 +204,14 @@ function NOsi.RotateTo(character, character2)
                         --local newRotation = {currentRotation[1], degree, currentRotation[3], currentRotation[4]}
                         --entity.Transform.Transform.RotationQuat = newRotation
                         --entity.Visual.Visual:SetWorldRotate(newRotation)
-                        entity.Steering.TargetRotation = degree
+                        if entity.Steering then
+                                entity.Steering.TargetRotation = degree
+
+                        elseif entity.Visual then
+                                entity.Visual.Visual:SetWorldRotate(entity2.Transform.Transform.RotationQuat)
+                        else
+                                Debug.Print("Can't rotate Entity " .. entity.Uuid.EntityUuid)
+                        end
                 end
         end
 end
@@ -241,16 +248,29 @@ end
 Lunisole = {}
 
 function Lunisole.Rotate(character, location)
-
---     print("Lunisole Rotate")
-
-    local charx = Ext.Entity.Get(character).Transform.Transform.Translate[1]
-    local chary = Ext.Entity.Get(character).Transform.Transform.Translate[3]
+    local char = Ext.Entity.Get(character)
+    local charTransform = char.Transform.Transform
+    local charx = charTransform.Translate[1]
+    local chary = charTransform.Translate[3]
     local vecx = charx - location[1]
     local vecy = chary - location[3]
     local RadToLookAt = Ext.Math.Atan2(vecx,vecy)
-    Ext.Entity.Get(character).Steering.TargetRotation = RadToLookAt
+    if char.Steering then
+        char.Steering.TargetRotation = RadToLookAt
+    elseif char.Visual then
+        local yaw = RadToLookAt
 
+        -- Convert yaw (radians) to quaternion (Y axis only)
+        local half = yaw * 0.5
+        local qx = 0
+        local qy = math.sin(half)
+        local qz = 0
+        local qw = math.cos(half)
+
+        char.Visual.Visual:SetWorldRotate({qx, qy, qz, qw})
+    else
+        Debug.Print("Can't rotate Entity " .. char.Uuid.EntityUuid)
+    end
 end
 
 
@@ -279,18 +299,18 @@ if Ext.IsClient() then
                 -- _D(payload)
 
                 local character = payload.character
-                local targetRotation = payload.target
+                local radRotationOrEntity = payload.target
 
-                if type(targetRotation) == "number" then -- 81
+                if type(radRotationOrEntity) == "number" then -- 81
                         -- targetPosition is coordinates
-                        NOsi.SetRotate(character, targetRotation)
-                elseif type(targetRotation) == "table" then -- x,y,z
+                        NOsi.SetRotate(character, radRotationOrEntity)
+                elseif type(radRotationOrEntity) == "table" then -- x,y,z
 
                         --NOsi.RotateToPosition(character, targetRotation)
-                        Lunisole.Rotate(character, targetRotation)
+                        Lunisole.Rotate(character, radRotationOrEntity)
                 else
                         -- targetposition is another character
-                        NOsi.RotateTo(character, targetRotation)
+                        NOsi.RotateTo(character, radRotationOrEntity)
                 end
         end)
 end

@@ -421,6 +421,13 @@ function Scene:CreateProps()
             table.insert(self.props, sceneProp)
         end
     end
+
+    Ext.Timer.WaitFor(200, function() -- Need to wait a moment for .Visual Component to be created
+        for _,prop in pairs(self.props) do
+            Debug.Print("attempting to rotate " .. prop)
+            Event.RequestRotation:Broadcast({character = prop, target = self.entities[1]})
+        end
+    end)
 end
 
 function Scene:DestroyProps()
@@ -624,6 +631,15 @@ function Scene:RotateScene(location)
 
     for _, character in pairs(self.entities) do
         Event.RequestRotation:Broadcast({character = character, target = location})
+    end
+
+    if self.props then
+        for _,prop in pairs(self.props) do
+            --Debug.Print("attempting to rotate ".. prop)
+            Event.RequestRotation:Broadcast({character = prop, target = location})
+        end
+    else
+        --Debug.Print("No Props in this scene")
     end
 
     -- TODO - probably not required whenb using Nosi 
