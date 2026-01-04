@@ -204,13 +204,33 @@ function NOsi.RotateTo(character, character2)
                         --local newRotation = {currentRotation[1], degree, currentRotation[3], currentRotation[4]}
                         --entity.Transform.Transform.RotationQuat = newRotation
                         --entity.Visual.Visual:SetWorldRotate(newRotation)
+
+                        local function checkIfVisualExists(entity)
+                                if entity.Visual then
+                                        if entity.Visual.Visual then
+                                                return true
+                                        else
+                                                return false
+                                        end
+                                else
+                                        return false
+                                end
+                        end
+                        local function recurseCheckVisualAndRotate(entity)
+                                Ext.Timer.WaitFor(50, function()
+                                        if checkIfVisualExists then
+                                                entity.Visual.Visual:SetWorldRotate(entity2.Transform.Transform.RotationQuat)
+                                                return true
+                                        end
+                                        return recurseCheckVisualAndRotate(entity)
+                                end)
+                        end
+
                         if entity.Steering then
                                 entity.Steering.TargetRotation = degree
 
-                        elseif entity.Visual then
-                                entity.Visual.Visual:SetWorldRotate(entity2.Transform.Transform.RotationQuat)
                         else
-                                Debug.Print("Can't rotate Entity " .. entity.Uuid.EntityUuid)
+                                recurseCheckVisualAndRotate(entity) -- Recursive check until visual exists so we can rotate
                         end
                 end
         end

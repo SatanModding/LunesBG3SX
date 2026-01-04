@@ -422,12 +422,12 @@ function Scene:CreateProps()
         end
     end
 
-    Ext.Timer.WaitFor(200, function() -- Need to wait a moment for .Visual Component to be created
+    -- Ext.Timer.WaitFor(200, function() -- Need to wait a moment for .Visual Component to be created
         for _,prop in pairs(self.props) do
             -- Debug.Print("attempting to rotate " .. prop)
             Event.RequestRotation:Broadcast({character = prop, target = self.entities[1]})
         end
-    end)
+    -- end)
 end
 
 function Scene:DestroyProps()
