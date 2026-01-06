@@ -182,7 +182,7 @@ if Ext.IsServer() then -- because this file is loaded through _initData.lua whic
     local eatpussy = addMainAnim("EatPussy",  anim["EatOutTop"].MapKey, anim["EatOutBtm"].MapKey, {"NSFW", "Straight", "Lesbian", "Oral"})
     eatpussy.SoundTop = Data.Sounds.Kissing
 
-    local fingerfuck = addMainAnim("FingerFuck",  anim["FingeringTop"].MapKey, anim["FingeringBtm"].MapKey, {"NSFW", "Straight", "Lesbian", "Gay", "Vaginal", "Anal"})
+    local fingerfuck = addMainAnim("FingerFuck",  anim["FingeringTop"].MapKey, anim["FingeringBtm"].MapKey, {"NSFW", "Straight", "Lesbian", "Gay", "Masturbation"})
     fingerfuck.SoundTop = Data.Sounds.Kissing
 
     local blowjob = addMainAnim("Blowjob",  anim["BlowjobTop"].MapKey, anim["BlowjobBtm"].MapKey, {"NSFW", "Straight", "Oral"})
