@@ -33,9 +33,9 @@ end
 function PartyInterface:Init()
     UI:RegisterSetting("PartyButtonSize",{100*ViewPortScale,100*ViewPortScale})
 
-    self.PartyArea = self.Wrapper:AddCollapsingHeader("Party")
+    self.PartyArea = self.Wrapper:AddCollapsingHeader(Ext.Loca.GetTranslatedString("h9e956f29dc2c4233b14b0b07ac36c3f0d55c", "Party"))
     self.PartyArea.DefaultOpen = true
-    self.NPCArea = self.Wrapper:AddCollapsingHeader("NPCs")
+    self.NPCArea = self.Wrapper:AddCollapsingHeader(Ext.Loca.GetTranslatedString("h3d507f295c0b468ea6429b9b00c3c4ed2534", "NPCs"))
     self.NPCArea.Visible = false
 
     -- Debug.Print("REQUESTING FETCHPARTY TO CLIENT WITH ID " .. USERID)
@@ -148,7 +148,7 @@ function UI:SelectedCharacterUpdates(character)
         self:InputRecieved(character.Uuid)
     else
         if not self.PartyInterface:CanBeSelectedAsCaster(character.Uuid) then
-            self:DisplayInfoText("You can only control your own characters as casters", 3000)
+            self:DisplayInfoText(Ext.Loca.GetTranslatedString("h9f152ef66db44370a071fa550c420f29247c", "You can only control your own characters as initiators"), 3000)
             return
         end
 
@@ -245,7 +245,7 @@ function PartyInterface:AddCharacter(parent, uuid)
                 if self:CanBeSelectedAsCaster(instance.Uuid) then
                     UI:SelectedCharacterUpdates(instance)
                 else
-                    UI:DisplayInfoText("You can only control your own characters as casters", 3000)
+                    UI:DisplayInfoText(Ext.Loca.GetTranslatedString("h9f152ef66db44370a071fa550c420f29247c", "You can only control your own characters as initiators"), 3000)
                 end
             end
         end

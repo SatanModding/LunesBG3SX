@@ -2,17 +2,34 @@
 <contentList>
 
 <!-- UI Specific -->
+    <content contentuid="h9e956f29dc2c4233b14b0b07ac36c3f0d55c" version="1">Party</content>
+    <content contentuid="h9f152ef66db44370a071fa550c420f29247c" version="1">You can only control your own characters as initiators</content>
+
     <!-- Party/NPC Interface -->
     <content contentuid="h2a86e31d7ec34b7490ead80f174354da5726" version="1">Select</content>
     <content contentuid="hbf2bfd2e408c493d9580e1fa08b7782d502g" version="1">Remove</content>
 
     <!-- Scene -->
     <content contentuid="hc21d333db09549dbbd1fcfaa6fdecb2a2b09" version="1">Scenes</content>
+    <content contentuid="h699539b0a74b4600b327a10bf219e66a2d46" version="1">No active scenes, create one by:&lt;br&gt;1. Select a character in the UI.&lt;br&gt;2. Click the BG3SX button.&lt;br&gt;3. Select a character of your choice to start a scene with&lt;br&gt;(In open world or UI)&lt;br&gt;This will only be show up once but can be made visible again via the Settings tab.</content>
+    <content contentuid="h8c3dba5cb522422ea3e69e327857b57e6e41" version="1">Mouse:&lt;br&gt;Left click to select | Right click to cancel&lt;br&gt;Controller:&lt;br&gt;Left stick to start targeting + A | B to cancel</content>
     <content contentuid="hfea9831b6ec148f1a9ddd486c3a0257c0610" version="1">Create SFW Scene</content>
     <content contentuid="hc266ca8031ad49239c1cc596692c5102c9ba" version="1">Create NSFW Scene</content>
+    <content contentuid="h01b7f2f8c4e4489882f832fd785f0e8178d6" version="1">Character is not whitelisted, please select a different character.</content>
     <content contentuid="hb393d16ea9494b2a8adfec48663c7512a69g" version="1">Running Scenes</content>
+    <content contentuid="hc1eac3710fc548f6bc1899bddbe872153404" version="1">Open Scene Control</content>
+
         <!-- SceneControl -->
-        <content contentuid="h267d0a9d1a2240ffbedc0fa051388f9c8b52" version="1">No additional solo animations available for this scene. Our discord has nice tutorials tho!</content>
+        <content contentuid="h994c15c6eec14d2197ac8f31db914c37aa96" version="1">Pause</content>
+        <content contentuid="hed8a57f8c3e14afa9eb66356aa9976666a32" version="1">Unpause</content>
+        <content contentuid="h3747fd1eeec041bc9029ee1daa02540c1590" version="1">Swap Position</content>
+        <content contentuid="ha11c0d67f49d4bf1957a053980fb6959dff7" version="1">Rotate Scene</content>
+        <content contentuid="he56162efc6ca410d959caaedbd10e0ff959e" version="1">Move Scene</content>
+        <content contentuid="h2a820e4a942a48bf91f0ab238974c82231f0" version="1">End Scene</content>
+        <content contentuid="h0b299f8632914efb8b4446db6a93d119782d" version="1">No Animations. Click me for Infos!</content>
+        <content contentuid="h267d0a9d1a2240ffbedc0fa051388f9c8b52" version="1">No additional solo animations available for this scene. Download an animation addon or join our Discord to learn to make some yourself!</content>
+        <content contentuid="h7ae3c6dbe4ce413a8fe0431034982d5813b2" version="1">Select an Animation</content>
+        <content contentuid="hd53428b0580c499b963bac81eaf2d0b47e46" version="1">By</content>
 
 	<!-- Appearance -->
     <content contentuid="h36809485096e467682a34b1a780bb4a4a816" version="1">Appearance</content>
@@ -25,23 +42,45 @@
     <content contentuid="ha0ba5dd9dcc94acca77258ba6254decb3784" version="1">MrFunsize Erections</content>
     <content contentuid="h12336834b5e64857bed909e165f752393cfb" version="1">Vanilla Vulvas</content>
     <content contentuid="hd0e090c89d924fa8ba6bfa2000ff8f479d8a" version="1">Vanilla Penises</content>
+    <content contentuid="h853bdaa4dd574d5ba209b0eaba549d338fcb" version="1">Out of Sex</content>
+    <content contentuid="hc5ba36d8ac9f4317ae6df860da22f7a12ecf" version="1">During Sex</content>
         <!-- MrFunSize Genital Names -->
         <content contentuid="h1e7bdab3f693cf4afafb4fcfabddbd240ee2" version="1">Erect</content>
         <content contentuid="hd4f04d1df9c2ef4a70f8536f9013cd3ac073" version="1">Hairy Erect</content>
 
     <!-- Whitelist -->
     <content contentuid="hd3dd6bc5609a4d65a7f71567e596dc84b81d" version="1">Whitelist</content>
+    <content contentuid="h8d7363f07c894daebbe1cae4bcb177d31a7a" version="1">(Read-only)</content>
+    <content contentuid="h634beee9bd3c428ba795f8301c98efcd182b" version="1">Tags of selected character</content>
+    <content contentuid="h294484a0821546e8ba2417eaf0917734bb7f" version="1">Character Tags</content>
+    <content contentuid="h5d7e88852cba458eafea142236b0c484f366" version="1">Allowed</content>
+    <content contentuid="hc3806d7f3689442aa912d9e6b79630401f82" version="1">No reason provided</content>
+    <content contentuid="h6029330e765d4893a14efcead210d658442f" version="1">Modded Entries</content>
+    <content contentuid="he32917e42c83454c917746b578ca549ffebc" version="1">Tag</content>
+    <content contentuid="h75c1295a055b4ed1a3ec428e6b22b9816b57" version="1">Whitelisted Entities</content>
+    <content contentuid="h959acde23b834d4eae945f7dacee45028gf9" version="1">Blacklisted Entities</content>
+    <content contentuid="h88a6b2f946604c6a923ec3f7d926793a9103" version="1">Only shows the name of loaded entities</content>
 
     <!-- NPC -->
     <content contentuid="h3d507f295c0b468ea6429b9b00c3c4ed2534" version="1">NPCs</content>
+    <content contentuid="haac4a3c8852044d39fbfc2ab012eaeb7f906" version="1">No NPC selected. Please select one first before clicking"</content>
+    <content contentuid="hbc4d2b25fabe48a2a97d814eac21ce6ed487" version="1">\"Strip\"</content>
+    <content contentuid="h19e30b9a3be84c7bb57c0cc8b894fe0d84ff" version="1">\"Dress\"</content>
+    <content contentuid="h59abcbc0950c48a8856f7bf76b8954a95c30" version="1">Select a range to scan for NPCs</content>
+    <content contentuid="h4d9b00350d494c55ba5b35ccdd087da5b7eg" version="1">You can also start a scene by selecting the NPC in the game world</content>
+    <content contentuid="ha855f8e5f75646058d05bdcf3ba8b67443d2" version="1">Scan</content>
+    <content contentuid="ha3f7c0a527914bf4bc0b48deb907abd4d9b4" version="1">Add</content>
 
     <!-- Setting -->
     <content contentuid="hedf73cea14534ece90bc4da1cc5f647d58e8" version="1">Settings</content>
     <content contentuid="h053ec08807c449e5873fbad66bb709c2ead8" version="1">Tab Visibility</content>
     <content contentuid="hadd9c724632b4e41ae4dbd58686b8db1c17f" version="1">Tab Settings</content>
     <content contentuid="ha5a309de2e9542b2999d70313cf9455ab451" version="1">Show all animations regardless of scene type</content>
+        <!-- SceneTab Settings -->
+        <content contentuid="h0388b3f9379841729a475c3b264d4cc96622" version="1">Scene Tab Settings</content>
+        <content contentuid="h1e4d1ff989ab4d5b9aedfe5d67d4b25cba8e" version="1">Show 'How To' again</content>
         <!-- NPCTab Settings -->
-        <content contentuid="hb21edb40a9044ddcb50f2557b6a00ae27933" version="1">NPCTab Settings</content>
+        <content contentuid="hb21edb40a9044ddcb50f2557b6a00ae27933" version="1">NPC Tab Settings</content>
         <content contentuid="hb2022efb943c40ee8e6a8bb9f354eb308d46" version="1">Automatic NPC Scan</content>
         <content contentuid="h96863be65f494a9ea56759ea763b38f06520" version="1">Disabling this settings creates a manual 'Scan' button in the NPC Tab.</content>
         <!-- Credits -->

@@ -23,7 +23,7 @@ function NPCTab:RequestStripNPC()
     -- print("got ", uuid)
 
     if not uuid then
-        local text = "            No NPC selected. Please select one first before clicking \"Strip\""
+        local text = "            " .. Ext.Loca.GetTranslatedString("haac4a3c8852044d39fbfc2ab012eaeb7f906", "No NPC selected. Please select one first before clicking" .. " " .. Ext.Loca.GetTranslatedString("hbc4d2b25fabe48a2a97d814eac21ce6ed487", "\"Strip\""))
         UIHelper.AddTemporaryTooltip(self.StripButton, 2000, text)
         return
     end
@@ -37,7 +37,7 @@ function NPCTab:RequestDressNPC()
         local uuid = UI:GetSelectedCharacter()
 
         if not uuid then
-            local text = "            No NPC selected. Please select one first before clicking \"Dress\""
+            local text = "            " .. Ext.Loca.GetTranslatedString("haac4a3c8852044d39fbfc2ab012eaeb7f906", "No NPC selected. Please select one first before clicking" .. " " .. Ext.Loca.GetTranslatedString("h19e30b9a3be84c7bb57c0cc8b894fe0d84ff", "\"Dress\""))
             UIHelper.AddTemporaryTooltip(self.DressButton, 2000, text)
             return
         end
@@ -132,8 +132,8 @@ end
 
 function NPCTab:Init()
 
-    self.Tab:AddText("Select a range to scan for NPCs")
-    self.Tab:AddText("You can also start a scene by selecting the NPC in the game world")
+    self.Tab:AddText(Ext.Loca.GetTranslatedString("h59abcbc0950c48a8856f7bf76b8954a95c30", "Select a range to scan for NPCs"))
+    self.Tab:AddText(Ext.Loca.GetTranslatedString("h4d9b00350d494c55ba5b35ccdd087da5b7eg", "You can also start a scene by selecting the NPC in the game world"))
 
     -- print("initializing InRange")
 
@@ -153,7 +153,7 @@ function NPCTab:Init()
         end
     end
 
-    self.AddButton = self.Tab:AddButton("Add")
+    self.AddButton = self.Tab:AddButton(Ext.Loca.GetTranslatedString("ha3f7c0a527914bf4bc0b48deb907abd4d9b4", "Add"))
     self.AddButton.IDContext = tostring(math.random(1000,100000))
     self.AddButton.OnClick = function(button,npc)
         -- print("Add NPC button clicked for ", npc)
@@ -183,7 +183,7 @@ function NPCTab:Init()
     -- print("SETTING UIEXIST TO TRUE")
 
 
-    self.ManualScan = self.Tab:AddButton("Scan")
+    self.ManualScan = self.Tab:AddButton(Ext.Loca.GetTranslatedString("ha855f8e5f75646058d05bdcf3ba8b67443d2", "Scan"))
     self.ManualScan.IDContext = tostring(math.random(1000,100000))
     self.ManualScan.SameLine = true
     self.ManualScan.Visible = true

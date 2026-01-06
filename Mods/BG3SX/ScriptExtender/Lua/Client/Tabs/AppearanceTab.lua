@@ -158,8 +158,8 @@ function AppearanceTab:UpdateGenitalGroup(whitelisted)
                     genitalSelectable.Selected = false
                     popup:Open()
                 end
-                local inactiveGenital = popup:AddSelectable("Out of Sex")
-                local activeGenital = popup:AddSelectable("During Sex")
+                local inactiveGenital = popup:AddSelectable(Ext.Loca.GetTranslatedString("h853bdaa4dd574d5ba209b0eaba549d338fcb", "Out of Sex"))
+                local activeGenital = popup:AddSelectable(Ext.Loca.GetTranslatedString("hc5ba36d8ac9f4317ae6df860da22f7a12ecf", "During Sex"))
 
                 -- local inactiveGenitalButton = categoryHeader:AddButton("Out of Sex")
                 -- local activeGenitalButton = categoryHeader:AddButton("During Sex")

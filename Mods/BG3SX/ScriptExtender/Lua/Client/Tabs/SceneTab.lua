@@ -53,7 +53,7 @@ function SceneTab:RefreshAvailableAnimations(animationTable, scene)
 end
 
 function SceneTab:CreateNewSceneArea()
-    self.NoSceneText = self.Tab:AddText("No active scenes, create one by:\n1. Select a character in the UI.\n2. Click the BG3SX button.\n3. Select a character of your choice to start a scene with\n(In open world or UI)")
+    self.NoSceneText = self.Tab:AddText(Ext.Loca.GetTranslatedString("h699539b0a74b4600b327a10bf219e66a2d46", "No active scenes, create one by:\n1. Select a character in the UI.\n2. Click the BG3SX button.\n3. Select a character of your choice to start a scene with\n(In open world or UI)\nThis will only show up once but can be made visible again via the Settings tab."))
 
     self.SFWSceneButton = self.Tab:AddImageButton("\t " .. Ext.Loca.GetTranslatedString("hfea9831b6ec148f1a9ddd486c3a0257c0610", "Create SFW Scene"), "BG3SX_SFW_Scene", {75,75})
     self.SFWSceneButton:Tooltip():AddText("\t " .. Ext.Loca.GetTranslatedString("hfea9831b6ec148f1a9ddd486c3a0257c0610", "Create SFW Scene"))
@@ -74,7 +74,7 @@ function SceneTab:CreateNewSceneArea()
     self.NSFWSceneButton.SameLine = true
 
     self.NewSceneEligible = true
-    self.ControlsText = self.Tab:AddText("Mouse:\nLeft click | Right click to cancel\nController:\nLeft stick to start targeting + A | B to cancel")
+    self.ControlsText = self.Tab:AddText(Ext.Loca.GetTranslatedString("h8c3dba5cb522422ea3e69e327857b57e6e41", "Mouse:\nLeft click to select | Right click to cancel\nController:\nLeft stick to start targeting + A | B to cancel"))
     self.ControlsText.SameLine = true
 
     self.ActiveScenesSeparator = self.Tab:AddSeparatorText(Ext.Loca.GetTranslatedString("hb393d16ea9494b2a8adfec48663c7512a69g", "Running Scenes"))
@@ -119,7 +119,7 @@ function SceneTab:DisableSceneButtons()
     self.SFWSceneButton.Tint = {0.69, 0.69, 0.69, 1.0} -- Greyed out
     self.NSFWSceneButton.Tint = {0.69, 0.69, 0.69, 1.0} -- Greyed out
     self.ControlsText.Visible = false
-    UI:DisplayInfoText("Character is not whitelisted, please select a different character.")
+    UI:DisplayInfoText(Ext.Loca.GetTranslatedString("h01b7f2f8c4e4489882f832fd785f0e8178d6", "Character is not whitelisted, please select a different character."))
 end
 
 function SceneTab:EnableSceneButtons()
