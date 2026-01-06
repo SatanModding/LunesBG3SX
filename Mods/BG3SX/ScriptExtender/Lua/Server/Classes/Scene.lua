@@ -674,11 +674,14 @@ function Scene:PlayAnimation(animationData)
         end
 
         for _, char in pairs (self.entities) do
-            Animation:New(char, animDataParent[animationData.Mod][animationData.Name])
+            Ext.ModEvents.BG3SX.AnimationChange:Throw({Time = "Before", SceneID = self.Uuid, Character = char, AnimationData = self.AnimationData})
+            local newAnimData = Animation:New(char, animDataParent[animationData.Mod][animationData.Name])
+            Ext.ModEvents.BG3SX.AnimationChange:Throw({Time = "After", SceneID = self.Uuid, Character = char, AnimationData = newAnimData})
 
-            -- Start sound for each character
             if animDataParent[animationData.Mod][animationData.Name].Sound == true then
-                Sound:New(char, animDataParent[animationData.Mod][animationData.Name])
+                Ext.ModEvents.BG3SX.SoundChange:Throw({Time = "Before", SceneID = self.Uuid, Character = char, AnimationData = self.AnimationData})
+                local newSoundData = Sound:New(char, animDataParent[animationData.Mod][animationData.Name])
+                Ext.ModEvents.BG3SX.SoundChange:Throw({Time = "After", SceneID = self.Uuid, Character = char, Sound = newSoundData})
             end
         end
 
