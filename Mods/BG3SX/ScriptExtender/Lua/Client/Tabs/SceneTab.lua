@@ -110,7 +110,7 @@ function SceneTab:UpdateNoSceneText()
         self.ActiveScenesSeparator.Visible = true
     else
         self.ActiveScenesSeparator.Visible = false
-        self.NoSceneText.Visible = true -- Show it again
+        -- self.NoSceneText.Visible = true -- Show it again -> Showing it again moved to settings tab
     end
 end
 

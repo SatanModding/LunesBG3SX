@@ -18,6 +18,13 @@ function SettingsTab:Init()
     local generalSettingsGroup = self.Tab:AddGroup("GeneralSettings")
 
     ---------------------------------
+    local showSceneGroup = generalSettingsGroup:AddGroup("Scene Tab Settings")
+    showSceneGroup:AddSeparatorText(Ext.Loca.GetTranslatedString("h0388b3f9379841729a475c3b264d4cc96622", "Scene Tab Settings"))
+    self:AddSettingButton(generalSettingsGroup, Ext.Loca.GetTranslatedString("h1e4d1ff989ab4d5b9aedfe5d67d4b25cba8e", "Show 'How To' again"), function()
+        UI.SceneTab.NoSceneText.Visible = true
+    end)
+
+    ---------------------------------
     local showTabGroup = generalSettingsGroup:AddGroup("Tab Visibility")
     showTabGroup:AddSeparatorText(Ext.Loca.GetTranslatedString("h053ec08807c449e5873fbad66bb709c2ead8", "Tab Visibility"))
 
@@ -37,7 +44,7 @@ function SettingsTab:Init()
 
     ---------------------------------
     local sceneGroup = generalSettingsGroup:AddGroup("NPCTab Settings")
-    sceneGroup:AddSeparatorText(Ext.Loca.GetTranslatedString("hb21edb40a9044ddcb50f2557b6a00ae27933", "NPCTab Settings"))
+    sceneGroup:AddSeparatorText(Ext.Loca.GetTranslatedString("hb21edb40a9044ddcb50f2557b6a00ae27933", "NPC Tab Settings"))
 
     UI.Settings.AutomaticNPCScan = self:AddSettingBox(generalSettingsGroup, Ext.Loca.GetTranslatedString("hb2022efb943c40ee8e6a8bb9f354eb308d46", "Automatic NPC Scan"), false, function(checked)
        if checked then
