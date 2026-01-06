@@ -16,7 +16,7 @@ local initialize
 -- CONSTRUCTOR
 --------------------------------------------------------------
 
----@class Scene
+---@class Scene: SceneParameters
 ---@field New fun(self:Scene, ...:SceneParameters):Scene
 ---@field Get fun(self:Scene, uuid:string):Scene|nil
 ---@field FindSceneByEntity fun(entityToSearch:string):Scene|nil
@@ -52,7 +52,7 @@ local initialize
 ---@field Rotation        table|nil  - Table with x,y,z,w rotation
 ---@field StartLocations  table|nil  - Saves the start locations (Position/Rotation) of each entity to teleport back to when scene is destroyed
 ---@field EntityScales    table|nil  - Saves the start entity scales
----@field CurrentAnimation table|nil  - Table of the current animation being played
+---@field AnimationData   table|nil  - Table of the current AnimationData
 ---@field CurrentSounds   table|nil  - Table of currently playing sounds
 ---@field TimerHandles    table|nil  - Timer handles in case they have to be cancelled (failsave)
 ---@field CameraZoom      table|nil  - Unused - Was intended to store previous zoom levels per entity - handled differently now
@@ -68,6 +68,7 @@ local initialize
 ---@field WasOnStage      table|nil  - Table of entities that were on stage before the scene started
 ---@field Fade            number|nil - Fade effect for the scene
 ---@field StrippedEQ      table<string,StrippedEQ>|nil  - Table of stripped equipment, armorset and slots per entity, used to restore equipment on Scene:Destroy()
+-- ---@field CurrentAnimation table|nil  - Table of the current animation being played -- Changed to .AnimationData
 
 -- Creeated a new Scene Instance
 ---@param ... SceneParameters
@@ -83,7 +84,8 @@ function Scene:New(...)
         rotation        = args.Rotation or {},
         startLocations  = args.StartLocations or {}, -- NEVER change this after initialize - Used to teleport everyone back on Scene:Destroy()
         entityScales    = args. EntityScales or {},
-        currentAnimation= args.CurrentAnimation or {},
+        -- currentAnimation= args.CurrentAnimation or {}, -- Changed to .AnimationData
+        AnimationData   = args.AnimationData or {},
         currentSounds   = args.CurrentSounds or {},
         timerHandles    = args.TimerHandles or {},
         cameraZoom      = args.CameraZoom or {},
@@ -411,9 +413,9 @@ end
 -----------------------------------------------------
 function Scene:CreateProps()
     -- _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Creating props for current animation")
-    if self.currentAnimation.Props then
-        -- _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Props found for current animation: " .. #self.currentAnimation.Props)
-        for _,animDataProp in pairs(self.currentAnimation.Props) do
+    if self.AnimationData.Props then
+        -- _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Props found for current animation: " .. #self.AnimationData.Props)
+        for _,animDataProp in pairs(self.AnimationData.Props) do
             -- _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Creating prop " .. animDataProp)
             local sceneProp = Osi.CreateAt(animDataProp, self.rootPosition[1], self.rootPosition[2], self.rootPosition[3], 1, 0, "")
             -- _P("[BG3SX][Scene.lua] - Scene:CreateProps() - Created prop " .. sceneProp)
@@ -617,7 +619,7 @@ function Scene:MoveSceneToLocation(newLocation)
 
 
     --scene:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
-    --Sex:PlayAnimation(entity, self.currentAnimation) -- Play prior animation again
+    --Sex:PlayAnimation(entity, self.AnimationData) -- Play prior animation again
 
     Ext.ModEvents.BG3SX.SceneMove:Throw({scene = self, oldLoca = oldLocation, newLoca = newLocation})
 end
@@ -644,7 +646,7 @@ function Scene:RotateScene(location)
 
     -- TODO - probably not required whenb using Nosi 
     --self:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
-    --Sex:PlayAnimation(character, self.currentAnimation) -- Play prior animation again
+    --Sex:PlayAnimation(character, self.AnimationData) -- Play prior animation again
 end
 
 function Scene:StopAnimation()
@@ -661,7 +663,7 @@ function Scene:TogglePause()
         end
         self.Paused = true
     elseif self.Paused == true then
-        self:PlayAnimation(self.currentAnimation)
+        self:PlayAnimation(self.AnimationData)
     end
 end
 
@@ -688,13 +690,13 @@ function Scene:PlayAnimation(animationData)
         self.Paused = false
 
         -- Prop handling
-        if animationData ~= self.currentAnimation then
+        if animationData ~= self.AnimationData then
             -- If animation is not the same as before save the new animationData table to the scene to use for prop management, teleporting or rotating
-            self.currentAnimation = animationData
-            self:DestroyProps() -- Props rely on scene.currentAnimation
+            self.AnimationData = animationData
+            self:DestroyProps() -- Props rely on scene.AnimationData
             self:CreateProps()
         end
-        self.currentAnimation = animDataParent[animationData.Mod][animationData.Name]
+        self.AnimationData = animDataParent[animationData.Mod][animationData.Name]
     end
 end
 
@@ -827,8 +829,8 @@ function Scene:SwapPosition()
             -- Sounds will automatically adapt on next loop
 
 
-            self:PlayAnimation(self.currentAnimation)
-            -- Sex:PlayAnimation(savedActor, self.currentAnimation)
+            self:PlayAnimation(self.AnimationData)
+            -- Sex:PlayAnimation(savedActor, self.AnimationData)
         end
     end
 end

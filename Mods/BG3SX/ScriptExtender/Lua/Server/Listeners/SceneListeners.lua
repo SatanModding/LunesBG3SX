@@ -25,7 +25,7 @@ Ext.Osiris.RegisterListener("UsingSpell", 5, "after", function(caster, spell, _,
     --     Ext.ModEvents.BG3SX.SceneSwitchPlacesAfter:Throw({scene.actors})
 
     --     scene:CancelAllSoundTimers() -- Cancel all currently saved soundTimers to not get overlapping sounds
-    --     Sex:PlayAnimation(caster, scene.currentAnimation)
+    --     Sex:PlayAnimation(caster, scene.AnimationData)
     -- end
     -- if spell == "BG3SX_ChangeCameraHeight" then
     --     Sex:ChangeCameraHeight(caster)

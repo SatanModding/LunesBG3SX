@@ -147,10 +147,10 @@ function Sex:PlayAnimation(character, animData)
     playAnimationAndSound(scene, animData)
 
     -- Prop handling
-    if animData ~= scene.currentAnimation then
+    if animData ~= scene.AnimationData then
         -- If animation is not the same as before save the new animationData table to the scene to use for prop management, teleporting or rotating
-        scene.currentAnimation = animData
-        scene:DestroyProps() -- Props rely on scene.currentAnimation
+        scene.AnimationData = animData
+        scene:DestroyProps() -- Props rely on scene.AnimationData
         scene:CreateProps()
     end
 end

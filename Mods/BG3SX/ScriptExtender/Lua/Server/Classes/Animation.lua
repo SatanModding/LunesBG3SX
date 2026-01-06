@@ -112,7 +112,7 @@ function Animation.ResetAnimation(character)
         -- ClientChanged takes a bit, If aniamtion is called too early, it gets reset again
         -- If we could put the animations "idle" we coudl circumvent this
         Ext.Timer.WaitFor(100, function ()
-            playAnimation(Animation:New(character, currentScene.currentAnimation))
+            playAnimation(Animation:New(character, currentScene.AnimationData))
         end)
         
     end

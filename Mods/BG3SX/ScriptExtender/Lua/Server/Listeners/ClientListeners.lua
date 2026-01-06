@@ -123,26 +123,26 @@ Event.NewSceneRequest:SetHandler(function (payload)
 
     if type == "SFW" then
         if Helper.StringContainsOne(caster, target) then -- SoloScene
-            local scene = Scene:New({Type = "SFW", Entities = {caster}, Animation = Data.IntroAnimations[ModuleUUID]["Start SFW"], Fade = 666})
+            local scene = Scene:New({Type = "SFW", Entities = {caster}, AnimationData = Data.IntroAnimations[ModuleUUID]["Start SFW"], Fade = 666})
             scene:Init()
-            scene:PlayAnimation(Data.IntroAnimations[ModuleUUID]["Start SFW"])
+            scene:PlayAnimation(scene.AnimationData)
 
         else-- PairedScene
-            local scene = Scene:New({Type = "SFW", Entities = {caster, target}, Animation = Data.IntroAnimations[ModuleUUID]["Hug or Carry"], Fade = 666})
+            local scene = Scene:New({Type = "SFW", Entities = {caster, target}, AnimationData = Data.IntroAnimations[ModuleUUID]["Hug or Carry"], Fade = 666})
             scene:Init()
-            scene:PlayAnimation(Data.IntroAnimations[ModuleUUID]["Hug or Carry"])
+            scene:PlayAnimation(scene.AnimationData)
         end
 
     elseif type == "NSFW" then
         if Helper.StringContainsOne(caster, target) then -- SoloScene
-            local scene = Scene:New({Type = "NSFW", Entities = {caster}, Animation = Data.IntroAnimations[ModuleUUID]["Start Masturbating"], Fade = 666})
+            local scene = Scene:New({Type = "NSFW", Entities = {caster}, AnimationData = Data.IntroAnimations[ModuleUUID]["Start Masturbating"], Fade = 666})
             scene:Init()
-            scene:PlayAnimation(Data.IntroAnimations[ModuleUUID]["Start Masturbating"])
+            scene:PlayAnimation(scene.AnimationData)
 
         else -- PairedScene
-            local scene = Scene:New({Type = "NSFW", Entities = {caster, target}, Animation = Data.IntroAnimations[ModuleUUID]["Hug or Carry"], Fade = 666})
+            local scene = Scene:New({Type = "NSFW", Entities = {caster, target}, AnimationData = Data.IntroAnimations[ModuleUUID]["Hug or Carry"], Fade = 666})
             scene:Init()
-            scene:PlayAnimation(Data.IntroAnimations[ModuleUUID]["Hug or Carry"])
+            scene:PlayAnimation(scene.AnimationData)
         end
     else
         Debug.Print("Unknown scene type: " .. type)

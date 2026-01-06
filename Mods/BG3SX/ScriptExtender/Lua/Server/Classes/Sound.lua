@@ -34,11 +34,11 @@ playSound = function(self)
     
     -- fetch sound data dynamically from current animation
     local soundTable = nil
-    if scene.currentAnimation then
+    if scene.AnimationData then
         if Helper.StringContainsOne(scene.entities[1], self.actor) then
-            soundTable = scene.currentAnimation.SoundTop
+            soundTable = scene.AnimationData.SoundTop
         else
-            soundTable = scene.currentAnimation.SoundBottom or scene.currentAnimation.SoundTop
+            soundTable = scene.AnimationData.SoundBottom or scene.AnimationData.SoundTop
         end
     end
     
@@ -48,9 +48,9 @@ playSound = function(self)
     Osi.PlaySound(self.actor, nothing) -- First, stop current sound
 
     if soundTable then
-        local sound = soundTable[math.random(1, #soundTable)]
-        if sound then
-            Osi.PlaySound(self.actor, sound)
+        self.Sound = soundTable[math.random(1, #soundTable)]
+        if self.Sound then
+            Osi.PlaySound(self.actor, self.Sound)
         end
     end
     
