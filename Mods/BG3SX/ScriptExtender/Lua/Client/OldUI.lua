@@ -63,7 +63,7 @@
 --         optionCheckBox.OnChange = function()
 --             if optionCheckBox.Checked == true then
 --                 content.val = true
---                 --Ext.Net.SendMessageToServer("BG3SX_" .. option, "") -- Setting this to true means we need to be able to show 
+--                 --Ext.Net.SendMessageToServer("BG3SX_" .. option, "") -- Setting this to true means we need to be able to show
 --             else
 --                 content.val = false
 --             end
@@ -81,12 +81,12 @@
 -- local genitals = {}
 -- function UI.GetUIGenitals()
 --     return genitals
---     -- TODO - send request for genitals to server. 
+--     -- TODO - send request for genitals to server.
 --     -- include currently controlled entity
 -- end
 -- local function OnSessionLoaded()
 
---     -- TODO SKIZ 
+--     -- TODO SKIZ
 --     -- The inactive and active gential labels can be populated by
 --     -- calling SexUserVars.GetGenital("BG3SX_OutOfSexGenital", uuid) and SexUserVars.GetGenital("BG3SX_SexGenital", uuid)
 
@@ -139,7 +139,7 @@
 --         local genitalTable = tab:AddTable("",1)
 --         local genitalArea = genitalTable.AddRow():AddCell()
 --         genitalTable.SizingStretchProp = true
-    
+
 --         for mod,content in pairs(genitals) do
 --             local modHeader = genitalArea:AddCollapsingHeader(tostring(mod))
 --             modHeader.DefaultOpen = false
@@ -186,7 +186,7 @@
 -- }
 -- function UI.CreateSexControls(tBar)
 --     local tab = tBar:AddTabItem("Sex")
-    
+
 --     local noSceneTable = tab:AddTable("",1)
 --     local sceneTable = tab:AddTable("",1)
 --     table.insert(sceneTables, noSceneTable)
@@ -242,7 +242,7 @@
 --     --charTable.Borders = true
 --     local row = charTable.AddRow()
 --     local size = {100,100}
---     local tName = Ext.Loca.GetTranslatedString(character.DisplayName.NameKey.Handle.Handle)
+--     local tName = Locale.GetTranslatedString(character.DisplayName.NameKey.Handle.Handle)
 --     local characterButton
 --     local foundOrigin = false
 --     for uuid,origin in pairs(Data.Origins) do
@@ -297,7 +297,7 @@
 -- local function createModTab(tab)
 --     local dev = UI.CreateDevMode(tab)
 --     local characters = UI.CreateCharacterTable(tab)
-    
+
 --     tab:AddSeparator("")
 
 --     local tBar = tab:AddTabBar("insertTabBarNameHere")
@@ -320,7 +320,7 @@
 --         return mouseover
 --     else
 --         _P("[BG3SX] Not a viable mouseover!")
---     end 
+--     end
 -- end
 
 -- local function getUUIDFromUserdata(mouseover)
@@ -351,4 +351,3 @@
 -- --        end
 -- --    end
 -- --end)
-

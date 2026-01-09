@@ -51,14 +51,14 @@ function FAQTab:New(holder)
     if UI.FAQTab then return end -- Fix for infinite UI repopulation
 
     local instance = setmetatable({
-        Tab = holder:AddTabItem(Ext.Loca.GetTranslatedString("h96a223099d1e4ef6bdcf0b9caf5fcbbdc4cc", "FAQ")),
+        Tab = holder:AddTabItem(Locale.GetTranslatedString("h96a223099d1e4ef6bdcf0b9caf5fcbbdc4cc", "FAQ")),
     }, FAQTab)
     return instance
 end
 
 function FAQTab:Init()
     local faqGroup = self.Tab:AddGroup("FAQ")
-    faqGroup:AddSeparatorText(Ext.Loca.GetTranslatedString("h96a223099d1e4ef6bdcf0b9caf5fcbbdc4cc", "FAQ"))
+    faqGroup:AddSeparatorText(Locale.GetTranslatedString("h96a223099d1e4ef6bdcf0b9caf5fcbbdc4cc", "FAQ"))
 
     self:GenerateFAQText()
 
@@ -81,10 +81,10 @@ function FAQTab:GenerateFAQText()
     aBackup = faqData[i]["Abackup"]
 
     if not self.questionHeader then
-        self.questionHeader = self.Tab:AddCollapsingHeader((Ext.Loca.GetTranslatedString(qText, qBackup)))
+        self.questionHeader = self.Tab:AddCollapsingHeader((Locale.GetTranslatedString(qText, qBackup)))
     end
 
-    self.questionHeader:AddText(Ext.Loca.GetTranslatedString(aText, aBackup))
+    self.questionHeader:AddText(Locale.GetTranslatedString(aText, aBackup))
 
     if faqData[i]["hasLink"] ~= nil then
         -- implement link if found

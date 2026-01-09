@@ -13,6 +13,7 @@ Ext.Require("Shared/Utils/NOsi.lua")
 -- Initialize Utilities
 Ext.Require("Shared/Utils/Math.lua")
 Ext.Require("Shared/Utils/Table.lua")
+Ext.Require("Shared/Utils/Locale.lua")
 Ext.Require("Shared/Utils/Visual.lua")
 Ext.Require("Shared/Utils/Shapeshift.lua")
 Ext.Require("Shared/Utils/Entity.lua")

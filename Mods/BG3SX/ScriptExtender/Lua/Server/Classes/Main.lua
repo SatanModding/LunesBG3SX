@@ -170,6 +170,6 @@ end)
 
 -- Ext.Entity.Subscribe("GameObjectVisual", function(entity, _, _)
 --     local GOV = entity.GameObjectVisual
---     _D(Ext.Loca.GetTranslatedString(Ext.Entity.Get(Ext.Entity.HandleToUuid(entity)).DisplayName.NameKey.Handle.Handle))
+--     _D(Locale.GetTranslatedString(Ext.Entity.Get(Ext.Entity.HandleToUuid(entity)).DisplayName.NameKey.Handle.Handle))
 --     _P(GOV.Type) -- This is for testing
 -- end)

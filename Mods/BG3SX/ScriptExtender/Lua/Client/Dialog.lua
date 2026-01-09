@@ -80,7 +80,7 @@ function TimelineManager:LoadTimeline(uuid, node)
     if node then
         assert(type(node) == "number", "[BG3SX] TimelineManager:LoadTimeline - Node is not a number")
     end
-    
+
     self.CurrentDialog = self.Timelines[uuid]
     self:GoTo(node)
     -- self.CurrentDialog.Timer
@@ -111,7 +111,7 @@ function TimelineManager:UpdateDialogContent(dialogUuid)
         t.SizingStretchSame = true
         return t
     end
-    
+
     local function newRow()
         local row = t:AddRow()
         row:AddCell() -- Add empty cell to center align the next one
@@ -124,7 +124,7 @@ function TimelineManager:UpdateDialogContent(dialogUuid)
         local row
         for i,node in ipairs(timelineNode) do
             if node.Flags then
-                
+
             end
             local function callNodeData(nodeData)
                 for _,call in ipairs(node.Data) do
@@ -217,7 +217,7 @@ local testTimeline = {
         [1] = {
             ["Flags"] = "",
             ["Data"] = {
-                {Type = "Text", Text = Ext.Loca.GetTranslatedString("","Greetings!")},
+                {Type = "Text", Text = Locale.GetTranslatedString("","Greetings!")},
                 {Type = "Wait", Time = 1,
                     {Type = "Text", Text = "Bye World"},
                     {Type = "Wait", Time = 2,
