@@ -95,7 +95,6 @@ function SceneControlInstance:Destroy(backToServer)
 
     self.Reference:Destroy() -- Delete SceneTab Reference Imgui Element
     self.Reference = nil -- Set to nil for NoSceneText update
-    UI.SceneTab:UpdateNoSceneText()
     -- Event.RequestSyncActiveScenes:SendToServer()
 
     for componentName,component in pairs(self) do
@@ -130,7 +129,11 @@ function SceneControlInstance:Initialize()
     self.Animations = {}
     self.AnimationPicker = {}
 
+    -- Buttons
     self:CreateAnimationControlArea()
+
+    -- Changes to SceneTab
+    UI.SceneTab:HideNoSceneText()
     self:CreateSceneTabReference()
 end
 
@@ -730,6 +733,8 @@ function SceneControlInstance:UpdateAnimationPicker()
 
     Debug.USEPREFIX = debugbefore
 end
+
+
 
 -- function SceneControl:AddMoveControl()
 --     self.Transform = {}

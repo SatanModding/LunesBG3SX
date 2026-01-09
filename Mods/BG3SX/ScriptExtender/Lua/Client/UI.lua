@@ -66,13 +66,12 @@ function UI:Init()
     self.SceneTab = SceneTab:New(self.TabBar)
     self.AppearanceTab = AppearanceTab:New(self.TabBar)
     self.WhitelistTab = WhitelistTab:New(self.TabBar)
-    self.WhitelistTab.Tab.Visible = false
+    -- self.WhitelistTab.Tab.Visible = false
     self.NPCTab = NPCTab:New(self.TabBar)
     self.SettingsTab = SettingsTab:New(self.TabBar)
     self.FAQTab = FAQTab:New(self.TabBar)
     self.DebugTab = DebugTab:New(self.TabBar)
-    self.DebugTab.Tab.Visible = false
-
+    -- self.DebugTab.Tab.Visible = false
 
     self.NPCTab:FetchAllNPCs()
 
@@ -83,7 +82,6 @@ function UI:Init()
     self.SettingsTab:Init()
     self.FAQTab:Init()
     self.DebugTab:Init()
-
 
     self.SceneControl = SceneControl:Init()
     self.ConsentControl = ConsentControl:Init()

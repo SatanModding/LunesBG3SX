@@ -92,27 +92,35 @@ function SceneTab:AwaitNewScene(type)
     end
 end
 
-function SceneTab:UpdateNoSceneText()
-    -- print("updating")
-    local stillOneActive
-    -- print("elf.ActiveSceneControls? " ,self.ActiveSceneControls )
-    if self.ActiveSceneControls then
-        -- print("size of active scene ", #self.ActiveSceneControls)
-        for _,sceneControl in pairs(self.ActiveSceneControls) do
-            if sceneControl.Reference then
-                -- print("Reference still exists ")
-                stillOneActive = true
-            end
-        end
-    end
-    if stillOneActive then
-        self.NoSceneText.Visible = false -- Keep it hidden
-        self.ActiveScenesSeparator.Visible = true
-    else
-        self.ActiveScenesSeparator.Visible = false
-        -- self.NoSceneText.Visible = true -- Show it again -> Showing it again moved to settings tab
-    end
+function SceneTab:HideNoSceneText() -- Replacement for UpdateNoSceneText
+    self.NoSceneText.Visible = false
+    self.ActiveScenesSeparator.Visible = true
+    UI.SettingsTab.NoSceneTextCheckbox.OnChange(false) -- Ensure Settings tab checkbox is unchecked and its callback is fired to update LocalSettings
 end
+
+-- function SceneTab:UpdateNoSceneText()
+--     -- print("updating")
+--     local stillOneActive
+--     -- print("elf.ActiveSceneControls? " ,self.ActiveSceneControls )
+--     if self.ActiveSceneControls then
+--         -- print("size of active scene ", #self.ActiveSceneControls)
+--         for _,sceneControl in pairs(self.ActiveSceneControls) do
+--             if sceneControl.Reference then
+--                 -- print("Reference still exists ")
+--                 stillOneActive = true
+--             end
+--         end
+--     end
+--     if stillOneActive then
+--         self.NoSceneText.Visible = false -- Keep it hidden
+--         self.ActiveScenesSeparator.Visible = true
+--         UI.SettingsTab.NoSceneTextCheckbox.OnChange(false) -- Ensure Settings tab checkbox is unchecked and its callback is fired to update LocalSettings
+--     else
+--         -- self.ActiveScenesSeparator.Visible = false
+--         -- self.NoSceneText.Visible = true -- Show it again -> Showing it again moved to settings tab
+--         -- Commented out since adding LocalSettings, basically HideNoSceneText() now
+--     end
+-- end
 
 function SceneTab:DisableSceneButtons()
     self.NewSceneEligible = false

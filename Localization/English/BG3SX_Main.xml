@@ -78,7 +78,7 @@
     <content contentuid="ha5a309de2e9542b2999d70313cf9455ab451" version="1">Show all animations regardless of scene type</content>
         <!-- SceneTab Settings -->
         <content contentuid="h0388b3f9379841729a475c3b264d4cc96622" version="1">Scene Tab Settings</content>
-        <content contentuid="h1e4d1ff989ab4d5b9aedfe5d67d4b25cba8e" version="1">Show 'How To' again</content>
+        <content contentuid="h1e4d1ff989ab4d5b9aedfe5d67d4b25cba8e" version="1">Show 'How To'</content>
         <!-- NPCTab Settings -->
         <content contentuid="hb21edb40a9044ddcb50f2557b6a00ae27933" version="1">NPC Tab Settings</content>
         <content contentuid="hb2022efb943c40ee8e6a8bb9f354eb308d46" version="1">Automatic NPC Scan</content>
@@ -185,4 +185,5 @@
 	<content contentuid="h2ca5ef2dg7f68g40dbg8c8dg05fd895a39b1" version="1">Finger</content>
 	<content contentuid="hb32715942ed4499b9ef6a288a729b0483578" version="1">Astarion Thrusting</content>
 
+    <content contentuid="h1539e8a9f0294d5194d3ef49318e2874bcc4" version="1">Addon Settings</content>
 </contentList>
