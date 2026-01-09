@@ -1,8 +1,8 @@
--- 
+--
 -------------------------------------------------------------------------------------------------------
 -- 	                        All purpose Visual maipualation
 --
--- 
+--
 ---------------------------------------------------------------------------------------------------------
 
 
@@ -15,19 +15,19 @@ end
 
 
 
---[[                                                     
-                     #@%%%%%%%%%%%%#    %%%%%%%%%%%%%        
-                %%%%#****##***####**#%#********######*#%%%%  
+--[[
+                     #@%%%%%%%%%%%%#    %%%%%%%%%%%%%
+                %%%%#****##***####**#%#********######*#%%%%
              #%%#***##=*%=@@@@+.....-*#****+-*@-#@@@#..:+#%@@
            #%#***##:..+@@@@+.%@=.......@+...-@@%@#:%@*.....-@
          %%*****%-....*@@@@@@@@+......+:....=@@@@@@@@*.....#%
-       @#*********##:.:%@@@@@@=.....-##=.....#@@@@@@=..:+#%@ 
-     @%***************####**++*####******#############**%@   
-   @@#*******%#****#%%%#********************************@    
- @@#********#%*************###%###*****************##%%#*#@  
-@%*************%%#****###************############********%@  
-#*****************#%%#********####*****************####%#@@  
-***********************##%%#***************************##*@@ 
+       @#*********##:.:%@@@@@@=.....-##=.....#@@@@@@=..:+#%@
+     @%***************####**++*####******#############**%@
+   @@#*******%#****#%%%#********************************@
+ @@#********#%*************###%###*****************##%%#*#@
+@%*************%%#****###************############********%@
+#*****************#%%#********####*****************####%#@@
+***********************##%%#***************************##*@@
 *****************************##%%%%%%######**********%%#**#@%
 ***********************************************************#@
 ********************************%###%#**********************%
@@ -50,34 +50,34 @@ end
 
 
 -------------------------------------------------------------------------------------------------------
---		 
---		 	                            NOsi version of Osi functions 
+--
+--		 	                            NOsi version of Osi functions
 --					        Faster and less flickering since they are not replicated
 --		 			 -> Have to call the Visual.Replicate function after all changes are done
 --		 			Supports Visual manipulation of Shapeshifted entitys/NPCs out of the box
 --						   		-> Necessary for Appearance Edit Enhanced
---	
+--
 --										"This is my Opus Magnum - https://i.imgur.com/WzVilXP.png"
 --                                         - Satan, 31.December 2024
---        
+--
 --                                      "WTF"
 --                                         - Skiz, 01. January, 2025
---		
+--
 ---------------------------------------------------------------------------------------------------------
 
 
 -- When using the "Better" functions, replication has to be called manuall
--- This reduces flickering when adding multiple visuals at once 
--- If a lot of changes are made, especially when having to add components to 
+-- This reduces flickering when adding multiple visuals at once
+-- If a lot of changes are made, especially when having to add components to
 -- shapeshifted entitys, sometimes a timer before replication is necessary
----@param entity EntityHandle 
+---@param entity EntityHandle
 ---@param delay number|nil -- numer in ms
 function Visual.Replicate(entity, delay)
 
 	delay = delay or nil
 
     local function func()
-        
+
         entity:Replicate("CharacterCreationAppearance")
         entity:Replicate("GameObjectVisual")
     end
@@ -132,13 +132,13 @@ end
 
 
 -- adds a whole list of visuals with Osi.AddCustomVisualOverride for convenience
----@param entity EntityHandle  
----@param listToAdd table 
+---@param entity EntityHandle
+---@param listToAdd table
 function Visual.AddListOfVisuals(entity, listToAdd)
-  
+
     if listToAdd then
 
-        if Shapeshift.IsShapeshifted(entity) then 
+        if Shapeshift.IsShapeshifted(entity) then
             Shapeshift.MakeEditable(entity)
             Shapeshift.AddListOfVisuals(entity, listToAdd)
             Shapeshift.RevertEditability(entity, 0)
@@ -152,13 +152,13 @@ end
 
 
 -- removes a whole list of visuals for convenience
----@param entity EntityHandle 
----@param listToRemove table 
+---@param entity EntityHandle
+---@param listToRemove table
 function Visual.RemoveListOfVisuals(entity, listToRemove)
 
     if listToRemove then
 
-        if Shapeshift.IsShapeshifted(entity) then 
+        if Shapeshift.IsShapeshifted(entity) then
             Shapeshift.MakeEditable(entity)
             Shapeshift.RemoveListOfVisuals(entity, listToRemove)
             Shapeshift.RevertEditability(entity, 0)
@@ -180,7 +180,7 @@ function Visual.GetAllVisuals(entity)
     -- if they don't have a CCA entry, they are an NPC and need to have one created
     local cca = Helper.GetPropertyOrDefault(entity,"CharacterCreationAppearance", nil)
 
-    if Shapeshift.IsShapeshifted(entity) then 
+    if Shapeshift.IsShapeshifted(entity) then
         return Shapeshift.GetAllVisuals(entity)
     else
 
@@ -194,9 +194,9 @@ end
 
 
 ----------------------------------------------------------------------------------------------------
--- 
+--
 -- 									Visual Type Identification
--- 
+--
 ----------------------------------------------------------------------------------------------------
 
 -- Get type of uuid
@@ -215,14 +215,14 @@ function Visual.getType(uuid)
 end
 
 ----------------------------------------------------------------------------------------------------
--- 
+--
 -- 									Get the cumulated information
--- 
+--
 ----------------------------------------------------------------------------------------------------
 
 -- Get all visuals of one type for an entity with their names
 ---@param type			string	        - The visual type (ex: Private Parts)
----@param entity		EntityHandle	
+---@param entity		EntityHandle
 ---@param visualType	string	        - "CharacterCreationAppearanceVisual" or "CharacterCreationSharedVisual"
 ---@param filter        boolean         - Whether to filter for bodytype, bodyshape, race
 ---@return table		                - List of entityCreationAppearaceVisual IDs for all Visual
@@ -248,10 +248,10 @@ function Visual.getAllVisualsWithName(type,entity, filter)
 end
 
 ----------------------------------------------------------------------------------------------------
--- 
+--
 -- 									Static Data Handling
 -- 				        read information saved in xml files from game
--- 
+--
 ----------------------------------------------------------------------------------------------------
 
 
@@ -295,16 +295,16 @@ end
 
 
 ----------------------------------------------------------------------------------------------------
--- 
--- 				                     Entity Visuals 
--- 
+--
+-- 				                     Entity Visuals
+--
 ----------------------------------------------------------------------------------------------------
 
 
 function Visual.HasCharacterCreationStats(entity)
 
     local E = Helper.GetPropertyOrDefault(entity,"CharacterCreationStats", nil)
-    
+
 	if E then
 		return true
     else
@@ -316,7 +316,7 @@ end
 function Visual.HasCharacterCreationAppearance(entity)
 
     local E = Helper.GetPropertyOrDefault(entity,"CharacterCreationAppearance", nil)
-    
+
 	if E then
 		return true
     else
@@ -335,7 +335,7 @@ function Visual.getEntityProperties(entity)
 
 	local bt =  entity.BodyType.BodyType
     local bs = 0
-    
+
 	if Visual.HasCharacterCreationStats(entity) then
 		bs = entity.CharacterCreationStats.BodyShape
 	end
@@ -351,7 +351,7 @@ function Visual.getEntityProperties(entity)
 		end
 	end
 
-	
+
 	if not Data.BodyLibrary.Races[race] then
 		race = human
 	end
@@ -388,12 +388,12 @@ local function tableContainsNameAlready(tableOfGenitals, genital)
 				return true
 			end
 		end
-	return false	
+	return false
 end
 
 
 -- Get all allowed Visual for entity (Ex: all vulva for human)
----@param entity EntityHandle	 
+---@param entity EntityHandle
 ---@param allVisual table       - table of all visuals to filter
 ---@param visualType string     - "CharacterCreationAppearanceVisual" or "CharacterCreationSharedVisual"
 ---@param filter boolean  	    - whether to filter for bodytype, bodyshape, race - false disables race filter
@@ -437,7 +437,7 @@ function Visual.getPermittedVisual(entity, allVisual, visualType, filter, usePar
                 if not tableContainsNameAlready(permittedVisual, visual) then
                     table.insert(permittedVisual, visual)
                 end
-                
+
             else
 			    table.insert(permittedVisual, visual)
             end
@@ -445,7 +445,7 @@ function Visual.getPermittedVisual(entity, allVisual, visualType, filter, usePar
     end
 
 	-- TODO - only for genitals
-    -- TODO - Clean up 
+    -- TODO - Clean up
     -- Some lazy filtering to filter out default Visual (for genitals only)
 
     local result = {}
@@ -478,12 +478,12 @@ end
 
 
 -- Get the current Visual of the entity of a specific type
----@param entity EntityHandle 	   	
+---@param entity EntityHandle
 ---@param type string 	   	     - The visual type (ex: Private Parts)
 ---@param visualType string      - "CharacterCreationAppearanceVisual" or "CharacterCreationSharedVisual"
 ---@return table			     - table of IDs of entityCreationAppearaceVisual
 function Visual.getCurrentVisualOfType(entity, type, visualType)
-    
+
 	local currentVisual = Visual.getCurrentVisual(entity)
 	local VisualOfType = Visual.getAllVisualsOfType(type, visualType)
 
@@ -502,9 +502,9 @@ function Visual.getCurrentVisualOfType(entity, type, visualType)
 end
 
 ----------------------------------------------------------------------------------------------------
--- 
+--
 -- 									Transformations
--- 
+--
 ----------------------------------------------------------------------------------------------------
 
 
@@ -520,7 +520,7 @@ function Visual.GiveVisualComponentIfHasNone(entity)
 end
 
 -- Override the current Visual with the new one
----@param newVisual	string          - ID of entityCreationAppearaceVisual 
+---@param newVisual	string          - ID of entityCreationAppearaceVisual
 ---@param type string               - ex: PrivateParts
 ---@param entity EntityHandle 	    - uuid of entity that will receive the Visual
 function Visual.overrideVisual(newVisual, entity, type)
@@ -556,7 +556,7 @@ function Visual.overrideVisual(newVisual, entity, type)
             Shapeshift.RevertEditability(entity,200)
         end
         Visual.BetterAddVisualOverride(entity, newVisual)
-	end 
+	end
 
 
     return entity.CharacterCreationAppearance.Visuals
@@ -564,7 +564,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------------------------
 --
---                                         Visual Set Slots 
+--                                         Visual Set Slots
 --                                  Those are the ones for NPCs
 --
 ---------------------------------------------------------------------------------------------------------------------------
@@ -610,7 +610,7 @@ function Visual.removeVisualSetSlot(entity, uuid)
 
         if  entry.VisualResource == uuid then
             entry.VisualResource = ""
-            
+
             table.insert(removed, {uuid = entry.VisualResource, index = i})
         end
     end
@@ -650,7 +650,7 @@ function Visual.addVisualSetSlot(entity, toBeAdded)
     for i, entry in pairs(slots) do
         for _, tba in pairs(toBeAdded) do
 
-            if i == tba.index  then 
+            if i == tba.index  then
                 entry.VisualResource = tba.uuid
             end
         end

@@ -12,9 +12,9 @@ AppearanceTab.__index = AppearanceTab
 ---@param holder ExtuiTabBar
 function AppearanceTab:New(holder)
     if UI.AppearanceTab then return end -- Fix for infinite UI repopulation
-    
+
     local instance = setmetatable({
-        Tab = holder:AddTabItem(Ext.Loca.GetTranslatedString("h36809485096e467682a34b1a780bb4a4a816", "Appearance")),
+        Tab = holder:AddTabItem(Locale.GetTranslatedString("h36809485096e467682a34b1a780bb4a4a816", "Appearance")),
         GenitalsLoaded = nil,
         Genitals = {},
     }, AppearanceTab)
@@ -29,8 +29,8 @@ function AppearanceTab:UpdateStrippingGroup(uuid)
     local entity = Ext.Entity.Get(uuid)
     local stripping = SexUserVars.GetAllowStripping(entity)
 
-    local allowStripBox = self.StrippingArea:AddCheckbox(Ext.Loca.GetTranslatedString("hd050a087bef04ed4b4b8c775b458b6c2d786", "Allow Stripping"))
-    
+    local allowStripBox = self.StrippingArea:AddCheckbox(Locale.GetTranslatedString("hd050a087bef04ed4b4b8c775b458b6c2d786", "Allow Stripping"))
+
     if (stripping == false) then
 
         allowStripBox.Checked = false
@@ -49,7 +49,7 @@ end
 
 function AppearanceTab:UpdateToggleVisibilityGroup(uuid)
     UI.DestroyChildren(self.ToggleVisibilityArea)
-    self.ToggleInvisButton = self.ToggleVisibilityArea:AddButton(Ext.Loca.GetTranslatedString("h2080108a2c8d4e509be9b53c2421a1c4eb95", "Toggle Invisibility"))
+    self.ToggleInvisButton = self.ToggleVisibilityArea:AddButton(Locale.GetTranslatedString("h2080108a2c8d4e509be9b53c2421a1c4eb95", "Toggle Invisibility"))
     self.ToggleInvisButton.OnClick = function()
         Event.ToggleInvisibility:SendToServer(uuid)
     end
@@ -69,7 +69,7 @@ function AppearanceTab:UpdateEquipmentAreaGroup(uuid)
 
     if IsNPC(entity) then
         local npcTab = UI.NPCTab
-        self.StripButton = self.EquipmentArea:AddButton(Ext.Loca.GetTranslatedString("h5217dc9e84404c68a890c1b21fb1b22dca33", "Strip NPC"))
+        self.StripButton = self.EquipmentArea:AddButton(Locale.GetTranslatedString("h5217dc9e84404c68a890c1b21fb1b22dca33", "Strip NPC"))
 
         self.StripButton.OnClick = function()
             -- print("Strip NPC button clicked")
@@ -77,7 +77,7 @@ function AppearanceTab:UpdateEquipmentAreaGroup(uuid)
         end
 
 
-        self.DressButton = self.EquipmentArea:AddButton(Ext.Loca.GetTranslatedString("h95893257756e4bacba737e735eb75c6ba1d0", "Dress NPC"))
+        self.DressButton = self.EquipmentArea:AddButton(Locale.GetTranslatedString("h95893257756e4bacba737e735eb75c6ba1d0", "Dress NPC"))
         self.DressButton.SameLine = true
 
         self.DressButton.OnClick = function()
@@ -86,7 +86,7 @@ function AppearanceTab:UpdateEquipmentAreaGroup(uuid)
         end
 
     end
-    
+
 end
 
 function AppearanceTab:Init()
@@ -108,7 +108,7 @@ function AppearanceTab:Init()
         self.EquipmentArea = self.Tab:AddGroup("")
     end
 
-    local sep = self.Tab:AddSeparatorText(Ext.Loca.GetTranslatedString("hfe5bebe645244c108b0fd82dcf10dcc22177", "Genitals"))
+    local sep = self.Tab:AddSeparatorText(Locale.GetTranslatedString("hfe5bebe645244c108b0fd82dcf10dcc22177", "Genitals"))
     sep:SetStyle("SeparatorTextPadding", 5)
     if not self.GenitalArea then
         self.GenitalArea = self.Tab:AddGroup("")
@@ -135,13 +135,13 @@ function AppearanceTab:UpdateGenitalGroup(whitelisted)
 
             -- Rename payload to regular names - TODO: Fix Payload
             if Category == "BG3SX_VanillaVulva" then
-                categoryHeader.Label = Ext.Loca.GetTranslatedString("h12336834b5e64857bed909e165f752393cfb", "Vanilla Vulvas")
+                categoryHeader.Label = Locale.GetTranslatedString("h12336834b5e64857bed909e165f752393cfb", "Vanilla Vulvas")
             elseif Category == "BG3SX_VanillaFlaccid" then
-                categoryHeader.Label = Ext.Loca.GetTranslatedString("hd0e090c89d924fa8ba6bfa2000ff8f479d8a", "Vanilla Penises")
+                categoryHeader.Label = Locale.GetTranslatedString("hd0e090c89d924fa8ba6bfa2000ff8f479d8a", "Vanilla Penises")
             elseif Category == "BG3SX_SimpleErections" then
-                categoryHeader.Label = Ext.Loca.GetTranslatedString("ha0ba5dd9dcc94acca77258ba6254decb3784", "MrFunsize Erections")
+                categoryHeader.Label = Locale.GetTranslatedString("ha0ba5dd9dcc94acca77258ba6254decb3784", "MrFunsize Erections")
             elseif Category == "BG3SX_OtherGenitals" then
-                categoryHeader.Label = Ext.Loca.GetTranslatedString("h7d29c52c0c6a4e7d8e2d284f0267b139f1ec", "Modded Genitals")
+                categoryHeader.Label = Locale.GetTranslatedString("h7d29c52c0c6a4e7d8e2d284f0267b139f1ec", "Modded Genitals")
             end
 
             local genitalTable = categoryHeader:AddTable("",3)
@@ -158,8 +158,8 @@ function AppearanceTab:UpdateGenitalGroup(whitelisted)
                     genitalSelectable.Selected = false
                     popup:Open()
                 end
-                local inactiveGenital = popup:AddSelectable(Ext.Loca.GetTranslatedString("h853bdaa4dd574d5ba209b0eaba549d338fcb", "Out of Sex"))
-                local activeGenital = popup:AddSelectable(Ext.Loca.GetTranslatedString("hc5ba36d8ac9f4317ae6df860da22f7a12ecf", "During Sex"))
+                local inactiveGenital = popup:AddSelectable(Locale.GetTranslatedString("h853bdaa4dd574d5ba209b0eaba549d338fcb", "Out of Sex"))
+                local activeGenital = popup:AddSelectable(Locale.GetTranslatedString("hc5ba36d8ac9f4317ae6df860da22f7a12ecf", "During Sex"))
 
                 -- local inactiveGenitalButton = categoryHeader:AddButton("Out of Sex")
                 -- local activeGenitalButton = categoryHeader:AddButton("During Sex")

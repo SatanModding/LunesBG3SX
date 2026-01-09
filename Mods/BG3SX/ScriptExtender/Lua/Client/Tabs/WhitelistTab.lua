@@ -8,20 +8,20 @@ function WhitelistTab:New(holder)
     if UI.WhitelistTab then return end -- Fix for infinite UI repopulation
 
     local instance = setmetatable({
-        Tab = holder:AddTabItem(Ext.Loca.GetTranslatedString("hd3dd6bc5609a4d65a7f71567e596dc84b81d", "Whitelist")),
+        Tab = holder:AddTabItem(Locale.GetTranslatedString("hd3dd6bc5609a4d65a7f71567e596dc84b81d", "Whitelist")),
     }, WhitelistTab)
     return instance
 end
 
 function WhitelistTab:Init()
-    local sep = self.Tab:AddSeparatorText(Ext.Loca.GetTranslatedString("h8d7363f07c894daebbe1cae4bcb177d31a7a", "(Read-only)" .. " " .. Ext.Loca.GetTranslatedString("h634beee9bd3c428ba795f8301c98efcd182b", "Tags of selected character")))
+    local sep = self.Tab:AddSeparatorText(Locale.GetTranslatedString("h8d7363f07c894daebbe1cae4bcb177d31a7a", "(Read-only)" .. " " .. Locale.GetTranslatedString("h634beee9bd3c428ba795f8301c98efcd182b", "Tags of selected character")))
     sep:SetStyle("SeparatorTextPadding", 5)
     self.IgnoredTags = {}
     self:FetchIgnoredTags()
-    self.UserTags = {Header = self.Tab:AddCollapsingHeader(Ext.Loca.GetTranslatedString("h294484a0821546e8ba2417eaf0917734bb7f", "Character Tags"))}
+    self.UserTags = {Header = self.Tab:AddCollapsingHeader(Locale.GetTranslatedString("h294484a0821546e8ba2417eaf0917734bb7f", "Character Tags"))}
     self.Whitelists = {}
     self:FetchUserTags()
-    local sep = self.Tab:AddSeparatorText(Ext.Loca.GetTranslatedString("h4d9b00350d494c55ba5b35ccdd087da5b7eg", "(Read-only)" .. " " .. Ext.Loca.GetTranslatedString("hd3dd6bc5609a4d65a7f71567e596dc84b81d", "Whitelist")))
+    local sep = self.Tab:AddSeparatorText(Locale.GetTranslatedString("h4d9b00350d494c55ba5b35ccdd087da5b7eg", "(Read-only)" .. " " .. Locale.GetTranslatedString("hd3dd6bc5609a4d65a7f71567e596dc84b81d", "Whitelist")))
     sep:SetStyle("SeparatorTextPadding", 5)
     self:FetchWhitelist()
 end
@@ -90,7 +90,7 @@ function WhitelistTab:UpdateUserTags(tags)
             local uuid = tagTreeNode:AddInputText("")
             uuid.Text = tag[1]
             uuid.SameLine = true
-            local allowedStatus = tagTreeNode:AddCheckbox(Ext.Loca.GetTranslatedString("h5d7e88852cba458eafea142236b0c484f366", "Allowed"))
+            local allowedStatus = tagTreeNode:AddCheckbox(Locale.GetTranslatedString("h5d7e88852cba458eafea142236b0c484f366", "Allowed"))
             allowedStatus.SameLine = true
             if self.Whitelists and Table.TableSize(self.Whitelists) > 0 then -- Only add an allowedStatus when WhitelistTab is found
                 local allowedOrNot = self:IsAllowed(name, tag[1])
@@ -105,7 +105,7 @@ function WhitelistTab:UpdateUserTags(tags)
                         local tooltipText = tooltip:AddText(self:GetReason(name))
                     else
                         local tooltip = allowedStatus:Tooltip()
-                        local tooltipText = tooltip:AddText(Ext.Loca.GetTranslatedString("hc3806d7f3689442aa912d9e6b79630401f82", "No reason provided"))
+                        local tooltipText = tooltip:AddText(Locale.GetTranslatedString("hc3806d7f3689442aa912d9e6b79630401f82", "No reason provided"))
                     end
                 end
             end
@@ -116,7 +116,7 @@ end
 -- Whitelist - Every entry also may have entry.racesUsingTag with multiple entries
 function WhitelistTab:GenerateWhitelist()
     if not self.WhitelistHeader then
-        self.WhitelistHeader = self.Tab:AddCollapsingHeader(Ext.Loca.GetTranslatedString("hd3dd6bc5609a4d65a7f71567e596dc84b81d", "Whitelist"))
+        self.WhitelistHeader = self.Tab:AddCollapsingHeader(Locale.GetTranslatedString("hd3dd6bc5609a4d65a7f71567e596dc84b81d", "Whitelist"))
     end
     table.sort(self.Whitelists.Whitelist)
     for TagName,Content in sortedPairs(self.Whitelists.Whitelist) do
@@ -155,7 +155,7 @@ end
 -- ModdedTags - Overrides entries of the whitelist
 function WhitelistTab:GenerateModdedWhitelist()
     if not self.ModdedTagsHeader then
-        self.ModdedTagsHeader = self.Tab:AddCollapsingHeader(Ext.Loca.GetTranslatedString("h6029330e765d4893a14efcead210d658442f", "Modded Entries"))
+        self.ModdedTagsHeader = self.Tab:AddCollapsingHeader(Locale.GetTranslatedString("h6029330e765d4893a14efcead210d658442f", "Modded Entries"))
         self.ModdedTagsHeader.Visible = false
     end
 
@@ -176,11 +176,11 @@ function WhitelistTab:GenerateModdedWhitelist()
                     if TagName ~= "KID" and TagName ~= "GOBLIN_KID" then
                         local tagTree = modTree:AddTree(tostring(TagName))
                         if Content.TAG then
-                            local uuid = tagTree:AddInputText(Ext.Loca.GetTranslatedString("he32917e42c83454c917746b578ca549ffebc", "Tag" .. ":"))
+                            local uuid = tagTree:AddInputText(Locale.GetTranslatedString("he32917e42c83454c917746b578ca549ffebc", "Tag" .. ":"))
                             uuid.Text = Content.TAG
                         end
                     if Content.Allowed ~= nil then
-                            local allowedStatus = tagTree:AddCheckbox(Ext.Loca.GetTranslatedString("h5d7e88852cba458eafea142236b0c484f366", "Allowed"))
+                            local allowedStatus = tagTree:AddCheckbox(Locale.GetTranslatedString("h5d7e88852cba458eafea142236b0c484f366", "Allowed"))
                             allowedStatus.SameLine = true
                             if Content.Allowed == true then
                                 allowedStatus.Checked = true
@@ -213,9 +213,9 @@ end
 -- Whitelisted Entities
 function WhitelistTab:GenerateWhitelistedEntities()
     if not self.WhitelistedEntitiesHeader then
-        self.WhitelistedEntitiesHeader = self.Tab:AddCollapsingHeader(Ext.Loca.GetTranslatedString("h75c1295a055b4ed1a3ec428e6b22b9816b57", "Whitelisted Entities"))
+        self.WhitelistedEntitiesHeader = self.Tab:AddCollapsingHeader(Locale.GetTranslatedString("h75c1295a055b4ed1a3ec428e6b22b9816b57", "Whitelisted Entities"))
     end
-    self.WhitelistedEntitiesHeader:AddText(Ext.Loca.GetTranslatedString("h88a6b2f946604c6a923ec3f7d926793a9103", "Only shows names of loaded entities"))
+    self.WhitelistedEntitiesHeader:AddText(Locale.GetTranslatedString("h88a6b2f946604c6a923ec3f7d926793a9103", "Only shows names of loaded entities"))
     local whitelistedEntitiesTable = self.WhitelistedEntitiesHeader:AddTable("",2)
 
     local entryByName = {}
@@ -241,9 +241,9 @@ end
 -- Blacklisted Entities
 function WhitelistTab:GenerateBlacklistedEntities()
     if not self.BlacklistedEntitiesHeader then
-        self.BlacklistedEntitiesHeader = self.Tab:AddCollapsingHeader(Ext.Loca.GetTranslatedString("h959acde23b834d4eae945f7dacee45028gf9", "Blacklisted Entities"))
+        self.BlacklistedEntitiesHeader = self.Tab:AddCollapsingHeader(Locale.GetTranslatedString("h959acde23b834d4eae945f7dacee45028gf9", "Blacklisted Entities"))
     end
-    self.BlacklistedEntitiesHeader:AddText(Ext.Loca.GetTranslatedString("h88a6b2f946604c6a923ec3f7d926793a9103", "Only shows names of loaded entities"))
+    self.BlacklistedEntitiesHeader:AddText(Locale.GetTranslatedString("h88a6b2f946604c6a923ec3f7d926793a9103", "Only shows names of loaded entities"))
     local blacklistedEntitiesTable = self.BlacklistedEntitiesHeader:AddTable("",2)
 
     local entryByName = {}
@@ -257,7 +257,7 @@ function WhitelistTab:GenerateBlacklistedEntities()
         end
     end
     table.sort(entryByName)
-    
+
     for name,entry in pairsByKeys(entryByName) do
         local row = blacklistedEntitiesTable:AddRow()
         local uuid = entry[1]

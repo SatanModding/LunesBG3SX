@@ -33,9 +33,9 @@ end
 function PartyInterface:Init()
     UI:RegisterSetting("PartyButtonSize",{100*ViewPortScale,100*ViewPortScale})
 
-    self.PartyArea = self.Wrapper:AddCollapsingHeader(Ext.Loca.GetTranslatedString("h9e956f29dc2c4233b14b0b07ac36c3f0d55c", "Party"))
+    self.PartyArea = self.Wrapper:AddCollapsingHeader(Locale.GetTranslatedString("h9e956f29dc2c4233b14b0b07ac36c3f0d55c", "Party"))
     self.PartyArea.DefaultOpen = true
-    self.NPCArea = self.Wrapper:AddCollapsingHeader(Ext.Loca.GetTranslatedString("h3d507f295c0b468ea6429b9b00c3c4ed2534", "NPCs"))
+    self.NPCArea = self.Wrapper:AddCollapsingHeader(Locale.GetTranslatedString("h3d507f295c0b468ea6429b9b00c3c4ed2534", "NPCs"))
     self.NPCArea.Visible = false
 
     -- Debug.Print("REQUESTING FETCHPARTY TO CLIENT WITH ID " .. USERID)
@@ -44,7 +44,7 @@ end
 
 function PartyInterface:UpdateParty()
     local previouslySelectedUuid = self.SelectedCharacter and self.SelectedCharacter.Uuid or nil
-    
+
     self.Characters = nil
     UI.DestroyChildren(self.PartyArea)
 
@@ -60,7 +60,7 @@ function PartyInterface:UpdateParty()
     local ownedAvatarCharacter = nil
     local firstSelectableCharacter = nil
     local previouslySelectedCharacter = nil
-    
+
     for i, character in ipairs(self.Party) do
         if i % maxTableWidth == 1 then
             row = t:AddRow()
@@ -74,14 +74,14 @@ function PartyInterface:UpdateParty()
             if previouslySelectedUuid and Helper.StringContains(newCharacter.Uuid, previouslySelectedUuid) then
                 previouslySelectedCharacter = newCharacter
             end
-            
+
             local canBeSelected = self:CanBeSelectedAsCaster(newCharacter.Uuid)
-            
+
             -- Check if this is the current user's owned avatar (not an NPC)
             if canBeSelected and not Entity:IsNPC(newCharacter.Uuid) then
                 local entity = Ext.Entity.Get(newCharacter.Uuid)
                 local currentUserEntity = Ext.Entity.Get(USERID)
-                
+
                 if entity and entity.UserReservedFor and entity.UserReservedFor.UserID and
                    currentUserEntity and currentUserEntity.UserReservedFor and currentUserEntity.UserReservedFor.UserID then
                     if entity.UserReservedFor.UserID == currentUserEntity.UserReservedFor.UserID then
@@ -89,14 +89,14 @@ function PartyInterface:UpdateParty()
                     end
                 end
             end
-            
+
             -- First selectable character as fallback
             if not firstSelectableCharacter and canBeSelected then
                 firstSelectableCharacter = newCharacter
             end
         end
     end
-    
+
     -- Priority: previously selected (if still valid) > owned avatar > first selectable character
     if previouslySelectedCharacter and self:CanBeSelectedAsCaster(previouslySelectedCharacter.Uuid) then
         self:SetSelectedCharacter(previouslySelectedCharacter.Uuid)
@@ -148,7 +148,7 @@ function UI:SelectedCharacterUpdates(character)
         self:InputRecieved(character.Uuid)
     else
         if not self.PartyInterface:CanBeSelectedAsCaster(character.Uuid) then
-            self:DisplayInfoText(Ext.Loca.GetTranslatedString("h9f152ef66db44370a071fa550c420f29247c", "You can only control your own characters as initiators"), 3000)
+            self:DisplayInfoText(Locale.GetTranslatedString("h9f152ef66db44370a071fa550c420f29247c", "You can only control your own characters as initiators"), 3000)
             return
         end
 
@@ -245,7 +245,7 @@ function PartyInterface:AddCharacter(parent, uuid)
                 if self:CanBeSelectedAsCaster(instance.Uuid) then
                     UI:SelectedCharacterUpdates(instance)
                 else
-                    UI:DisplayInfoText(Ext.Loca.GetTranslatedString("h9f152ef66db44370a071fa550c420f29247c", "You can only control your own characters as initiators"), 3000)
+                    UI:DisplayInfoText(Locale.GetTranslatedString("h9f152ef66db44370a071fa550c420f29247c", "You can only control your own characters as initiators"), 3000)
                 end
             end
         end
@@ -301,13 +301,13 @@ function PartyInterface:AddNPC(parent, uuid)
             end
         end
 
-        local selectNPC = instance.Popup:AddSelectable(Ext.Loca.GetTranslatedString("h2a86e31d7ec34b7490ead80f174354da5726", "Select"))
+        local selectNPC = instance.Popup:AddSelectable(Locale.GetTranslatedString("h2a86e31d7ec34b7490ead80f174354da5726", "Select"))
         selectNPC.OnClick = function()
             selectNPC.Selected = false
             UI:SelectedCharacterUpdates(instance)
         end
 
-        local removeNPC = instance.Popup:AddSelectable(Ext.Loca.GetTranslatedString("hbf2bfd2e408c493d9580e1fa08b7782d502g", "Remove"))
+        local removeNPC = instance.Popup:AddSelectable(Locale.GetTranslatedString("hbf2bfd2e408c493d9580e1fa08b7782d502g", "Remove"))
         removeNPC.OnClick = function()
             removeNPC.Selected = false
             -- instance.Popup:Close()

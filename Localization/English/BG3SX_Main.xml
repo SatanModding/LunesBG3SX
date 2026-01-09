@@ -86,7 +86,7 @@
         <!-- Credits -->
         <content contentuid="hd1aa350cf2bf4942b9be983b18920e88g247" version="1">Credits</content>
         <content contentuid="h554123bc72a54633ad9d1768c065e80d4431" version="1">This mod was created with a lot of help by the amazing BG3 Modding Community,but we would like to thank a few contributors specifically:</content>
-        <content contentuid="h89d4bb3b5a474a2b80143206bfeb07821c8a" version="1">Contributors: kit, ltpitb, baeator, Aahz, Volitio, Lunisole, LaughingLeader, Norbyte</content>
+        <content contentuid="h89d4bb3b5a474a2b80143206bfeb07821c8a" version="1">Contributors: kit, ltpitb, baeator, Aahz, Volitio, Velvy, Lunisole, LaughingLeader, Norbyte</content>
         <content contentuid="h2f2930940303487eb3355ef98472ddcdg8d0" version="1">If you would like to contribute, please join our Discord server:</content>
 
     <!-- Debug -->
@@ -136,7 +136,7 @@
 
 	<content contentuid="h8649d899g2704g4ca5gae5bgcb08b6857d42" version="1">Switch Places</content>
 	<content contentuid="hb918558bg3115g4475g968agc318a2bd6852" version="1">Switch the places of the top/bottom actors of the scene.</content>
-	
+
 	<content contentuid="h8cc6d8e0ga472g4b25gb556g7ab2e08e6149" version="2">Move Scene</content>
 	<content contentuid="h3ae22e3ag2aeag4d6ag8fbcgd9c4215cc7ec" version="2">Teleports the scene to a chosen location.</content>
 
@@ -163,7 +163,7 @@
     <content contentuid="h2b093b5fbc9642129d9bd335e1701c9b284c" version="1">If this is active, the entity will not strip</content>
 
 <!-- Passives -->
-    <content contentuid="h1cbdf6f6af2b42b086b8c3626eaa5bc09f37" version="1">Toggle Stripping On/Off</content> 
+    <content contentuid="h1cbdf6f6af2b42b086b8c3626eaa5bc09f37" version="1">Toggle Stripping On/Off</content>
 	<content contentuid="h6183f539gad38g4948g89fdgf93b87c288ec" version="1">Stripping Blocked</content>
 	<content contentuid="h5b7303dfgde02g417dgbb26g0843d58ebef4" version="1">If enabled, prevents stripping of a character before a scene.</content>
 

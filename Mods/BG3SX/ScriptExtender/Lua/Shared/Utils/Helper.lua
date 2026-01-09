@@ -118,7 +118,7 @@ function Helper.GetEntityName(e)
     if e.CustomName ~= nil then
         return e.CustomName.Name
     elseif e.DisplayName ~= nil then
-        return Ext.Loca.GetTranslatedString(e.DisplayName.NameKey.Handle.Handle)
+        return Locale.GetTranslatedString(e.DisplayName.NameKey.Handle.Handle)
     elseif e:HasRawComponent("ls::TerrainObject") then
         return "Terrain"
     elseif e.GameObjectVisual ~= nil then
@@ -191,7 +191,7 @@ end
 
 
 -- Destroys a marker
----@param marker    string  - The Marker UUID to destroy 
+---@param marker    string  - The Marker UUID to destroy
 function Helper.DestroyMarker(marker)
     Osi.RequestDelete(marker) -- Check if we don't need Osi.RequestDeleteTemporary
 end
@@ -396,7 +396,7 @@ function Helper.StringToTable(str)
 end
 
 function Helper.GetName(uuid)
-    local translate = Ext.Loca.GetTranslatedString
+    local translate = Locale.GetTranslatedString
     local entity = Ext.Entity.Get(uuid)
     local displayName
 
@@ -671,6 +671,3 @@ function Helper.SatanSync(entity, componentPath, newValue)
     local payload = Ext.Json.Stringify({uuid = uuid, componentPath = componentPath, newValue = newValueButAsTable})
     Event.SatanSync:Broadcast(payload)
 end
-
-
-

@@ -143,7 +143,7 @@ function SceneControlInstance:AdjustPositionOnSpawn()
     -- baseX = clamp(baseX, 0, ViewPort[1] - self.OriginalSize[1])
     -- baseY = clamp(baseY, 0, ViewPort[2] - self.OriginalSize[2])
     -- self.OriginalPosition = {baseX, baseY}
-    
+
     -- local activeSC = UI.SceneControl.ActiveSceneControls
     -- if #activeSC == 0 then
     --     self.Window:SetPos(self.OriginalPosition)
@@ -162,7 +162,7 @@ function SceneControlInstance:AdjustPositionOnSpawn()
     baseX = clamp(baseX, 0, ViewPort[1] - self.OriginalSize[1])
     baseY = clamp(baseY, 0, ViewPort[2] - self.OriginalSize[2])
     self.OriginalPosition = {baseX, baseY}
-    
+
     local activeSC = UI.SceneControl.ActiveSceneControls
     local scCount = #activeSC
     local posX = clamp(baseX - 15 + (15 * scCount), 0, ViewPort[1] - self.OriginalSize[1])
@@ -188,8 +188,8 @@ function SceneControlInstance:CreateSceneTabReference()
     local refGroup = UI.SceneTab.Tab:AddGroup("")
     local popup = refGroup:AddPopup(self.Window.Label)
     local ref = refGroup:AddSelectable(self.Scene.Type .. " Scene: " .. self.Window.Label)
-    local openButton = popup:AddSelectable(Ext.Loca.GetTranslatedString("hc1eac3710fc548f6bc1899bddbe872153404", "Open Scene Control"))
-    local closeButton = popup:AddSelectable(Ext.Loca.GetTranslatedString("h2a820e4a942a48bf91f0ab238974c82231f0", "End Scene"))
+    local openButton = popup:AddSelectable(Locale.GetTranslatedString("hc1eac3710fc548f6bc1899bddbe872153404", "Open Scene Control"))
+    local closeButton = popup:AddSelectable(Locale.GetTranslatedString("h2a820e4a942a48bf91f0ab238974c82231f0", "End Scene"))
     -- closeButton.SameLine = true
     -- local ref = refGroup:AddText(self.Window.Label)
     -- ref.SameLine = true
@@ -216,13 +216,13 @@ end
 function SceneControlInstance:AddControlButtons()
     self.ControlButtons = {}
     local buttons = {
-        {Name = Ext.Loca.GetTranslatedString("h994c15c6eec14d2197ac8f31db914c37aa96", "Pause"), Icon = "BG3SX_PauseScene_Dormant"},
-        {Name = Ext.Loca.GetTranslatedString("hed8a57f8c3e14afa9eb66356aa9976666a32", "Unpause"), Icon = "BG3SX_PauseScene_Active", Visible = false}, -- Unpause is only visible when paused
-        {Name = Ext.Loca.GetTranslatedString("h3747fd1eeec041bc9029ee1daa02540c1590", "Swap Position"), Icon = "BG3SX_ICON_Scene_SwitchPlaces"},
-        {Name = Ext.Loca.GetTranslatedString("ha11c0d67f49d4bf1957a053980fb6959dff7", "Rotate Scene"), Icon = "BG3SX_ICON_Scene_Rotate"},
+        {Name = Locale.GetTranslatedString("h994c15c6eec14d2197ac8f31db914c37aa96", "Pause"), Icon = "BG3SX_PauseScene_Dormant"},
+        {Name = Locale.GetTranslatedString("hed8a57f8c3e14afa9eb66356aa9976666a32", "Unpause"), Icon = "BG3SX_PauseScene_Active", Visible = false}, -- Unpause is only visible when paused
+        {Name = Locale.GetTranslatedString("h3747fd1eeec041bc9029ee1daa02540c1590", "Swap Position"), Icon = "BG3SX_ICON_Scene_SwitchPlaces"},
+        {Name = Locale.GetTranslatedString("ha11c0d67f49d4bf1957a053980fb6959dff7", "Rotate Scene"), Icon = "BG3SX_ICON_Scene_Rotate"},
         --"Change Camera Height",
-        {Name = Ext.Loca.GetTranslatedString("he56162efc6ca410d959caaedbd10e0ff959e", "Move Scene"), Icon = "BG3SX_ICON_Scene_Move"},
-        {Name = Ext.Loca.GetTranslatedString("h2a820e4a942a48bf91f0ab238974c82231f0", "End Scene"), Icon = "BG3SX_StopSceneNew"},
+        {Name = Locale.GetTranslatedString("he56162efc6ca410d959caaedbd10e0ff959e", "Move Scene"), Icon = "BG3SX_ICON_Scene_Move"},
+        {Name = Locale.GetTranslatedString("h2a820e4a942a48bf91f0ab238974c82231f0", "End Scene"), Icon = "BG3SX_StopSceneNew"},
     }
 
     for _,button in pairs(buttons) do
@@ -258,42 +258,42 @@ end
 
 function SceneControlInstance:AddButtonFunctionality(buttonLabel)
     --local UI = UI.GetUIByID(self.UI)
-    if buttonLabel == Ext.Loca.GetTranslatedString("h994c15c6eec14d2197ac8f31db914c37aa96", "Pause") then
+    if buttonLabel == Locale.GetTranslatedString("h994c15c6eec14d2197ac8f31db914c37aa96", "Pause") then
         Event.TogglePause:SendToServer({ID = USERID, Scene = self.Scene})
-        self:HideButton(Ext.Loca.GetTranslatedString("h994c15c6eec14d2197ac8f31db914c37aa96", "Pause"))
-        self:ShowButton(Ext.Loca.GetTranslatedString("hed8a57f8c3e14afa9eb66356aa9976666a32", "Unpause"))
-    elseif buttonLabel == Ext.Loca.GetTranslatedString("hed8a57f8c3e14afa9eb66356aa9976666a32", "Unpause") then
+        self:HideButton(Locale.GetTranslatedString("h994c15c6eec14d2197ac8f31db914c37aa96", "Pause"))
+        self:ShowButton(Locale.GetTranslatedString("hed8a57f8c3e14afa9eb66356aa9976666a32", "Unpause"))
+    elseif buttonLabel == Locale.GetTranslatedString("hed8a57f8c3e14afa9eb66356aa9976666a32", "Unpause") then
         Event.TogglePause:SendToServer({ID = USERID, Scene = self.Scene})
-        self:HideButton(Ext.Loca.GetTranslatedString("hed8a57f8c3e14afa9eb66356aa9976666a32", "Unpause"))
-        self:ShowButton(Ext.Loca.GetTranslatedString("h994c15c6eec14d2197ac8f31db914c37aa96", "Pause"))
-    elseif buttonLabel == Ext.Loca.GetTranslatedString("h3747fd1eeec041bc9029ee1daa02540c1590", "Swap Position") then
+        self:HideButton(Locale.GetTranslatedString("hed8a57f8c3e14afa9eb66356aa9976666a32", "Unpause"))
+        self:ShowButton(Locale.GetTranslatedString("h994c15c6eec14d2197ac8f31db914c37aa96", "Pause"))
+    elseif buttonLabel == Locale.GetTranslatedString("h3747fd1eeec041bc9029ee1daa02540c1590", "Swap Position") then
         Event.SwapPosition:SendToServer({ID = USERID, Scene = self.Scene})
-    elseif buttonLabel == Ext.Loca.GetTranslatedString("ha11c0d67f49d4bf1957a053980fb6959dff7", "Rotate Scene") then
+    elseif buttonLabel == Locale.GetTranslatedString("ha11c0d67f49d4bf1957a053980fb6959dff7", "Rotate Scene") then
         UI:AwaitInput("RotateScene", self.Scene)
-    elseif buttonLabel == Ext.Loca.GetTranslatedString("h2a820e4a942a48bf91f0ab238974c82231f0", "Change Camera Height") then
+    elseif buttonLabel == Locale.GetTranslatedString("h2a820e4a942a48bf91f0ab238974c82231f0", "Change Camera Height") then
         Event.ChangeCameraHeight:SendToServer({ID = USERID})
-    elseif buttonLabel == Ext.Loca.GetTranslatedString("he56162efc6ca410d959caaedbd10e0ff959e", "Move Scene") then
+    elseif buttonLabel == Locale.GetTranslatedString("he56162efc6ca410d959caaedbd10e0ff959e", "Move Scene") then
         UI:AwaitInput("MoveScene", self.Scene)
-    elseif buttonLabel == Ext.Loca.GetTranslatedString("h2a820e4a942a48bf91f0ab238974c82231f0", "End Scene") then
+    elseif buttonLabel == Locale.GetTranslatedString("h2a820e4a942a48bf91f0ab238974c82231f0", "End Scene") then
         self:Destroy(true)
     end
 end
 
 -- Creates some initial buttons with their own events
--- Sends an Event to Server, requesting Animations 
+-- Sends an Event to Server, requesting Animations
 function SceneControlInstance:CreateAnimationControlArea()
     self:AddControlButtons()
 
 --#region No Animations Group
     self.NoAnimGroup = self.Window:AddGroup("No Animations")
-    local noAnimSelectable = self.NoAnimGroup:AddSelectable(Ext.Loca.GetTranslatedString("h0b299f8632914efb8b4446db6a93d119782d","No Animations. Click me for Infos!"))
+    local noAnimSelectable = self.NoAnimGroup:AddSelectable(Locale.GetTranslatedString("h0b299f8632914efb8b4446db6a93d119782d","No Animations. Click me for Infos!"))
     local noAnimPopup = self.NoAnimGroup:AddPopup("")
     noAnimPopup.IDContext = math.random(100000, 999999) -- Random ID to avoid conflicts
     noAnimSelectable.OnClick = function()
         noAnimSelectable.Selected = false
         noAnimPopup:Open()
     end
-    local noAnimationsInfoPart1 = noAnimPopup:AddText(Ext.Loca.GetTranslatedString("h267d0a9d1a2240ffbedc0fa051388f9c8b52","No additional solo animations available for this scene. Download an animation addon or join our Discord to learn to make some yourself!"))
+    local noAnimationsInfoPart1 = noAnimPopup:AddText(Locale.GetTranslatedString("h267d0a9d1a2240ffbedc0fa051388f9c8b52","No additional solo animations available for this scene. Download an animation addon or join our Discord to learn to make some yourself!"))
     self.NoAnimGroup.Visible = false
 --#endregion
 
@@ -590,13 +590,13 @@ end
 
 function SceneControlInstance:UpdateAuthor(holder, animData)
     if not animData then
-        holder.Label = Ext.Loca.GetTranslatedString("h7ae3c6dbe4ce413a8fe0431034982d5813b2", "Select an Animation")
+        holder.Label = Locale.GetTranslatedString("h7ae3c6dbe4ce413a8fe0431034982d5813b2", "Select an Animation")
     else
         local actualAuthor = Helper.GetModAuthor(animData.Mod)
         if actualAuthor == "Lune, Skiz, Satan" then
             actualAuthor = "Lune"
         end
-        holder.Label = Ext.Loca.GetTranslatedString("hd53428b0580c499b963bac81eaf2d0b47e46", "By") .. ": " .. actualAuthor
+        holder.Label = Locale.GetTranslatedString("hd53428b0580c499b963bac81eaf2d0b47e46", "By") .. ": " .. actualAuthor
     end
     holder.Visible = true
 end
@@ -686,7 +686,7 @@ function SceneControlInstance:UpdateAnimationPicker()
         end
         nextButton.SameLine = true
 
-        authorName = g:AddText(Ext.Loca.GetTranslatedString("h7ae3c6dbe4ce413a8fe0431034982d5813b2", "Select an Animation"))
+        authorName = g:AddText(Locale.GetTranslatedString("h7ae3c6dbe4ce413a8fe0431034982d5813b2", "Select an Animation"))
 
         local indexData = animationPicker.Options[animationPicker.SelectedIndex+1] -- SelectedIndex begins with 0 but table starts with 1 so we increase by 1
         if indexData ~= nil then

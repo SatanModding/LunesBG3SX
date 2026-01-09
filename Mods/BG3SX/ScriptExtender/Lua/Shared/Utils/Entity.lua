@@ -315,7 +315,7 @@ end
 
 
 --- Safely navigates a nested table using a path of keys.
---- @param entity EntityHandle  
+--- @param entity EntityHandle
 --- @param previousComponent any|nil       - component of previous iteration
 --- @param path string[]   -- Array of keys to walk through . Ex. ["ServerCharacter", "CharacterCreationAppearance", "Visual"]
 --- @param newComponent any
@@ -586,7 +586,7 @@ end
 
 -- use a helper object and Osi to make an entity rotate
 ---@param entity uuid
----@param helper uuid - helper object 
+---@param helper uuid - helper object
 function Entity:RotateEntity(uuid, helper)
     Osi.SteerTo(uuid, helper, 1)
 end
@@ -621,7 +621,7 @@ end
 
 function Entity:CopyDisplayName(entityToCopyFrom, targetEntity)
     local name = Osi.GetDisplayName(entityToCopyFrom)
-    local trName = Ext.Loca.GetTranslatedString(name)
+    local trName = Locale.GetTranslatedString(name)
     Osi.SetStoryDisplayName(targetEntity, trName)
 end
 
@@ -667,7 +667,7 @@ end
 -- -- character string - UUID
 -- -- visual string    - UUID
 -- function Entity:GiveShapeshiftedVisual(character, visual)
---     local entity = Ext.Entity.Get(character)        
+--     local entity = Ext.Entity.Get(character)
 
 --     -- usually this component never exists. AAE creates one too
 --     if (not entity.AppearanceOverride) then
@@ -695,13 +695,13 @@ end
 --     table.insert(visuals, visual)
 --     entity.AppearanceOverride.Visual.Visuals = visuals
 --     entity:Replicate("AppearanceOverride")
---     entity:Replicate("GameObjectVisual") 
+--     entity:Replicate("GameObjectVisual")
 
 --     -- _P("Visuals after adding")
 --     -- _D(entity.AppearanceOverride.Visual.Visuals)
 
 --     -- revert to originial type to prevent weird things from happening
---     -- Timer necessary because else the visual change doesn't show if we revert to 4 too fast. 
+--     -- Timer necessary because else the visual change doesn't show if we revert to 4 too fast.
 --     Ext.Timer.WaitFor(100, function()
 --         entity.GameObjectVisual.Type = 4
 --     end)
@@ -760,7 +760,7 @@ end
 --     end)
 -- end
 
--- -- Gives shapeshifted entity a visual (like CCAV) and 
+-- -- Gives shapeshifted entity a visual (like CCAV) and
 -- -- Deletes any other visuals of the same type (ex: type = private parts)
 -- -- Replicates edited components -- TODO: Remosve replication from the other functions or this one
 -- ---@param character string  - UUID
