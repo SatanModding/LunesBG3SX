@@ -108,7 +108,7 @@ function SettingsTab:InitCustomSettings()
     self.CustomSettingsHeader = self.Tab:AddSeparatorText(Locale.GetTranslatedString("h1539e8a9f0294d5194d3ef49318e2874bcc4", "Custom Settings"))
     self.CustomSettingsGroup = self.Tab:AddGroup("CustomSettings")
     self.CustomSettingsHeader.Visible = false
-    if self.CustomSettings > 0 then
+    if #self.CustomSettings > 0 then
         self:UpdateCustomSettings()
     end
     self.CustomSettingsAreaReady = true
