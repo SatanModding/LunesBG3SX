@@ -123,11 +123,8 @@ end
 -- Try this workaround
 
 Ext.Osiris.RegisterListener("GainedControl", 1, "after", function(target)  
-
-    Ext.IO.SaveFile("BG3SX/Debug_host_trace_gainedControl.json", Ext.DumpExport(Ext.Entity.GetTrace()))
-
+    -- Ext.IO.SaveFile("BG3SX/Debug_host_trace_gainedControl.json", Ext.DumpExport(Ext.Entity.GetTrace()))
     Animation.ResetAnimation(target)
-
 end)
 
 function Animation.SortTableOfAnimations(animations)
