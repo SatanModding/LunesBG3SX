@@ -28,24 +28,26 @@ function SettingsTab:Init()
     local showTabGroup = generalSettingsGroup:AddGroup("Tab Visibility")
     showTabGroup:AddSeparatorText(Locale.GetTranslatedString("h053ec08807c449e5873fbad66bb709c2ead8", "Tab Visibility"))
 
-    self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("h3d507f295c0b468ea6429b9b00c3c4ed2534", "NPCs"), true, "Tab_NPC", "Visible", function(checked)
-        UI.NPCTab.Tab.Visible = checked
-    end)
-
-    local box = self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("hd3dd6bc5609a4d65a7f71567e596dc84b81d", "Whitelist"), false, "Tab_Whitelist", "Visible", function(checked)
+    UI.Settings.General = {}
+    -- UI.Settings.General.ShowSettingsTab = self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("hedf73cea14534ece90bc4da1cc5f647d58e8", "Settings"), true, "Tab_Settings", "Visible", function(checked)
+    --     UI.SettingsTab.Tab.Visible = checked
+    -- end) -- why did i write this, we don't want to hide the settings tab
+    UI.Settings.General.ShowWhitelisttab = self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("hd3dd6bc5609a4d65a7f71567e596dc84b81d", "Whitelist"), false, "Tab_Whitelist", "Visible", function(checked)
         UI.WhitelistTab.Tab.Visible = checked
     end)
-    box.SameLine = true
+    -- UI.Settings.General.ShowWhitelisttab.SameLine = true
 
-    local box = self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("hb4507f4d6c634f08a5e4080b00b7c2a1fddb", "Debug"), false, "Tab_Debug", "Visible", function(checked)
+    UI.Settings.General.ShowDebugTab = self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("hb4507f4d6c634f08a5e4080b00b7c2a1fddb", "Debug"), false, "Tab_Debug", "Visible", function(checked)
         UI.DebugTab.Tab.Visible = checked
     end)
-    box.SameLine = true
+    UI.Settings.General.ShowDebugTab.SameLine = true
 
     ---------------------------------
     local showSceneGroup = generalSettingsGroup:AddGroup("Scene Tab Settings")
     showSceneGroup:AddSeparatorText(Locale.GetTranslatedString("h0388b3f9379841729a475c3b264d4cc96622", "Scene Tab Settings"))
-    self.NoSceneTextCheckbox = self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("h1e4d1ff989ab4d5b9aedfe5d67d4b25cba8e", "Show 'How To'"), true, "Tab_Scenes", "NoSceneText_Visible", function(checked)
+
+    UI.Settings.SceneTab = {}
+    UI.Settings.SceneTab.NoSceneText = self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("h1e4d1ff989ab4d5b9aedfe5d67d4b25cba8e", "Show 'How To'"), true, "Tab_Scenes", "NoSceneText_Visible", function(checked)
         if UI.SceneTab and UI.SceneTab.NoSceneText then
             UI.SceneTab.NoSceneText.Visible = checked
         end
@@ -55,14 +57,11 @@ function SettingsTab:Init()
     local sceneGroup = generalSettingsGroup:AddGroup("NPCTab Settings")
     sceneGroup:AddSeparatorText(Locale.GetTranslatedString("hb21edb40a9044ddcb50f2557b6a00ae27933", "NPC Tab Settings"))
 
-    UI.Settings.AutomaticNPCScan = self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("hb2022efb943c40ee8e6a8bb9f354eb308d46", "Automatic NPC Scan"), false, "Tab_NPC", "AutomaticScan", function(checked)
-        if checked then
-            UI.NPCTab.ManualScan.Visible = false
-        else
-            UI.NPCTab.ManualScan.Visible = true
-        end
+    UI.Settings.NPCTab = {}
+    UI.Settings.NPCTab.AutomaticScan = self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("hb2022efb943c40ee8e6a8bb9f354eb308d46", "Automatic NPC Scan"), false, "Tab_NPC", "AutomaticScan", function(checked)
+        UI.NPCTab.ManualScan.Visible = checked
     end)
-    UI.Settings.AutomaticNPCScan:Tooltip():AddText(Locale.GetTranslatedString("h96863be65f494a9ea56759ea763b38f06520", "Disabling this settings creates a manual 'Scan' button in the NPC Tab."))
+    UI.Settings.NPCTab.AutomaticScan:Tooltip():AddText(Locale.GetTranslatedString("h96863be65f494a9ea56759ea763b38f06520", "Disabling this settings creates a manual 'Scan' button in the NPC Tab."))
 
     self:InitCustomSettings()
     self:GenerateCredits()
@@ -81,14 +80,11 @@ function SettingsTab:AddSettingBox(group, label, defaultValue, tableKey, propert
     local checked = settingsTable[property]
     if checked == nil then
         checked = defaultValue
+        settingsTable[property] = checked
+        LocalSettings:AddOrChange(tableKey, settingsTable)
     end
-    
     checkBox.Checked = checked
-    --callback(checked) -- Might break if ui is loaded and this is called before LevelGameplayStarted server event
-    -- Currently every setting box is only created, the callback is only called when changed
-    -- We need to call it once after levelgameplaystarted if we want to apply saved setting values
-    -- I think
-    
+
     checkBox.OnChange = function(val)
         local newVal
         if type(val) == "boolean" then
@@ -101,6 +97,7 @@ function SettingsTab:AddSettingBox(group, label, defaultValue, tableKey, propert
         LocalSettings:AddOrChange(tableKey, settingsTable)
         callback(newVal)
     end
+
     return checkBox
 end
 
@@ -127,7 +124,8 @@ function SettingsTab:UpdateCustomSettings()
         -- Add each setting for this mod under its header
         for _, setting in ipairs(settings) do
             if setting.SettingType == "CheckBox" then
-                self:AddSettingBox(modGroup, setting.Label, setting.DefaultValue, setting.LocalSettingsKey, setting.LocalSettingsField, setting.Callback)
+                setting.Element = self:AddSettingBox(modGroup, setting.Label, setting.DefaultValue, setting.LocalSettingsKey, setting.LocalSettingsField, setting.Callback)
+                if setting.SameLine then setting.Element.SameLine = true end
             end
         end
     end
@@ -140,6 +138,8 @@ end
 ---@field LocalSettingsKey string
 ---@field LocalSettingsField string
 ---@field Callback fun(checked:boolean)
+---@field Element? ExtuiCheckbox
+---@field SameLine? boolean
 
 -- Register a custom setting from an addon mod
 ---@param args CustomSettingParams
@@ -156,7 +156,9 @@ function SettingsTab:RegisterCustomSetting(args)
         DefaultValue = args.DefaultValue,
         LocalSettingsKey = args.LocalSettingsKey,
         LocalSettingsField = args.LocalSettingsField,
-        Callback = args.Callback
+        Callback = args.Callback,
+        Element = args.Element or nil,
+        SameLine = args.SameLine or false,
     })
     if self.CustomSettingsAreaReady then
         self:UpdateCustomSettings()

@@ -235,7 +235,7 @@ local function OnTick()
     local TASK_CHECK_FREQUENCY = 360
 
     if (tick % TASK_CHECK_FREQUENCY == 0) then
-        if UI.Ready and UI.Settings.AutomaticNPCScan.Checked then
+        if UI.Ready and UI.Settings.NPCTab.AutomaticScan.Checked then
             NPCTab:ScanForNPCs()
         end
     end

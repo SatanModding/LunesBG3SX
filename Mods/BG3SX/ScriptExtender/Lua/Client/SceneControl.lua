@@ -559,9 +559,10 @@ function SceneControlInstance:GetAnimationsBySceneType()
                             if Table.Contains(AnimationData.Categories, sceneType) then
                                 animsByType[moduleUUID][AnimationName] = AnimationData
                             else
-                                if UI.Settings["UnlockedAnimations"] then
-                                    animsByType[moduleUUID][AnimationName] = AnimationData
-                                end
+                                -- Unused right now
+                                -- if UI.Settings["UnlockedAnimations"] then
+                                --     animsByType[moduleUUID][AnimationName] = AnimationData
+                                -- end
                             end
                         end
                     end

@@ -66,12 +66,24 @@ function UI:Init()
     self.SceneTab = SceneTab:New(self.TabBar)
     self.AppearanceTab = AppearanceTab:New(self.TabBar)
     self.WhitelistTab = WhitelistTab:New(self.TabBar)
-    -- self.WhitelistTab.Tab.Visible = false
+    local whitelistTabVisibleSettings = LocalSettings:GetOr(false, "Tab_Whitelist")
+    if whitelistTabVisibleSettings and whitelistTabVisibleSettings.Visible then
+        self.WhitelistTab.Tab.Visible = whitelistTabVisibleSettings.Visible
+    else
+        -- If no setting, default to false
+        self.WhitelistTab.Tab.Visible = false
+    end
     self.NPCTab = NPCTab:New(self.TabBar)
     self.SettingsTab = SettingsTab:New(self.TabBar)
     self.FAQTab = FAQTab:New(self.TabBar)
     self.DebugTab = DebugTab:New(self.TabBar)
-    -- self.DebugTab.Tab.Visible = false
+    local debugTabVisibleSettings = LocalSettings:GetOr(false, "Tab_Debug")
+    if debugTabVisibleSettings and debugTabVisibleSettings.Visible then
+        self.DebugTab.Tab.Visible = debugTabVisibleSettings.Visible
+    else
+        -- If no setting, default to false
+        self.DebugTab.Tab.Visible = false
+    end
 
     self.NPCTab:FetchAllNPCs()
 
