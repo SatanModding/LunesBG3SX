@@ -23,6 +23,7 @@
         <content contentuid="h994c15c6eec14d2197ac8f31db914c37aa96" version="1">Pause</content>
         <content contentuid="hed8a57f8c3e14afa9eb66356aa9976666a32" version="1">Unpause</content>
         <content contentuid="h3747fd1eeec041bc9029ee1daa02540c1590" version="1">Swap Position</content>
+        <content contentuid="h5416e2788d7d457e931c5694cfb6bb7601e1" version="1">Change Camera Height</content>
         <content contentuid="ha11c0d67f49d4bf1957a053980fb6959dff7" version="1">Rotate Scene</content>
         <content contentuid="he56162efc6ca410d959caaedbd10e0ff959e" version="1">Move Scene</content>
         <content contentuid="h2a820e4a942a48bf91f0ab238974c82231f0" version="1">End Scene</content>
@@ -83,6 +84,8 @@
         <content contentuid="hb21edb40a9044ddcb50f2557b6a00ae27933" version="1">NPC Tab Settings</content>
         <content contentuid="hb2022efb943c40ee8e6a8bb9f354eb308d46" version="1">Automatic NPC Scan</content>
         <content contentuid="h96863be65f494a9ea56759ea763b38f06520" version="1">Disabling this settings creates a manual 'Scan' button in the NPC Tab.</content>
+        <!-- Addon Settings -->
+        <content contentuid="h1539e8a9f0294d5194d3ef49318e2874bcc4" version="1">Addon Settings</content>
         <!-- Credits -->
         <content contentuid="hd1aa350cf2bf4942b9be983b18920e88g247" version="1">Credits</content>
         <content contentuid="h554123bc72a54633ad9d1768c065e80d4431" version="1">This mod was created with a lot of help by the amazing BG3 Modding Community,but we would like to thank a few contributors specifically:</content>
@@ -184,6 +187,4 @@
 	<content contentuid="h87ee4bfdg8b1bg494cg93a1g11b347703922" version="1">Tribbing</content>
 	<content contentuid="h2ca5ef2dg7f68g40dbg8c8dg05fd895a39b1" version="1">Finger</content>
 	<content contentuid="hb32715942ed4499b9ef6a288a729b0483578" version="1">Astarion Thrusting</content>
-
-    <content contentuid="h1539e8a9f0294d5194d3ef49318e2874bcc4" version="1">Addon Settings</content>
 </contentList>

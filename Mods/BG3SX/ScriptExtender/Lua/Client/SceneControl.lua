@@ -273,7 +273,7 @@ function SceneControlInstance:AddButtonFunctionality(buttonLabel)
         Event.SwapPosition:SendToServer({ID = USERID, Scene = self.Scene})
     elseif buttonLabel == Locale.GetTranslatedString("ha11c0d67f49d4bf1957a053980fb6959dff7", "Rotate Scene") then
         UI:AwaitInput("RotateScene", self.Scene)
-    elseif buttonLabel == Locale.GetTranslatedString("h2a820e4a942a48bf91f0ab238974c82231f0", "Change Camera Height") then
+    elseif buttonLabel == Locale.GetTranslatedString("h5416e2788d7d457e931c5694cfb6bb7601e1", "Change Camera Height") then
         Event.ChangeCameraHeight:SendToServer({ID = USERID})
     elseif buttonLabel == Locale.GetTranslatedString("he56162efc6ca410d959caaedbd10e0ff959e", "Move Scene") then
         UI:AwaitInput("MoveScene", self.Scene)
