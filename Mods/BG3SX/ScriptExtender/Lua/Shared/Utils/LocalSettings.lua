@@ -5,20 +5,11 @@
 ---@field FolderName string|nil #defaults to mod.Info.Name
 ---@field Ready boolean
 LocalSettings = {}
-
--- LocalSettings = _Class:Create("LocalSettings", nil, {
---     SaveImmediately = true,
---     FileName = "LocalSettings",
--- })
+LocalSettings.SaveImmediately = LocalSettings.SaveImmediately or true
+LocalSettings.FileName = LocalSettings.FileName or "LocalSettings"
+LocalSettings.Data = LocalSettings.Data or {}
 
 function LocalSettings:__tostring() return string.format("%s Data, %d entries", self.FileName, self:Count()) end
-
--- Manager class, no init
--- function LocalSettings:Init()
---     self.FileName = self.FileName or "LocalSettings"
---     self.Data = self.Data or {}
---     self.SaveImmediately = (self.SaveImmediately == nil) or self.SaveImmediately
--- end
 
 ---Saves the LocalSettings data to a given fileName within a subfolder of
 --- %localappdata%/Larian Studios/Baldur's Gate 3/Script Extender
@@ -121,3 +112,5 @@ end
 --     Cache:AddOrChange(CacheData.RuntimeComponentNames, componentNames)
 -- end
 -- GenerateCache()
+
+return LocalSettings
