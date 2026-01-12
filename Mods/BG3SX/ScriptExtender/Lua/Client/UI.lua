@@ -65,25 +65,19 @@ function UI:Init()
     self.TabBar = self.Window:AddTabBar("")
     self.SceneTab = SceneTab:New(self.TabBar)
     self.AppearanceTab = AppearanceTab:New(self.TabBar)
+
     self.WhitelistTab = WhitelistTab:New(self.TabBar)
-    local whitelistTabVisibleSettings = LocalSettings:GetOr(false, "Tab_Whitelist")
-    if whitelistTabVisibleSettings and whitelistTabVisibleSettings.Visible then
-        self.WhitelistTab.Tab.Visible = whitelistTabVisibleSettings.Visible
-    else
-        -- If no setting, default to false
-        self.WhitelistTab.Tab.Visible = false
-    end
+    self:SetDefaultTabVisibility(self.WhitelistTab, "Tab_Whitelist", false)
+
     self.NPCTab = NPCTab:New(self.TabBar)
+    self:SetDefaultTabVisibility(self.NPCTab, "Tab_NPCs", true)
+
     self.SettingsTab = SettingsTab:New(self.TabBar)
     self.FAQTab = FAQTab:New(self.TabBar)
+    
     self.DebugTab = DebugTab:New(self.TabBar)
-    local debugTabVisibleSettings = LocalSettings:GetOr(false, "Tab_Debug")
-    if debugTabVisibleSettings and debugTabVisibleSettings.Visible then
-        self.DebugTab.Tab.Visible = debugTabVisibleSettings.Visible
-    else
-        -- If no setting, default to false
-        self.DebugTab.Tab.Visible = false
-    end
+    self:SetDefaultTabVisibility(self.DebugTab, "Tab_Debug", false)
+    -- Only a few tabs have visibility settings, others are always visible
 
     self.NPCTab:FetchAllNPCs()
 
@@ -104,14 +98,20 @@ function UI:Init()
     -- Send ModEvent about UI being ready
 end
 
----@param settingName string
----@param value any
-function UI:RegisterSetting(settingName,value)
-    self.Settings[settingName] = value
+---Set tab visibility from LocalSettings default fallback
+---@param tab table The tab object with a Tab property
+---@param settingsKey string The LocalSettings key (e.g., "Tab_Debug")
+---@param defaultVisible boolean The default visibility if not in LocalSettings
+function UI:SetDefaultTabVisibility(tab, settingsKey, defaultVisible)
+    local visibilitySettings = LocalSettings:GetOr({ Visible = defaultVisible }, settingsKey)
+    if type(visibilitySettings) ~= "table" then
+        visibilitySettings = { Visible = defaultVisible }
+        LocalSettings:AddOrChange(settingsKey, visibilitySettings)
+    end
+    tab.Tab.Visible = visibilitySettings.Visible
 end
 
 function UI:AwaitInput(reason, payload)
-
     local payload = payload or nil
     if self.MouseInputHandler or self.ControllerInputHandler then
         self:CancelAwaitInput() -- Sanity Check Reset

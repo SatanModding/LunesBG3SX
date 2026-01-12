@@ -31,7 +31,7 @@ end
 
 
 function PartyInterface:Init()
-    UI:RegisterSetting("PartyButtonSize",{100*ViewPortScale,100*ViewPortScale})
+    LocalSettings:AddOrChange("Party_Interface", { PartyButtonSize = 100*ViewPortScale })
 
     self.PartyArea = self.Wrapper:AddCollapsingHeader(Locale.GetTranslatedString("h9e956f29dc2c4233b14b0b07ac36c3f0d55c", "Party"))
     self.PartyArea.DefaultOpen = true
@@ -230,11 +230,18 @@ function PartyInterface:AddCharacter(parent, uuid)
         for uuid,origin in pairs(Data.Origins) do
             if Helper.StringContains(uuid, instance.Uuid) then
                 foundOrigin = true
-                instance.CharacterButton = charGroup:AddImageButton("","EC_Portrait_"..origin, UI.Settings["PartyButtonSize"])
+                local defaultSize = 100*ViewPortScale
+                local partyInterfaceSettings = LocalSettings:GetOr({ PartyButtonSize = defaultSize }, "Party_Interface")
+                local buttonSize = type(partyInterfaceSettings) == "table" and partyInterfaceSettings.PartyButtonSize or defaultSize
+                
+                instance.CharacterButton = charGroup:AddImageButton("","EC_Portrait_"..origin, buttonSize)
             end
         end
         if not foundOrigin then
-            instance.CharacterButton = charGroup:AddImageButton("","EC_Portrait_Generic", UI.Settings["PartyButtonSize"])
+            local defaultSize = 100*ViewPortScale
+            local partyInterfaceSettings = LocalSettings:GetOr({ PartyButtonSize = defaultSize }, "Party_Interface")
+            local buttonSize = type(partyInterfaceSettings) == "table" and partyInterfaceSettings.PartyButtonSize or defaultSize
+            instance.CharacterButton = charGroup:AddImageButton("","EC_Portrait_Generic", buttonSize)
         end
 
         instance.CharacterButton.OnClick = function()
@@ -284,11 +291,17 @@ function PartyInterface:AddNPC(parent, uuid)
         for uuid,origin in pairs(Data.Origins) do
             if Helper.StringContains(uuid, instance.Uuid) then
                 foundOrigin = true
-                instance.CharacterButton = npcGroup:AddImageButton("","EC_Portrait_"..origin, UI.Settings["PartyButtonSize"])
+                local defaultSize = 100*ViewPortScale
+                local partyInterfaceSettings = LocalSettings:GetOr({ PartyButtonSize = defaultSize }, "Party_Interface")
+                local buttonSize = type(partyInterfaceSettings) == "table" and partyInterfaceSettings.PartyButtonSize or defaultSize
+                instance.CharacterButton = npcGroup:AddImageButton("","EC_Portrait_"..origin, buttonSize)
             end
         end
         if not foundOrigin then
-            instance.CharacterButton = npcGroup:AddImageButton("","EC_Portrait_Generic", UI.Settings["PartyButtonSize"])
+            local defaultSize = 100*ViewPortScale
+            local partyInterfaceSettings = LocalSettings:GetOr({ PartyButtonSize = defaultSize }, "Party_Interface")
+            local buttonSize = type(partyInterfaceSettings) == "table" and partyInterfaceSettings.PartyButtonSize or defaultSize
+            instance.CharacterButton = npcGroup:AddImageButton("","EC_Portrait_Generic", buttonSize)
         end
 
         instance.Popup = npcGroup:AddPopup("NPCPopup")

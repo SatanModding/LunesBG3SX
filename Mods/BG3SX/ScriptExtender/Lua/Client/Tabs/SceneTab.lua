@@ -54,7 +54,7 @@ end
 
 function SceneTab:CreateNewSceneArea()
     self.NoSceneText = self.Tab:AddText(Locale.GetTranslatedString("h699539b0a74b4600b327a10bf219e66a2d46", "No active scenes, create one by:\n1. Select a character in the UI.\n2. Click the BG3SX button.\n3. Select a character of your choice to start a scene with\n(In open world or UI)\nThis will only show up once but can be made visible again via the Settings tab."))
-    local noSceneTextSettings = LocalSettings:GetOr({}, "Tab_Scenes")
+    local noSceneTextSettings = LocalSettings:GetOr({NoSceneText_Visible = true}, "Tab_Scenes")
     if noSceneTextSettings.NoSceneText_Visible == false then
         self.NoSceneText.Visible = false
     end

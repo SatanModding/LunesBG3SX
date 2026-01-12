@@ -29,16 +29,16 @@ function SettingsTab:Init()
     showTabGroup:AddSeparatorText(Locale.GetTranslatedString("h053ec08807c449e5873fbad66bb709c2ead8", "Tab Visibility"))
 
     UI.Settings.General = {}
-    -- UI.Settings.General.ShowSettingsTab = self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("hedf73cea14534ece90bc4da1cc5f647d58e8", "Settings"), true, "Tab_Settings", "Visible", function(checked)
-    --     UI.SettingsTab.Tab.Visible = checked
-    -- end) -- why did i write this, we don't want to hide the settings tab
     UI.Settings.General.ShowWhitelisttab = self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("hd3dd6bc5609a4d65a7f71567e596dc84b81d", "Whitelist"), false, "Tab_Whitelist", "Visible", function(checked)
-        UI.WhitelistTab.Tab.Visible = checked
+        if UI.WhitelistTab and UI.WhitelistTab.Tab then
+            UI.WhitelistTab.Tab.Visible = checked
+        end
     end)
-    -- UI.Settings.General.ShowWhitelisttab.SameLine = true
 
     UI.Settings.General.ShowDebugTab = self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("hb4507f4d6c634f08a5e4080b00b7c2a1fddb", "Debug"), false, "Tab_Debug", "Visible", function(checked)
-        UI.DebugTab.Tab.Visible = checked
+        if UI.DebugTab and UI.DebugTab.Tab then
+            UI.DebugTab.Tab.Visible = checked
+        end
     end)
     UI.Settings.General.ShowDebugTab.SameLine = true
 
@@ -59,7 +59,9 @@ function SettingsTab:Init()
 
     UI.Settings.NPCTab = {}
     UI.Settings.NPCTab.AutomaticScan = self:AddSettingBox(generalSettingsGroup, Locale.GetTranslatedString("hb2022efb943c40ee8e6a8bb9f354eb308d46", "Automatic NPC Scan"), false, "Tab_NPC", "AutomaticScan", function(checked)
-        UI.NPCTab.ManualScan.Visible = checked
+        if UI.NPCTab and UI.NPCTab.ManualScan then
+            UI.NPCTab.ManualScan.Visible = checked
+        end
     end)
     UI.Settings.NPCTab.AutomaticScan:Tooltip():AddText(Locale.GetTranslatedString("h96863be65f494a9ea56759ea763b38f06520", "Disabling this settings creates a manual 'Scan' button in the NPC Tab."))
 
@@ -157,7 +159,6 @@ function SettingsTab:RegisterCustomSetting(args)
         LocalSettingsKey = args.LocalSettingsKey,
         LocalSettingsField = args.LocalSettingsField,
         Callback = args.Callback,
-        Element = args.Element or nil,
         SameLine = args.SameLine or false,
     })
     if self.CustomSettingsAreaReady then
